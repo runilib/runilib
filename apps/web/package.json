@@ -2,7 +2,7 @@
   "name": "@runilib/website",
   "version": "0.0.1",
   "private": true,
-  "description": "React UniKit documentation website",
+  "description": "React Universal Librairies documentation website",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

@@ -1,17 +1,16 @@
 {
-  "name": "@runilib/formbridge",
+  "name": "formbridge",
   "version": "1.0.0",
-  "description": "Cross-platform form state management for React and React Native — same API on both.",
+  "description": "Schema-first, cross-platform forms for React and React Native. One schema, one API, every platform.",
   "keywords": [
     "react",
     "react-native",
     "form",
     "validation",
-    "form-state",
+    "schema",
     "cross-platform",
     "universal",
-    "typescript",
-    "hooks"
+    "typescript"
   ],
   "homepage": "https://unikit.dev/docs/formbridge",
   "repository": {
@@ -23,6 +22,7 @@
   "author": "AKS",
   "sideEffects": false,
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -40,11 +40,9 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "jest",
-    "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist coverage .turbo"
+    "clean": "rm -rf dist coverage"
   },
   "peerDependencies": {
     "react": ">=17.0.0"

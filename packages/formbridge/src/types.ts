@@ -1,159 +1,302 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, ComponentType } from 'react';
 
-// ─── Field value types ────────────────────────────────────────────────────────
+// ─── Field types ───────────────────────────────────────────────────────────────
 
-export type FieldValue = string | number | boolean | null | undefined;
-export type FormValues = Record<string, FieldValue>;
+export type FieldType =
+  | 'text'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'tel'
+  | 'url'
+  | 'textarea'
+  | 'checkbox'
+  | 'switch'
+  | 'select'
+  | 'radio'
+  | 'date'
+  | 'otp'
+  | 'custom';
 
-// ─── Validation ───────────────────────────────────────────────────────────────
+// ─── Form state machine ────────────────────────────────────────────────────────
 
-export type ValidatorFn<V extends FieldValue = FieldValue> =
-  (value: V, allValues: FormValues) => string | null | undefined | Promise<string | null | undefined>;
+export type FormStatus = 'idle' | 'validating' | 'submitting' | 'success' | 'error';
 
-export interface FieldRules<V extends FieldValue = FieldValue> {
-  /** Field is required. Pass true or a custom error message. */
-  required?:  boolean | string;
-  /** Minimum length (strings) or minimum value (numbers). */
-  min?:       number | { value: number; message: string };
-  /** Maximum length (strings) or maximum value (numbers). */
-  max?:       number | { value: number; message: string };
-  /** Minimum string length. */
-  minLength?: number | { value: number; message: string };
-  /** Maximum string length. */
-  maxLength?: number | { value: number; message: string };
-  /** Regex pattern. */
-  pattern?:   RegExp | { value: RegExp; message: string };
-  /** Custom async or sync validator function. */
-  validate?:  ValidatorFn<V> | Record<string, ValidatorFn<V>>;
+// ─── Validation ────────────────────────────────────────────────────────────────
+
+export type SyncValidator<V = unknown>  = (value: V, allValues: Record<string, unknown>) => string | null;
+export type AsyncValidator<V = unknown> = (value: V, allValues: Record<string, unknown>) => Promise<string | null>;
+export type Validator<V = unknown>      = SyncValidator<V> | AsyncValidator<V>;
+
+// ─── Field descriptor (created by field.xxx()) ────────────────────────────────
+
+export interface FieldDescriptor<V = unknown> {
+  /** Internal type used to pick the right renderer */
+  _type:          FieldType;
+  /** Human-readable label */
+  _label:         string;
+  /** Placeholder text */
+  _placeholder?:  string;
+  /** Default value */
+  _defaultValue:  V;
+  /** Is the field required */
+  _required:      boolean;
+  /** Required error message */
+  _requiredMsg:   string;
+  /** Min (string length or number) */
+  _min?:          number;
+  _minMsg?:       string;
+  /** Max (string length or number) */
+  _max?:          number;
+  _maxMsg?:       string;
+  /** Regex pattern */
+  _pattern?:      RegExp;
+  _patternMsg?:   string;
+  /** Options for select / radio */
+  _options?:      SelectOption[];
+  /** OTP length */
+  _otpLength?:    number;
+  /** Password strength enforcement */
+  _strongPassword?: boolean;
+  /** Trim value before validation */
+  _trim:          boolean;
+  /** Disable the field */
+  _disabled:      boolean;
+  /** Hide the field */
+  _hidden:        boolean;
+  /** Debounce ms for async validators */
+  _debounce:      number;
+  /** Custom sync/async validators */
+  _validators:    Validator<V>[];
+  /** Transform before storing (e.g., toUpperCase) */
+  _transform?:    (v: V) => V;
+  /** Cross-field dependency name for validation */
+  _matchField?:   string;
+  /** Custom renderer (overrides platform renderer) */
+  _customRender?: (props: FieldRenderProps<V>) => ReactNode;
+  /** Helper text shown below the field */
+  _hint?:         string;
+  /** Max file size for file fields */
+  _maxFileSize?:  number;
+  /** Accepted file types */
+  _accept?:       string[];
 }
 
-// ─── Field state ──────────────────────────────────────────────────────────────
-
-export interface FieldState {
-  value:       FieldValue;
-  error:       string | null;
-  touched:     boolean;
-  dirty:       boolean;
-  validating:  boolean;
+export interface SelectOption {
+  label: string;
+  value: string | number;
 }
 
-// ─── Form state ───────────────────────────────────────────────────────────────
+// ─── Per-field runtime state ───────────────────────────────────────────────────
 
-export interface FormState<T extends FormValues = FormValues> {
-  values:      T;
-  errors:      Partial<Record<keyof T, string>>;
-  touched:     Partial<Record<keyof T, boolean>>;
-  dirty:       Partial<Record<keyof T, boolean>>;
-  isValid:     boolean;
-  isDirty:     boolean;
-  isSubmitting:boolean;
-  isSubmitted: boolean;
-  submitCount: number;
+export interface FieldState<V = unknown> {
+  value:      V;
+  error:      string | null;
+  touched:    boolean;
+  dirty:      boolean;
+  validating: boolean;
 }
 
-// ─── Register return ─────────────────────────────────────────────────────────
+// ─── Form state (what the user gets) ─────────────────────────────────────────
 
-/** Props returned by register() for web <input> elements */
-export interface WebFieldProps {
-  name:        string;
-  value:       string | number;
-  checked?:    boolean;
-  onChange:    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-  onBlur:      () => void;
-  ref:         React.RefCallback<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
+export interface FormState<Schema extends FormSchema> {
+  values:       SchemaValues<Schema>;
+  errors:       Partial<Record<keyof Schema, string>>;
+  touched:      Partial<Record<keyof Schema, boolean>>;
+  dirty:        Partial<Record<keyof Schema, boolean>>;
+  status:       FormStatus;
+  isValid:      boolean;
+  isDirty:      boolean;
+  isSubmitting: boolean;
+  isSuccess:    boolean;
+  isError:      boolean;
+  submitCount:  number;
+  /** Error returned by onSubmit (e.g., API error) */
+  submitError:  string | null;
 }
 
-/** Props returned by register() for React Native TextInput */
-export interface NativeFieldProps {
-  value:         string;
-  onChangeText:  (text: string) => void;
-  onBlur:        () => void;
-  ref:           React.RefCallback<unknown>;
-}
+// ─── Schema = map of field descriptors ────────────────────────────────────────
 
-export type FieldProps = WebFieldProps | NativeFieldProps;
+export type FormSchema = Record<string, FieldDescriptor<any>>;
 
-// ─── Controller ──────────────────────────────────────────────────────────────
+/** Extract the value type of a FieldDescriptor */
+type FieldValue<D> = D extends FieldDescriptor<infer V> ? V : never;
 
-export interface ControllerRenderProps<V extends FieldValue = FieldValue> {
-  value:    V;
-  onChange: (value: V) => void;
-  onBlur:   () => void;
-  name:     string;
-}
+/** Extract the values object type from a schema */
+export type SchemaValues<S extends FormSchema> = {
+  [K in keyof S]: FieldValue<S[K]>;
+};
 
-export interface ControllerFieldState {
-  error:    string | null;
-  touched:  boolean;
-  dirty:    boolean;
-  invalid:  boolean;
-}
+// ─── Props passed to each rendered field ─────────────────────────────────────
 
-export interface ControllerProps<V extends FieldValue = FieldValue> {
+export interface FieldRenderProps<V = unknown> {
   name:         string;
-  rules?:       FieldRules<V>;
-  defaultValue?:V;
-  render:       (props: { field: ControllerRenderProps<V>; fieldState: ControllerFieldState }) => ReactNode;
+  value:        V;
+  label:        string;
+  placeholder?: string;
+  error:        string | null;
+  touched:      boolean;
+  dirty:        boolean;
+  validating:   boolean;
+  disabled:     boolean;
+  hint?:        string;
+  options?:     SelectOption[];
+  otpLength?:   number;
+  onChange:     (value: V) => void;
+  onBlur:       () => void;
+  onFocus:      () => void;
 }
 
-// ─── useForm options ─────────────────────────────────────────────────────────
+// ─── useForm return ────────────────────────────────────────────────────────────
 
-export type ValidationMode = 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched' | 'all';
-
-export interface UseFormOptions<T extends FormValues = FormValues> {
-  /** Default values for all fields. */
-  defaultValues?:  T;
-  /** When to trigger validation. @default 'onSubmit' */
-  mode?:           ValidationMode;
-  /** Re-validate mode after first submission. @default 'onChange' */
-  reValidateMode?: ValidationMode;
-}
-
-// ─── useForm return ───────────────────────────────────────────────────────────
-
-export interface UseFormReturn<T extends FormValues = FormValues> {
+export interface UseFormReturn<Schema extends FormSchema> {
   /**
-   * Register an uncontrolled field.
-   * Returns props for web `<input>` or RN `<TextInput>` depending on platform.
+   * The smart Form component — renders a form wrapper.
+   * @example <form.Form onSubmit={handleSignUp}> ... </form.Form>
    */
-  register:       <K extends keyof T>(name: K, rules?: FieldRules<T[K] extends FieldValue ? T[K] : FieldValue>) => FieldProps;
-
-  /** Handle form submission with validation. */
-  handleSubmit:   (onValid: (values: T) => void | Promise<void>, onInvalid?: (errors: Partial<Record<keyof T, string>>) => void) => () => Promise<void>;
-
-  /** Set a field value programmatically. */
-  setValue:       <K extends keyof T>(name: K, value: T[K], opts?: { shouldValidate?: boolean; shouldDirty?: boolean }) => void;
-
-  /** Get current value of a field. */
-  getValue:       <K extends keyof T>(name: K) => T[K];
-
-  /** Get all current values. */
-  getValues:      () => T;
-
-  /** Trigger validation manually for one or all fields. */
-  trigger:        (name?: keyof T | Array<keyof T>) => Promise<boolean>;
-
-  /** Set an error manually. */
-  setError:       (name: keyof T, error: { message: string }) => void;
-
-  /** Clear errors for one or all fields. */
-  clearErrors:    (name?: keyof T | Array<keyof T>) => void;
-
-  /** Reset the form to default values. */
-  reset:          (values?: Partial<T>) => void;
-
-  /** Watch a field value (reactive). */
-  watch:          <K extends keyof T>(name: K) => T[K];
-
-  /** Watch all values (reactive). */
-  watchAll:       () => T;
-
-  /** Current form state snapshot (non-reactive by default — use watch for reactivity). */
-  formState:      FormState<T>;
+  Form: FormComponent<Schema>;
 
   /**
-   * A controlled field component — use when register() is not enough
-   * (e.g., custom pickers, date inputs, sliders).
+   * Auto-rendered field components — one per schema key.
+   * On web: renders <input>, <textarea>, <select>, etc.
+   * On native: renders <TextInput>, <Switch>, <Picker>, etc.
+   * @example <form.fields.email />
    */
-  Controller:     (props: ControllerProps) => JSX.Element | null;
+  fields: FieldComponents<Schema>;
+
+  /**
+   * Current form state (reactive).
+   */
+  state: FormState<Schema>;
+
+  /**
+   * Set a field value programmatically.
+   */
+  setValue: <K extends keyof Schema>(name: K, value: SchemaValues<Schema>[K]) => void;
+
+  /**
+   * Get the current value of a field.
+   */
+  getValue: <K extends keyof Schema>(name: K) => SchemaValues<Schema>[K];
+
+  /**
+   * Get all current values.
+   */
+  getValues: () => SchemaValues<Schema>;
+
+  /**
+   * Manually trigger validation for one, multiple, or all fields.
+   * Returns true if all validated fields are valid.
+   */
+  validate: (names?: keyof Schema | Array<keyof Schema>) => Promise<boolean>;
+
+  /**
+   * Reset to default values (or provided values).
+   */
+  reset: (values?: Partial<SchemaValues<Schema>>) => void;
+
+  /**
+   * Set a field error manually (e.g., from an API response).
+   */
+  setError: (name: keyof Schema, message: string) => void;
+
+  /**
+   * Clear errors for one or all fields.
+   */
+  clearErrors: (name?: keyof Schema | Array<keyof Schema>) => void;
+
+  /**
+   * Watch a reactive field value.
+   */
+  watch: <K extends keyof Schema>(name: K) => SchemaValues<Schema>[K];
+
+  /**
+   * Programmatic submit — same as pressing the submit button.
+   */
+  submit: () => Promise<void>;
 }
+
+// ─── Form component type ─────────────────────────────────────────────────────
+
+export interface FormProps<Schema extends FormSchema> {
+  children:        ReactNode;
+  onSubmit:        (values: SchemaValues<Schema>) => void | Promise<void>;
+  onError?:        (errors: Partial<Record<keyof Schema, string>>) => void;
+  /** Called when submission throws — message shown as submitError */
+  onSubmitError?:  (error: unknown) => string;
+  className?:      string;
+  style?:          object;
+}
+
+export type FormComponent<Schema extends FormSchema> = {
+  (props: FormProps<Schema>): JSX.Element;
+  /** A submit button that is automatically disabled + shows loading state */
+  Submit: SubmitButtonComponent;
+};
+
+export interface SubmitButtonProps {
+  children?:   ReactNode;
+  className?:  string;
+  style?:      object;
+  loadingText?: string;
+  disabled?:   boolean;
+}
+export type SubmitButtonComponent = (props: SubmitButtonProps) => JSX.Element;
+
+// ─── Field components map ─────────────────────────────────────────────────────
+
+export type FieldComponents<Schema extends FormSchema> = {
+  [K in keyof Schema]: FieldComponent<FieldValue<Schema[K]>>;
+};
+
+export interface ExtraFieldProps {
+  /** Override the label defined in the schema */
+  label?:       string;
+  /** Override placeholder */
+  placeholder?: string;
+  /** Override hint */
+  hint?:        string;
+  /** Additional class (web only) */
+  className?:   string;
+  /** Additional style */
+  style?:       object;
+}
+export type FieldComponent<V = unknown> = (props?: ExtraFieldProps) => JSX.Element;
+
+// ─── useForm options ──────────────────────────────────────────────────────────
+
+export type ValidationTrigger = 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched';
+
+export interface UseFormOptions {
+  /**
+   * When validation runs:
+   * - `onBlur`   (default) — after field loses focus
+   * - `onChange` — on every keystroke
+   * - `onSubmit` — only on submit
+   * - `onTouched` — after blur, then on every change
+   */
+  validateOn?:     ValidationTrigger;
+  /**
+   * After first submission, when to re-validate.
+   * Defaults to `'onChange'`.
+   */
+  revalidateOn?:   ValidationTrigger;
+  /**
+   * Schema-level resolver (Zod, Yup, Joi, Valibot).
+   * When provided, field-level validators are bypassed.
+   */
+  resolver?:       SchemaResolver;
+  /**
+   * Show field errors inline immediately without user interaction.
+   */
+  showErrorsOn?:   'submit' | 'always';
+}
+
+// ─── Resolver ────────────────────────────────────────────────────────────────
+
+export interface ResolverResult {
+  values: Record<string, unknown>;
+  errors: Record<string, string>;
+}
+
+export type SchemaResolver = (values: Record<string, unknown>) => Promise<ResolverResult>;

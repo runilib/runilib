@@ -1,185 +1,124 @@
-import { runRules } from '../src/validators/rules';
-import { validators } from '../src/validators/presets';
+import { validateField, validateAll } from '../src/validators/engine';
+import { field } from '../src/builders/field';
 
-describe('runRules — required', () => {
-  it('returns error when value is empty string', async () => {
-    const err = await runRules('', { required: true }, {});
-    expect(err).toBe('This field is required.');
-  });
+const desc = (f: ReturnType<typeof field.text>) => (f as any)._build();
 
-  it('returns custom message', async () => {
-    const err = await runRules('', { required: 'Champ obligatoire.' }, {});
-    expect(err).toBe('Champ obligatoire.');
-  });
-
-  it('passes when value is not empty', async () => {
-    const err = await runRules('hello', { required: true }, {});
-    expect(err).toBeNull();
-  });
-
-  it('catches null and undefined', async () => {
-    expect(await runRules(null,      { required: true }, {})).not.toBeNull();
-    expect(await runRules(undefined, { required: true }, {})).not.toBeNull();
-  });
-
-  it('catches whitespace-only strings', async () => {
-    expect(await runRules('   ', { required: true }, {})).not.toBeNull();
+// ─── required ─────────────────────────────────────────────────────────────────
+describe('validateField — required', () => {
+  it('returns error for empty string',   async () => expect(await validateField(desc(field.text('x').required()), '', {})).not.toBeNull());
+  it('returns error for null',           async () => expect(await validateField(desc(field.text('x').required()), null, {})).not.toBeNull());
+  it('returns error for whitespace',     async () => expect(await validateField(desc(field.text('x').required()), '   ', {})).not.toBeNull());
+  it('passes for non-empty value',       async () => expect(await validateField(desc(field.text('x').required()), 'hello', {})).toBeNull());
+  it('uses custom required message',     async () => {
+    const err = await validateField(desc(field.text('x').required('Obligatoire')), '', {});
+    expect(err).toBe('Obligatoire');
   });
 });
 
-describe('runRules — minLength / maxLength', () => {
-  it('fails minLength', async () => {
-    const err = await runRules('ab', { minLength: 5 }, {});
-    expect(err).toContain('5');
-  });
-
-  it('passes minLength', async () => {
-    const err = await runRules('hello world', { minLength: 5 }, {});
-    expect(err).toBeNull();
-  });
-
-  it('fails maxLength', async () => {
-    const err = await runRules('toolongstring', { maxLength: 5 }, {});
-    expect(err).toContain('5');
-  });
-
-  it('uses custom message for maxLength', async () => {
-    const err = await runRules('toolong', { maxLength: { value: 3, message: 'Trop long.' } }, {});
-    expect(err).toBe('Trop long.');
-  });
-});
-
-describe('runRules — min / max (numbers)', () => {
-  it('fails min', async () => {
-    const err = await runRules(3, { min: 10 }, {});
-    expect(err).toContain('10');
-  });
-
-  it('passes min', async () => {
-    const err = await runRules(15, { min: 10 }, {});
-    expect(err).toBeNull();
-  });
-
-  it('fails max', async () => {
-    const err = await runRules(100, { max: 50 }, {});
-    expect(err).toContain('50');
-  });
-
-  it('passes max', async () => {
-    const err = await runRules(25, { max: 50 }, {});
-    expect(err).toBeNull();
-  });
-});
-
-describe('runRules — pattern', () => {
-  it('fails regex', async () => {
-    const err = await runRules('not-an-email', { pattern: /^[\w.]+@[\w.]+$/ }, {});
-    expect(err).toBe('Invalid format.');
-  });
-
-  it('passes regex', async () => {
-    const err = await runRules('hello@example.com', { pattern: /^[\w.]+@[\w.]+$/ }, {});
-    expect(err).toBeNull();
-  });
-
+// ─── min / max ────────────────────────────────────────────────────────────────
+describe('validateField — min/max (string)', () => {
+  it('fails min length',  async () => expect(await validateField(desc(field.text('x').min(5)), 'abc', {})).not.toBeNull());
+  it('passes min length', async () => expect(await validateField(desc(field.text('x').min(3)), 'hello', {})).toBeNull());
+  it('fails max length',  async () => expect(await validateField(desc(field.text('x').max(3)), 'toolong', {})).not.toBeNull());
+  it('passes max length', async () => expect(await validateField(desc(field.text('x').max(10)), 'short', {})).toBeNull());
   it('uses custom message', async () => {
-    const err = await runRules('bad', { pattern: { value: /^\d+$/, message: 'Digits only.' } }, {});
+    const err = await validateField(desc(field.text('x').min(5, 'Trop court.')), 'ab', {});
+    expect(err).toBe('Trop court.');
+  });
+});
+
+describe('validateField — min/max (number)', () => {
+  const numDesc = (f: any) => (f)._build();
+  it('fails min', async () => expect(await validateField(numDesc(field.number('x').min(18)), 10, {})).not.toBeNull());
+  it('passes min', async () => expect(await validateField(numDesc(field.number('x').min(18)), 20, {})).toBeNull());
+  it('fails max', async () => expect(await validateField(numDesc(field.number('x').max(100)), 150, {})).not.toBeNull());
+});
+
+// ─── pattern ──────────────────────────────────────────────────────────────────
+describe('validateField — pattern', () => {
+  it('fails non-matching pattern', async () => {
+    const err = await validateField(desc(field.text('x').pattern(/^\d+$/, 'Digits only.')), 'abc', {});
     expect(err).toBe('Digits only.');
   });
-});
-
-describe('runRules — custom validate', () => {
-  it('sync validator returns error', async () => {
-    const err = await runRules('admin', { validate: (v) => v === 'admin' ? 'Username taken.' : null }, {});
-    expect(err).toBe('Username taken.');
-  });
-
-  it('async validator returns error', async () => {
-    const err = await runRules('taken', {
-      validate: async (v) => {
-        await new Promise(r => setTimeout(r, 10));
-        return v === 'taken' ? 'Already in use.' : null;
-      },
-    }, {});
-    expect(err).toBe('Already in use.');
-  });
-
-  it('multiple named validators — stops at first error', async () => {
-    const err = await runRules('a', {
-      validate: {
-        len:  (v) => typeof v === 'string' && v.length >= 3 ? null : 'Min 3 chars.',
-        upper:(v) => typeof v === 'string' && /[A-Z]/.test(v) ? null : 'Need uppercase.',
-      },
-    }, {});
-    expect(err).toBe('Min 3 chars.');
-  });
-
-  it('receives allValues', async () => {
-    const err = await runRules('pass', {
-      validate: (v, all) => v === all.password ? null : 'Passwords must match.',
-    }, { password: 'different' });
-    expect(err).toBe('Passwords must match.');
-  });
-
-  it('returns null when valid', async () => {
-    const err = await runRules('hello', { validate: () => null }, {});
+  it('passes matching pattern', async () => {
+    const err = await validateField(desc(field.text('x').pattern(/^\d+$/)), '123', {});
     expect(err).toBeNull();
   });
 });
 
-describe('runRules — no rules', () => {
-  it('returns null with no rules', async () => {
-    const err = await runRules('anything', {}, {});
+// ─── email built-in ───────────────────────────────────────────────────────────
+describe('field.email', () => {
+  it('rejects invalid email', async () => expect(await validateField((field.email('x') as any)._build(), 'notanemail', {})).not.toBeNull());
+  it('accepts valid email',   async () => expect(await validateField((field.email('x') as any)._build(), 'aks@unikit.dev', {})).toBeNull());
+  it('skips validation if empty and not required', async () => expect(await validateField((field.email('x') as any)._build(), '', {})).toBeNull());
+});
+
+// ─── password strength ────────────────────────────────────────────────────────
+describe('field.password.strong()', () => {
+  const d = (field.password('x').required().strong() as any)._build();
+  it('rejects short password',           async () => expect(await validateField(d, 'Ab1!', {})).not.toBeNull());
+  it('rejects no uppercase',             async () => expect(await validateField(d, 'abcdef1!', {})).not.toBeNull());
+  it('rejects no number',                async () => expect(await validateField(d, 'Abcdefg!', {})).not.toBeNull());
+  it('rejects no special char',          async () => expect(await validateField(d, 'Abcdefg1', {})).not.toBeNull());
+  it('accepts strong password',          async () => expect(await validateField(d, 'Abcdef1!', {})).toBeNull());
+});
+
+// ─── matches ──────────────────────────────────────────────────────────────────
+describe('field.text.matches()', () => {
+  const d = (field.text('Confirm').required().matches('password', 'Does not match.') as any)._build();
+  it('fails when values differ', async () => {
+    const err = await validateField(d, 'abc', { password: 'xyz' });
+    expect(err).toBe('Does not match.');
+  });
+  it('passes when values are equal', async () => {
+    const err = await validateField(d, 'same', { password: 'same' });
     expect(err).toBeNull();
   });
 });
 
-// ─── Preset validators ────────────────────────────────────────────────────────
-
-describe('validators.email', () => {
-  it('rejects invalid emails', async () => {
-    for (const bad of ['notanemail', 'a@', '@b.com', 'a b@c.com']) {
-      const err = await runRules(bad, validators.email, {});
-      expect(err).not.toBeNull();
-    }
-  });
-  it('accepts valid emails', async () => {
-    for (const good of ['user@example.com', 'a.b+c@x.co', 'USER@DOMAIN.ORG']) {
-      const err = await runRules(good, validators.email, {});
-      expect(err).toBeNull();
-    }
+// ─── custom async validator ───────────────────────────────────────────────────
+describe('custom async validator', () => {
+  it('returns error from async validator', async () => {
+    const d = (field.text('x').required().validate(async (v) => {
+      await new Promise(r => setTimeout(r, 10));
+      return v === 'taken' ? 'Already taken.' : null;
+    }) as any)._build();
+    expect(await validateField(d, 'taken', {})).toBe('Already taken.');
+    expect(await validateField(d, 'free', {})).toBeNull();
   });
 });
 
-describe('validators.url', () => {
-  it('rejects non-urls', async () => {
-    expect(await runRules('just-text', validators.url, {})).not.toBeNull();
-    expect(await runRules('ftp://bad', validators.url, {})).not.toBeNull();
+// ─── transform + trim ────────────────────────────────────────────────────────
+describe('trim & transform', () => {
+  it('trims whitespace before required check', async () => {
+    const d = (field.text('x').required().trim() as any)._build();
+    expect(await validateField(d, '   ', {})).not.toBeNull();
   });
-  it('accepts valid urls', async () => {
-    expect(await runRules('https://example.com', validators.url, {})).toBeNull();
-    expect(await runRules('http://sub.domain.co/path?q=1', validators.url, {})).toBeNull();
-  });
-});
-
-describe('validators.strongPassword', () => {
-  it('rejects weak passwords', async () => {
-    expect(await runRules('short', validators.strongPassword, {})).not.toBeNull();
-    expect(await runRules('alllowercase1', validators.strongPassword, {})).not.toBeNull();
-    expect(await runRules('ALLUPPERCASE1', validators.strongPassword, {})).not.toBeNull();
-    expect(await runRules('NoNumbers!!', validators.strongPassword, {})).not.toBeNull();
-  });
-  it('accepts strong passwords', async () => {
-    expect(await runRules('StrongPass1', validators.strongPassword, {})).toBeNull();
-    expect(await runRules('Abc12345', validators.strongPassword, {})).toBeNull();
+  it('applies transform before validation', async () => {
+    const d = (field.text('x').required().transform(v => v.toUpperCase()).min(3) as any)._build();
+    expect(await validateField(d, 'ab', {})).not.toBeNull();
+    expect(await validateField(d, 'abc', {})).toBeNull();
   });
 });
 
-describe('validators.numeric', () => {
-  it('rejects non-numeric strings', async () => {
-    expect(await runRules('12a', validators.numeric, {})).not.toBeNull();
+// ─── validateAll ──────────────────────────────────────────────────────────────
+describe('validateAll', () => {
+  it('returns empty object when all valid', async () => {
+    const descriptors = {
+      email:    (field.email('Email').required() as any)._build(),
+      password: (field.password('Password').required() as any)._build(),
+    };
+    const errors = await validateAll(descriptors, { email: 'a@b.com', password: 'secret123' });
+    expect(Object.keys(errors)).toHaveLength(0);
   });
-  it('accepts digit-only strings', async () => {
-    expect(await runRules('123456', validators.numeric, {})).toBeNull();
+
+  it('returns errors for invalid fields', async () => {
+    const descriptors = {
+      email:    (field.email('Email').required() as any)._build(),
+      password: (field.password('Password').required() as any)._build(),
+    };
+    const errors = await validateAll(descriptors, { email: '', password: '' });
+    expect(errors.email).toBeTruthy();
+    expect(errors.password).toBeTruthy();
   });
 });

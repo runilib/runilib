@@ -1,6 +1,7 @@
 # formbridge
 
-> Cross-platform form state management for **React** and **React Native** — same API on both.
+> **Schema-first, cross-platform forms for React and React Native.**
+> One schema. One API. Every platform. No duplicated logic ever.
 
 [![npm](https://img.shields.io/npm/v/formbridge)](https://npmjs.com/package/formbridge)
 [![license](https://img.shields.io/npm/l/formbridge)](./LICENSE)
@@ -8,17 +9,35 @@
 
 ---
 
-## Features
+## Why formbridge?
 
-| | |
-|---|---|
-| ✅ | **Same API** — `useForm`, `register`, `handleSubmit` work identically on web and native |
-| 🔷 | **TypeScript-first** — 100% typed, generic over your form shape |
-| 🧪 | **Built-in validators** — required, min, max, minLength, maxLength, pattern, custom async |
-| 🎯 | **Preset validators** — email, url, strongPassword, phoneFR, numeric... |
-| 🧩 | **Controller** — for custom inputs (pickers, sliders, date pickers) |
-| 🌳 | **FormProvider** — share form context in deeply nested components |
-| ⚡ | **Validation modes** — `onChange` · `onBlur` · `onSubmit` · `onTouched` · `all` |
+Most form libraries make you wire things up manually — `register()`, spread props, write `onChange`, track errors yourself. **formbridge flips this completely.**
+
+You describe your form **once** using a fluent schema. formbridge generates:
+- The right input component for each field type
+- Labels, placeholders, hints and error messages
+- Validation (sync + async)
+- A submit button with loading state
+
+The same schema works identically on **React web** and **React Native** — no platform-specific code needed.
+
+```tsx
+// ✅ This is your ENTIRE form on both web and native:
+const { Form, fields } = useForm({
+  email:    field.email('Email').required(),
+  password: field.password('Password').required().strong(),
+  terms:    field.checkbox('I accept the terms').mustBeTrue(),
+});
+
+return (
+  <Form onSubmit={handleSignUp}>
+    <fields.email />       {/* auto-renders <input type="email"> or <TextInput> */}
+    <fields.password />    {/* auto-renders secure input with strength validation */}
+    <fields.terms />       {/* auto-renders checkbox or Switch */}
+    <Form.Submit>Sign up</Form.Submit>
+  </Form>
+);
+```
 
 ---
 
@@ -28,213 +47,465 @@
 npm install formbridge
 ```
 
-**React Native:** no extra peer deps needed beyond `react-native` itself.
+**React Native** — no extra deps beyond `react-native` itself.
 
 ---
 
-## Quick Start
+## Core concept — the schema
 
-### React (web)
+A schema is a plain object mapping field names to field descriptors created by the `field` builder.
 
-```tsx
-import { useForm, ErrorMessage } from 'formbridge';
+```ts
+import { useForm, field } from 'formbridge';
 
-export default function LoginForm() {
-  const form = useForm({
-    defaultValues: { email: '', password: '' },
-    mode: 'onTouched',
-  });
-
-  const onSubmit = form.handleSubmit((values) => {
-    console.log('✅', values);
-  });
-
-  return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
-      <input {...form.register('email', { required: true, pattern: /^[^\s@]+@[^\s@]+$/ })} />
-      <ErrorMessage error={form.formState.errors.email} />
-
-      <input {...form.register('password', { required: true, minLength: 8 })} type="password" />
-      <ErrorMessage error={form.formState.errors.password} />
-
-      <button type="submit">Log in</button>
-    </form>
-  );
-}
+const { Form, fields, state } = useForm({
+  name:    field.text('Full name'),
+  email:   field.email('Email'),
+  age:     field.number('Age'),
+  country: field.select('Country').options(['FR','US','UK']),
+  terms:   field.checkbox('Accept terms'),
+});
 ```
 
-### React Native (exact same logic, just different elements)
+That's it. No interfaces, no generics, no register calls.
+
+---
+
+## `field` — the builder API
+
+Every method is chainable. Chain as many as you need.
+
+### Text fields
+
+```ts
+field.text('Label')
+  .required('This field is required.')   // mark required
+  .min(3)                                // min length
+  .max(80)                               // max length
+  .trim()                                // trim whitespace before validation
+  .placeholder('Enter your name')
+  .hint('Helper text shown below the field')
+  .disabled()
+  .hidden()
+```
+
+### Email
+
+```ts
+field.email('Email address')
+  .required()
+  // Email format validation is built-in automatically
+```
+
+### Password
+
+```ts
+field.password('Password')
+  .required()
+  .strong()        // enforces: 8+ chars, uppercase, lowercase, number, special char
+  .min(8)          // or set your own minimum
+```
+
+### Confirm password
+
+```ts
+field.password('Confirm password')
+  .required()
+  .matches('password', 'Passwords do not match.')   // cross-field validation
+```
+
+### Number
+
+```ts
+field.number('Age')
+  .required()
+  .min(18, 'Must be 18 or older.')
+  .max(120)
+  .positive()         // shorthand for min(0.001)
+  .integer()          // must be a whole number
+```
+
+### Phone & URL
+
+```ts
+field.tel('Phone')    // built-in format validation
+field.url('Website')  // enforces https:// or http://
+```
+
+### Textarea
+
+```ts
+field.textarea('Bio')
+  .max(500)
+  .hint('Max 500 characters.')
+```
+
+### Checkbox & Switch
+
+```ts
+field.checkbox('Accept Terms').mustBeTrue('You must accept.')
+field.switch('Push notifications')   // renders as a toggle switch
+```
+
+### Select & Radio
+
+```ts
+field.select('Country')
+  .options([
+    { label: 'France',         value: 'FR' },
+    { label: 'United States',  value: 'US' },
+  ])
+  .required()
+
+field.radio('Role')
+  .options(['Developer', 'Designer', 'Manager'])   // simple string array also works
+  .required()
+```
+
+### OTP / PIN code
+
+```ts
+field.otp('Verification code')
+  .required()
+  .length(6)                   // renders 6 separate input boxes
+  .hint('Check your SMS.')
+```
+
+### Date
+
+```ts
+field.date('Date of birth')
+  .required()
+```
+
+### Custom renderer
+
+Override the platform renderer entirely:
 
 ```tsx
-import { useForm, ErrorMessage } from 'formbridge';
-import type { NativeFieldProps } from 'formbridge';
-
-export default function LoginForm() {
-  const form = useForm({
-    defaultValues: { email: '', password: '' },
-    mode: 'onTouched',
-  });
-
-  return (
+field.number('Rating')
+  .render(({ value, onChange, error, label }) => (
     <View>
-      <TextInput {...form.register('email', { required: true }) as NativeFieldProps} />
-      <ErrorMessage error={form.formState.errors.email} />
-
-      <TextInput {...form.register('password', { required: true, minLength: 8 }) as NativeFieldProps} secureTextEntry />
-      <ErrorMessage error={form.formState.errors.password} />
-
-      <TouchableOpacity onPress={form.handleSubmit((v) => console.log(v))}>
-        <Text>Log in</Text>
-      </TouchableOpacity>
+      <Text>{label}</Text>
+      {[1,2,3,4,5].map(n => (
+        <TouchableOpacity key={n} onPress={() => onChange(n)}>
+          <Text style={{ opacity: value >= n ? 1 : 0.3 }}>★</Text>
+        </TouchableOpacity>
+      ))}
+      {error && <Text style={{ color: 'red' }}>{error}</Text>}
     </View>
-  );
-}
+  ))
+```
+
+### Async validation with debounce
+
+```ts
+field.text('Username')
+  .required()
+  .validate(async (value) => {
+    const taken = await api.checkUsername(value);
+    return taken ? 'Username already taken.' : null;
+  })
+  .debounce(400)    // waits 400ms after last keystroke before calling
+  .hint('Checking availability…')
+```
+
+### Multiple validators
+
+```ts
+field.text('Code')
+  .validate((v) => v.startsWith('UC-') ? null : 'Must start with UC-')
+  .validate(async (v) => {
+    const valid = await api.validateCode(v);
+    return valid ? null : 'Invalid code.';
+  })
+```
+
+### Transform
+
+```ts
+field.text('Username')
+  .transform(v => v.toLowerCase().trim())   // stored and validated as lowercase
 ```
 
 ---
 
-## API Reference
-
-### `useForm<T>(options?)`
+## `useForm()` — full return API
 
 ```ts
 const {
-  register,      // (name, rules?) => web input props | native TextInput props
-  handleSubmit,  // (onValid, onInvalid?) => () => Promise<void>
-  setValue,      // (name, value, opts?) => void
-  getValue,      // (name) => value
-  getValues,     // () => all values
-  trigger,       // (name?) => Promise<boolean>
-  setError,      // (name, { message }) => void
-  clearErrors,   // (name?) => void
-  reset,         // (values?) => void
-  watch,         // (name) => value
-  watchAll,      // () => all values
-  formState,     // { values, errors, touched, dirty, isValid, isDirty, isSubmitting, ... }
-  Controller,    // controlled field component
-} = useForm({ defaultValues, mode, reValidateMode });
+  Form,        // <Form onSubmit={fn}> wrapper + <Form.Submit>
+  fields,      // { [fieldName]: () => JSX.Element }
+  state,       // reactive form state
+  setValue,    // (name, value) => void
+  getValue,    // (name) => value
+  getValues,   // () => all values
+  validate,    // (name?) => Promise<boolean>
+  reset,       // (values?) => void
+  setError,    // (name, message) => void
+  clearErrors, // (name?) => void
+  watch,       // (name) => reactive value
+  submit,      // () => Promise<void>  — programmatic submit
+} = useForm(schema, options);
+```
+
+### `state` — form state object
+
+```ts
+state.values        // { [fieldName]: value }
+state.errors        // { [fieldName]: errorMessage }
+state.touched       // { [fieldName]: boolean }
+state.dirty         // { [fieldName]: boolean }
+state.status        // 'idle' | 'validating' | 'submitting' | 'success' | 'error'
+state.isValid
+state.isDirty
+state.isSubmitting
+state.isSuccess
+state.isError
+state.submitCount
+state.submitError   // string | null — error thrown by onSubmit
+```
+
+### `useForm` options
+
+```ts
+useForm(schema, {
+  validateOn:    'onBlur',    // 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched'
+  revalidateOn:  'onChange',  // after first submit, when to re-validate
+  resolver:      zodResolver(schema),  // optional schema-level resolver
+})
 ```
 
 ### Validation modes
 
 | Mode | When validation runs |
 |------|----------------------|
-| `onSubmit` | Only when form is submitted *(default)* |
-| `onBlur` | When a field loses focus |
+| `onBlur` *(default)* | After a field loses focus |
 | `onChange` | On every keystroke |
-| `onTouched` | After the first blur, then on every change |
-| `all` | On every change and blur |
+| `onSubmit` | Only when the form is submitted |
+| `onTouched` | After first blur, then on every change |
 
-### Built-in rules
+---
+
+## `<Form>` component
+
+```tsx
+<Form
+  onSubmit={(values) => api.createUser(values)}
+  onError={(errors) => console.warn(errors)}
+  onSubmitError={(err) => 'Server error. Please try again.'}
+  className="my-form"   // web only
+  style={{ padding: 20 }}
+>
+  {/* fields */}
+  <Form.Submit loadingText="Submitting…">Submit</Form.Submit>
+</Form>
+```
+
+`<Form.Submit>` is automatically:
+- Disabled while submitting or validating
+- Shows `loadingText` with a loading indicator
+- A `<button type="submit">` on web, a `<TouchableOpacity>` on native
+
+---
+
+## Schema-level resolvers
+
+Use Zod, Yup, Joi or Valibot for full schema validation. The resolver replaces field-level validators.
 
 ```ts
-register('name', {
-  required:  true | 'Custom message',
-  min:       18   | { value: 18, message: 'Must be 18+' },
-  max:       99,
-  minLength: 3    | { value: 3, message: 'Too short' },
-  maxLength: 50,
-  pattern:   /^\d+$/ | { value: /^\d+$/, message: 'Digits only' },
-  validate:  (value, allValues) => value !== 'admin' ? null : 'Username taken',
-  // Multiple named validators:
-  validate: {
-    notAdmin:  (v) => v !== 'admin'    ? null : 'Username taken',
-    notEmpty:  (v) => v.trim().length > 0 ? null : 'Cannot be blank',
-  },
-})
-```
+import { z }           from 'zod';
+import { zodResolver } from 'formbridge';
 
-### Preset validators
-
-```ts
-import { validators } from 'formbridge';
-
-register('email',    validators.email)
-register('website',  validators.url)
-register('phone',    validators.phoneFR)
-register('code',     validators.numeric)
-register('password', validators.strongPassword)
-register('username', validators.alphanumeric)
-```
-
-### Controller (for custom inputs)
-
-```tsx
-<form.Controller
-  name="country"
-  rules={{ required: 'Please select a country.' }}
-  defaultValue=""
-  render={({ field, fieldState }) => (
-    <CountryPicker
-      value={field.value}
-      onChange={field.onChange}
-      onBlur={field.onBlur}
-      error={fieldState.error}
-      invalid={fieldState.invalid}
-    />
-  )}
-/>
-```
-
-### FormProvider + useFormContext
-
-```tsx
-// Wrap
-<FormProvider form={form}>
-  <DeepChildComponent />
-</FormProvider>
-
-// Consume anywhere in the tree
-function DeepChildComponent() {
-  const { register, formState } = useFormContext<MyForm>();
-  return <input {...register('email')} />;
-}
-```
-
-### ErrorMessage
-
-```tsx
-// Web → renders a <p> with role="alert"
-// Native → renders a <Text> with accessibilityRole="alert"
-<ErrorMessage error={formState.errors.email} />
-
-// Custom renderer
-<ErrorMessage
-  error={formState.errors.email}
-  render={(msg) => <MyErrorText>{msg}</MyErrorText>}
-/>
-```
-
-### useField (standalone, no form)
-
-```tsx
-const { value, error, touched, inputProps, textInputProps, setValue, validate } = useField({
-  defaultValue: '',
-  rules: { required: true, minLength: 3 },
+const schema = z.object({
+  email:    z.string().email('Invalid email.'),
+  password: z.string().min(8, 'Min 8 characters.'),
+  age:      z.coerce.number().min(18, 'Must be 18+.'),
 });
 
-// Web
-<input {...inputProps} />
+const { Form, fields } = useForm(
+  {
+    email:    field.email('Email').required(),
+    password: field.password('Password').required(),
+    age:      field.number('Age').required(),
+  },
+  { resolver: zodResolver(schema) }
+);
+```
 
-// Native
-<TextInput {...textInputProps} />
+Available resolvers: `zodResolver`, `yupResolver`, `joiResolver`, `valibotResolver`.
+
+---
+
+## Programmatic control
+
+```tsx
+// Set a value externally (e.g., from a map picker)
+setValue('city', 'Paris');
+
+// Trigger validation on specific fields
+const isEmailValid = await validate('email');
+
+// Validate all fields before a custom action
+const isAllValid = await validate();
+
+// Set API errors manually
+setError('email', 'This email is already registered.');
+
+// Reset to defaults (or new values)
+reset();
+reset({ email: 'prefill@example.com' });
+
+// Watch a value reactively (renders on change)
+const password = watch('password');
+
+// Programmatic submit
+await submit();
+```
+
+---
+
+## Prefilling values
+
+```tsx
+const { reset } = useForm({ ... });
+
+useEffect(() => {
+  reset({
+    name:  user.name,
+    email: user.email,
+    role:  user.role,
+  });
+}, [user]);
+```
+
+---
+
+## Conditional fields
+
+```tsx
+// Use field.hidden() based on a watched value
+const plan = watch('plan');
+
+const { Form, fields } = useForm({
+  plan:       field.select('Plan').options(['free','pro']).required(),
+  teamSize:   field.number('Team size').min(1).hidden(plan !== 'pro'),
+  couponCode: field.text('Coupon code').hidden(plan !== 'pro'),
+});
+```
+
+---
+
+## Override labels / placeholder per-render
+
+```tsx
+// Schema defines the default, render can override
+<fields.email label="Work email" placeholder="you@company.com" />
 ```
 
 ---
 
 ## TypeScript
 
+formbridge infers types from your schema — no extra type annotations needed.
+
 ```ts
-import type {
-  FormValues,           // { [key: string]: FieldValue }
-  FieldRules,           // built-in rule shapes
-  FormState,            // { values, errors, touched, dirty, isValid, ... }
-  UseFormReturn,        // full return type of useForm()
-  ControllerRenderProps,// field + onChange + onBlur
-  ControllerFieldState, // error + touched + dirty + invalid
-  NativeFieldProps,     // for casting register() on RN
-  WebFieldProps,        // for casting register() on web
-} from 'formbridge';
+const { Form, fields, state } = useForm({
+  age: field.number('Age').required().min(18),
+});
+
+// state.values.age is inferred as `number`
+// state.errors.age is inferred as `string | undefined`
+```
+
+If you need the values type:
+
+```ts
+import type { SchemaValues } from 'formbridge';
+
+type MyValues = SchemaValues<typeof mySchema>;
+// { email: string; age: number; terms: boolean; ... }
+```
+
+---
+
+## Full example — Sign-up form
+
+### React (web)
+
+```tsx
+import { useForm, field } from 'formbridge';
+
+export function SignUpForm() {
+  const { Form, fields, state } = useForm(
+    {
+      name:     field.text('Full name').required().trim().max(80),
+      email:    field.email('Email').required(),
+      password: field.password('Password').required().strong(),
+      confirm:  field.password('Confirm password').required()
+                    .matches('password', 'Passwords must match.'),
+      country:  field.select('Country')
+                    .options([
+                      { label: 'France',        value: 'FR' },
+                      { label: 'United States', value: 'US' },
+                    ])
+                    .required(),
+      terms:    field.checkbox('I accept the terms').mustBeTrue(),
+    },
+    { validateOn: 'onTouched' }
+  );
+
+  return (
+    <Form onSubmit={(values) => api.signUp(values)}>
+      <fields.name />
+      <fields.email />
+      <fields.password />
+      <fields.confirm />
+      <fields.country />
+      <fields.terms />
+      <Form.Submit loadingText="Creating account…">Sign up →</Form.Submit>
+    </Form>
+  );
+}
+```
+
+### React Native (exact same schema)
+
+```tsx
+import { useForm, field } from 'formbridge';
+import { View, ScrollView } from 'react-native';
+
+export function SignUpScreen() {
+  const { Form, fields } = useForm(
+    {
+      // ← Exact same schema as the web form above
+      name:     field.text('Full name').required().trim().max(80),
+      email:    field.email('Email').required(),
+      password: field.password('Password').required().strong(),
+      confirm:  field.password('Confirm password').required()
+                    .matches('password', 'Passwords must match.'),
+      country:  field.select('Country')
+                    .options([{ label: 'France', value: 'FR' }, { label: 'US', value: 'US' }])
+                    .required(),
+      terms:    field.checkbox('I accept the terms').mustBeTrue(),
+    },
+    { validateOn: 'onTouched' }
+  );
+
+  return (
+    <ScrollView>
+      <Form onSubmit={(values) => api.signUp(values)}>
+        <fields.name />       {/* TextInput */}
+        <fields.email />      {/* TextInput, email keyboard */}
+        <fields.password />   {/* TextInput, secureTextEntry */}
+        <fields.confirm />
+        <fields.country />    {/* Options list */}
+        <fields.terms />      {/* Switch */}
+        <Form.Submit>Sign up →</Form.Submit>
+      </Form>
+    </ScrollView>
+  );
+}
 ```
 
 ---
