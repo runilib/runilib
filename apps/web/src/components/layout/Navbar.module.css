@@ -1,0 +1,130 @@
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: var(--nav-h);
+  transition:
+    border-color 0.3s,
+    background 0.3s,
+    backdrop-filter 0.3s;
+  border-bottom: 1px solid transparent;
+}
+.nav.scrolled {
+  background: rgba(7, 8, 13, 0.88);
+  backdrop-filter: blur(18px);
+  border-bottom-color: var(--border);
+}
+.inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  flex: 1;
+}
+.links a {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.links a:hover,
+.links a.active {
+  color: var(--text);
+}
+.cta {
+  margin-left: auto;
+}
+.githubBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  transition: all 0.2s;
+}
+.githubBtn:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin-left: auto;
+}
+.burger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--muted);
+  border-radius: 1px;
+}
+.mobileMenu {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobileMenu a {
+  padding: 10px 0;
+  font-size: 15px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.mobileMenu a:hover {
+  color: var(--text);
+}
+@media (max-width: 768px) {
+  .inner {
+    padding: 0 20px;
+    gap: 0;
+  }
+  .links,
+  .cta {
+    display: none;
+  }
+  .burger {
+    display: flex;
+  }
+}

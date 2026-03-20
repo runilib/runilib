@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Taskflow",
+    "slug": "unikit-example-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": { "resizeMode": "contain", "backgroundColor": "#f9f5ee" },
+    "ios":     { "supportsTablet": false, "bundleIdentifier": "dev.unikit.example" },
+    "android": { "adaptiveIcon": { "backgroundColor": "#f9f5ee" }, "package": "dev.unikit.example" },
+    "scheme": "taskflow",
+    "plugins": ["expo-router"]
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "name": "@runilib/formbridge",
+  "version": "1.0.0",
+  "description": "Cross-platform form state management for React and React Native — same API on both.",
+  "keywords": [
+    "react",
+    "react-native",
+    "form",
+    "validation",
+    "form-state",
+    "cross-platform",
+    "universal",
+    "typescript",
+    "hooks"
+  ],
+  "homepage": "https://unikit.dev/docs/formbridge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/unikit.git",
+    "directory": "packages/formbridge"
+  },
+  "license": "MIT",
+  "author": "AKS",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist coverage .turbo"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-dom": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0",
+    "@babel/preset-react": "^7.22.0",
+    "@babel/preset-typescript": "^7.23.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "runilib-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "yarn@4.13.0",
+  "workspaces": [
+    "apps/*",
+    "examples/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "build:packages": "turbo run build --filter='./packages/*'",
+    "dev": "yarn build:packages && turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rimraf node_modules .turbo",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "yarn build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/cli": "^2.29.7",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.5.0",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.2"
+  },
+  "resolutions": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.0",
+    "react-native-web": "0.21.0"
+  }
+}

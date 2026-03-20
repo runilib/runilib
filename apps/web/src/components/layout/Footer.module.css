@@ -1,0 +1,69 @@
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 56px 0 40px;
+  margin-top: 80px;
+}
+.inner {
+  display: flex;
+  justify-content: space-between;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+}
+.logoIcon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+.copy {
+  font-size: 13px;
+  color: var(--muted2);
+}
+.cols {
+  display: flex;
+  gap: 56px;
+  flex-wrap: wrap;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.colTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted2);
+  margin-bottom: 4px;
+}
+.col a {
+  font-size: 14px;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.col a:hover {
+  color: var(--text);
+}
+.soon {
+  font-size: 14px;
+  color: var(--muted2);
+}
