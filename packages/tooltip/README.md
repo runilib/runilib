@@ -1,4 +1,9 @@
-# universal-copilot
+
+```md
+> This repository is a read-only mirror of the package maintained in the main Runilib monorepo.  
+> Please open code contributions in the main monorepo. 
+
+# runilib/tooltip
 
 > Cross-platform onboarding & guided tour — **same TypeScript API on React (web) and React Native**.  
 > No code changes needed when switching platforms.
@@ -52,35 +57,35 @@ npx expo install react-native-svg
 
 ## Quick Start
 
-### 1 — Wrap your app with `<CopilotProvider>`
+### 1 — Wrap your app with `<TooltipProvider>`
 
 ```tsx
-import { CopilotProvider } from 'universal-copilot';
+import { TooltipProvider } from 'universal-copilot';
 
 export default function App() {
   return (
-    <CopilotProvider animationType="slide">
+    <TooltipProvider animationType="slide">
       <MyScreen />
-    </CopilotProvider>
+    </TooltipProvider>
   );
 }
 ```
 
-### 2 — Register steps with `<CopilotStep>`
+### 2 — Register steps with `<TooltipStep>`
 
 ```tsx
-import { CopilotStep } from 'universal-copilot';
+import { TooltipStep } from 'universal-copilot';
 
 function MyScreen() {
   return (
     <View>
-      <CopilotStep name="logo" order={1} title="Welcome!" text="This is our app.">
+      <TooltipStep name="logo" order={1} title="Welcome!" text="This is our app.">
         <Image source={logo} />
-      </CopilotStep>
+      </TooltipStep>
 
-      <CopilotStep name="search" order={2} title="Search" text="Find anything here.">
+      <TooltipStep name="search" order={2} title="Search" text="Find anything here.">
         <TextInput placeholder="Search…" />
-      </CopilotStep>
+      </TooltipStep>
 
       <StartButton />
     </View>
@@ -88,13 +93,13 @@ function MyScreen() {
 }
 ```
 
-### 3 — Control the tour with `useCopilot`
+### 3 — Control the tour with `useTooltip`
 
 ```tsx
-import { useCopilot } from 'universal-copilot';
+import { useTooltip } from 'universal-copilot';
 
 function StartButton() {
-  const { start } = useCopilot();
+  const { start } = useTooltip();
   return <Button onPress={() => start()} title="Start Tour" />;
 }
 ```
@@ -103,24 +108,24 @@ function StartButton() {
 
 ## Props Reference
 
-### `<CopilotProvider>`
+### `<TooltipProvider>`
 
 | Prop                    | Type                    | Default                 | Description                                |
 | ----------------------- | ----------------------- | ----------------------- | ------------------------------------------ |
 | `animationType`         | `AnimationType`         | `'slide'`               | Tooltip entrance animation                 |
-| `theme`                 | `CopilotTheme`          | —                       | Color overrides                            |
+| `theme`                 | `TooltipTheme`          | —                       | Color overrides                            |
 | `tooltipStyle`          | `object`                | —                       | Extra styles on the tooltip container      |
 | `overlayColor`          | `string`                | `'rgba(15,15,25,0.72)'` | Backdrop RGBA color                        |
 | `spotlightPadding`      | `number`                | `8`                     | Extra space around the highlighted element |
 | `spotlightBorderRadius` | `number`                | `8`                     | Corner radius of the spotlight cutout      |
-| `maskClickable`         | `boolean`               | `false`                 | Close the tour when clicking the backdrop  |
-| `labels`                | `CopilotLabels`         | —                       | Override button labels                     |
+| `stopOnOutsideClick`         | `boolean`               | `false`                 | Close the tour when clicking the backdrop  |
+| `labels`                | `TooltipLabels`         | —                       | Override button labels                     |
 | `renderTooltip`         | `(props) => ReactNode`  | —                       | Fully custom tooltip renderer              |
 | `onStart`               | `() => void`            | —                       | Called when the tour starts                |
 | `onStop`                | `() => void`            | —                       | Called when the tour ends                  |
 | `onStepChange`          | `(step, index) => void` | —                       | Called on each step change                 |
 
-### `<CopilotStep>`
+### `<TooltipStep>`
 
 | Prop        | Type               | Default      | Description                   |
 | ----------- | ------------------ | ------------ | ----------------------------- |
@@ -131,7 +136,7 @@ function StartButton() {
 | `placement` | `TooltipPlacement` | `'auto'`     | Preferred tooltip side        |
 | `active`    | `boolean`          | `true`       | Set `false` to skip this step |
 
-### `useCopilot()` — return values
+### `useTooltip()` — return values
 
 | Property           | Type                               | Description                          |
 | ------------------ | ---------------------------------- | ------------------------------------ |
@@ -140,7 +145,7 @@ function StartButton() {
 | `next()`           | `() => void`                       | Advance one step                     |
 | `prev()`           | `() => void`                       | Go back one step                     |
 | `goTo(index)`      | `(i: number) => Promise<void>`     | Jump to step by 0-based index        |
-| `currentStep`      | `CopilotStepData \| null`          | Active step object                   |
+| `currentStep`      | `TooltipStepData \| null`          | Active step object                   |
 | `isRunning`        | `boolean`                          | Whether the tour is active           |
 | `totalSteps`       | `number`                           | Total registered steps               |
 | `currentIndex`     | `number`                           | 0-based current index                |
@@ -165,7 +170,7 @@ type AnimationType = 'fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glow';
 | `glow`   | Scale + glow shadow                    |
 
 ```tsx
-<CopilotProvider animationType="bounce">
+<TooltipProvider animationType="bounce">
 ```
 
 ---
@@ -173,7 +178,7 @@ type AnimationType = 'fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glow';
 ## Theming
 
 ```tsx
-<CopilotProvider
+<TooltipProvider
   theme={{
     primary:      '#10b981',  // button + active dot
     primaryText:  '#ffffff',
@@ -196,7 +201,7 @@ Replace the default tooltip with your own UI:
 ```tsx
 import type { RenderTooltipProps } from 'universal-copilot';
 
-<CopilotProvider
+<TooltipProvider
   renderTooltip={({ step, stepIndex, totalSteps, onNext, onPrev, onStop }: RenderTooltipProps) => (
     <View style={styles.myTooltip}>
       <Text>{step.title}</Text>
@@ -213,7 +218,7 @@ import type { RenderTooltipProps } from 'universal-copilot';
 ## Label overrides
 
 ```tsx
-<CopilotProvider
+<TooltipProvider
   labels={{
     next:   'Suivant →',
     prev:   '← Retour',
@@ -230,7 +235,7 @@ import type { RenderTooltipProps } from 'universal-copilot';
 ```tsx
 const { isAdmin } = useUser();
 
-<CopilotStep
+<TooltipStep
   name="admin-panel"
   order={4}
   title="Admin Panel"
@@ -238,7 +243,7 @@ const { isAdmin } = useUser();
   active={isAdmin} // skipped when false
 >
   <AdminButton />
-</CopilotStep>;
+</TooltipStep>;
 ```
 
 ---
@@ -246,7 +251,7 @@ const { isAdmin } = useUser();
 ## Start from a specific step
 
 ```tsx
-const { start } = useCopilot();
+const { start } = useTooltip();
 
 // Jump directly to a named step
 <Button onPress={() => start('settings')} title="Show Settings Step" />;
@@ -258,7 +263,7 @@ const { start } = useCopilot();
 
 ```tsx
 function TourBar() {
-  const { isRunning, currentIndex, totalSteps, currentStep, next, prev, stop } = useCopilot();
+  const { isRunning, currentIndex, totalSteps, currentStep, next, prev, stop } = useTooltip();
 
   if (!isRunning) return null;
 
@@ -280,7 +285,7 @@ function TourBar() {
 ## Event callbacks
 
 ```tsx
-<CopilotProvider
+<TooltipProvider
   onStart={() => analytics.track('tour_started')}
   onStop={() => analytics.track('tour_ended')}
   onStepChange={(step, index) =>
@@ -306,7 +311,7 @@ type TooltipPlacement = 'auto' | 'top' | 'bottom' | 'left' | 'right';
 **React Native:**
 
 - `react-native-svg` is **required** for the spotlight effect.
-- `<CopilotStep>` wraps the child in an extra `<View collapsable={false}>`. Override layout with a parent style if needed.
+- `<TooltipStep>` wraps the child in an extra `<View collapsable={false}>`. Override layout with a parent style if needed.
 - On Android, set `<StatusBar translucent>` so the overlay covers the status bar.
 
 **Web:**

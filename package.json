@@ -17,7 +17,8 @@
     "clean": "turbo run clean && rimraf node_modules .turbo",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "yarn build && changeset publish"
+    "release": "changeset publish",
+    "changeset:status": "changeset status"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
@@ -29,5 +30,13 @@
   },
   "resolutions": {
     "react-native-svg": "15.12.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/runilib/runilib.git"
+  },
+  "bugs": {
+    "url": "https://github.com/runilib/runilib/issues"
+  },
+  "homepage": "https://github.com/runilib/runilib#readme"
 }

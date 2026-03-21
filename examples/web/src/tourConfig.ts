@@ -20,7 +20,7 @@ export const TOUR_LABELS: TooltipLabels = {
 
 /**
  * All tour steps defined centrally.
- * Each key matches the `name` prop on <CopilotStep>.
+ * Each key matches the `name` prop on <TooltipStep>.
  */
 export const STEPS = {
   HEADER:       { name: 'header',       order: 1, title: 'Welcome to Taskflow 👋',     text: 'Your personal productivity command center. Let us show you around.' },

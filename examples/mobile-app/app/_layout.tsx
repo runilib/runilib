@@ -15,7 +15,7 @@ export default function RootLayout() {
         spotlightBorderRadius={16}
         theme={TOUR_THEME}
         labels={TOUR_LABELS}
-        maskClickable
+        stopOnOutsideClick
         onStart={() => console.log('[@runilib/tooltip] tour started')}
         onStop={() => console.log('[@runilib/tooltip] tour ended')}
         onStepChange={(step, i) => console.log(`[@runilib/tooltip] step ${i + 1}: ${step.name}`)}

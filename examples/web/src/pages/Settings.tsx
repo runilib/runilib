@@ -143,7 +143,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
               <div className={styles.libsList}>
                 {[
                   { name: 'stepwise',   version: 'v1.0.0', status: 'active',      desc: 'Guided onboarding tours' },
-                  { name: 'formbridge', version: 'v1.0.0', status: 'active',      desc: 'Cross-platform form state' },
+                  { name: 'formura', version: 'v1.0.0', status: 'active',      desc: 'Cross-platform form state' },
                   { name: 'toastly',    version: null,      status: 'coming-soon', desc: 'Toast notifications' },
                   { name: 'modalkit',   version: null,      status: 'coming-soon', desc: 'Modals & bottom sheets' },
                 ].map(lib => (

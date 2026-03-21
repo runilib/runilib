@@ -20,7 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — versioning:
 - `renderTooltip` prop for full custom tooltip
 - `theme` prop for color overrides
 - `labels` prop for button label overrides
-- `active` prop on `<CopilotStep>` for conditional steps
+- `active` prop on `<TooltipStep>` for conditional steps
 - `onStart`, `onStop`, `onStepChange` lifecycle callbacks
 - TypeScript-first: 100% typed source, `dist/*.d.ts` shipped
 - Full unit test suite (positioning, animations, context, hook, step)

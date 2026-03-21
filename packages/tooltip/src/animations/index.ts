@@ -3,45 +3,45 @@ import type { AnimationType, TooltipPlacement } from "../types";
 // ─── Web CSS keyframes ────────────────────────────────────────────────────────
 
 export const WEB_KEYFRAMES = `
-  @keyframes uc-fade {
+  @keyframes runilib-tooltip-fade {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
-  @keyframes uc-slide {
+  @keyframes runilib-tooltip-slide {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes uc-slide-up {
+  @keyframes runilib-tooltip-slide-up {
     from { opacity: 0; transform: translateY(-16px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes uc-slide-left {
+  @keyframes runilib-tooltip-slide-left {
     from { opacity: 0; transform: translateX(16px); }
     to   { opacity: 1; transform: translateX(0); }
   }
-  @keyframes uc-slide-right {
+  @keyframes runilib-tooltip-slide-right {
     from { opacity: 0; transform: translateX(-16px); }
     to   { opacity: 1; transform: translateX(0); }
   }
-  @keyframes uc-zoom {
+  @keyframes runilib-tooltip-zoom {
     from { opacity: 0; transform: scale(0.85); }
     to   { opacity: 1; transform: scale(1); }
   }
-  @keyframes uc-bounce {
+  @keyframes runilib-tooltip-bounce {
     0%   { opacity: 0; transform: scale(0.5); }
     60%  { opacity: 1; transform: scale(1.08); }
     80%  { transform: scale(0.97); }
     100% { transform: scale(1); }
   }
-  @keyframes uc-flip {
+  @keyframes runilib-tooltip-flip {
     from { opacity: 0; transform: perspective(400px) rotateX(-30deg); }
     to   { opacity: 1; transform: perspective(400px) rotateX(0deg); }
   }
-  @keyframes uc-glow {
+  @keyframes runilib-tooltip-glow {
     0%   { opacity: 0; transform: scale(0.9); box-shadow: 0 0 0 rgba(99,102,241,0); }
     100% { opacity: 1; transform: scale(1);   box-shadow: 0 0 24px rgba(99,102,241,0.4); }
   }
-  @keyframes uc-overlay-in {
+  @keyframes runilib-tooltip-overlay-in {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
@@ -56,22 +56,22 @@ export function getWebAnimation(
   const easing = type === "bounce" ? "cubic-bezier(0.34,1.56,0.64,1)" : "ease-out";
 
   const keyframeMap: Record<AnimationType, string> = {
-    fade: "uc-fade",
-    zoom: "uc-zoom",
-    bounce: "uc-bounce",
-    flip: "uc-flip",
-    glow: "uc-glow",
+    fade: "runilib-tooltip-fade",
+    zoom: "runilib-tooltip-zoom",
+    bounce: "runilib-tooltip-bounce",
+    flip: "runilib-tooltip-flip",
+    glow: "runilib-tooltip-glow",
     slide:
       placement === "top"
-        ? "uc-slide-up"
+        ? "runilib-tooltip-slide-up"
         : placement === "left"
-          ? "uc-slide-right"
+          ? "runilib-tooltip-slide-right"
           : placement === "right"
-            ? "uc-slide-left"
-            : "uc-slide",
+            ? "runilib-tooltip-slide-left"
+            : "runilib-tooltip-slide",
   };
 
-  return `${keyframeMap[type] ?? "uc-fade"} ${duration} ${easing} both`;
+  return `${keyframeMap[type] ?? "runilib-tooltip-fade"} ${duration} ${easing} both`;
 }
 
 // ─── Native animation configs ─────────────────────────────────────────────────

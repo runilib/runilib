@@ -1,0 +1,65 @@
+name: Mirror package to standalone repo
+
+on:
+  workflow_call:
+    inputs:
+      package_path:
+        required: true
+        type: string
+      target_repo:
+        required: true
+        type: string
+      target_branch:
+        required: false
+        type: string
+        default: main
+      mirror_git_user_name:
+        required: true
+        type: string
+        default: main
+      mirror_git_user_email:
+        required: true
+        type: string
+        default: main
+    secrets:
+      mirror_push_token:
+        required: true
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "${{ inputs.mirror_git_user_name }}"
+          git config user.email "${{ inputs.mirror_git_user_email }}"
+
+      - name: Verify package path exists
+        run: |
+          test -d "${{ inputs.package_path }}"
+
+      - name: Create subtree branch
+        run: |
+          git subtree split --prefix="${{ inputs.package_path }}" -b mirror-branch
+
+      - name: Push subtree to mirror repository
+        env:
+          TARGET_REPO: ${{ inputs.target_repo }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+          MIRROR_PUSH_TOKEN: ${{ secrets.mirror_push_token }}
+        run: |
+          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git push mirror mirror-branch:${TARGET_BRANCH} --force
+
+      - name: Cleanup local branch
+        if: always()
+        run: |
+          git branch -D mirror-branch || true

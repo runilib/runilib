@@ -48,18 +48,13 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
   const { start, isRunning } = useTooltip();
   const started = useRef(false);
 
-
   useEffect(() => {
     if (!started.current) {
       started.current = true;
       const timer = setTimeout(() => start(), 800);
-        console.log("FDSFDSFDSFDFS", { isRunning})
-
       return () => clearTimeout(timer);
     }
   }, [start, isRunning]);
-
-
 
   return (
     <div className={styles.layout}>
@@ -117,10 +112,8 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
             </div>
             <div className={styles.headerRight}>
               <TooltipStep {...STEPS.NOTIFICATIONS} placement="auto">
-                <button               type='button'
- className={`btn btn-ghost ${styles.notifBtn}`}>
-                  🔔
-                  <span className={styles.notifBadge}>3</span>
+                <button type='button' className={`btn btn-ghost ${styles.notifBtn}`}>
+                  🔔 <span className={styles.notifBadge}>3</span>
                 </button>
               </TooltipStep>
               <button               type='button'

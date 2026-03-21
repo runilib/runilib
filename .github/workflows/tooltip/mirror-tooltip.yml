@@ -1,0 +1,23 @@
+name: Mirror @runilib/tooltip
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/tooltip/**"
+      - ".github/workflows/tooltip/mirror-package.yml"
+      - ".github/workflows/tooltip/mirror-tooltip.yml"
+  workflow_dispatch:
+
+jobs:
+  mirror-tooltip:
+    uses: ./.github/workflows/tooltip/mirror-package.yml
+    with:
+      package_path: packages/tooltip
+      target_repo: runilib/tooltip
+      target_branch: main
+      mirror_git_user_name:  ${{ secrets.MIRROR_GIT_USER_NAME }}
+      mirror_git_user_email:  ${{ secrets.MIRROR_GIT_USER_EMAIL }}
+    secrets:
+      mirror_push_token: ${{ secrets.MIRROR_PUSH_TOKEN }}

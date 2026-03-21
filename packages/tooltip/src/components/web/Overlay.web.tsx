@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
 import { WEB_KEYFRAMES } from "../../animations";
@@ -23,31 +23,40 @@ function injectStyles(): void {
 }
 
 function getOrCreatePortal(): HTMLElement {
-  let el = document.getElementById(PORTAL_ID);
-  if (!el) {
-    el = document.createElement("div");
-    el.id = PORTAL_ID;
-    document.body.appendChild(el);
+  let element = document.getElementById(PORTAL_ID);
+  if (!element) {
+    element = document.createElement("div");
+    element.id = PORTAL_ID;
+    document.body.appendChild(element);
   }
-  return el;
+  return element;
 }
 
 function useDimensions(): { w: number; h: number } {
-  const [dims, setDims] = useState({
+  const [dimensions, setDimensions] = useState({
     w: window.innerWidth,
     h: window.innerHeight,
   });
+
   useEffect(() => {
-    const handler = () => setDims({ w: window.innerWidth, h: window.innerHeight });
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
+    const handleResize = () => {
+      setDimensions({
+        w: window.innerWidth,
+        h: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
-  return dims;
+
+  return dimensions;
 }
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
+
 function easeOut(t: number): number {
   return 1 - (1 - t) ** 3;
 }
@@ -67,82 +76,92 @@ export const WebOverlay = ({
   theme,
   tooltipStyle,
   renderTooltip,
-  maskClickable,
+  stopOnOutsideClick,
   labels,
   onNext,
   onPrev,
   onStop,
 }: OverlayProps) => {
   const [spot, setSpot] = useState<SpotlightRect | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<ReturnType<typeof computeTooltipPosition> | null>(
-    null
-  );
-  const prevRectRef = useRef<SpotlightRect | null>(null);
-  const rafRef = useRef<number>(0);
-  const dims = useDimensions();
+  const [tooltipSize, setTooltipSize] = useState({
+    width: TOOLTIP_WIDTH,
+    height: TOOLTIP_HEIGHT,
+  });
 
-  // ─── Animate spotlight ────────────────────────────────────────────────────
+  const previousRectRef = useRef<SpotlightRect | null>(null);
+  const animationFrameRef = useRef<number>(0);
+  const dimensions = useDimensions();
+
+  const spotlightTarget = useMemo(() => {
+    if (!currentRect) {
+      return null;
+    }
+
+    return getSpotlightRect(currentRect, spotlightPadding, spotlightBorderRadius);
+  }, [currentRect, spotlightPadding, spotlightBorderRadius]);
+
+  const tooltipPos = useMemo(() => {
+    if (!visible || !spotlightTarget || !currentStep) {
+      return null;
+    }
+
+    return computeTooltipPosition(
+      spotlightTarget,
+      tooltipSize,
+      currentStep.placement ?? "auto",
+      dimensions.w,
+      dimensions.h
+    );
+  }, [visible, spotlightTarget, currentStep, tooltipSize, dimensions]);
 
   const animateSpotlight = useCallback((from: SpotlightRect, to: SpotlightRect): void => {
-    cancelAnimationFrame(rafRef.current);
-    const start = performance.now();
+    cancelAnimationFrame(animationFrameRef.current);
+
+    const startTime = performance.now();
     const duration = 300;
 
     const tick = (now: number): void => {
-      const t = Math.min((now - start) / duration, 1);
-      const ease = easeOut(t);
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = easeOut(t);
+
       setSpot({
-        x: lerp(from.x, to.x, ease),
-        y: lerp(from.y, to.y, ease),
-        width: lerp(from.width, to.width, ease),
-        height: lerp(from.height, to.height, ease),
+        x: lerp(from.x, to.x, eased),
+        y: lerp(from.y, to.y, eased),
+        width: lerp(from.width, to.width, eased),
+        height: lerp(from.height, to.height, eased),
         borderRadius: to.borderRadius,
       });
-      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+
+      if (t < 1) {
+        animationFrameRef.current = requestAnimationFrame(tick);
+      }
     };
 
-    rafRef.current = requestAnimationFrame(tick);
+    animationFrameRef.current = requestAnimationFrame(tick);
   }, []);
 
-  // ─── On step change ───────────────────────────────────────────────────────
-
   useEffect(() => {
-    if (!visible || !currentRect) {
+    if (!visible || !spotlightTarget) {
       setSpot(null);
-      setTooltipPos(null);
       return;
     }
 
     injectStyles();
 
-    const sr = getSpotlightRect(currentRect, spotlightPadding, spotlightBorderRadius);
+    if (previousRectRef.current) {
+      animateSpotlight(previousRectRef.current, spotlightTarget);
+    } else {
+      setSpot(spotlightTarget);
+    }
 
-    if (prevRectRef.current) animateSpotlight(prevRectRef.current, sr);
-    else setSpot(sr);
-    prevRectRef.current = sr;
+    previousRectRef.current = spotlightTarget;
 
-    setTooltipPos(
-      computeTooltipPosition(
-        sr,
-        { width: TOOLTIP_WIDTH, height: TOOLTIP_HEIGHT },
-        currentStep?.placement ?? "auto",
-        dims.w,
-        dims.h
-      )
-    );
+    return () => cancelAnimationFrame(animationFrameRef.current);
+  }, [visible, spotlightTarget, animateSpotlight]);
 
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [
-    visible,
-    currentRect,
-    currentStep,
-    dims,
-    spotlightPadding,
-    spotlightBorderRadius,
-    animateSpotlight,
-  ]);
-
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
   const fill = overlayColor ?? "rgba(15,15,25,0.72)";
   const portal = getOrCreatePortal();
@@ -153,26 +172,25 @@ export const WebOverlay = ({
         position: "fixed",
         inset: 0,
         zIndex: 999990,
-        animation: "uc-overlay-in 0.25s ease-out both",
+        animation: "runilib-tooltip-overlay-in 0.25s ease-out both",
         pointerEvents: "none",
       }}
     >
-      {/* SVG spotlight overlay */}
       <svg
         style={{
           position: "absolute",
           inset: 0,
-          pointerEvents: maskClickable ? "none" : "all",
+          pointerEvents: stopOnOutsideClick ? "auto" : "auto",
         }}
-        width={dims.w}
-        height={dims.h}
-        viewBox={`0 0 ${dims.w} ${dims.h}`}
-        role={maskClickable ? "button" : undefined}
-        tabIndex={maskClickable ? 0 : undefined}
-        aria-label={maskClickable ? "Close tour overlay" : undefined}
-        onClick={maskClickable ? onStop : undefined}
+        width={dimensions.w}
+        height={dimensions.h}
+        viewBox={`0 0 ${dimensions.w} ${dimensions.h}`}
+        role={stopOnOutsideClick ? "button" : undefined}
+        tabIndex={stopOnOutsideClick ? 0 : undefined}
+        aria-label={stopOnOutsideClick ? "Close tour overlay" : undefined}
+        onClick={stopOnOutsideClick ? onStop : undefined}
         onKeyDown={
-          maskClickable
+          stopOnOutsideClick
             ? (event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
@@ -184,7 +202,7 @@ export const WebOverlay = ({
       >
         <defs>
           <mask id="uc-mask">
-            <rect x={0} y={0} width={dims.w} height={dims.h} fill="white" />
+            <rect x={0} y={0} width={dimensions.w} height={dimensions.h} fill="white" />
             {spot && (
               <rect
                 x={spot.x}
@@ -198,7 +216,14 @@ export const WebOverlay = ({
           </mask>
         </defs>
 
-        <rect x={0} y={0} width={dims.w} height={dims.h} fill={fill} mask="url(#uc-mask)" />
+        <rect
+          x={0}
+          y={0}
+          width={dimensions.w}
+          height={dimensions.h}
+          fill={fill}
+          mask="url(#uc-mask)"
+        />
 
         {spot && (
           <rect
@@ -214,7 +239,6 @@ export const WebOverlay = ({
         )}
       </svg>
 
-      {/* Tooltip */}
       {tooltipPos && currentStep && (
         <div style={{ pointerEvents: "all" }}>
           <Tooltip
@@ -230,6 +254,18 @@ export const WebOverlay = ({
             onNext={onNext}
             onPrev={onPrev}
             onStop={onStop}
+            onMeasure={(nextSize) => {
+              setTooltipSize((previousSize) => {
+                if (
+                  previousSize.width === nextSize.width &&
+                  previousSize.height === nextSize.height
+                ) {
+                  return previousSize;
+                }
+
+                return nextSize;
+              });
+            }}
           />
         </div>
       )}

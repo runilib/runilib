@@ -23,7 +23,7 @@ const PRIORITY_RANK: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
 
 const ALL_TASKS = [
   { id: 1,  title: 'Integrate @runilib/tooltip in mobile',  priority: 'High',   due: 'Today',    project: 'Mobile App',    done: false },
-  { id: 2,  title: 'Write formbridge docs',          priority: 'Medium', due: 'Tomorrow', project: 'formbridge',    done: false },
+  { id: 2,  title: 'Write formura docs',          priority: 'Medium', due: 'Tomorrow', project: 'formura',    done: false },
   { id: 3,  title: 'Design token audit',             priority: 'Medium', due: 'Mar 22',   project: 'Design System', done: false },
   { id: 4,  title: 'Deploy @runilib/tooltip v1.0',           priority: 'High',   due: 'Done',     project: 'Mobile App',    done: true  },
   { id: 5,  title: 'Setup CI/CD pipeline',           priority: 'High',   due: 'Mar 24',   project: 'Infrastructure',done: false },

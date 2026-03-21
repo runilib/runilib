@@ -9,13 +9,13 @@
 
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { CopilotProvider, CopilotStep, useCopilot } from 'universal-copilot';
-import type { RenderTooltipProps, AnimationType } from 'universal-copilot';
+import { TooltipProvider, TooltipStep, useTooltip } from '@runilib/tooltip';
+import type { RenderTooltipProps, AnimationType } from '@runilib/tooltip';
 
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
-    <CopilotProvider
+    <TooltipProvider
       animationType="bounce"
       overlayColor="rgba(10,10,20,0.78)"
       spotlightPadding={10}
@@ -33,19 +33,19 @@ export default function App() {
       onStepChange={(step, index) => console.log(`Step ${index + 1}: ${step.name}`)}
     >
       <Dashboard />
-    </CopilotProvider>
+    </TooltipProvider>
   );
 }
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function Dashboard() {
-  const { start } = useCopilot();
+  const { start } = useTooltip();
 
   return (
     <div style={styles.page}>
       {/* Header */}
-      <CopilotStep
+      <TooltipStep
         name="header"
         order={1}
         title="Welcome to your Dashboard 👋"
@@ -63,11 +63,11 @@ function Dashboard() {
             </a>
           </nav>
         </header>
-      </CopilotStep>
+      </TooltipStep>
 
       <main style={styles.main}>
         {/* Search */}
-        <CopilotStep
+        <TooltipStep
           name="search"
           order={2}
           title="🔍 Search"
@@ -75,10 +75,10 @@ function Dashboard() {
           placement="bottom"
         >
           <input style={styles.search} placeholder="Search anything…" />
-        </CopilotStep>
+        </TooltipStep>
 
         {/* Stats */}
-        <CopilotStep
+        <TooltipStep
           name="stats"
           order={3}
           title="📊 Your Stats"
@@ -90,11 +90,11 @@ function Dashboard() {
             <StatCard label="Revenue" value="$41,200" trend="+12%" />
             <StatCard label="Tasks" value="94" trend="-3%" negative />
           </div>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* Actions */}
         <div style={styles.actions}>
-          <CopilotStep
+          <TooltipStep
             name="export"
             order={4}
             title="📥 Export"
@@ -102,9 +102,9 @@ function Dashboard() {
             placement="top"
           >
             <button style={styles.btnSecondary}>Export</button>
-          </CopilotStep>
+          </TooltipStep>
 
-          <CopilotStep
+          <TooltipStep
             name="new-report"
             order={5}
             title="✨ New Report"
@@ -112,7 +112,7 @@ function Dashboard() {
             placement="top"
           >
             <button style={styles.btnPrimary}>+ New Report</button>
-          </CopilotStep>
+          </TooltipStep>
         </div>
 
         {/* Start tour */}
@@ -243,9 +243,9 @@ export function AppWithCustomTooltip() {
   );
 
   return (
-    <CopilotProvider renderTooltip={renderTooltip}>
+    <TooltipProvider renderTooltip={renderTooltip}>
       <Dashboard />
-    </CopilotProvider>
+    </TooltipProvider>
   );
 }
 

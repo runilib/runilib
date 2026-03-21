@@ -1,6 +1,6 @@
-import type { CopilotTheme, CopilotLabels } from 'stepwise';
+import type { TooltipTheme, TooltipLabels } from '@runilib/tooltip';
 
-export const TOUR_THEME: CopilotTheme = {
+export const TOUR_THEME: TooltipTheme = {
   primary:      '#e8a020',
   primaryText:  '#1a1108',
   background:   '#ffffff',
@@ -11,7 +11,7 @@ export const TOUR_THEME: CopilotTheme = {
   borderRadius: '16px',
 };
 
-export const TOUR_LABELS: CopilotLabels = {
+export const TOUR_LABELS: TooltipLabels = {
   next:   'Next →',
   prev:   '← Back',
   finish: 'Let\'s go! 🚀',

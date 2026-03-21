@@ -102,11 +102,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/universal-copilot.git"
+    "url": "https://github.com/runilib/tooltip.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/universal-copilot/issues"
+    "url": "https://github.com/runilib/tooltip/issues"
   },
-  "homepage": "https://github.com/your-org/universal-copilot#readme",
+  "homepage": "https://github.com/runilib/tooltip#readme",
   "sideEffects": false
 }

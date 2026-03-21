@@ -108,7 +108,7 @@ export default function ProfileScreen() {
             <View style={s.libsList}>
               {[
                 { name: '@runilib/tooltip', desc: 'Onboarding tours', status: 'active' },
-                { name: 'formbridge', desc: 'Form state', status: 'soon' },
+                { name: 'formura', desc: 'Form state', status: 'soon' },
                 { name: 'toastly', desc: 'Notifications', status: 'soon' },
               ].map(lib => (
                 <View key={lib.name} style={s.libRow}>

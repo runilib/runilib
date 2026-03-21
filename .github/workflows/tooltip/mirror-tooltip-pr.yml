@@ -1,0 +1,102 @@
+name: Mirror tooltip PR
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - "packages/tooltip/**"
+      - ".github/workflows/tooltip/mirror-tooltip-pr.yml"
+  workflow_dispatch:
+
+jobs:
+  mirror-pr:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    env:
+      TARGET_REPO: runilib/tooltip
+      PACKAGE_PATH: packages/tooltip
+      TARGET_BRANCH: main
+
+    steps:
+      - name: Checkout monorepo PR head
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.pull_request.head.sha }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "runilib-bot"
+          git config user.email "bot@runilib.dev"
+
+      - name: Compute sync branch name
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "sync_branch=sync/manual-tooltip" >> "$GITHUB_OUTPUT"
+            echo "source_pr_number=manual" >> "$GITHUB_OUTPUT"
+            echo "source_pr_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+            echo "source_title=Manual mirror refresh for tooltip" >> "$GITHUB_OUTPUT"
+          else
+            echo "sync_branch=sync/pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "source_pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "source_pr_url=${{ github.event.pull_request.html_url }}" >> "$GITHUB_OUTPUT"
+            echo "source_title=${{ github.event.pull_request.title }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create subtree branch
+        run: |
+          git subtree split --prefix="${PACKAGE_PATH}" -b mirror-tooltip-pr-branch
+
+      - name: Push subtree to mirror repo branch
+        env:
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: |
+          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git push mirror mirror-tooltip-pr-branch:${{ steps.vars.outputs.sync_branch }} --force
+
+      - name: Create or update mirror PR
+        env:
+          GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: |
+          EXISTING_PR_NUMBER="$(gh pr list \
+            --repo "${TARGET_REPO}" \
+            --base "${TARGET_BRANCH}" \
+            --head "${{ steps.vars.outputs.sync_branch }}" \
+            --json number \
+            --jq '.[0].number')"
+
+          PR_TITLE="[mirror] ${{ steps.vars.outputs.source_title }}"
+          PR_BODY=$(cat <<EOF
+          This pull request is an automated mirror preview for \`@runilib/tooltip\`.
+
+          - Source package path: \`${PACKAGE_PATH}\`
+          - Source monorepo: \`${{ github.repository }}\`
+          - Source PR / run: ${{ steps.vars.outputs.source_pr_url }}
+
+          > Do not edit this PR manually. The source of truth is the main Runilib monorepo.
+          EOF
+          )
+
+          if [ -z "${EXISTING_PR_NUMBER}" ] || [ "${EXISTING_PR_NUMBER}" = "null" ]; then
+            gh pr create \
+              --repo "${TARGET_REPO}" \
+              --base "${TARGET_BRANCH}" \
+              --head "${{ steps.vars.outputs.sync_branch }}" \
+              --title "${PR_TITLE}" \
+              --body "${PR_BODY}"
+          else
+            gh pr edit "${EXISTING_PR_NUMBER}" \
+              --repo "${TARGET_REPO}" \
+              --title "${PR_TITLE}" \
+              --body "${PR_BODY}"
+          fi
+
+      - name: Cleanup local branch
+        if: always()
+        run: |
+          git branch -D mirror-tooltip-pr-branch || true

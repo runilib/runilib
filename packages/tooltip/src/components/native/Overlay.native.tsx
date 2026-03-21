@@ -38,7 +38,7 @@ export const NativeOverlay = ({
   theme,
   tooltipStyle,
   renderTooltip,
-  maskClickable,
+  stopOnOutsideClick,
   labels,
   onNext,
   onPrev,
@@ -130,7 +130,7 @@ export const NativeOverlay = ({
       <StatusBar translucent backgroundColor="transparent" />
 
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: overlayOpacity }]}>
-        <TouchableWithoutFeedback onPress={maskClickable ? onStop : undefined}>
+        <TouchableWithoutFeedback onPress={stopOnOutsideClick ? onStop : undefined}>
           <Svg width={SW} height={SH} style={StyleSheet.absoluteFill}>
             <Defs>
               <Mask id="uc-native-mask">

@@ -20,7 +20,7 @@ import {
   StatusBar,
   ScrollView,
 } from 'react-native';
-import { CopilotProvider, CopilotStep, useCopilot } from '@runilib/tooltip';
+import { TooltipProvider, TooltipStep, useTooltip } from '@runilib/tooltip';
 import type { AnimationType, RenderTooltipProps } from '@runilib/tooltip';
 
 // ─── App ─────────────────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ export default function App() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <CopilotProvider
+      <TooltipProvider
         animationType="bounce"
         spotlightPadding={10}
         spotlightBorderRadius={14}
@@ -45,7 +45,7 @@ export default function App() {
         onStepChange={(step, i) => console.log(`Step ${i + 1}: ${step.name}`)}
       >
         <Dashboard />
-      </CopilotProvider>
+      </TooltipProvider>
     </SafeAreaView>
   );
 }
@@ -53,13 +53,13 @@ export default function App() {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function Dashboard() {
-  const { start } = useCopilot();
+  const { start } = useTooltip();
   const [selectedAnim, setSelectedAnim] = useState<AnimationType>('bounce');
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header */}
-      <CopilotStep
+      <TooltipStep
         name="header"
         order={1}
         title="Welcome to MyApp 👋"
@@ -72,10 +72,10 @@ function Dashboard() {
             <Text style={styles.headerBadgeText}>Pro</Text>
           </View>
         </View>
-      </CopilotStep>
+      </TooltipStep>
 
       {/* Search */}
-      <CopilotStep
+      <TooltipStep
         name="search"
         order={2}
         title="🔍 Search"
@@ -87,10 +87,10 @@ function Dashboard() {
           placeholder="Search anything…"
           placeholderTextColor="#9ca3af"
         />
-      </CopilotStep>
+      </TooltipStep>
 
       {/* Stats */}
-      <CopilotStep
+      <TooltipStep
         name="stats"
         order={3}
         title="📊 Your Stats"
@@ -102,11 +102,11 @@ function Dashboard() {
           <StatCard label="Revenue" value="$41.2K" trend="+12%" />
           <StatCard label="Tasks" value="94" trend="-3%" negative />
         </View>
-      </CopilotStep>
+      </TooltipStep>
 
       {/* Actions row */}
       <View style={styles.actionsRow}>
-        <CopilotStep
+        <TooltipStep
           name="export"
           order={4}
           title="📥 Export"
@@ -116,9 +116,9 @@ function Dashboard() {
           <TouchableOpacity style={styles.btnSecondary}>
             <Text style={styles.btnSecondaryText}>Export</Text>
           </TouchableOpacity>
-        </CopilotStep>
+        </TooltipStep>
 
-        <CopilotStep
+        <TooltipStep
           name="new-report"
           order={5}
           title="✨ New Report"
@@ -128,7 +128,7 @@ function Dashboard() {
           <TouchableOpacity style={styles.btnPrimary}>
             <Text style={styles.btnPrimaryText}>+ New Report</Text>
           </TouchableOpacity>
-        </CopilotStep>
+        </TooltipStep>
       </View>
 
       {/* Animation picker */}
@@ -238,9 +238,9 @@ export function AppWithCustomTooltip() {
   );
 
   return (
-    <CopilotProvider renderTooltip={renderTooltip}>
+    <TooltipProvider renderTooltip={renderTooltip}>
       <Dashboard />
-    </CopilotProvider>
+    </TooltipProvider>
   );
 }
 

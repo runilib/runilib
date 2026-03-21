@@ -1,7 +1,7 @@
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 
 import { getWebAnimation } from "../../animations";
-import type { TooltipProps, TooltipTheme } from "../../types";
+import type { TooltipPlacement, TooltipProps, TooltipTheme } from "../../types";
 
 // ─── Default theme ────────────────────────────────────────────────────────────
 
@@ -24,49 +24,78 @@ export const Tooltip = ({
   totalSteps,
   tooltipPos,
   animationType = "slide",
-  theme,
+  theme: themeProp,
   tooltipStyle,
   renderTooltip,
   labels = {},
   onNext,
   onPrev,
   onStop,
-}: TooltipProps) => {
-  const t = { ...DEFAULT_THEME, ...theme };
+  onMeasure,
+}: TooltipProps & {
+  onMeasure?: (size: { width: number; height: number }) => void;
+}) => {
+  const theme = { ...DEFAULT_THEME, ...themeProp };
   const [ready, setReady] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Re-trigger animation on step change
   useEffect(() => {
     setReady(false);
     const raf = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [stepIndex, step.name, animationType]);
+
+  // Measure real tooltip size
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element || !onMeasure) {
+      return;
+    }
+
+    const reportSize = () => {
+      const rect = element.getBoundingClientRect();
+      onMeasure({
+        width: Math.ceil(rect.width),
+        height: Math.ceil(rect.height),
+      });
+    };
+
+    reportSize();
+
+    const resizeObserver = new ResizeObserver(reportSize);
+    resizeObserver.observe(element);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [onMeasure, stepIndex, step.name, renderTooltip, step.text, step.title]);
 
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === totalSteps - 1;
   const { placement, arrowOffset = 0 } = tooltipPos;
   const animation = ready ? getWebAnimation(animationType, placement) : "none";
-  const arrowStyle = buildArrowStyle(placement, arrowOffset);
+  const arrowStyle = buildArrowStyle(placement, arrowOffset, theme.background);
 
   const containerStyle: CSSProperties = {
     position: "fixed",
     top: tooltipPos.top,
     left: tooltipPos.left,
     width: 300,
-    background: t.background,
-    borderRadius: t.borderRadius,
-    boxShadow: t.shadow,
+    background: theme.background,
+    borderRadius: theme.borderRadius,
+    boxShadow: theme.shadow,
     padding: "20px",
     zIndex: 999999,
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     animation,
-    border: `1px solid ${t.border}`,
+    border: `1px solid ${theme.border}`,
     ...(tooltipStyle as CSSProperties),
   };
 
   if (renderTooltip) {
     return (
-      <div style={containerStyle}>
+      <div ref={containerRef} style={containerStyle}>
         {renderTooltip({ step, stepIndex, totalSteps, onNext, onPrev, onStop })}
         <div style={arrowStyle} />
       </div>
@@ -74,7 +103,7 @@ export const Tooltip = ({
   }
 
   return (
-    <div style={containerStyle}>
+    <div ref={containerRef} style={containerStyle}>
       {/* Header */}
       <div
         style={{
@@ -90,17 +119,18 @@ export const Tooltip = ({
               margin: 0,
               fontWeight: 700,
               fontSize: 15,
-              color: t.text,
+              color: theme.text,
               lineHeight: 1.3,
             }}
           >
             {step.title}
           </p>
         )}
+
         <button
           type="button"
           onClick={onStop}
-          style={closeButtonStyle(t)}
+          style={closeButtonStyle(theme)}
           aria-label={labels.close ?? "Close"}
           title={labels.close ?? "Close"}
         >
@@ -114,7 +144,7 @@ export const Tooltip = ({
           style={{
             margin: "0 0 16px",
             fontSize: 13.5,
-            color: t.subtext,
+            color: theme.subtext,
             lineHeight: 1.6,
           }}
         >
@@ -130,7 +160,6 @@ export const Tooltip = ({
           justifyContent: "space-between",
         }}
       >
-        {/* Step dots */}
         <div style={{ display: "flex", gap: 5 }}>
           {Array.from({ length: totalSteps }).map((item, i) => (
             <div
@@ -139,34 +168,32 @@ export const Tooltip = ({
                 width: i === stepIndex ? 18 : 6,
                 height: 6,
                 borderRadius: 3,
-                background: i === stepIndex ? t.primary : t.border,
+                background: i === stepIndex ? theme.primary : theme.border,
                 transition: "all 0.25s ease",
               }}
             />
           ))}
         </div>
 
-        {/* Buttons */}
         <div style={{ display: "flex", gap: 8 }}>
           {!isFirst && (
-            <button type="button" onClick={onPrev} style={secondaryButtonStyle(t)}>
+            <button type="button" onClick={onPrev} style={secondaryButtonStyle(theme)}>
               {labels.prev ?? "← Back"}
             </button>
           )}
-          <button type="button" onClick={onNext} style={primaryButtonStyle(t)}>
+
+          <button type="button" onClick={onNext} style={primaryButtonStyle(theme)}>
             {isLast ? (labels.finish ?? "Finish 🎉") : (labels.next ?? "Next →")}
           </button>
         </div>
       </div>
 
-      {/* Arrow */}
       <div style={arrowStyle} />
     </div>
   );
 };
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
-
 function closeButtonStyle(t: Required<TooltipTheme>): CSSProperties {
   return {
     background: "none",
@@ -211,8 +238,13 @@ function secondaryButtonStyle(t: Required<TooltipTheme>): CSSProperties {
   };
 }
 
-function buildArrowStyle(placement: string, offset: number): CSSProperties {
+function buildArrowStyle(
+  placement: TooltipPlacement,
+  offset: number,
+  color: string
+): CSSProperties {
   const size = 10;
+
   const base: CSSProperties = {
     position: "absolute",
     width: 0,
@@ -225,42 +257,46 @@ function buildArrowStyle(placement: string, offset: number): CSSProperties {
       return {
         ...base,
         top: -size,
-        left: `calc(50% + ${offset}px)`,
+        left: offset,
         transform: "translateX(-50%)",
         borderLeft: `${size}px solid transparent`,
         borderRight: `${size}px solid transparent`,
-        borderBottom: `${size}px solid white`,
+        borderBottom: `${size}px solid ${color}`,
       };
+
     case "top":
       return {
         ...base,
         bottom: -size,
-        left: `calc(50% + ${offset}px)`,
+        left: offset,
         transform: "translateX(-50%)",
         borderLeft: `${size}px solid transparent`,
         borderRight: `${size}px solid transparent`,
-        borderTop: `${size}px solid white`,
+        borderTop: `${size}px solid ${color}`,
       };
+
     case "right":
       return {
         ...base,
-        top: "50%",
+        top: offset,
         left: -size,
         transform: "translateY(-50%)",
         borderTop: `${size}px solid transparent`,
         borderBottom: `${size}px solid transparent`,
-        borderRight: `${size}px solid white`,
+        borderRight: `${size}px solid ${color}`,
       };
+
     case "left":
       return {
         ...base,
-        top: "50%",
+        top: offset,
         right: -size,
         transform: "translateY(-50%)",
         borderTop: `${size}px solid transparent`,
         borderBottom: `${size}px solid transparent`,
-        borderLeft: `${size}px solid white`,
+        borderLeft: `${size}px solid ${color}`,
       };
+
     default:
       return base;
   }

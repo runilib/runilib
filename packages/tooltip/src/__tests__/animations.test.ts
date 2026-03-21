@@ -3,18 +3,18 @@ import type { AnimationType } from "../types";
 
 describe("getWebAnimation", () => {
   it("returns a CSS animation string containing the keyframe name", () => {
-    expect(getWebAnimation("fade", "bottom")).toContain("uc-fade");
-    expect(getWebAnimation("zoom", "bottom")).toContain("uc-zoom");
-    expect(getWebAnimation("bounce", "bottom")).toContain("uc-bounce");
-    expect(getWebAnimation("flip", "bottom")).toContain("uc-flip");
-    expect(getWebAnimation("glow", "bottom")).toContain("uc-glow");
+    expect(getWebAnimation("fade", "bottom")).toContain("runilib-tooltip-fade");
+    expect(getWebAnimation("zoom", "bottom")).toContain("runilib-tooltip-zoom");
+    expect(getWebAnimation("bounce", "bottom")).toContain("runilib-tooltip-bounce");
+    expect(getWebAnimation("flip", "bottom")).toContain("runilib-tooltip-flip");
+    expect(getWebAnimation("glow", "bottom")).toContain("runilib-tooltip-glow");
   });
 
   it("adapts slide keyframe based on placement", () => {
-    expect(getWebAnimation("slide", "bottom")).toContain("uc-slide");
-    expect(getWebAnimation("slide", "top")).toContain("uc-slide-up");
-    expect(getWebAnimation("slide", "left")).toContain("uc-slide-right");
-    expect(getWebAnimation("slide", "right")).toContain("uc-slide-left");
+    expect(getWebAnimation("slide", "bottom")).toContain("runilib-tooltip-slide");
+    expect(getWebAnimation("slide", "top")).toContain("runilib-tooltip-slide-up");
+    expect(getWebAnimation("slide", "left")).toContain("runilib-tooltip-slide-right");
+    expect(getWebAnimation("slide", "right")).toContain("runilib-tooltip-slide-left");
   });
 
   it("bounce uses longer duration (0.5s)", () => {

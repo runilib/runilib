@@ -25,7 +25,7 @@ interface Task {
 
 const INITIAL_TASKS: Task[] = [
   { id: 1, title: 'Set up @runilib/tooltip in mobile app', priority: 'High',   due: 'Today',     status: 'active', project: 'Mobile App' },
-  { id: 2, title: 'Write unit tests for useForm',  priority: 'High',   due: 'Tomorrow',  status: 'active', project: 'formbridge' },
+  { id: 2, title: 'Write unit tests for useForm',  priority: 'High',   due: 'Tomorrow',  status: 'active', project: 'formura' },
   { id: 3, title: 'Design token audit',            priority: 'Medium', due: 'Mar 22',    status: 'active', project: 'Design System' },
   { id: 4, title: 'Deploy v1.0 of @runilib/tooltip',       priority: 'High',   due: 'Done',      status: 'done',   project: 'Mobile App' },
   { id: 5, title: 'Add dark mode support',         priority: 'Low',    due: 'Mar 28',    status: 'active', project: 'Design System' },

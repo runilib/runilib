@@ -21,7 +21,7 @@ export const TooltipProvider = ({
   overlayColor,
   spotlightPadding = 8,
   spotlightBorderRadius = 8,
-  maskClickable = false,
+  stopOnOutsideClick = false,
   labels = {},
   renderTooltip,
   onStart,
@@ -36,7 +36,7 @@ export const TooltipProvider = ({
       overlayColor={overlayColor}
       spotlightPadding={spotlightPadding}
       spotlightBorderRadius={spotlightBorderRadius}
-      maskClickable={maskClickable}
+      stopOnOutsideClick={stopOnOutsideClick}
       labels={labels}
       renderTooltip={renderTooltip}
     />

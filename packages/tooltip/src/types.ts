@@ -24,11 +24,10 @@ export interface TooltipLabels {
   next?: string;
   prev?: string;
   finish?: string;
-  close?: string;
+  close?: string; // TODO make it to accept string or ReactNode
 }
 
 // ─── Step ─────────────────────────────────────────────────────────────────────
-
 export interface TooltipStepData {
   name: string;
   order: number;
@@ -90,7 +89,7 @@ export interface TooltipProviderProps {
   overlayColor?: string;
   spotlightPadding?: number;
   spotlightBorderRadius?: number;
-  maskClickable?: boolean;
+  stopOnOutsideClick?: boolean;
   labels?: TooltipLabels;
   renderTooltip?: (props: RenderTooltipProps) => ReactNode;
   onStart?: () => void;
@@ -174,7 +173,7 @@ export interface OverlayProps {
   theme?: TooltipTheme;
   tooltipStyle?: object;
   renderTooltip?: (props: RenderTooltipProps) => ReactNode;
-  maskClickable: boolean;
+  stopOnOutsideClick: boolean;
   labels: TooltipLabels;
   onNext: () => void;
   onPrev: () => void;

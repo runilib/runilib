@@ -4,7 +4,7 @@ import type { UseTooltipReturn } from "../types";
 /**
  * `useTooltip` — main hook to control the onboarding tour.
  *
- * Must be used inside a `<CopilotProvider>`.
+ * Must be used inside a `<TooltipProvider>`.
  *
  * @example
  * const { start, stop, isRunning, currentStep, totalSteps } = useTooltip();

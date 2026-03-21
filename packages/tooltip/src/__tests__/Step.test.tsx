@@ -32,7 +32,7 @@ function Wrapper({
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe("CopilotStep (web)", () => {
+describe("TooltipStep (web)", () => {
   it("registers itself on mount", async () => {
     let ctx!: StepwiseContextValue;
 
