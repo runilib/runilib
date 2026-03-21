@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 // ─── Enums / Unions ───────────────────────────────────────────────────────────
 
@@ -37,6 +37,8 @@ export interface TooltipStepData {
   placement?: TooltipPlacement;
   /** Internal: measure function injected by <TooltipStep> */
   measure: () => Promise<TooltipRect>;
+
+  ensureVisible?: () => void | Promise<void>;
 }
 
 export interface TooltipRect {
@@ -97,7 +99,6 @@ export interface TooltipProviderProps {
 }
 
 // ─── Step props ───────────────────────────────────────────────────────────────
-
 export interface TooltipStepProps {
   children: ReactNode;
   name: string;
@@ -106,6 +107,20 @@ export interface TooltipStepProps {
   text?: string;
   placement?: TooltipPlacement;
   active?: boolean;
+
+  /**
+   * Web only
+   */
+  asChild?: boolean;
+  wrapperElement?: "div" | "span";
+  wrapperClassName?: string;
+  wrapperStyle?: CSSProperties;
+
+  /**
+   * Optional cross-platform hook.
+   * Useful on React Native if the user wants to scroll a ScrollView manually.
+   */
+  onBeforeShow?: () => void | Promise<void>;
 }
 
 // ─── useTooltip return ────────────────────────────────────────────────────────

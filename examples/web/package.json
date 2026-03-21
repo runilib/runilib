@@ -13,6 +13,7 @@
     "@runilib/tooltip": "workspace:*",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-native-web": "^0.21.0",
     "react-router-dom": "^6.22.0"
   },
   "devDependencies": {

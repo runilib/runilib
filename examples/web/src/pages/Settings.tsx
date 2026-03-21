@@ -6,11 +6,11 @@ import styles from './Settings.module.css';
 // const ANIMATION: AnimationType = 'flip';
 
 const SETTINGS_STEPS = {
-  PROFILE: { name: 'settings-profile', order: 1, title: '👤 Your profile',   text: 'Update your name, email, avatar and timezone here.',           placement: 'bottom' as const },
-  NOTIFS:  { name: 'settings-notifs',  order: 2, title: '🔔 Notifications', text: 'Choose exactly which events send you an email or push alert.',  placement: 'right'  as const },
-  THEME:   { name: 'settings-theme',   order: 3, title: '🎨 Appearance',     text: 'Switch between light and dark, or let the system decide.',      placement: 'right'  as const },
-  BILLING: { name: 'settings-billing', order: 4, title: '💳 Plan & billing', text: 'Manage your subscription, invoices and payment method.',        placement: 'top'    as const },
-  LIBS:    { name: 'settings-libs',    order: 5, title: '⚡ runilib',   text: 'This app is powered by runilib — same code, every platform.', placement: 'top' as const },
+  PROFILE: { name: 'settings-profile', order: 1, title: '👤 Your profile',   text: 'Update your name, email, avatar and timezone here.',            },
+  NOTIFS:  { name: 'settings-notifs',  order: 2, title: '🔔 Notifications', text: 'Choose exactly which events send you an email or push alert.',  },
+  THEME:   { name: 'settings-theme',   order: 3, title: '🎨 Appearance',     text: 'Switch between light and dark, or let the system decide.',      },
+  BILLING: { name: 'settings-billing', order: 4, title: '💳 Plan & billing', text: 'Manage your subscription, invoices and payment method.',        },
+  LIBS:    { name: 'settings-libs',    order: 5, title: '⚡ runilib',   text: 'This app is powered by runilib — same code, every platform.',  },
 };
 
 export function Settings({ onBack }: { onBack: () => void }) {
@@ -53,8 +53,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
           <div className={styles.topBarRight}>
             <span className={styles.animBadge}>✦ flip animation</span>
             <button
-                          type='button'
-
+              type='button'
               className="btn btn-ghost"
               style={{ fontSize: 12 }}
               onClick={() => start('settings-profile')}

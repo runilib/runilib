@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import { WEB_KEYFRAMES } from "../../animations";
 import type { OverlayProps, SpotlightRect } from "../../types";
 import { computeTooltipPosition, getSpotlightRect } from "../../utils/positioning";
-import { WebTooltip } from "./Tooltip";
+import { Tooltip } from "./Tooltip.web";
 
 const TOOLTIP_WIDTH = 300;
 const TOOLTIP_HEIGHT = 180;
@@ -54,7 +54,7 @@ function easeOut(t: number): number {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export const WebOverlay= ({
+export const WebOverlay = ({
   visible,
   currentRect,
   currentStep,
@@ -72,7 +72,7 @@ export const WebOverlay= ({
   onNext,
   onPrev,
   onStop,
-}:OverlayProps) => {
+}: OverlayProps) => {
   const [spot, setSpot] = useState<SpotlightRect | null>(null);
   const [tooltipPos, setTooltipPos] = useState<ReturnType<typeof computeTooltipPosition> | null>(
     null
@@ -217,7 +217,7 @@ export const WebOverlay= ({
       {/* Tooltip */}
       {tooltipPos && currentStep && (
         <div style={{ pointerEvents: "all" }}>
-          <WebTooltip
+          <Tooltip
             step={currentStep}
             stepIndex={stepIndex}
             totalSteps={totalSteps}

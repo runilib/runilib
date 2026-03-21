@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef} from 'react';
 import { TooltipStep, useTooltip,  } from '@runilib/tooltip';
 import { STEPS } from '../tourConfig';
 import styles from './Dashboard.module.css';
@@ -48,18 +48,23 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
   const { start, isRunning } = useTooltip();
   const started = useRef(false);
 
+
   useEffect(() => {
     if (!started.current) {
       started.current = true;
       const timer = setTimeout(() => start(), 800);
+        console.log("FDSFDSFDSFDFS", { isRunning})
+
       return () => clearTimeout(timer);
     }
-  }, [start]);
+  }, [start, isRunning]);
+
+
 
   return (
     <div className={styles.layout}>
       {/* Sidebar */}
-      <TooltipStep {...STEPS.SIDEBAR} placement="right">
+      <TooltipStep {...STEPS.SIDEBAR}>
         <aside className={styles.sidebar}>
           <div className={styles.logo}>
             <span className={styles.logoIcon}>⚡</span>
@@ -104,14 +109,14 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
 
       {/* Main */}
       <main className={styles.main}>
-        <TooltipStep {...STEPS.HEADER} placement="bottom">
+        <TooltipStep {...STEPS.HEADER}>
           <header className={styles.header}>
             <div>
               <h1 className={styles.pageTitle}>Dashboard</h1>
               <p className={styles.pageSubtitle}>Monday, March 17 · 3 tasks due today</p>
             </div>
             <div className={styles.headerRight}>
-              <TooltipStep {...STEPS.NOTIFICATIONS} placement="bottom">
+              <TooltipStep {...STEPS.NOTIFICATIONS} placement="auto">
                 <button               type='button'
  className={`btn btn-ghost ${styles.notifBtn}`}>
                   🔔
@@ -123,7 +128,7 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
                 ⚙ Settings
               </button>
               <button                type='button'
- className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => { onRestartTour(); }} disabled={isRunning}>
+ className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => { start(); }} disabled={isRunning}>
                 {isRunning ? '▶ Tour running…' : '▶ Restart Tour'}
               </button>
             </div>
@@ -131,7 +136,7 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
         </TooltipStep>
 
         <div className={styles.content}>
-          <TooltipStep {...STEPS.STATS} placement="bottom">
+          <TooltipStep {...STEPS.STATS} placement="auto">
             <div className={styles.statsRow}>
               {STATS.map(s => (
                 <div key={s.label} className={`card ${styles.statCard}`}>
@@ -147,7 +152,7 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
             <div className={styles.tasksSectionHeader}>
               <h2 className={styles.sectionTitle}>Active Tasks</h2>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <TooltipStep {...STEPS.FILTERS} placement="bottom">
+                <TooltipStep {...STEPS.FILTERS} placement="auto">
                   <div className={styles.filters}>
                     {['All', 'In Progress', 'Review', 'Backlog'].map(f => (
                       <button               type='button'
@@ -155,7 +160,7 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
                     ))}
                   </div>
                 </TooltipStep>
-                <TooltipStep {...STEPS.NEW_TASK} placement="bottom">
+                <TooltipStep {...STEPS.NEW_TASK} placement="auto">
                   <button               type='button'
  className="btn btn-primary">+ New Task</button>
                 </TooltipStep>
@@ -164,7 +169,7 @@ export function Dashboard({ onGoToSettings, onRestartTour }: Props) {
 
             <div className={styles.taskList}>
               {TASKS.map((task, i) => (
-                <TooltipStep key={task.id} {...STEPS.TASK_CARD} active={i === 0} placement="right">
+                <TooltipStep key={task.id} {...STEPS.TASK_CARD} active={i === 0} placement="auto">
                   <div className={`card ${styles.taskCard}`}>
                     <div className={styles.taskTop}>
                       <div className={styles.taskCheck}>

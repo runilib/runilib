@@ -1,10 +1,208 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { View } from "react-native";
+// // import { useCallback, useEffect, useRef } from 'react';
+// // import { View } from "react-native";
+
+// // import { useTooltipContext } from "../../context/TooltipContext";
+// // import type { TooltipRect, TooltipStepProps } from "../../types";
+
+// // export const NativeTooltipStep= ({
+// //   children,
+// //   name,
+// //   order,
+// //   title,
+// //   text,
+// //   placement = "auto",
+// //   active = true,
+// // }:TooltipStepProps) => {
+// //   const containerRef = useRef<View | null>(null);
+// //   const { registerStep, unregisterStep } = useTooltipContext();
+
+// //   const measure = useCallback((): Promise<TooltipRect> => {
+// //     const container = containerRef.current;
+
+// //     if (!container) {
+// //       return Promise.reject(
+// //         new Error(`[runilib/tooltip] ref not attached for step "${name}"`)
+// //       );
+// //     }
+
+// //     return new Promise<TooltipRect>((resolve, reject) => {
+// //       if (typeof container.measureInWindow === "function") {
+// //         container.measureInWindow(
+// //           (measuredX: number, measuredY: number, measuredWidth: number, measuredHeight: number) => {
+// //             resolve({
+// //               x: measuredX,
+// //               y: measuredY,
+// //               width: measuredWidth,
+// //               height: measuredHeight,
+// //             });
+// //           }
+// //         );
+// //         return;
+// //       }
+
+// //       if (typeof container.measure === "function") {
+// //         container.measure(
+// //           (
+// //             _localX: number,
+// //             _localY: number,
+// //             measuredWidth: number,
+// //             measuredHeight: number,
+// //             pageX: number,
+// //             pageY: number
+// //           ) => {
+// //             resolve({
+// //               x: pageX,
+// //               y: pageY,
+// //               width: measuredWidth,
+// //               height: measuredHeight,
+// //             });
+// //           }
+// //         );
+// //         return;
+// //       }
+
+// //       reject(
+// //         new Error(
+// //           `[react-unikit/tooltip] Cannot measure step "${name}". Make sure the wrapper View has collapsable={false}.`
+// //         )
+// //       );
+// //     });
+// //   }, [name]);
+
+// //   useEffect(() => {
+// //     if (!active) {
+// //       return;
+// //     }
+
+// //     registerStep({
+// //       name,
+// //       order,
+// //       title,
+// //       text,
+// //       placement,
+// //       measure,
+// //     });
+
+// //     return () => {
+// //       unregisterStep(name);
+// //     };
+// //   }, [active, measure, name, order, placement, registerStep, text, title, unregisterStep]);
+
+// //   return (
+// //     <View ref={containerRef} collapsable={false} pointerEvents="box-none">
+// //       {children}
+// //     </View>
+// //   );
+// // };
+
+// import type React from "react";
+// import { useCallback, useEffect, useRef } from "react";
+// import { View } from "react-native";
+
+// import { useTooltipContext } from "../../context/TooltipContext";
+// import type { TooltipRect, TooltipStepProps } from "../../types";
+
+// export function TooltipStep({
+//   children,
+//   name,
+//   order,
+//   title,
+//   text,
+//   placement = "auto",
+//   active = true,
+// }: TooltipStepProps): React.ReactElement {
+//   const containerRef = useRef<View | null>(null);
+//   const { registerStep, unregisterStep } = useTooltipContext();
+
+//   const measure = useCallback((): Promise<TooltipRect> => {
+//     const container = containerRef.current;
+
+//     if (!container) {
+//       return Promise.reject(new Error(`[runilib/tooltip] ref not attached for step "${name}"`));
+//     }
+
+//     return new Promise<TooltipRect>((resolve, reject) => {
+//       if (typeof container.measureInWindow === "function") {
+//         container.measureInWindow(
+//           (measuredX: number, measuredY: number, measuredWidth: number, measuredHeight: number) => {
+//             resolve({
+//               x: measuredX,
+//               y: measuredY,
+//               width: measuredWidth,
+//               height: measuredHeight,
+//             });
+//           }
+//         );
+//         return;
+//       }
+
+//       if (typeof container.measure === "function") {
+//         container.measure(
+//           (
+//             _localX: number,
+//             _localY: number,
+//             measuredWidth: number,
+//             measuredHeight: number,
+//             pageX: number,
+//             pageY: number
+//           ) => {
+//             resolve({
+//               x: pageX,
+//               y: pageY,
+//               width: measuredWidth,
+//               height: measuredHeight,
+//             });
+//           }
+//         );
+//         return;
+//       }
+
+//       reject(
+//         new Error(
+//           `[runilib/tooltip] Cannot measure step "${name}". Make sure the wrapper View has collapsable={false}.`
+//         )
+//       );
+//     });
+//   }, [name]);
+
+//   useEffect(() => {
+//     if (!active) {
+//       return;
+//     }
+
+//     registerStep({
+//       name,
+//       order,
+//       title,
+//       text,
+//       placement,
+//       measure,
+//     });
+
+//     return () => {
+//       unregisterStep(name);
+//     };
+//   }, [active, measure, name, order, placement, registerStep, text, title, unregisterStep]);
+
+//   return (
+//     <View ref={containerRef} collapsable={false} pointerEvents="box-none">
+//       {children}
+//     </View>
+//   );
+// }
+
+import type React from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { type StyleProp, View, type ViewStyle } from "react-native";
 
 import { useTooltipContext } from "../../context/TooltipContext";
 import type { TooltipRect, TooltipStepProps } from "../../types";
 
-export const NativeTooltipStep= ({
+type NativeTooltipStepProps = TooltipStepProps & {
+  nativeWrapperStyle?: StyleProp<ViewStyle>;
+};
+
+export function TooltipStep({
   children,
   name,
   order,
@@ -12,7 +210,8 @@ export const NativeTooltipStep= ({
   text,
   placement = "auto",
   active = true,
-}:TooltipStepProps) => {
+  nativeWrapperStyle,
+}: NativeTooltipStepProps): React.ReactElement {
   const containerRef = useRef<View | null>(null);
   const { registerStep, unregisterStep } = useTooltipContext();
 
@@ -20,9 +219,7 @@ export const NativeTooltipStep= ({
     const container = containerRef.current;
 
     if (!container) {
-      return Promise.reject(
-        new Error(`[runilib/tooltip] ref not attached for step "${name}"`)
-      );
+      return Promise.reject(new Error(`[runilib/tooltip] ref not attached for step "${name}"`));
     }
 
     return new Promise<TooltipRect>((resolve, reject) => {
@@ -63,7 +260,7 @@ export const NativeTooltipStep= ({
 
       reject(
         new Error(
-          `[react-unikit/tooltip] Cannot measure step "${name}". Make sure the wrapper View has collapsable={false}.`
+          `[runilib/tooltip] Cannot measure step "${name}". Make sure the wrapper View has collapsable={false}.`
         )
       );
     });
@@ -89,8 +286,13 @@ export const NativeTooltipStep= ({
   }, [active, measure, name, order, placement, registerStep, text, title, unregisterStep]);
 
   return (
-    <View ref={containerRef} collapsable={false} pointerEvents="box-none">
+    <View
+      ref={containerRef}
+      collapsable={false}
+      pointerEvents="box-none"
+      style={nativeWrapperStyle}
+    >
       {children}
     </View>
   );
-};
+}

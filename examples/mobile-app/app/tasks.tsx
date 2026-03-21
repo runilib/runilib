@@ -4,8 +4,8 @@ import {
   TextInput, StyleSheet, SafeAreaView, Modal,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { CopilotStep, useCopilot } from 'stepwise';
-import type { AnimationType } from 'stepwise';
+import { TooltipStep, useTooltip } from '@runilib/tooltip';
+import type { AnimationType } from '@runilib/tooltip';
 
 // Showcase different animation types on this screen
 const ANIMATION: AnimationType = 'slide';
@@ -22,10 +22,10 @@ type SortKey = 'priority' | 'due' | 'project';
 const PRIORITY_RANK: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
 
 const ALL_TASKS = [
-  { id: 1,  title: 'Integrate stepwise in mobile',  priority: 'High',   due: 'Today',    project: 'Mobile App',    done: false },
+  { id: 1,  title: 'Integrate @runilib/tooltip in mobile',  priority: 'High',   due: 'Today',    project: 'Mobile App',    done: false },
   { id: 2,  title: 'Write formbridge docs',          priority: 'Medium', due: 'Tomorrow', project: 'formbridge',    done: false },
   { id: 3,  title: 'Design token audit',             priority: 'Medium', due: 'Mar 22',   project: 'Design System', done: false },
-  { id: 4,  title: 'Deploy stepwise v1.0',           priority: 'High',   due: 'Done',     project: 'Mobile App',    done: true  },
+  { id: 4,  title: 'Deploy @runilib/tooltip v1.0',           priority: 'High',   due: 'Done',     project: 'Mobile App',    done: true  },
   { id: 5,  title: 'Setup CI/CD pipeline',           priority: 'High',   due: 'Mar 24',   project: 'Infrastructure',done: false },
   { id: 6,  title: 'Migrate auth to JWT',            priority: 'High',   due: 'Mar 25',   project: 'API',           done: false },
   { id: 7,  title: 'Update color tokens',            priority: 'Low',    due: 'Mar 28',   project: 'Design System', done: false },
@@ -37,7 +37,7 @@ export default function TasksScreen() {
   const [sortBy,  setSortBy]  = useState<SortKey>('priority');
   const [newTask, setNewTask] = useState('');
   const [tasks,   setTasks]   = useState(ALL_TASKS);
-  const { start, isRunning }  = useCopilot();
+  const { start, isRunning }  = useTooltip();
   const tourStarted           = useRef(false);
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function TasksScreen() {
       </View>
 
       {/* Search */}
-      <CopilotStep {...TASK_STEPS.SEARCH} placement="bottom">
+      <TooltipStep {...TASK_STEPS.SEARCH}>
         <View style={s.searchWrap}>
           <Text style={s.searchIcon}>🔍</Text>
           <TextInput
@@ -103,21 +103,21 @@ export default function TasksScreen() {
             </TouchableOpacity>
           )}
         </View>
-      </CopilotStep>
+      </TooltipStep>
 
       {/* Sort + count */}
       <View style={s.toolbar}>
         <Text style={s.taskCount}>{filteredAndSorted.length} tasks</Text>
-        <CopilotStep {...TASK_STEPS.SORT} placement="left">
+        <TooltipStep {...TASK_STEPS.SORT}>
           <TouchableOpacity style={s.sortBtn} onPress={cycleSortBy}>
             <Text style={s.sortIcon}>⇅</Text>
             <Text style={s.sortLabel}>{sortLabels[sortBy]}</Text>
           </TouchableOpacity>
-        </CopilotStep>
+        </TooltipStep>
       </View>
 
       {/* Quick add */}
-      <CopilotStep {...TASK_STEPS.ADD_FORM} placement="bottom">
+      <TooltipStep {...TASK_STEPS.ADD_FORM} >
         <View style={s.addRow}>
           <TextInput
             style={s.addInput}
@@ -132,10 +132,10 @@ export default function TasksScreen() {
             <Text style={s.addBtnText}>+</Text>
           </TouchableOpacity>
         </View>
-      </CopilotStep>
+      </TooltipStep>
 
       {/* Task list */}
-      <CopilotStep {...TASK_STEPS.LIST} placement="top">
+      <TooltipStep {...TASK_STEPS.LIST}>
         <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
           {filteredAndSorted.map(task => (
             <TouchableOpacity
@@ -170,7 +170,7 @@ export default function TasksScreen() {
           )}
           <View style={{ height: 120 }} />
         </ScrollView>
-      </CopilotStep>
+      </TooltipStep>
     </SafeAreaView>
   );
 }

@@ -2,12 +2,12 @@ import { useTooltipContext } from "../context/TooltipContext";
 import type { UseTooltipReturn } from "../types";
 
 /**
- * `useCopilot` — main hook to control the onboarding tour.
+ * `useTooltip` — main hook to control the onboarding tour.
  *
  * Must be used inside a `<CopilotProvider>`.
  *
  * @example
- * const { start, stop, isRunning, currentStep, totalSteps } = useCopilot();
+ * const { start, stop, isRunning, currentStep, totalSteps } = useTooltip();
  *
  * // Start the tour from the beginning
  * <button onClick={() => start()}>Start Tour</button>

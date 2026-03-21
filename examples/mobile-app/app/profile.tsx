@@ -4,7 +4,7 @@ import {
   StyleSheet, SafeAreaView, Switch, Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { CopilotStep, useCopilot } from 'stepwise';
+import { TooltipStep, useTooltip } from '@runilib/tooltip';
 
 const PROFILE_STEPS = {
   AVATAR:   { name: 'profile-avatar',   order: 1, title: 'Your profile',        text: 'Tap your avatar to update your photo and personal info.' },
@@ -14,7 +14,7 @@ const PROFILE_STEPS = {
 };
 
 export default function ProfileScreen() {
-  const { start, isRunning } = useCopilot();
+  const { start, isRunning } = useTooltip();
   const tourStarted = useRef(false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Avatar card */}
-        <CopilotStep {...PROFILE_STEPS.AVATAR} placement="bottom">
+        <TooltipStep {...PROFILE_STEPS.AVATAR}>
           <View style={s.avatarCard}>
             <View style={s.avatarCircle}>
               <Text style={s.avatarInitials}>AK</Text>
@@ -56,10 +56,10 @@ export default function ProfileScreen() {
               <Text style={s.editBtnText}>Edit</Text>
             </TouchableOpacity>
           </View>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* Stats */}
-        <CopilotStep {...PROFILE_STEPS.STATS} placement="bottom">
+        <TooltipStep {...PROFILE_STEPS.STATS}>
           <View style={s.statsRow}>
             {[
               { v: '14', l: 'Day streak', icon: '🔥' },
@@ -73,10 +73,10 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* Settings */}
-        <CopilotStep {...PROFILE_STEPS.SETTINGS} placement="top">
+        <TooltipStep {...PROFILE_STEPS.SETTINGS}>
           <View style={s.section}>
             <Text style={s.sectionTitle}>Preferences</Text>
             {[
@@ -98,16 +98,16 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* Powered by runilib */}
-        <CopilotStep {...PROFILE_STEPS.LIBS} placement="top">
+        <TooltipStep {...PROFILE_STEPS.LIBS}>
           <View style={s.libsCard}>
             <Text style={s.libsTitle}>⚡ Powered by runilib</Text>
             <Text style={s.libsSub}>Libraries used in this app</Text>
             <View style={s.libsList}>
               {[
-                { name: 'stepwise', desc: 'Onboarding tours', status: 'active' },
+                { name: '@runilib/tooltip', desc: 'Onboarding tours', status: 'active' },
                 { name: 'formbridge', desc: 'Form state', status: 'soon' },
                 { name: 'toastly', desc: 'Notifications', status: 'soon' },
               ].map(lib => (
@@ -125,7 +125,7 @@ export default function ProfileScreen() {
               ))}
             </View>
           </View>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* Sign out */}
         <TouchableOpacity style={s.signOutBtn} onPress={() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)}>

@@ -1,15 +1,17 @@
 {
   "expo": {
     "name": "Taskflow",
-    "slug": "unikit-example-mobile",
+    "slug": "runilib-example-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": { "resizeMode": "contain", "backgroundColor": "#f9f5ee" },
-    "ios":     { "supportsTablet": false, "bundleIdentifier": "dev.unikit.example" },
-    "android": { "adaptiveIcon": { "backgroundColor": "#f9f5ee" }, "package": "dev.unikit.example" },
+    "ios":     { "supportsTablet": false, "bundleIdentifier": "dev.runilib.example" },
+    "android": { "adaptiveIcon": { "backgroundColor": "#f9f5ee" }, "package": "dev.runilib.example" },
     "scheme": "taskflow",
-    "plugins": ["expo-router"]
+    "plugins": ["expo-router"],
+    "experiments": {
+      "autolinkingModuleResolution": true
+    }
   }
 }

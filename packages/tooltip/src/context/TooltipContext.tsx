@@ -1,128 +1,181 @@
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from "react";
+
+import { createContext, type ReactNode, useCallback, useContext, useRef, useState } from "react";
 
 import type { TooltipConfig, TooltipContextValue, TooltipRect, TooltipStepData } from "../types";
 
-// ─── Context ──────────────────────────────────────────────────────────────────
-
 const TooltipContext = createContext<TooltipContextValue | null>(null);
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
 interface TooltipContextProviderProps {
   children: ReactNode;
   config: TooltipConfig;
 }
 
-const sorted = (map: Record<string, TooltipStepData>): TooltipStepData[] =>
-  Object.values(map).sort((a, b) => a.order - b.order);
+const sortSteps = (stepMap: Record<string, TooltipStepData>): TooltipStepData[] =>
+  Object.values(stepMap).sort((firstStep, secondStep) => firstStep.order - secondStep.order);
 
 export const TooltipContextProvider = ({ children, config }: TooltipContextProviderProps) => {
   const stepsRef = useRef<Record<string, TooltipStepData>>({});
+  const configRef = useRef(config);
+  const activationIdRef = useRef(0);
+
+  configRef.current = config;
 
   const [sortedSteps, setSortedSteps] = useState<TooltipStepData[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [visible, setVisible] = useState<boolean>(false);
   const [currentRect, setCurrentRect] = useState<TooltipRect | null>(null);
 
-  // ─── Helpers ────────────────────────────────────────────────────────────────
-
-  // ─── Step registration ───────────────────────────────────────────────────────
   const registerStep = useCallback((step: TooltipStepData): void => {
     stepsRef.current[step.name] = step;
-    setSortedSteps(sorted(stepsRef.current));
+    setSortedSteps(sortSteps(stepsRef.current));
   }, []);
 
   const unregisterStep = useCallback((name: string): void => {
     delete stepsRef.current[name];
-    setSortedSteps(sorted(stepsRef.current));
+    setSortedSteps(sortSteps(stepsRef.current));
   }, []);
 
-  // ─── Measure ─────────────────────────────────────────────────────────────────
-
   const measureAndShow = useCallback(
-    async (index: number, steps: TooltipStepData[]): Promise<void> => {
+    async (index: number, providedSteps?: TooltipStepData[]): Promise<void> => {
+      const steps = providedSteps ?? sortSteps(stepsRef.current);
       const step = steps[index];
-      if (!step) return;
-      try {
-        const rect = await step.measure();
-        setCurrentRect(rect);
-      } catch {
+
+      if (!step) {
         setCurrentRect(null);
+        setVisible(false);
+        return;
+      }
+
+      const activationId = ++activationIdRef.current;
+
+      setVisible(false);
+
+      try {
+        await step.ensureVisible?.();
+
+        const rect = await step.measure();
+
+        if (activationId !== activationIdRef.current) {
+          return;
+        }
+
+        setSortedSteps(steps);
+        setCurrentIndex(index);
+        setCurrentRect(rect);
+        setVisible(true);
+      } catch (error) {
+        if (activationId !== activationIdRef.current) {
+          return;
+        }
+
+        setSortedSteps(steps);
+        setCurrentIndex(index);
+        setCurrentRect(null);
+        setVisible(false);
+
+        console.warn(`[runilib/tooltip] Failed to measure step "${step.name}".`, error);
       }
     },
     []
   );
 
-  // ─── Tour control ─────────────────────────────────────────────────────────────
+  const activateStep = useCallback(
+    async (
+      index: number,
+      providedSteps?: TooltipStepData[],
+      options?: {
+        emitStepChange?: boolean;
+      }
+    ): Promise<void> => {
+      const steps = providedSteps ?? sortSteps(stepsRef.current);
+      const step = steps[index];
+
+      if (!step) {
+        return;
+      }
+
+      await measureAndShow(index, steps);
+
+      if (options?.emitStepChange !== false) {
+        configRef.current.onStepChange?.(step, index);
+      }
+    },
+    [measureAndShow]
+  );
 
   const start = useCallback(
     async (stepName?: string): Promise<void> => {
-      const list = sorted(stepsRef.current);
-      setSortedSteps(list);
+      const steps = sortSteps(stepsRef.current);
 
-      let idx = 0;
-      if (stepName) {
-        const found = list.findIndex((s) => s.name === stepName);
-        if (found >= 0) idx = found;
+      if (!steps.length) {
+        return;
       }
 
-      setCurrentIndex(idx);
-      setVisible(true);
-      config.onStart?.();
-      await measureAndShow(idx, list);
+      let nextIndex = 0;
+
+      if (stepName) {
+        const foundIndex = steps.findIndex((step) => step.name === stepName);
+        if (foundIndex >= 0) {
+          nextIndex = foundIndex;
+        }
+      }
+
+      configRef.current.onStart?.();
+      await activateStep(nextIndex, steps);
     },
-    [config, measureAndShow]
+    [activateStep]
   );
 
   const stop = useCallback((): void => {
+    activationIdRef.current += 1;
     setVisible(false);
     setCurrentRect(null);
     setCurrentIndex(0);
-    config.onStop?.();
-  }, [config]);
+    configRef.current.onStop?.();
+  }, []);
 
-  const next = useCallback(
-    async (steps?: TooltipStepData[]): Promise<void> => {
-      const list = steps ?? sortedSteps;
-      if (currentIndex >= list.length - 1) {
-        stop();
-        return;
-      }
-      const nextIdx = currentIndex + 1;
-      setCurrentIndex(nextIdx);
-      config.onStepChange?.(list[nextIdx], nextIdx);
-      await measureAndShow(nextIdx, list);
-    },
-    [currentIndex, sortedSteps, stop, config, measureAndShow]
-  );
+  const next = useCallback(async (): Promise<void> => {
+    const steps = sortSteps(stepsRef.current);
 
-  const prev = useCallback(
-    async (steps?: TooltipStepData[]): Promise<void> => {
-      const list = steps ?? sortedSteps;
-      if (currentIndex <= 0) return;
-      const prevIdx = currentIndex - 1;
-      setCurrentIndex(prevIdx);
-      config.onStepChange?.(list[prevIdx], prevIdx);
-      await measureAndShow(prevIdx, list);
-    },
-    [currentIndex, sortedSteps, config, measureAndShow]
-  );
+    if (!steps.length) {
+      return;
+    }
+
+    if (currentIndex >= steps.length - 1) {
+      stop();
+      return;
+    }
+
+    const nextIndex = currentIndex + 1;
+    await activateStep(nextIndex, steps);
+  }, [activateStep, currentIndex, stop]);
+
+  const prev = useCallback(async (): Promise<void> => {
+    const steps = sortSteps(stepsRef.current);
+
+    if (!steps.length) {
+      return;
+    }
+
+    if (currentIndex <= 0) {
+      return;
+    }
+
+    const previousIndex = currentIndex - 1;
+    await activateStep(previousIndex, steps);
+  }, [activateStep, currentIndex]);
 
   const goTo = useCallback(
     async (index: number): Promise<void> => {
-      const list = sortedSteps;
-      if (index < 0 || index >= list.length) return;
-      setCurrentIndex(index);
-      config.onStepChange?.(list[index], index);
-      await measureAndShow(index, list);
+      const steps = sortSteps(stepsRef.current);
+
+      if (index < 0 || index >= steps.length) {
+        return;
+      }
+
+      await activateStep(index, steps);
     },
-    [sortedSteps, config, measureAndShow]
+    [activateStep]
   );
 
   const currentStep = sortedSteps[currentIndex] ?? null;
@@ -147,12 +200,12 @@ export const TooltipContextProvider = ({ children, config }: TooltipContextProvi
   return <TooltipContext.Provider value={value}>{children}</TooltipContext.Provider>;
 };
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
-
 export function useTooltipContext(): TooltipContextValue {
-  const ctx = useContext(TooltipContext);
-  if (!ctx) {
-    throw new Error("[universal-copilot] useTooltipContext must be used inside <TooltipProvider>.");
+  const context = useContext(TooltipContext);
+
+  if (!context) {
+    throw new Error("[runilib/tooltip] useTooltipContext must be used inside <TooltipProvider>.");
   }
-  return ctx;
+
+  return context;
 }

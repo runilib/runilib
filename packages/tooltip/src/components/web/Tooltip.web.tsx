@@ -18,7 +18,7 @@ const DEFAULT_THEME: Required<TooltipTheme> = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export const WebTooltip = ({
+export const Tooltip = ({
   step,
   stepIndex,
   totalSteps,
@@ -31,7 +31,7 @@ export const WebTooltip = ({
   onNext,
   onPrev,
   onStop,
-}:TooltipProps) => {
+}: TooltipProps) => {
   const t = { ...DEFAULT_THEME, ...theme };
   const [ready, setReady] = useState(false);
 

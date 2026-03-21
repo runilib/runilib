@@ -10,13 +10,10 @@
  * import { TooltipProvider, Tooltip, useTooltip } from 'universal-copilot';
  */
 
-// ─── Public API ───────────────────────────────────────────────────────────────
 export { ANIMATION_TYPES } from "./animations";
-export { TooltipProvider } from "./components/TooltipProvider.web";
-export { TooltipStep } from "./components/tooltip/TooltipStep.web";
+export { TooltipProvider } from "./components/TooltipProvider.native";
+export { TooltipStep } from "./components/tooltip/TooltipStep.native";
 export { useTooltip } from "./hooks/useTooltip";
-
-// ─── Types (re-exported for consumers) ───────────────────────────────────────
 
 export type {
   TooltipPlacement,

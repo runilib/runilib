@@ -4,7 +4,7 @@ import {
   StyleSheet, SafeAreaView, Pressable, Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { CopilotStep, useCopilot } from 'stepwise';
+import { TooltipStep, useTooltip } from '@runilib/tooltip';
 import { STEPS } from '../tourConfig';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,10 +24,10 @@ interface Task {
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const INITIAL_TASKS: Task[] = [
-  { id: 1, title: 'Set up stepwise in mobile app', priority: 'High',   due: 'Today',     status: 'active', project: 'Mobile App' },
+  { id: 1, title: 'Set up @runilib/tooltip in mobile app', priority: 'High',   due: 'Today',     status: 'active', project: 'Mobile App' },
   { id: 2, title: 'Write unit tests for useForm',  priority: 'High',   due: 'Tomorrow',  status: 'active', project: 'formbridge' },
   { id: 3, title: 'Design token audit',            priority: 'Medium', due: 'Mar 22',    status: 'active', project: 'Design System' },
-  { id: 4, title: 'Deploy v1.0 of stepwise',       priority: 'High',   due: 'Done',      status: 'done',   project: 'Mobile App' },
+  { id: 4, title: 'Deploy v1.0 of @runilib/tooltip',       priority: 'High',   due: 'Done',      status: 'done',   project: 'Mobile App' },
   { id: 5, title: 'Add dark mode support',         priority: 'Low',    due: 'Mar 28',    status: 'active', project: 'Design System' },
   { id: 6, title: 'Migrate auth endpoints',        priority: 'High',   due: 'Mar 25',    status: 'active', project: 'API' },
 ];
@@ -44,7 +44,7 @@ export default function HomeScreen() {
   const [tasks,      setTasks]      = useState<Task[]>(INITIAL_TASKS);
   const [filter,     setFilter]     = useState<'all' | 'active' | 'done'>('all');
   const [activeTab,  setActiveTab]  = useState(0);
-  const { start, isRunning }        = useCopilot();
+  const { start, isRunning }        = useTooltip();
   const tourStarted                 = useRef(false);
 
   // Auto-start tour on mount
@@ -75,7 +75,7 @@ export default function HomeScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* ── Header ── */}
-        <CopilotStep {...STEPS.GREETING} placement="bottom">
+        <TooltipStep {...STEPS.GREETING}>
           <View style={s.header}>
             <View>
               <Text style={s.greeting}>Good morning, AKS 👋</Text>
@@ -89,10 +89,10 @@ export default function HomeScreen() {
               <Text style={s.restartBtnText}>{isRunning ? '▶…' : '▶ Tour'}</Text>
             </TouchableOpacity>
           </View>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* ── Stats card ── */}
-        <CopilotStep {...STEPS.STATS_CARD} placement="bottom">
+        <TooltipStep {...STEPS.STATS_CARD} placement="bottom">
           <View style={s.statsCard}>
             <View style={s.statsLeft}>
               <Text style={s.statsPercent}>{pct}%</Text>
@@ -115,10 +115,10 @@ export default function HomeScreen() {
               ))}
             </View>
           </View>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* ── Filter bar ── */}
-        <CopilotStep {...STEPS.FILTER_BAR} placement="bottom">
+        <TooltipStep {...STEPS.FILTER_BAR} placement="bottom">
           <View style={s.filterRow}>
             {(['all', 'active', 'done'] as const).map(f => (
               <TouchableOpacity
@@ -132,22 +132,22 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </CopilotStep>
+        </TooltipStep>
 
         {/* ── Section header + add button ── */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>Tasks</Text>
-          <CopilotStep {...STEPS.ADD_TASK} placement="left">
+          <TooltipStep {...STEPS.ADD_TASK}>
             <TouchableOpacity style={s.addBtn} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}>
               <Text style={s.addBtnText}>+ Add</Text>
             </TouchableOpacity>
-          </CopilotStep>
+          </TooltipStep>
         </View>
 
         {/* ── Task list ── */}
         <View style={s.taskList}>
           {filtered.map((task, idx) => (
-            <CopilotStep
+            <TooltipStep
               key={task.id}
               {...STEPS.TASK_ITEM}
               active={idx === 0}
@@ -158,7 +158,7 @@ export default function HomeScreen() {
                 onToggle={() => toggleTask(task.id)}
                 onDelete={() => deleteTask(task.id)}
               />
-            </CopilotStep>
+            </TooltipStep>
           ))}
           {filtered.length === 0 && (
             <View style={s.emptyState}>
@@ -173,7 +173,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* ── Bottom nav ── */}
-      <CopilotStep {...STEPS.BOTTOM_NAV} placement="top">
+      <TooltipStep {...STEPS.BOTTOM_NAV} placement="top">
         <View style={s.bottomNav}>
           {[
             { icon: '⊞', label: 'Dashboard', idx: 0 },
@@ -191,7 +191,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </View>
-      </CopilotStep>
+      </TooltipStep>
     </SafeAreaView>
   );
 }

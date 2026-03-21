@@ -19,7 +19,7 @@ type SharedBridgeProps = BridgeProps & {
   OverlayComponent: ComponentType<OverlayProps>;
 };
 
-export function CopilotOverlayBridgeShared({ OverlayComponent, ...props }: SharedBridgeProps) {
+export function TooltipOverlayBridgeShared({ OverlayComponent, ...props }: SharedBridgeProps) {
   const { sortedSteps, currentIndex, currentStep, currentRect, visible, next, prev, stop } =
     useTooltipContext();
 

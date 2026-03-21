@@ -1,88 +1,29 @@
-import type { SpotlightRect, TooltipPlacement, TooltipPosition, TooltipRect } from "../types";
+import type { SpotlightRect, TooltipPlacement, TooltipRect } from "../types";
 
 const TOOLTIP_MARGIN = 14;
 const SCREEN_PADDING = 10;
 
-interface Size {
+export type TooltipSize = {
   width: number;
   height: number;
-}
+};
 
-interface Candidate {
+export type TooltipPositionResult = {
   top: number;
   left: number;
-  placement: TooltipPlacement;
-  fits: boolean;
+  placement: Exclude<TooltipPlacement, "auto">;
+  arrowOffset: number;
+};
+
+const SCREEN_MARGIN = 16;
+const TOOLTIP_GAP = 12;
+const ARROW_SIZE = 10;
+const ARROW_EDGE_PADDING = 20;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
 }
 
-/**
- * Compute the best tooltip position given a target rect and viewport dimensions.
- * Works for both web (viewport px) and native (screen dp).
- */
-export function computeTooltipPosition(
-  targetRect: TooltipRect,
-  tooltipSize: Size,
-  placement: TooltipPlacement = "auto",
-  screenWidth: number = 375,
-  screenHeight: number = 812
-): TooltipPosition {
-  const { x, y, width, height } = targetRect;
-  const tw = tooltipSize.width;
-  const th = tooltipSize.height;
-
-  const candidates: Record<string, Candidate> = {
-    bottom: {
-      top: y + height + TOOLTIP_MARGIN,
-      left: clamp(x + width / 2 - tw / 2, SCREEN_PADDING, screenWidth - tw - SCREEN_PADDING),
-      placement: "bottom",
-      fits: y + height + th + TOOLTIP_MARGIN < screenHeight - SCREEN_PADDING,
-    },
-    top: {
-      top: y - th - TOOLTIP_MARGIN,
-      left: clamp(x + width / 2 - tw / 2, SCREEN_PADDING, screenWidth - tw - SCREEN_PADDING),
-      placement: "top",
-      fits: y - th - TOOLTIP_MARGIN > SCREEN_PADDING,
-    },
-    right: {
-      top: clamp(y + height / 2 - th / 2, SCREEN_PADDING, screenHeight - th - SCREEN_PADDING),
-      left: x + width + TOOLTIP_MARGIN,
-      placement: "right",
-      fits: x + width + tw + TOOLTIP_MARGIN < screenWidth - SCREEN_PADDING,
-    },
-    left: {
-      top: clamp(y + height / 2 - th / 2, SCREEN_PADDING, screenHeight - th - SCREEN_PADDING),
-      left: x - tw - TOOLTIP_MARGIN,
-      placement: "left",
-      fits: x - tw - TOOLTIP_MARGIN > SCREEN_PADDING,
-    },
-  };
-
-  let chosen: Candidate;
-
-  if (placement === "auto") {
-    chosen = candidates.bottom.fits
-      ? candidates.bottom
-      : candidates.top.fits
-        ? candidates.top
-        : candidates.right.fits
-          ? candidates.right
-          : candidates.left;
-  } else {
-    chosen = candidates[placement] ?? candidates.bottom;
-  }
-
-  const centerX = x + width / 2;
-  const arrowOffset = clamp(centerX - chosen.left - tw / 2, -(tw / 2 - 20), tw / 2 - 20);
-
-  return {
-    top: chosen.top,
-    left: chosen.left,
-    placement: chosen.placement,
-    arrowOffset,
-  };
-}
-
-/** Returns the spotlight bounding rect with padding applied. */
 export function getSpotlightRect(
   targetRect: TooltipRect,
   padding: number = 8,
@@ -97,6 +38,89 @@ export function getSpotlightRect(
   };
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
+export function computeTooltipPosition(
+  target: SpotlightRect,
+  tooltipSize: TooltipSize,
+  preferredPlacement: TooltipPlacement,
+  screenWidth: number,
+  screenHeight: number
+): TooltipPositionResult {
+  const targetCenterX = target.x + target.width / 2;
+  const targetCenterY = target.y + target.height / 2;
+
+  const canPlaceBottom =
+    target.y + target.height + TOOLTIP_GAP + tooltipSize.height <= screenHeight - SCREEN_MARGIN;
+
+  const canPlaceTop = target.y - TOOLTIP_GAP - tooltipSize.height >= SCREEN_MARGIN;
+
+  const canPlaceRight =
+    target.x + target.width + TOOLTIP_GAP + tooltipSize.width <= screenWidth - SCREEN_MARGIN;
+
+  const canPlaceLeft = target.x - TOOLTIP_GAP - tooltipSize.width >= SCREEN_MARGIN;
+
+  const resolvedPlacement: Exclude<TooltipPlacement, "auto"> = (() => {
+    if (preferredPlacement !== "auto") {
+      if (preferredPlacement === "bottom" && canPlaceBottom) return "bottom";
+      if (preferredPlacement === "top" && canPlaceTop) return "top";
+      if (preferredPlacement === "right" && canPlaceRight) return "right";
+      if (preferredPlacement === "left" && canPlaceLeft) return "left";
+    }
+
+    if (canPlaceBottom) return "bottom";
+    if (canPlaceTop) return "top";
+    if (canPlaceRight) return "right";
+    if (canPlaceLeft) return "left";
+
+    return "bottom";
+  })();
+
+  if (resolvedPlacement === "bottom" || resolvedPlacement === "top") {
+    const left = clamp(
+      targetCenterX - tooltipSize.width / 2,
+      SCREEN_MARGIN,
+      screenWidth - SCREEN_MARGIN - tooltipSize.width
+    );
+
+    const top =
+      resolvedPlacement === "bottom"
+        ? target.y + target.height + TOOLTIP_GAP
+        : target.y - tooltipSize.height - TOOLTIP_GAP;
+
+    const arrowOffset = clamp(
+      targetCenterX - left,
+      ARROW_EDGE_PADDING,
+      tooltipSize.width - ARROW_EDGE_PADDING
+    );
+
+    return {
+      top,
+      left,
+      placement: resolvedPlacement,
+      arrowOffset,
+    };
+  }
+
+  const top = clamp(
+    targetCenterY - tooltipSize.height / 2,
+    SCREEN_MARGIN,
+    screenHeight - SCREEN_MARGIN - tooltipSize.height
+  );
+
+  const left =
+    resolvedPlacement === "right"
+      ? target.x + target.width + TOOLTIP_GAP
+      : target.x - tooltipSize.width - TOOLTIP_GAP;
+
+  const arrowOffset = clamp(
+    targetCenterY - top,
+    ARROW_EDGE_PADDING,
+    tooltipSize.height - ARROW_EDGE_PADDING
+  );
+
+  return {
+    top,
+    left,
+    placement: resolvedPlacement,
+    arrowOffset,
+  };
 }

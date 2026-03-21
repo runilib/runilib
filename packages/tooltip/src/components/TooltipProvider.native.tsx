@@ -1,6 +1,6 @@
 import { TooltipContextProvider } from "../context/TooltipContext";
 import type { TooltipProviderProps } from "../types";
-import { CopilotOverlayBridge } from "./OverlayComponent";
+import { TooltipOverlayBridge } from "./Overlay.native";
 
 /**
  * `TooltipProvider`
@@ -13,7 +13,7 @@ import { CopilotOverlayBridge } from "./OverlayComponent";
  *   <App />
  * </TooltipProvider>
  */
-export const TooltipProvider= ({
+export const TooltipProvider = ({
   children,
   animationType = "slide",
   theme,
@@ -27,9 +27,9 @@ export const TooltipProvider= ({
   onStart,
   onStop,
   onStepChange,
-}:TooltipProviderProps) => (
+}: TooltipProviderProps) => (
   <TooltipContextProvider config={{ onStart, onStop, onStepChange }}>
-    <CopilotOverlayBridge
+    <TooltipOverlayBridge
       animationType={animationType}
       theme={theme}
       tooltipStyle={tooltipStyle}

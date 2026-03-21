@@ -11,17 +11,16 @@ export default function App() {
 
   return (
     <TooltipProvider
-      animationType={page === 'settings' ? 'flip' : 'bounce'}
+      animationType={"glow"}
       overlayColor="rgba(10,9,7,0.82)"
       spotlightPadding={10}
       spotlightBorderRadius={14}
       theme={TOUR_THEME}
       labels={TOUR_LABELS}
-      maskClickable={false}
-      onStart={() => console.log('[stepwise] tour started')}
-      onStop={() => console.log('[stepwise] tour ended')}
-      onStepChange={(step, i) => console.log(`[stepwise] step ${i + 1}: ${step.name}`)}
-      
+      maskClickable
+      onStart={() => console.log('[@runilib/tooltip]:onStart tour started')}
+      onStop={() => console.log('[@runilib/tooltip]:onStop tour ended')}
+      onStepChange={(step, i) => console.log(`[@runilib/tooltip]:onStepChange step ${i + 1}: ${step.name}`)}
     >
       {page === 'dashboard' && (
         <Dashboard

@@ -1,5 +1,5 @@
 {
-  "name": "runilib-monorepo",
+  "name": "runilib",
   "private": true,
   "version": "0.0.0",
   "packageManager": "yarn@4.13.0",
@@ -28,9 +28,6 @@
     "typescript": "^5.9.2"
   },
   "resolutions": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-native": "0.83.0",
-    "react-native-web": "0.21.0"
+    "react-native-svg": "15.12.1"
   }
 }
