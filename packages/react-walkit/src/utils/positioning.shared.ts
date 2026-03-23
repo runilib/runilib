@@ -1,12 +1,16 @@
-import type { TooltipPlacement } from "../types/Tooltip.types";
-import type { SpotlightRect, TargetRect, Placement as WalkPlacement } from "../types/Walk.types";
+import type { TooltipPlacement } from '../types/Tooltip.types';
+import type {
+  SpotlightRect,
+  TargetRect,
+  Placement as WalkitPlacement,
+} from '../types/Walkit.types';
 
 /**
  * Shared placement union used by both walkthroughs and simple tooltips.
  *
- * Walk and tooltip placements currently share the same literal values.
+ * Walkit and tooltip placements currently share the same literal values.
  */
-export type SharedPlacement = WalkPlacement | TooltipPlacement;
+export type SharedPlacement = WalkitPlacement | TooltipPlacement;
 
 /**
  * Shared rectangle shape used by positioning utilities.
@@ -36,7 +40,7 @@ export type SizeLike = {
 export type FloatingPositionResult = {
   top: number;
   left: number;
-  placement: Exclude<SharedPlacement, "auto">;
+  placement: Exclude<SharedPlacement, 'auto'>;
   offset: number;
 };
 
@@ -80,7 +84,7 @@ function clamp(value: number, min: number, max: number): number {
 export function getSpotlightRect(
   targetRect: TargetRect,
   padding = 8,
-  borderRadius = 8
+  borderRadius = 8,
 ): SpotlightRect {
   return {
     x: targetRect.x - padding,
@@ -121,56 +125,58 @@ export function computeFloatingPosition({
   const centerY = targetRect.y + targetRect.height / 2;
 
   const canPlaceBottom =
-    targetRect.y + targetRect.height + gap + floatingSize.height <= screenHeight - screenMargin;
+    targetRect.y + targetRect.height + gap + floatingSize.height <=
+    screenHeight - screenMargin;
 
   const canPlaceTop = targetRect.y - gap - floatingSize.height >= screenMargin;
 
   const canPlaceRight =
-    targetRect.x + targetRect.width + gap + floatingSize.width <= screenWidth - screenMargin;
+    targetRect.x + targetRect.width + gap + floatingSize.width <=
+    screenWidth - screenMargin;
 
   const canPlaceLeft = targetRect.x - gap - floatingSize.width >= screenMargin;
 
-  const placement: Exclude<SharedPlacement, "auto"> = (() => {
-    if (preferredPlacement !== "auto") {
-      if (preferredPlacement === "bottom" && canPlaceBottom) {
-        return "bottom";
+  const placement: Exclude<SharedPlacement, 'auto'> = (() => {
+    if (preferredPlacement !== 'auto') {
+      if (preferredPlacement === 'bottom' && canPlaceBottom) {
+        return 'bottom';
       }
-      if (preferredPlacement === "top" && canPlaceTop) {
-        return "top";
+      if (preferredPlacement === 'top' && canPlaceTop) {
+        return 'top';
       }
-      if (preferredPlacement === "right" && canPlaceRight) {
-        return "right";
+      if (preferredPlacement === 'right' && canPlaceRight) {
+        return 'right';
       }
-      if (preferredPlacement === "left" && canPlaceLeft) {
-        return "left";
+      if (preferredPlacement === 'left' && canPlaceLeft) {
+        return 'left';
       }
     }
 
     if (canPlaceBottom) {
-      return "bottom";
+      return 'bottom';
     }
     if (canPlaceTop) {
-      return "top";
+      return 'top';
     }
     if (canPlaceRight) {
-      return "right";
+      return 'right';
     }
     if (canPlaceLeft) {
-      return "left";
+      return 'left';
     }
 
-    return "bottom";
+    return 'bottom';
   })();
 
-  if (placement === "top" || placement === "bottom") {
+  if (placement === 'top' || placement === 'bottom') {
     const left = clamp(
       centerX - floatingSize.width / 2,
       screenMargin,
-      screenWidth - screenMargin - floatingSize.width
+      screenWidth - screenMargin - floatingSize.width,
     );
 
     const top =
-      placement === "bottom"
+      placement === 'bottom'
         ? targetRect.y + targetRect.height + gap
         : targetRect.y - floatingSize.height - gap;
 
@@ -187,11 +193,11 @@ export function computeFloatingPosition({
   const top = clamp(
     centerY - floatingSize.height / 2,
     screenMargin,
-    screenHeight - screenMargin - floatingSize.height
+    screenHeight - screenMargin - floatingSize.height,
   );
 
   const left =
-    placement === "right"
+    placement === 'right'
       ? targetRect.x + targetRect.width + gap
       : targetRect.x - floatingSize.width - gap;
 

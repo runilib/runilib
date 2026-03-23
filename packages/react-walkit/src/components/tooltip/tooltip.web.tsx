@@ -7,23 +7,24 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from "react";
-import ReactDOM from "react-dom";
+} from 'react';
+import ReactDOM from 'react-dom';
+
 import type {
   TooltipApi,
   TooltipContentApi,
   TooltipPlacement,
   TooltipProps,
-} from "../../types/Tooltip.types";
-import { computeSimpleTooltipPosition } from "../../utils/Tooltip.positioning";
+} from '../../types/Tooltip.types';
+import { computeSimpleTooltipPosition } from '../../utils/Tooltip.positioning';
 
-const PORTAL_ID = "__react_walkit_tooltip_portal__";
+const PORTAL_ID = '__react_walkit_tooltip_portal__';
 
 function getOrCreatePortal(): HTMLElement {
   let element = document.getElementById(PORTAL_ID);
 
   if (!element) {
-    element = document.createElement("div");
+    element = document.createElement('div');
     element.id = PORTAL_ID;
     document.body.appendChild(element);
   }
@@ -43,7 +44,7 @@ export function Tooltip({
   children,
   content,
   renderContent,
-  placement = "auto",
+  placement = 'auto',
   offset = 10,
   disabled = false,
   openOnHover = false,
@@ -116,7 +117,7 @@ export function Tooltip({
       toggle,
       visible,
     }),
-    [start, stop, toggle, visible]
+    [start, stop, toggle, visible],
   );
 
   const contentApi: TooltipContentApi = useMemo(
@@ -124,9 +125,10 @@ export function Tooltip({
       stop,
       visible,
     }),
-    [stop, visible]
+    [stop, visible],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useLayoutEffect(() => {
     if (!visible || !shellRef.current) {
       return;
@@ -171,12 +173,12 @@ export function Tooltip({
       measureAnchor();
     };
 
-    window.addEventListener("resize", handleResizeOrScroll);
-    window.addEventListener("scroll", handleResizeOrScroll, true);
+    window.addEventListener('resize', handleResizeOrScroll);
+    window.addEventListener('scroll', handleResizeOrScroll, true);
 
     return () => {
-      window.removeEventListener("resize", handleResizeOrScroll);
-      window.removeEventListener("scroll", handleResizeOrScroll, true);
+      window.removeEventListener('resize', handleResizeOrScroll);
+      window.removeEventListener('scroll', handleResizeOrScroll, true);
     };
   }, [visible, measureAnchor]);
 
@@ -189,7 +191,9 @@ export function Tooltip({
       const targetNode = event.target as Node | null;
 
       const clickedInsideTooltip = shellRef.current?.contains(targetNode ?? null);
-      const clickedInsideTrigger = triggerWrapperRef.current?.contains(targetNode ?? null);
+      const clickedInsideTrigger = triggerWrapperRef.current?.contains(
+        targetNode ?? null,
+      );
 
       if (clickedInsideTooltip || clickedInsideTrigger) {
         return;
@@ -198,10 +202,10 @@ export function Tooltip({
       stop();
     };
 
-    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener('mousedown', handlePointerDown);
 
     return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener('mousedown', handlePointerDown);
     };
   }, [visible, closeOnOutsidePress, stop]);
 
@@ -216,43 +220,46 @@ export function Tooltip({
       placement,
       window.innerWidth,
       window.innerHeight,
-      offset
+      offset,
     );
   }, [visible, anchorRect, shellSize, placement, offset]);
 
-  const renderedTrigger: ReactNode = typeof trigger === "function" ? trigger(api) : trigger;
+  const renderedTrigger: ReactNode =
+    typeof trigger === 'function' ? trigger(api) : trigger;
 
   const renderedContent = renderContent?.(contentApi) ?? content ?? null;
 
   const defaultBackground =
-    ((tooltipStyle as CSSProperties | undefined)?.backgroundColor as string | undefined) ??
+    ((tooltipStyle as CSSProperties | undefined)?.backgroundColor as
+      | string
+      | undefined) ??
     ((tooltipStyle as CSSProperties | undefined)?.background as string | undefined) ??
-    "#111827";
+    '#111827';
 
   const resolvedAnchorColor = anchorColor ?? defaultBackground;
 
   const wrapperStyle: CSSProperties = {
-    display: "inline-flex",
+    display: 'inline-flex',
     ...(triggerWrapperStyle as CSSProperties),
   };
 
   const shellStyle: CSSProperties = {
-    position: "fixed",
+    position: 'fixed',
     top: computedPosition?.top ?? -9999,
     left: computedPosition?.left ?? -9999,
     zIndex,
-    visibility: visible ? "visible" : "hidden",
+    visibility: visible ? 'visible' : 'hidden',
   };
 
   const defaultBubbleStyle: CSSProperties = {
     maxWidth,
-    backgroundColor: "#111827",
-    color: "#ffffff",
+    backgroundColor: '#111827',
+    color: '#ffffff',
     borderRadius: 10,
-    padding: "10px 12px",
+    padding: '10px 12px',
     fontSize: 13,
     lineHeight: 1.45,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.22)",
+    boxShadow: '0 10px 30px rgba(0,0,0,0.22)',
     ...(tooltipStyle as CSSProperties),
   };
 
@@ -260,6 +267,8 @@ export function Tooltip({
 
   return (
     <>
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
+      {/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
       <span
         ref={triggerWrapperRef}
         style={wrapperStyle}
@@ -273,7 +282,11 @@ export function Tooltip({
       {visible &&
         renderedContent &&
         ReactDOM.createPortal(
-          <div ref={shellRef} style={shellStyle} role="tooltip">
+          <div
+            ref={shellRef}
+            style={shellStyle}
+            role="tooltip"
+          >
             {renderContent ? (
               renderedContent
             ) : (
@@ -286,12 +299,12 @@ export function Tooltip({
                   computedPosition.placement,
                   computedPosition.anchorOffset,
                   anchorSize,
-                  resolvedAnchorColor
+                  resolvedAnchorColor,
                 )}
               />
             )}
           </div>,
-          portal
+          portal,
         )}
     </>
   );
@@ -301,55 +314,55 @@ function buildWebAnchorStyle(
   placement: TooltipPlacement,
   offset: number,
   size: number,
-  color: string
+  color: string,
 ): CSSProperties {
   const base: CSSProperties = {
-    position: "absolute",
+    position: 'absolute',
     width: 0,
     height: 0,
-    pointerEvents: "none",
+    pointerEvents: 'none',
   };
 
   switch (placement) {
-    case "bottom":
+    case 'bottom':
       return {
         ...base,
         top: -size,
         left: offset,
-        transform: "translateX(-50%)",
+        transform: 'translateX(-50%)',
         borderLeft: `${size}px solid transparent`,
         borderRight: `${size}px solid transparent`,
         borderBottom: `${size}px solid ${color}`,
       };
 
-    case "top":
+    case 'top':
       return {
         ...base,
         bottom: -size,
         left: offset,
-        transform: "translateX(-50%)",
+        transform: 'translateX(-50%)',
         borderLeft: `${size}px solid transparent`,
         borderRight: `${size}px solid transparent`,
         borderTop: `${size}px solid ${color}`,
       };
 
-    case "right":
+    case 'right':
       return {
         ...base,
         top: offset,
         left: -size,
-        transform: "translateY(-50%)",
+        transform: 'translateY(-50%)',
         borderTop: `${size}px solid transparent`,
         borderBottom: `${size}px solid transparent`,
         borderRight: `${size}px solid ${color}`,
       };
 
-    case "left":
+    case 'left':
       return {
         ...base,
         top: offset,
         right: -size,
-        transform: "translateY(-50%)",
+        transform: 'translateY(-50%)',
         borderTop: `${size}px solid transparent`,
         borderBottom: `${size}px solid transparent`,
         borderLeft: `${size}px solid ${color}`,

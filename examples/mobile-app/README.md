@@ -32,11 +32,11 @@ npm run android    # Android emulator
 
 ```tsx
 // Exact same code as in the web app — only the wrapped element changes
-<WalkStep name="add-task" order={2} title="Add tasks" text="Tap to add.">
+<WalkitStep name="add-task" order={2} title="Add tasks" text="Tap to add.">
   <TouchableOpacity style={s.addBtn}>   {/* RN element */}
     <Text>+ Add</Text>
   </TouchableOpacity>
-</WalkStep>
+</WalkitStep>
 ```
 
 ## Project structure
@@ -44,7 +44,7 @@ npm run android    # Android emulator
 ```
 mobile-app/
 ├── app/
-│   ├── _layout.tsx     ← WalkProvider wraps everything here
+│   ├── _layout.tsx     ← WalkitProvider wraps everything here
 │   └── index.tsx       ← Main dashboard screen
 ├── tourConfig.ts       ← Centralised step definitions + theme
 └── package.json

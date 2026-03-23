@@ -4,30 +4,34 @@
  * Full onboarding tour on a mobile dashboard screen.
  *
  * Install:
- *   npm install universal-copilot react-native-svg
+ *   npm install @runilib/react-walkit react-native-svg
  *   # Expo:
  *   npx expo install react-native-svg
  */
 
 import React, { useState } from 'react';
 import {
-  View,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
+  View,
 } from 'react-native';
-import { WalkProvider, WalkStep, useWalk } from '@runilib/react-walkit';
+
+import { useWalkit, WalkitProvider, WalkitStep } from '@runilib/react-walkit';
 
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <WalkProvider
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#fff"
+      />
+      <WalkitProvider
         animationType="bounce"
         spotlightPadding={10}
         spotlightBorderRadius={14}
@@ -44,7 +48,7 @@ export default function App() {
         onStepChange={(step, i) => console.log(`Step ${i + 1}: ${step.id}`)}
       >
         <Dashboard />
-      </WalkProvider>
+      </WalkitProvider>
     </SafeAreaView>
   );
 }
@@ -52,17 +56,17 @@ export default function App() {
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function Dashboard() {
-  const { start } = useWalk();
+  const { start } = useWalkit();
   const [selectedAnim, setSelectedAnim] = useState('bounce');
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header */}
-      <WalkStep
+      <WalkitStep
         id="header"
         order={1}
         title="Welcome to MyApp 👋"
-        text="Your personal dashboard — all key metrics in one place."
+        content="Your personal dashboard — all key metrics in one place."
         placement="bottom"
       >
         <View style={styles.header}>
@@ -71,14 +75,14 @@ function Dashboard() {
             <Text style={styles.headerBadgeText}>Pro</Text>
           </View>
         </View>
-      </WalkStep>
+      </WalkitStep>
 
       {/* Search */}
-      <WalkStep
+      <WalkitStep
         id="search"
         order={2}
         title="🔍 Search"
-        text="Quickly find any content, user, or report in the app."
+        content="Quickly find any content, user, or report in the app."
         placement="bottom"
       >
         <TextInput
@@ -86,60 +90,78 @@ function Dashboard() {
           placeholder="Search anything…"
           placeholderTextColor="#9ca3af"
         />
-      </WalkStep>
+      </WalkitStep>
 
       {/* Stats */}
-      <WalkStep
+      <WalkitStep
         id="stats"
         order={3}
         title="📊 Your Stats"
-        text="Monitor daily KPIs at a glance. Refreshed every hour."
+        content="Monitor daily KPIs at a glance. Refreshed every hour."
         placement="bottom"
       >
         <View style={styles.statsRow}>
-          <StatCard label="Users" value="12,430" trend="+8%" />
-          <StatCard label="Revenue" value="$41.2K" trend="+12%" />
-          <StatCard label="Tasks" value="94" trend="-3%" negative />
+          <StatCard
+            label="Users"
+            value="12,430"
+            trend="+8%"
+          />
+          <StatCard
+            label="Revenue"
+            value="$41.2K"
+            trend="+12%"
+          />
+          <StatCard
+            label="Tasks"
+            value="94"
+            trend="-3%"
+            negative
+          />
         </View>
-      </WalkStep>
+      </WalkitStep>
 
       {/* Actions row */}
       <View style={styles.actionsRow}>
-        <WalkStep
+        <WalkitStep
           id="export"
           order={4}
           title="📥 Export"
-          text="Download your data as CSV or PDF."
+          content="Download your data as CSV or PDF."
           placement="top"
         >
           <TouchableOpacity style={styles.btnSecondary}>
             <Text style={styles.btnSecondaryText}>Export</Text>
           </TouchableOpacity>
-        </WalkStep>
+        </WalkitStep>
 
-        <WalkStep
+        <WalkitStep
           id="new-report"
           order={5}
           title="✨ New Report"
-          text="Create a custom report from scratch."
+          content="Create a custom report from scratch."
           placement="top"
         >
           <TouchableOpacity style={styles.btnPrimary}>
             <Text style={styles.btnPrimaryText}>+ New Report</Text>
           </TouchableOpacity>
-        </WalkStep>
+        </WalkitStep>
       </View>
 
       {/* Animation picker */}
       <Text style={styles.sectionLabel}>Animation style:</Text>
       <View style={styles.animRow}>
-        {(['fade', 'slide', 'zoom', 'bounce', 'flip', 'glow']).map((a) => (
+        {['fade', 'slide', 'zoom', 'bounce', 'flip', 'glow'].map((a) => (
           <TouchableOpacity
             key={a}
             onPress={() => setSelectedAnim(a)}
             style={[styles.animChip, selectedAnim === a && styles.animChipActive]}
           >
-            <Text style={[styles.animChipText, selectedAnim === a && styles.animChipTextActive]}>
+            <Text
+              style={[
+                styles.animChipText,
+                selectedAnim === a && styles.animChipTextActive,
+              ]}
+            >
               {a}
             </Text>
           </TouchableOpacity>
@@ -147,7 +169,11 @@ function Dashboard() {
       </View>
 
       {/* Start button */}
-      <TouchableOpacity style={styles.tourBtn} onPress={() => start()} activeOpacity={0.85}>
+      <TouchableOpacity
+        style={styles.tourBtn}
+        onPress={() => start()}
+        activeOpacity={0.85}
+      >
         <Text style={styles.tourBtnText}>🚀 Start Tour</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -171,7 +197,9 @@ function StatCard({
     <View style={styles.card}>
       <Text style={styles.cardValue}>{value}</Text>
       <Text style={styles.cardLabel}>{label}</Text>
-      <Text style={[styles.cardTrend, { color: negative ? '#ef4444' : '#10b981' }]}>{trend}</Text>
+      <Text style={[styles.cardTrend, { color: negative ? '#ef4444' : '#10b981' }]}>
+        {trend}
+      </Text>
     </View>
   );
 }
@@ -188,7 +216,9 @@ export function AppWithCustomTooltip() {
     onStop,
   }: any) => (
     <View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+      <View
+        style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}
+      >
         <Text style={{ fontWeight: '700', fontSize: 14, color: '#1e1e2e', flex: 1 }}>
           {step.title}
         </Text>
@@ -197,9 +227,17 @@ export function AppWithCustomTooltip() {
         </TouchableOpacity>
       </View>
       {step.text && (
-        <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>{step.text}</Text>
+        <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
+          {step.text}
+        </Text>
       )}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Text style={{ fontSize: 12, color: '#9ca3af' }}>
           {stepIndex + 1} / {totalSteps}
         </Text>
@@ -237,9 +275,9 @@ export function AppWithCustomTooltip() {
   );
 
   return (
-    <WalkProvider renderPopover={renderPopover}>
+    <WalkitProvider renderPopover={renderPopover}>
       <Dashboard />
-    </WalkProvider>
+    </WalkitProvider>
   );
 }
 

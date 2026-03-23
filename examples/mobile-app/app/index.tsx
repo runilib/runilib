@@ -4,7 +4,7 @@ import {
   StyleSheet, SafeAreaView, Pressable, Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Tooltip, WalkStep, useWalk } from '@runilib/react-walkit';
+import { Tooltip, WalkitStep, useWalkit } from '@runilib/react-walkit';
 import { STEPS } from '../tourConfig';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ export default function HomeScreen() {
   const [tasks,      setTasks]      = useState<Task[]>(INITIAL_TASKS);
   const [filter,     setFilter]     = useState<'all' | 'active' | 'done'>('all');
   const [activeTab,  setActiveTab]  = useState(0);
-  const { start, isRunning }        = useWalk();
+  const { start, isRunning }        = useWalkit();
   const tourStarted                 = useRef(false);
 
   // Auto-start tour on mount
@@ -75,7 +75,7 @@ export default function HomeScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* ── Header ── */}
-        <WalkStep {...STEPS.GREETING}>
+        <WalkitStep {...STEPS.GREETING}>
           <View style={s.header}>
             <View>
               <Text style={s.greeting}>Good morning, AKS 👋</Text>
@@ -89,10 +89,10 @@ export default function HomeScreen() {
               <Text style={s.restartBtnText}>{isRunning ? '▶…' : '▶ Tour'}</Text>
             </TouchableOpacity>
           </View>
-        </WalkStep>
+        </WalkitStep>
 
         {/* ── Stats card ── */}
-        <WalkStep {...STEPS.STATS_CARD}>
+        <WalkitStep {...STEPS.STATS_CARD}>
           <View style={s.statsCard}>
             <View style={s.statsLeft}>
               <Text style={s.statsPercent}>{pct}%</Text>
@@ -115,10 +115,10 @@ export default function HomeScreen() {
               ))}
             </View>
           </View>
-        </WalkStep>
+        </WalkitStep>
 
         {/* ── Filter bar ── */}
-        <WalkStep {...STEPS.FILTER_BAR}>
+        <WalkitStep {...STEPS.FILTER_BAR}>
           <View style={s.filterRow}>
             {(['all', 'active', 'done'] as const).map(f => (
               <TouchableOpacity
@@ -132,7 +132,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </WalkStep>
+        </WalkitStep>
 
         {/* ── Section header + add button ── */}
         <View style={s.sectionHeader}>
@@ -184,17 +184,17 @@ export default function HomeScreen() {
 </Tooltip>
 
 
-          <WalkStep {...STEPS.ADD_TASK}>
+          <WalkitStep {...STEPS.ADD_TASK}>
             <TouchableOpacity style={s.addBtn} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}>
               <Text style={s.addBtnText}>+ Add</Text>
             </TouchableOpacity>
-          </WalkStep>
+          </WalkitStep>
         </View>
 
         {/* ── Task list ── */}
         <View style={s.taskList}>
           {filtered.map((task, idx) => (
-            <WalkStep
+            <WalkitStep
               key={task.id}
               {...STEPS.TASK_ITEM}
               active={idx === 0}
@@ -204,7 +204,7 @@ export default function HomeScreen() {
                 onToggle={() => toggleTask(task.id)}
                 onDelete={() => deleteTask(task.id)}
               />
-            </WalkStep>
+            </WalkitStep>
           ))}
           {filtered.length === 0 && (
             <View style={s.emptyState}>
@@ -219,7 +219,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* ── Bottom nav ── */}
-      <WalkStep {...STEPS.BOTTOM_NAV}>
+      <WalkitStep {...STEPS.BOTTOM_NAV}>
         <View style={s.bottomNav}>
           {[
             { icon: '⊞', label: 'Dashboard', idx: 0 },
@@ -237,7 +237,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </View>
-      </WalkStep>
+      </WalkitStep>
     </SafeAreaView>
   );
 }

@@ -1,6 +1,11 @@
-import { NativeOverlay } from "../walk/native/Overlay.native";
-import { type BridgeProps, WalkOverlayBridgeShared } from "./WalkOverlayBridge.shared";
+import { NativeOverlay } from '../walkit/native/Overlay.native';
+import { type BridgeProps, SharedWalkitOverlayBridge } from './SharedWalkitOverlayBridge';
 
-export const WalkOverlayBridge = (props: BridgeProps) => {
-  return <WalkOverlayBridgeShared {...props} OverlayComponent={NativeOverlay} />;
+export const WalkitOverlayBridge = (props: BridgeProps) => {
+  return (
+    <SharedWalkitOverlayBridge
+      {...props}
+      OverlayComponent={NativeOverlay}
+    />
+  );
 };

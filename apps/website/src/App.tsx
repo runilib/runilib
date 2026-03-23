@@ -39,7 +39,7 @@ function Inner() {
         <Route path="/docs" element={<Docs />} />
         <Route path="/docs/:id" element={<LibraryDetail />} />
         <Route path="/ecosystem" element={<Ecosystem />} />
-        <Route path="/contributing"       element={<Contributing />} />
+        <Route path="/contributing" element={<Contributing />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

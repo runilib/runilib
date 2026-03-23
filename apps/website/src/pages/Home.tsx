@@ -43,26 +43,26 @@ return (
   stepwise: {
     filename: "App.tsx",
     lang: "tsx",
-    code: `import { CopilotProvider, CopilotStep, useCopilot }
+    code: `import { WalkitProvider, WalkitStep, useWalkit }
   from 'stepwise'
 
 // 1. Wrap your app
-<CopilotProvider
+<WalkitProvider
   animationType="spring"
   persist={{ key: 'tour-v1', storage: 'local' }}
 >
   <App />
-</CopilotProvider>
+</WalkitProvider>
 
 // 2. Tag any element
-<CopilotStep name="search" order={1}
+<WalkitStep name="search" order={1}
   title="Search anything"
   text="Find tasks, projects and teammates instantly.">
   <SearchBar />
-</CopilotStep>
+</WalkitStep>
 
 // 3. Start programmatically
-const { start } = useCopilot()
+const { start } = useWalkit()
 <button onClick={start}>Take the tour →</button>`,
   },
   tooltip: {

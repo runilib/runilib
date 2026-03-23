@@ -1,4 +1,4 @@
-import { Tooltip, useWalk, WalkStep } from "@runilib/react-walkit";
+import { Tooltip, useWalkit, WalkitStep } from "@runilib/react-walkit";
 import { useEffect, useRef } from "react";
 import { STEPS } from "../tourConfig";
 import styles from "./Dashboard.module.css";
@@ -93,7 +93,7 @@ const priorityDot: Record<string, string> = {
 };
 
 export function Dashboard({ onGoToSettings }: Props) {
-  const { start, isRunning } = useWalk();
+  const { start, isRunning } = useWalkit();
   const started = useRef(false);
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export function Dashboard({ onGoToSettings }: Props) {
   return (
     <div className={styles.layout}>
       {/* Sidebar */}
-      <WalkStep {...STEPS.SIDEBAR}>
+      <WalkitStep {...STEPS.SIDEBAR}>
         <aside className={styles.sidebar}>
           <div className={styles.logo}>
             <span className={styles.logoIcon}>⚡</span>
@@ -152,22 +152,22 @@ export function Dashboard({ onGoToSettings }: Props) {
             </div>
           </div>
         </aside>
-      </WalkStep>
+      </WalkitStep>
 
       {/* Main */}
       <main className={styles.main}>
-        <WalkStep {...STEPS.HEADER}>
+        <WalkitStep {...STEPS.HEADER}>
           <header className={styles.header}>
             <div>
               <h1 className={styles.pageTitle}>Dashboard</h1>
               <p className={styles.pageSubtitle}>Monday, March 17 · 3 tasks due today</p>
             </div>
             <div className={styles.headerRight}>
-              <WalkStep {...STEPS.NOTIFICATIONS} placement="auto">
+              <WalkitStep {...STEPS.NOTIFICATIONS} placement="auto">
                 <button type="button" className={`btn btn-ghost ${styles.notifBtn}`}>
                   🔔 <span className={styles.notifBadge}>3</span>
                 </button>
-              </WalkStep>
+              </WalkitStep>
               <button
                 type="button"
                 className="btn btn-ghost"
@@ -189,10 +189,10 @@ export function Dashboard({ onGoToSettings }: Props) {
               </button>
             </div>
           </header>
-        </WalkStep>
+        </WalkitStep>
 
         <div className={styles.content}>
-          <WalkStep {...STEPS.STATS} placement="auto">
+          <WalkitStep {...STEPS.STATS} placement="auto">
             <div className={styles.statsRow}>
               {STATS.map((s) => (
                 <div key={s.label} className={`card ${styles.statCard}`}>
@@ -204,7 +204,7 @@ export function Dashboard({ onGoToSettings }: Props) {
                 </div>
               ))}
             </div>
-          </WalkStep>
+          </WalkitStep>
 
           <div className={styles.tasksSection}>
             <div className={styles.tasksSectionHeader}>
@@ -254,7 +254,7 @@ export function Dashboard({ onGoToSettings }: Props) {
               </Tooltip>
 
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <WalkStep {...STEPS.FILTERS} placement="auto">
+                <WalkitStep {...STEPS.FILTERS} placement="auto">
                   <div className={styles.filters}>
                     {["All", "In Progress", "Review", "Backlog"].map((f) => (
                       <button
@@ -266,18 +266,18 @@ export function Dashboard({ onGoToSettings }: Props) {
                       </button>
                     ))}
                   </div>
-                </WalkStep>
-                <WalkStep {...STEPS.NEW_TASK} placement="auto">
+                </WalkitStep>
+                <WalkitStep {...STEPS.NEW_TASK} placement="auto">
                   <button type="button" className="btn btn-primary">
                     + New Task
                   </button>
-                </WalkStep>
+                </WalkitStep>
               </div>
             </div>
 
             <div className={styles.taskList}>
               {TASKS.map((task, i) => (
-                <WalkStep key={task.id} {...STEPS.TASK_CARD} active={i === 0} placement="auto">
+                <WalkitStep key={task.id} {...STEPS.TASK_CARD} active={i === 0} placement="auto">
                   <div className={`card ${styles.taskCard}`}>
                     <div className={styles.taskTop}>
                       <div className={styles.taskCheck}>
@@ -325,7 +325,7 @@ export function Dashboard({ onGoToSettings }: Props) {
                       </div>
                     )}
                   </div>
-                </WalkStep>
+                </WalkitStep>
               ))}
             </div>
           </div>

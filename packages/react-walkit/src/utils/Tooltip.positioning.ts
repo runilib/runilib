@@ -1,17 +1,16 @@
-import type { TooltipPlacement } from "../types/Tooltip.types";
-
+import type { TooltipPlacement } from '../types/Tooltip.types';
 import {
   computeFloatingPosition,
   type FloatingPositionResult,
   type RectLike,
   type SizeLike,
   TOOLTIP_POSITION_DEFAULTS,
-} from "./positioning.shared";
+} from './positioning.shared';
 
 export type TooltipComputedPosition = {
   top: number;
   left: number;
-  placement: Exclude<TooltipPlacement, "auto">;
+  placement: Exclude<TooltipPlacement, 'auto'>;
   /**
    * Center position of the anchor inside the tooltip shell.
    * Horizontal for top/bottom, vertical for left/right.
@@ -30,7 +29,7 @@ export function computeSimpleTooltipPosition(
   preferredPlacement: TooltipPlacement,
   screenWidth: number,
   screenHeight: number,
-  offset = 10
+  offset = 10,
 ): TooltipComputedPosition {
   const result: FloatingPositionResult = computeFloatingPosition({
     targetRect: anchorRect,

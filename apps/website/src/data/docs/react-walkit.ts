@@ -15,9 +15,9 @@ export const reactWalkitDocs: LibraryDoc = {
       group: "Core API",
       color: "amber",
       items: [
-        { id: "rw-provider", label: "CopilotProvider" },
-        { id: "rw-step", label: "CopilotStep" },
-        { id: "rw-hook", label: "useCopilot()" },
+        { id: "rw-provider", label: "WalkitProvider" },
+        { id: "rw-step", label: "WalkitStep" },
+        { id: "rw-hook", label: "useWalkit()" },
         { id: "rw-animations", label: "Animations" },
       ],
     },
@@ -39,42 +39,42 @@ export const reactWalkitDocs: LibraryDoc = {
       title: "Overview",
       content: `react-walkit is a cross-platform onboarding tour library for React and React Native.
 
-Tag any element with CopilotStep, wrap your app with CopilotProvider, and call start().
+Tag any element with WalkitStep, wrap your app with WalkitProvider, and call start().
 The same code produces a native-feeling tour on both web and mobile.`,
       code: {
         filename: "TourExample.tsx",
         lang: "tsx",
-        code: `import { CopilotProvider, CopilotStep, useCopilot } from 'react-walkit'
+        code: `import { WalkitProvider, WalkitStep, useWalkit } from 'react-walkit'
 
 // 1. Wrap your app
 export function App() {
   return (
-    <CopilotProvider
+    <WalkitProvider
       animationType="spring"
       persist={{ key: 'main-tour-v1', storage: 'local' }}
     >
       <Dashboard />
-    </CopilotProvider>
+    </WalkitProvider>
   )
 }
 
 // 2. Tag elements anywhere in your component tree
 function Dashboard() {
-  const { start } = useCopilot()
+  const { start } = useWalkit()
 
   return (
     <div>
-      <CopilotStep name="search" order={1}
+      <WalkitStep name="search" order={1}
         title="Search anything"
         text="Find tasks, projects and teammates instantly.">
         <SearchBar />
-      </CopilotStep>
+      </WalkitStep>
 
-      <CopilotStep name="new-task" order={2}
+      <WalkitStep name="new-task" order={2}
         title="Create a task"
         text="Press + to add a new task to your board.">
         <NewTaskButton />
-      </CopilotStep>
+      </WalkitStep>
 
       <button onClick={start}>
         Take the tour →
@@ -111,11 +111,11 @@ npx expo install expo-haptics`,
       code: {
         filename: "App.tsx",
         lang: "tsx",
-        code: `import { CopilotProvider } from 'react-walkit'
+        code: `import { WalkitProvider } from 'react-walkit'
 
 export function App() {
   return (
-    <CopilotProvider
+    <WalkitProvider
       animationType="bounce"
       theme={{
         tooltipStyle: {
@@ -145,19 +145,19 @@ export function App() {
       }}
     >
       <MainNavigator />
-    </CopilotProvider>
+    </WalkitProvider>
   )
 }`,
       },
     },
     {
       id: "rw-provider",
-      title: "CopilotProvider",
+      title: "WalkitProvider",
       content: "The root provider. Place it at the top of your app tree.",
       code: {
-        filename: "CopilotProvider.tsx",
+        filename: "WalkitProvider.tsx",
         lang: "tsx",
-        code: `<CopilotProvider
+        code: `<WalkitProvider
   // Animation style
   animationType="spring"  // "fade" | "slide" | "zoom" | "bounce" | "flip" | "glow" | "spring"
 
@@ -188,12 +188,12 @@ export function App() {
     },
     {
       id: "rw-step",
-      title: "CopilotStep",
+      title: "WalkitStep",
       content: "Wrap any element to make it a tour step.",
       code: {
-        filename: "CopilotStep.tsx",
+        filename: "WalkitStep.tsx",
         lang: "tsx",
-        code: `<CopilotStep
+        code: `<WalkitStep
   // Required
   name="settings-button"    // unique identifier
   order={3}                 // position in the tour
@@ -214,10 +214,10 @@ export function App() {
   screen="SettingsScreen"
 >
   <SettingsButton />
-</CopilotStep>
+</WalkitStep>
 
 // Targetless step (centered modal)
-<CopilotStep
+<WalkitStep
   name="welcome"
   order={1}
   title="Welcome to the app! 👋"
@@ -228,10 +228,10 @@ export function App() {
     },
     {
       id: "rw-hook",
-      title: "useCopilot()",
+      title: "useWalkit()",
       content: "Full programmatic control over the tour.",
       code: {
-        filename: "useCopilot.ts",
+        filename: "useWalkit.ts",
         lang: "tsx",
         code: `const {
   // Control
@@ -259,7 +259,7 @@ export function App() {
   status,         // 'not_started' | 'in_progress' | 'completed'
   markCompleted,  // () => void
   reset,          // () => void — clear persistence
-} = useCopilot()
+} = useWalkit()
 
 // Example: wait for user action then continue
 async function handleInteractiveTour() {
@@ -278,10 +278,10 @@ async function handleInteractiveTour() {
         filename: "animations.tsx",
         lang: "tsx",
         code: `// Global animation
-<CopilotProvider animationType="spring">
+<WalkitProvider animationType="spring">
 
 // Per-step override (coming in v1.2)
-<CopilotStep
+<WalkitStep
   name="attention"
   animationType="glow"    // override for this step
   ...
@@ -297,7 +297,7 @@ async function handleInteractiveTour() {
 // "spring" — physics-based spring
 
 // Disable animations
-<CopilotProvider animationType={null}>
+<WalkitProvider animationType={null}>
 
 // Respect prefers-reduced-motion (automatic)`,
       },
@@ -309,10 +309,10 @@ async function handleInteractiveTour() {
       code: {
         filename: "analytics.tsx",
         lang: "tsx",
-        code: `import { useCopilotEvent } from 'react-walkit'
+        code: `import { useWalkitEvent } from 'react-walkit'
 
 function AnalyticsLayer() {
-  useCopilotEvent({
+  useWalkitEvent({
     onStepEnter: ({ step, index, totalSteps }) => {
       analytics.track('tour_step_view', {
         step:  step.name,
@@ -356,7 +356,7 @@ function AnalyticsLayer() {
       code: {
         filename: "ab-testing.tsx",
         lang: "tsx",
-        code: `<CopilotProvider
+        code: `<WalkitProvider
   variants={[
     {
       id:     'control',
@@ -376,10 +376,10 @@ function AnalyticsLayer() {
   }}
 >
   <App />
-</CopilotProvider>
+</WalkitProvider>
 
 // Get A/B metrics
-const { variants } = useCopilotMetrics()
+const { variants } = useWalkitMetrics()
 // {
 //   control:    { shown: 1200, completed: 480, rate: "40%" },
 //   challenger: { shown: 1180, completed: 590, rate: "50%" },

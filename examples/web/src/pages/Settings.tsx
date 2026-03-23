@@ -1,44 +1,44 @@
-import { useWalk, WalkStep } from "@runilib/react-walkit";
+import { useWalkit, WalkitStep, type WalkitStepProps } from "@runilib/react-walkit";
 import { useEffect, useRef, useState } from "react";
 import styles from "./Settings.module.css";
 
 // This page uses a different animation to showcase the variety
 
-const SETTINGS_STEPS = {
+const SETTINGS_STEPS:{[key in string]: WalkitStepProps} = {
   PROFILE: {
-    name: "settings-profile",
+    id: "settings-profile",
     order: 1,
     title: "👤 Your profile",
-    text: "Update your name, email, avatar and timezone here.",
+    content: "Update your name, email, avatar and timezone here.",
   },
   NOTIFS: {
-    name: "settings-notifs",
+    id: "settings-notifs",
     order: 2,
     title: "🔔 Notifications",
-    text: "Choose exactly which events send you an email or push alert.",
+    content: "Choose exactly which events send you an email or push alert.",
   },
   THEME: {
-    name: "settings-theme",
+    id: "settings-theme",
     order: 3,
     title: "🎨 Appearance",
-    text: "Switch between light and dark, or let the system decide.",
+    content: "Switch between light and dark, or let the system decide.",
   },
   BILLING: {
-    name: "settings-billing",
+    id: "settings-billing",
     order: 4,
     title: "💳 Plan & billing",
-    text: "Manage your subscription, invoices and payment method.",
+    content: "Manage your subscription, invoices and payment method.",
   },
   LIBS: {
-    name: "settings-libs",
+    id: "settings-libs",
     order: 5,
     title: "⚡ runilib",
-    text: "This app is powered by runilib — same code, every platform.",
+    content: "This app is powered by runilib — same code, every platform.",
   },
 };
 
 export function Settings({ onBack }: { onBack: () => void }) {
-  const { start, isRunning } = useWalk();
+  const { start, isRunning } = useWalkit();
   const tourStarted = useRef(false);
   const [activeSection, setActiveSection] = useState("profile");
 
@@ -93,7 +93,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
 
         <div className={styles.content}>
           {/* Profile */}
-          <WalkStep {...SETTINGS_STEPS.PROFILE}>
+          <WalkitStep {...SETTINGS_STEPS.PROFILE}>
             <section className={`card ${styles.section}`}>
               <h2 className={styles.sectionTitle}>Profile</h2>
               <div className={styles.profileRow}>
@@ -115,10 +115,10 @@ export function Settings({ onBack }: { onBack: () => void }) {
                 </button>
               </div>
             </section>
-          </WalkStep>
+          </WalkitStep>
 
           {/* Notifications */}
-          <WalkStep {...SETTINGS_STEPS.NOTIFS}>
+          <WalkitStep {...SETTINGS_STEPS.NOTIFS}>
             <section className={`card ${styles.section}`}>
               <h2 className={styles.sectionTitle}>Notifications</h2>
               <div className={styles.toggleList}>
@@ -137,10 +137,10 @@ export function Settings({ onBack }: { onBack: () => void }) {
                 ))}
               </div>
             </section>
-          </WalkStep>
+          </WalkitStep>
 
           {/* Appearance */}
-          <WalkStep {...SETTINGS_STEPS.THEME}>
+          <WalkitStep {...SETTINGS_STEPS.THEME}>
             <section className={`card ${styles.section}`}>
               <h2 className={styles.sectionTitle}>Appearance</h2>
               <div className={styles.themeGrid}>
@@ -149,10 +149,10 @@ export function Settings({ onBack }: { onBack: () => void }) {
                 ))}
               </div>
             </section>
-          </WalkStep>
+          </WalkitStep>
 
           {/* Billing */}
-          <WalkStep {...SETTINGS_STEPS.BILLING}>
+          <WalkitStep {...SETTINGS_STEPS.BILLING}>
             <section className={`card ${styles.section}`}>
               <h2 className={styles.sectionTitle}>Plan & Billing</h2>
               <div className={styles.planRow}>
@@ -165,10 +165,10 @@ export function Settings({ onBack }: { onBack: () => void }) {
                 </button>
               </div>
             </section>
-          </WalkStep>
+          </WalkitStep>
 
           {/* runilib libs */}
-          <WalkStep {...SETTINGS_STEPS.LIBS}>
+          <WalkitStep {...SETTINGS_STEPS.LIBS}>
             <section className={`card ${styles.section} ${styles.libsSection}`}>
               <h2 className={styles.sectionTitle}>⚡ Powered by runilib</h2>
               <p className={styles.libsDesc}>
@@ -224,7 +224,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
                 ))}
               </div>
             </section>
-          </WalkStep>
+          </WalkitStep>
         </div>
       </main>
     </div>

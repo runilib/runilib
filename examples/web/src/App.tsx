@@ -1,4 +1,4 @@
-import { WalkProvider } from "@runilib/react-walkit";
+import { WalkitProvider } from "@runilib/react-walkit";
 import { useState } from "react";
 import { Dashboard } from "./pages/Dashboard";
 import { Settings } from "./pages/Settings";
@@ -10,7 +10,7 @@ export default function App() {
   const [page, setPage] = useState<Page>("dashboard");
 
   return (
-    <WalkProvider
+    <WalkitProvider
       animationType="bounce"
       overlayColor="rgba(10,9,7,0.82)"
       spotlightPadding={10}
@@ -21,7 +21,7 @@ export default function App() {
       onStart={() => console.log("[@runilib/react-walkit]:onStart tour started")}
       onStop={() => console.log("[@runilib/react-walkit]:onStop tour ended")}
       onStepChange={(step, i) =>
-        console.log(`[@runilib/react-walkit]:onStepChange step ${i + 1}: ${step.name}`)
+        console.log(`[@runilib/react-walkit]:onStepChange step ${i + 1}: ${step.id}`)
       }
     >
       {page === "dashboard" && (
@@ -31,6 +31,6 @@ export default function App() {
         />
       )}
       {page === "settings" && <Settings onBack={() => setPage("dashboard")} />}
-    </WalkProvider>
+    </WalkitProvider>
   );
 }

@@ -3,13 +3,13 @@
 > This repository is a read-only mirror of the package maintained in the main Runilib monorepo.  
 > Please open code contributions in the main monorepo. 
 
-# runilib/react-walkit
+# @runilib/react-walkit
 
 > Cross-platform onboarding & guided tour — **same TypeScript API on React (web) and React Native**.  
 > No code changes needed when switching platforms.
 
-[![npm version](https://img.shields.io/npm/v/universal-copilot.svg)](https://www.npmjs.com/package/universal-copilot)
-[![license](https://img.shields.io/npm/l/universal-copilot.svg)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/@runilib/react-walkit.svg)](https://www.npmjs.com/package/@runilib/react-walkit)
+[![license](https://img.shields.io/npm/l/@runilib/react-walkit.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)](https://www.typescriptlang.org/)
 [![platform](https://img.shields.io/badge/platform-web%20%7C%20react--native-brightgreen.svg)]()
 
@@ -22,7 +22,7 @@
 | ✅  | **Truly cross-platform** — one API for React web and React Native    |
 | 🎨  | **6 animation types** — `fade` `slide` `zoom` `bounce` `flip` `glow` |
 | 🔦  | **Animated SVG spotlight** — smooth cutout around your elements      |
-| 💅  | **Fully themeable** — colors, shapes, labels, custom react-walkit         |
+| 💅  | **Fully themeable** — colors, shapes, labels, custom @runilib/react-walkit         |
 | 🧩  | **TypeScript-first** — 100% typed, no `any` in public API            |
 | 🧪  | **Tested** — unit tests for all core logic                           |
 | 💡  | **Zero config** — works out of the box                               |
@@ -32,9 +32,9 @@
 ## Installation
 
 ```bash
-npm install universal-copilot
+npm install @runilib/react-walkit
 # or
-yarn add universal-copilot
+yarn add @runilib/react-walkit
 ```
 
 ### Peer dependencies
@@ -57,35 +57,35 @@ npx expo install react-native-svg
 
 ## Quick Start
 
-### 1 — Wrap your app with `<WalkProvider>`
+### 1 — Wrap your app with `<WalkitProvider>`
 
 ```tsx
-import { WalkProvider } from 'universal-copilot';
+import { WalkitProvider } from '@runilib/react-walkit';
 
 export default function App() {
   return (
-    <WalkProvider animationType="slide">
+    <WalkitProvider animationType="slide">
       <MyScreen />
-    </WalkProvider>
+    </WalkitProvider>
   );
 }
 ```
 
-### 2 — Register steps with `<WalkStep>`
+### 2 — Register steps with `<WalkitStep>`
 
 ```tsx
-import { WalkStep } from 'universal-copilot';
+import { WalkitStep } from '@runilib/react-walkit';
 
 function MyScreen() {
   return (
     <View>
-      <WalkStep name="logo" order={1} title="Welcome!" text="This is our app.">
+      <WalkitStep name="logo" order={1} title="Welcome!" text="This is our app.">
         <Image source={logo} />
-      </WalkStep>
+      </WalkitStep>
 
-      <WalkStep name="search" order={2} title="Search" text="Find anything here.">
+      <WalkitStep name="search" order={2} title="Search" text="Find anything here.">
         <TextInput placeholder="Search…" />
-      </WalkStep>
+      </WalkitStep>
 
       <StartButton />
     </View>
@@ -93,13 +93,13 @@ function MyScreen() {
 }
 ```
 
-### 3 — Control the tour with `useWalk`
+### 3 — Control the tour with `useWalkit`
 
 ```tsx
-import { useWalk } from 'universal-copilot';
+import { useWalkit } from '@runilib/react-walkit';
 
 function StartButton() {
-  const { start } = useWalk();
+  const { start } = useWalkit();
   return <Button onPress={() => start()} title="Start Tour" />;
 }
 ```
@@ -108,24 +108,24 @@ function StartButton() {
 
 ## Props Reference
 
-### `<WalkProvider>`
+### `<WalkitProvider>`
 
 | Prop                    | Type                    | Default                 | Description                                |
 | ----------------------- | ----------------------- | ----------------------- | ------------------------------------------ |
 | `animationType`         | `AnimationType`         | `'slide'`               | Tooltip entrance animation                 |
-| `theme`                 | `WalkTheme`          | —                       | Color overrides                            |
-| `tooltipStyle`          | `object`                | —                       | Extra styles on the react-walkit container      |
+| `theme`                 | `WalkitTheme`          | —                       | Color overrides                            |
+| `tooltipStyle`          | `object`                | —                       | Extra styles on the @runilib/react-walkit container      |
 | `overlayColor`          | `string`                | `'rgba(15,15,25,0.72)'` | Backdrop RGBA color                        |
 | `spotlightPadding`      | `number`                | `8`                     | Extra space around the highlighted element |
 | `spotlightBorderRadius` | `number`                | `8`                     | Corner radius of the spotlight cutout      |
 | `stopOnOutsideClick`         | `boolean`               | `false`                 | Close the tour when clicking the backdrop  |
 | `labels`                | `TooltipLabels`         | —                       | Override button labels                     |
-| `renderPopover`         | `(props) => ReactNode`  | —                       | Fully custom react-walkit renderer              |
+| `renderPopover`         | `(props) => ReactNode`  | —                       | Fully custom @runilib/react-walkit renderer              |
 | `onStart`               | `() => void`            | —                       | Called when the tour starts                |
 | `onStop`                | `() => void`            | —                       | Called when the tour ends                  |
 | `onStepChange`          | `(step, index) => void` | —                       | Called on each step change                 |
 
-### `<WalkStep>`
+### `<WalkitStep>`
 
 | Prop        | Type               | Default      | Description                   |
 | ----------- | ------------------ | ------------ | ----------------------------- |
@@ -133,10 +133,10 @@ function StartButton() {
 | `order`     | `number`           | **required** | Display order (ascending)     |
 | `title`     | `string`           | —            | Tooltip title                 |
 | `text`      | `string`           | —            | Tooltip description           |
-| `placement` | `Placement` | `'auto'`     | Preferred react-walkit side        |
+| `placement` | `Placement` | `'auto'`     | Preferred @runilib/react-walkit side        |
 | `active`    | `boolean`          | `true`       | Set `false` to skip this step |
 
-### `useWalk()` — return values
+### `useWalkit()` — return values
 
 | Property           | Type                               | Description                          |
 | ------------------ | ---------------------------------- | ------------------------------------ |
@@ -170,7 +170,7 @@ type AnimationType = 'fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glow';
 | `glow`   | Scale + glow shadow                    |
 
 ```tsx
-<WalkProvider animationType="bounce">
+<WalkitProvider animationType="bounce">
 ```
 
 ---
@@ -178,11 +178,11 @@ type AnimationType = 'fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glow';
 ## Theming
 
 ```tsx
-<WalkProvider
+<WalkitProvider
   theme={{
     primary:      '#10b981',  // button + active dot
     primaryText:  '#ffffff',
-    background:   '#1e1e2e',  // react-walkit background (dark mode)
+    background:   '#1e1e2e',  // @runilib/react-walkit background (dark mode)
     text:         '#f9fafb',
     subtext:      '#9ca3af',
     border:       '#374151',
@@ -196,12 +196,12 @@ All keys are optional — unset keys fall back to the built-in defaults.
 
 ## Custom Tooltip
 
-Replace the default react-walkit with your own UI:
+Replace the default @runilib/react-walkit with your own UI:
 
 ```tsx
-import type { RenderTooltipProps } from 'universal-copilot';
+import type { RenderTooltipProps } from '@runilib/react-walkit';
 
-<WalkProvider
+<WalkitProvider
   renderPopover={({ step, stepIndex, totalSteps, onNext, onPrev, onStop }: RenderTooltipProps) => (
     <View style={styles.myTooltip}>
       <Text>{step.title}</Text>
@@ -218,7 +218,7 @@ import type { RenderTooltipProps } from 'universal-copilot';
 ## Label overrides
 
 ```tsx
-<WalkProvider
+<WalkitProvider
   labels={{
     next:   'Suivant →',
     prev:   '← Retour',
@@ -235,7 +235,7 @@ import type { RenderTooltipProps } from 'universal-copilot';
 ```tsx
 const { isAdmin } = useUser();
 
-<WalkStep
+<WalkitStep
   name="admin-panel"
   order={4}
   title="Admin Panel"
@@ -243,7 +243,7 @@ const { isAdmin } = useUser();
   active={isAdmin} // skipped when false
 >
   <AdminButton />
-</WalkStep>;
+</WalkitStep>;
 ```
 
 ---
@@ -251,7 +251,7 @@ const { isAdmin } = useUser();
 ## Start from a specific step
 
 ```tsx
-const { start } = useWalk();
+const { start } = useWalkit();
 
 // Jump directly to a named step
 <Button onPress={() => start('settings')} title="Show Settings Step" />;
@@ -263,7 +263,7 @@ const { start } = useWalk();
 
 ```tsx
 function TourBar() {
-  const { isRunning, currentIndex, totalSteps, currentStep, next, prev, stop } = useWalk();
+  const { isRunning, currentIndex, totalSteps, currentStep, next, prev, stop } = useWalkit();
 
   if (!isRunning) return null;
 
@@ -285,7 +285,7 @@ function TourBar() {
 ## Event callbacks
 
 ```tsx
-<WalkProvider
+<WalkitProvider
   onStart={() => analytics.track('tour_started')}
   onStop={() => analytics.track('tour_ended')}
   onStepChange={(step, index) =>
@@ -311,7 +311,7 @@ type Placement = 'auto' | 'top' | 'bottom' | 'left' | 'right';
 **React Native:**
 
 - `react-native-svg` is **required** for the spotlight effect.
-- `<WalkStep>` wraps the child in an extra `<View collapsable={false}>`. Override layout with a parent style if needed.
+- `<WalkitStep>` wraps the child in an extra `<View collapsable={false}>`. Override layout with a parent style if needed.
 - On Android, set `<StatusBar translucent>` so the overlay covers the status bar.
 
 **Web:**

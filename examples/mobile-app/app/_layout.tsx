@@ -1,14 +1,14 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { WalkProvider } from '@runilib/react-walkit';
+import { WalkitProvider } from '@runilib/react-walkit';
 import { TOUR_THEME, TOUR_LABELS } from '../tourConfig';
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" backgroundColor="#f9f5ee" />
-      <WalkProvider
+      <WalkitProvider
         animationType="bounce"
         overlayColor="rgba(20,16,10,0.80)"
         spotlightPadding={0}
@@ -21,7 +21,7 @@ export default function RootLayout() {
         onStepChange={(step, i) => console.log(`[@runilib/react-walkit] step ${i + 1}: ${step.id}`)}
       >
         <Stack screenOptions={{ headerShown: false }} />
-      </WalkProvider>
+      </WalkitProvider>
     </SafeAreaProvider>
   );
 }

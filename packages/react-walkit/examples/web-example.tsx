@@ -4,17 +4,18 @@
  * Illustrates a full onboarding tour on a dashboard page.
  *
  * Install:
- *   npm install universal-copilot react react-dom
+ *   npm install @runilib/react-walkit react react-dom
  */
 
-import React from 'react';
 import type { CSSProperties } from 'react';
-import { WalkProvider, WalkStep, useWalk } from '@runilib/react-walkit';
+import React from 'react';
+
+import { useWalkit, WalkitProvider, WalkitStep } from '@runilib/react-walkit';
 
 // ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
-    <WalkProvider
+    <WalkitProvider
       animationType="bounce"
       overlayColor="rgba(10,10,20,0.78)"
       spotlightPadding={10}
@@ -32,91 +33,127 @@ export default function App() {
       onStepChange={(step, index) => console.log(`Step ${index + 1}: ${step.id}`)}
     >
       <Dashboard />
-    </WalkProvider>
+    </WalkitProvider>
   );
 }
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function Dashboard() {
-  const { start } = useWalk();
+  const { start } = useWalkit();
 
   return (
     <div style={styles.page}>
       {/* Header */}
-      <WalkStep
+      <WalkitStep
         id="header"
         order={1}
         title="Welcome to your Dashboard 👋"
-        text="All your key metrics and tools are available right from here."
+        content="All your key metrics and tools are available right from here."
         placement="bottom"
       >
         <header style={styles.header}>
           <h1 style={styles.logo}>MyApp</h1>
           <nav style={styles.nav}>
-            <a href="#" style={styles.navLink}>
+            <a
+              href="/"
+              style={styles.navLink}
+            >
               Home
             </a>
-            <a href="#" style={styles.navLink}>
+            <a
+              href="/"
+              style={styles.navLink}
+            >
               Reports
             </a>
           </nav>
         </header>
-      </WalkStep>
+      </WalkitStep>
 
       <main style={styles.main}>
         {/* Search */}
-        <WalkStep
+        <WalkitStep
           id="search"
           order={2}
           title="🔍 Search"
-          text="Quickly find any content, user, or report across the whole app."
+          content="Quickly find any content, user, or report across the whole app."
           placement="bottom"
         >
-          <input style={styles.search} placeholder="Search anything…" />
-        </WalkStep>
+          <input
+            style={styles.search}
+            placeholder="Search anything…"
+          />
+        </WalkitStep>
 
         {/* Stats */}
-        <WalkStep
+        <WalkitStep
           id="stats"
           order={3}
           title="📊 Your Stats"
-          text="Monitor your daily and monthly KPIs at a glance. Data refreshes every hour."
+          content="Monitor your daily and monthly KPIs at a glance. Data refreshes every hour."
           placement="bottom"
         >
           <div style={styles.statsRow}>
-            <StatCard label="Users" value="12,430" trend="+8%" />
-            <StatCard label="Revenue" value="$41,200" trend="+12%" />
-            <StatCard label="Tasks" value="94" trend="-3%" negative />
+            <StatCard
+              label="Users"
+              value="12,430"
+              trend="+8%"
+            />
+            <StatCard
+              label="Revenue"
+              value="$41,200"
+              trend="+12%"
+            />
+            <StatCard
+              label="Tasks"
+              value="94"
+              trend="-3%"
+              negative
+            />
           </div>
-        </WalkStep>
+        </WalkitStep>
 
         {/* Actions */}
         <div style={styles.actions}>
-          <WalkStep
+          <WalkitStep
             id="export"
             order={4}
             title="📥 Export"
-            text="Download your data as CSV or PDF with one click."
+            content="Download your data as CSV or PDF with one click."
             placement="top"
           >
-            <button style={styles.btnSecondary}>Export</button>
-          </WalkStep>
+            <button
+              type="button"
+              style={styles.btnSecondary}
+            >
+              Export
+            </button>
+          </WalkitStep>
 
-          <WalkStep
+          <WalkitStep
             id="new-report"
             order={5}
             title="✨ New Report"
-            text="Create a custom report with the metrics that matter most to you."
+            content="Create a custom report with the metrics that matter most to you."
             placement="top"
           >
-            <button style={styles.btnPrimary}>+ New Report</button>
-          </WalkStep>
+            <button
+              type="button"
+              style={styles.btnPrimary}
+            >
+              + New Report
+            </button>
+          </WalkitStep>
         </div>
 
         {/* Start tour */}
         <div style={{ marginTop: 40, display: 'flex', gap: 12 }}>
-          <button onClick={() => start()} style={styles.tourBtn}>
+          <button
+            type="button"
+            onClick={() => start()}
+            style={styles.tourBtn}
+          >
             🚀 Start Tour
           </button>
           <AnimationShowcase />
@@ -137,6 +174,7 @@ function AnimationShowcase() {
       <span style={{ fontSize: 13, color: '#6b7280' }}>Animation:</span>
       {ANIMATIONS.map((a) => (
         <button
+          type="button"
           key={a}
           onClick={() => setSelected(a)}
           style={{
@@ -163,17 +201,19 @@ function StatCard({
   value,
   trend,
   negative = false,
-}: {
+}: Readonly<{
   label: string;
   value: string;
   trend: string;
   negative?: boolean;
-}) {
+}>) {
   return (
     <div style={styles.card}>
       <p style={styles.cardValue}>{value}</p>
       <p style={styles.cardLabel}>{label}</p>
-      <span style={{ ...styles.cardTrend, color: negative ? '#ef4444' : '#10b981' }}>{trend}</span>
+      <span style={{ ...styles.cardTrend, color: negative ? '#ef4444' : '#10b981' }}>
+        {trend}
+      </span>
     </div>
   );
 }
@@ -193,8 +233,14 @@ export function AppWithCustomTooltip() {
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
         <strong style={{ fontSize: 14, color: '#1e1e2e' }}>{step.title}</strong>
         <button
+          type="button"
           onClick={onStop}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: '#9ca3af',
+          }}
         >
           ✕
         </button>
@@ -202,13 +248,16 @@ export function AppWithCustomTooltip() {
       {step.text && (
         <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 12px' }}>{step.text}</p>
       )}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+      >
         <span style={{ fontSize: 12, color: '#9ca3af' }}>
           {stepIndex + 1} / {totalSteps}
         </span>
         <div style={{ display: 'flex', gap: 8 }}>
           {stepIndex > 0 && (
             <button
+              type="button"
               onClick={onPrev}
               style={{
                 fontSize: 12,
@@ -223,6 +272,7 @@ export function AppWithCustomTooltip() {
             </button>
           )}
           <button
+            type="button"
             onClick={onNext}
             style={{
               fontSize: 12,
@@ -242,9 +292,9 @@ export function AppWithCustomTooltip() {
   );
 
   return (
-    <WalkProvider renderPopover={renderPopover}>
+    <WalkitProvider renderPopover={renderPopover}>
       <Dashboard />
-    </WalkProvider>
+    </WalkitProvider>
   );
 }
 

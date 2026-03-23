@@ -1,9 +1,12 @@
-import { act, render } from "@testing-library/react";
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
-import { StepwiseContextProvider, useStepwiseContext } from "../../src/context/StepwiseContext";
-import { useStepwise } from "../../src/hooks/useStepwise";
-import type { StepwiseContextValue, StepwiseStepData, UseStepwiseReturn } from "../types";
+import { act, render } from '@testing-library/react';
+import {
+  StepwiseContextProvider,
+  useStepwiseContext,
+} from '../../src/context/StepwiseContext';
+import { useStepwise } from '../../src/hooks/useStepwise';
+import type { StepwiseContextValue, StepwiseStepData, UseStepwiseReturn } from '../types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -13,7 +16,7 @@ function makeStep(name: string, order: number): StepwiseStepData {
     order,
     title: `Title ${order}`,
     text: `Text ${order}`,
-    placement: "auto",
+    placement: 'auto',
     measure: () => Promise.resolve({ x: 0, y: 0, width: 80, height: 40 }),
   };
 }
@@ -50,7 +53,7 @@ async function setup(config = {}) {
             ctx = c;
           }}
         />
-      </StepwiseContextProvider>
+      </StepwiseContextProvider>,
     );
   });
 
@@ -59,27 +62,27 @@ async function setup(config = {}) {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe("useWalk", () => {
-  it("defaults: isRunning=false, totalSteps=0", async () => {
+describe('useWalkit', () => {
+  it('defaults: isRunning=false, totalSteps=0', async () => {
     const { getApi } = await setup();
     expect(getApi().isRunning).toBe(false);
     expect(getApi().totalSteps).toBe(0);
     expect(getApi().currentStep).toBeNull();
   });
 
-  it("start() sets isRunning=true", async () => {
+  it('start() sets isRunning=true', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
+      getCtx().registerStep(makeStep('a', 1));
       await getApi().start();
     });
     expect(getApi().isRunning).toBe(true);
   });
 
-  it("stop() sets isRunning=false", async () => {
+  it('stop() sets isRunning=false', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
+      getCtx().registerStep(makeStep('a', 1));
       await getApi().start();
     });
     act(() => {
@@ -88,46 +91,46 @@ describe("useWalk", () => {
     expect(getApi().isRunning).toBe(false);
   });
 
-  it("isFirstStep=true and isLastStep=true when only one step", async () => {
+  it('isFirstStep=true and isLastStep=true when only one step', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("only", 1));
+      getCtx().registerStep(makeStep('only', 1));
       await getApi().start();
     });
     expect(getApi().isFirstStep).toBe(true);
     expect(getApi().isLastStep).toBe(true);
   });
 
-  it("isLastStep=false when more steps remain", async () => {
+  it('isLastStep=false when more steps remain', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
-      getCtx().registerStep(makeStep("b", 2));
+      getCtx().registerStep(makeStep('a', 1));
+      getCtx().registerStep(makeStep('b', 2));
       await getApi().start();
     });
     expect(getApi().isFirstStep).toBe(true);
     expect(getApi().isLastStep).toBe(false);
   });
 
-  it("next() advances currentIndex", async () => {
+  it('next() advances currentIndex', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
-      getCtx().registerStep(makeStep("b", 2));
+      getCtx().registerStep(makeStep('a', 1));
+      getCtx().registerStep(makeStep('b', 2));
       await getApi().start();
     });
     await act(async () => {
       getApi().next();
     });
     expect(getApi().currentIndex).toBe(1);
-    expect(getApi().currentStep?.name).toBe("b");
+    expect(getApi().currentStep?.name).toBe('b');
   });
 
-  it("prev() decrements currentIndex", async () => {
+  it('prev() decrements currentIndex', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
-      getCtx().registerStep(makeStep("b", 2));
+      getCtx().registerStep(makeStep('a', 1));
+      getCtx().registerStep(makeStep('b', 2));
       await getApi().start();
     });
     await act(async () => {
@@ -139,12 +142,12 @@ describe("useWalk", () => {
     expect(getApi().currentIndex).toBe(0);
   });
 
-  it("goTo() jumps directly to the index", async () => {
+  it('goTo() jumps directly to the index', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
-      getCtx().registerStep(makeStep("b", 2));
-      getCtx().registerStep(makeStep("c", 3));
+      getCtx().registerStep(makeStep('a', 1));
+      getCtx().registerStep(makeStep('b', 2));
+      getCtx().registerStep(makeStep('c', 3));
       await getApi().start();
     });
     await act(async () => {
@@ -154,31 +157,31 @@ describe("useWalk", () => {
     expect(getApi().isLastStep).toBe(true);
   });
 
-  it("totalSteps reflects registered steps", async () => {
+  it('totalSteps reflects registered steps', async () => {
     const { getApi, getCtx } = await setup();
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
-      getCtx().registerStep(makeStep("b", 2));
-      getCtx().registerStep(makeStep("c", 3));
+      getCtx().registerStep(makeStep('a', 1));
+      getCtx().registerStep(makeStep('b', 2));
+      getCtx().registerStep(makeStep('c', 3));
     });
     expect(getApi().totalSteps).toBe(3);
   });
 
-  it("calls onStart when tour starts", async () => {
+  it('calls onStart when tour starts', async () => {
     const onStart = jest.fn();
     const { getApi, getCtx } = await setup({ onStart });
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
+      getCtx().registerStep(makeStep('a', 1));
       await getApi().start();
     });
     expect(onStart).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onStop when tour stops", async () => {
+  it('calls onStop when tour stops', async () => {
     const onStop = jest.fn();
     const { getApi, getCtx } = await setup({ onStop });
     await act(async () => {
-      getCtx().registerStep(makeStep("a", 1));
+      getCtx().registerStep(makeStep('a', 1));
       await getApi().start();
     });
     act(() => {
@@ -187,13 +190,13 @@ describe("useWalk", () => {
     expect(onStop).toHaveBeenCalledTimes(1);
   });
 
-  it("throws when used outside WalkProvider", () => {
-    const spy = jest.spyOn(console, "error").mockImplementation(() => {});
+  it('throws when used outside WalkitProvider', () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
     function Broken() {
       useStepwise();
       return null;
     }
-    expect(() => render(<Broken />)).toThrow("[universal-copilot]");
+    expect(() => render(<Broken />)).toThrow('[universal-copilot]');
     spy.mockRestore();
   });
 });

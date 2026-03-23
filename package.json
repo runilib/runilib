@@ -9,24 +9,57 @@
     "packages/*"
   ],
   "scripts": {
+    "prepare": "husky",
+    "dev": "turbo run dev --parallel",
     "build": "turbo run build",
-    "build:packages": "turbo run build --filter='./packages/*'",
-    "dev": "yarn build:packages && turbo run dev --parallel",
     "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "check": "turbo run check",
+    "check:fix": "turbo run check:fix",
     "typecheck": "turbo run typecheck",
-    "clean": "turbo run clean && rimraf node_modules .turbo",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch --parallel",
+    "test:coverage": "turbo run test:coverage",
+    "clean": "turbo run clean",
+    "biome": "biome",
+    "biome:lint": "yarn exec biome lint .",
+    "biome:lint:fix": "yarn exec biome lint --write .",
+    "biome:format": "yarn exec biome format --write .",
+    "biome:check": "yarn exec biome check .",
+    "biome:check:fix": "yarn exec biome check --write .",
+    "biome:ci": "yarn exec biome ci .",
+    "format": "turbo run format",
+    "ts:build": "tsc -b",
+    "ts:build:watch": "tsc -b --watch",
+    "commitlint": "commitlint --from=HEAD~1 --to=HEAD",
+    "build:packages": "turbo run build --filter='./packages/*'",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
     "changeset:status": "changeset status"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css,scss,html}": [
+      "yarn exec biome check --write --no-errors-on-unmatched"
+    ]
+  },
   "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.7",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitest/coverage-v8": "^4.1.1",
+    "husky": "^9.1.7",
+    "jsdom": "^29.0.1",
+    "lint-staged": "^16.4.0",
     "rimraf": "^6.0.1",
     "tsup": "^8.5.0",
-    "turbo": "^2.5.8",
-    "typescript": "^5.9.2"
+    "turbo": "^2.8.20",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.1"
   },
   "resolutions": {
     "react-native-svg": "15.12.1"

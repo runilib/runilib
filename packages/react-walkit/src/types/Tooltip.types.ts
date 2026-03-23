@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-export type TooltipPlacement = "auto" | "top" | "bottom" | "left" | "right";
+export type TooltipPlacement = 'auto' | 'top' | 'bottom' | 'left' | 'right';
 
 export type TooltipApi = {
   start: () => void;

@@ -1,6 +1,11 @@
-import { WebOverlay } from "../walk/web/Overlay.web";
-import { type BridgeProps, WalkOverlayBridgeShared } from "./WalkOverlayBridge.shared";
+import { WebOverlay } from '../walkit/web/Overlay.web';
+import { type BridgeProps, SharedWalkitOverlayBridge } from './SharedWalkitOverlayBridge';
 
-export const WalkOverlayBridge = (props: BridgeProps) => {
-  return <WalkOverlayBridgeShared {...props} OverlayComponent={WebOverlay} />;
+export const WalkitOverlayBridge = (props: BridgeProps) => {
+  return (
+    <SharedWalkitOverlayBridge
+      {...props}
+      OverlayComponent={WebOverlay}
+    />
+  );
 };

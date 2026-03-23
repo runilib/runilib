@@ -223,7 +223,7 @@ export const fr: Translations = {
       subtitle: 'Ces issues sont bien délimitées, documentées et idéales pour se familiariser avec le code.',
       items: [
         { tag: 'good first issue', title: 'Ajouter la locale japonaise à formbridge',       desc: 'Ajouter le pack de locale ja avec tous les messages de validation traduits.',              color: 'teal'   },
-        { tag: 'good first issue', title: 'stepwise : ajouter l\'animation slide-left',     desc: 'Implémenter une variante slide-depuis-la-gauche pour animationType de CopilotProvider.', color: 'amber'  },
+        { tag: 'good first issue', title: 'stepwise : ajouter l\'animation slide-left',     desc: 'Implémenter une variante slide-depuis-la-gauche pour animationType de WalkitProvider.', color: 'amber'  },
         { tag: 'good first issue', title: 'tooltip : data-testid sur tous les composants',  desc: 'Ajouter des props data-testid à Tooltip et TooltipContent pour faciliter les tests.',     color: 'teal'   },
         { tag: 'help wanted',      title: 'formbridge : résolveur Valibot',                 desc: 'Implémenter un adaptateur de résolveur pour la librairie de validation Valibot.',          color: 'blue'   },
         { tag: 'help wanted',      title: 'stepwise : adaptateur Expo Router',              desc: 'Construire un adaptateur de navigation pour les tours multi-écrans avec Expo Router.',     color: 'amber'  },

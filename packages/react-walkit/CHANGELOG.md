@@ -10,9 +10,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — versioning:
 ### Added
 
 - ✅ Initial release
-- `<WalkProvider>` — wraps the app, hosts state and the overlay
+- `<WalkitProvider>` — wraps the app, hosts state and the overlay
 - `<react-walkit>` — registers elements as tour steps, cross-platform
-- `useWalk()` — TypeScript hook to control the tour programmatically
+- `useWalkit()` — TypeScript hook to control the tour programmatically
 - 6 animations: `fade`, `slide`, `zoom`, `bounce`, `flip`, `glow`
 - SVG animated spotlight for web (ReactDOM portal) and React Native (Modal)
 - Auto-placement engine with viewport clamping (`'auto'` mode)
@@ -20,7 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — versioning:
 - `renderPopover` prop for full custom react-walkit
 - `theme` prop for color overrides
 - `labels` prop for button label overrides
-- `active` prop on `<WalkStep>` for conditional steps
+- `active` prop on `<WalkitStep>` for conditional steps
 - `onStart`, `onStop`, `onStepChange` lifecycle callbacks
 - TypeScript-first: 100% typed source, `dist/*.d.ts` shipped
 - Full unit test suite (positioning, animations, context, hook, step)

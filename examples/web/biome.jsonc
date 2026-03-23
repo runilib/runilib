@@ -1,10 +1,12 @@
 {
-  "extends": ["@runilib/biome-config/biome"],
-  "linter": {
-    "rules": {
-      "suspicious": {
-        "noConsole": "off"
-      }
+  "root": false,
+  "extends": "//",
+  "files": {
+    "includes": ["src/**", "vite.config.ts"]
+  },
+  "javascript": {
+    "formatter": {
+      "lineWidth": 90
     }
   }
 }

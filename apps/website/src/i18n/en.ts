@@ -224,7 +224,7 @@ export const en: Translations = {
       subtitle: 'These issues are well-scoped, documented, and a great way to get familiar with the codebase.',
       items: [
         { tag: 'good first issue', title: 'Add Japanese locale to formbridge',          desc: 'Add ja locale pack with all validation messages translated.',                   color: 'teal'   },
-        { tag: 'good first issue', title: 'stepwise: add slide-left animation',         desc: 'Implement a slide-from-left variant for CopilotProvider animationType.',       color: 'amber'  },
+        { tag: 'good first issue', title: 'stepwise: add slide-left animation',         desc: 'Implement a slide-from-left variant for WalkitProvider animationType.',       color: 'amber'  },
         { tag: 'good first issue', title: 'tooltip: add data-testid to all components', desc: 'Add data-testid props to Tooltip, TooltipContent for easier testing.',         color: 'teal'   },
         { tag: 'help wanted',      title: 'formbridge: Valibot resolver',                desc: 'Implement a resolver adapter for Valibot schema validation library.',          color: 'blue'   },
         { tag: 'help wanted',      title: 'stepwise: Expo Router adapter',              desc: 'Build a navigation adapter for Expo Router multi-screen tours.',               color: 'amber'  },

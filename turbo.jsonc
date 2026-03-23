@@ -1,0 +1,68 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+
+  "globalDependencies": [
+    "package.json",
+    "yarn.lock",
+    "tsconfig.base.json",
+    "biome.jsonc",
+    "vitest.workspace.ts",
+    "vitest.shared.ts"
+  ],
+
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "!.next/cache/**",
+        "lib/**"
+      ]
+    },
+
+    // Dev = tâche longue, pas de cache
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+
+    // Lint et check: pas de cache de fichiers générés
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "cache": false,
+      "outputs": []
+    },
+    "check": {
+      "outputs": []
+    },
+    "check:fix": {
+      "cache": false,
+      "outputs": []
+    },
+
+    // Typecheck
+    "typecheck": {
+      "outputs": []
+    },
+
+    // Tests
+    "test": {
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "test:coverage": {
+      "outputs": ["coverage/**"]
+    },
+
+    "clean": {
+      "cache": false
+    }
+  }
+}

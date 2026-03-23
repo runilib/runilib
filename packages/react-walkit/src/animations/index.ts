@@ -1,4 +1,4 @@
-import type { AnimationType, Placement } from "../types/Walk.types";
+import type { AnimationType, Placement } from '../types/Walkit.types';
 
 // ─── Web CSS keyframes ────────────────────────────────────────────────────────
 
@@ -48,27 +48,30 @@ export const WEB_KEYFRAMES = `
 `;
 
 /** Returns the CSS `animation` value for the react-walkit entrance. */
-export function getWebAnimation(type: AnimationType, placement: Placement = "bottom"): string {
-  const duration = type === "bounce" ? "0.5s" : "0.3s";
-  const easing = type === "bounce" ? "cubic-bezier(0.34,1.56,0.64,1)" : "ease-out";
+export function getWebAnimation(
+  type: AnimationType,
+  placement: Placement = 'bottom',
+): string {
+  const duration = type === 'bounce' ? '0.5s' : '0.3s';
+  const easing = type === 'bounce' ? 'cubic-bezier(0.34,1.56,0.64,1)' : 'ease-out';
 
   const keyframeMap: Record<AnimationType, string> = {
-    fade: "runilib-react-walkit-fade",
-    zoom: "runilib-react-walkit-zoom",
-    bounce: "runilib-react-walkit-bounce",
-    flip: "runilib-react-walkit-flip",
-    glow: "runilib-react-walkit-glow",
+    fade: 'runilib-react-walkit-fade',
+    zoom: 'runilib-react-walkit-zoom',
+    bounce: 'runilib-react-walkit-bounce',
+    flip: 'runilib-react-walkit-flip',
+    glow: 'runilib-react-walkit-glow',
     slide:
-      placement === "top"
-        ? "runilib-react-walkit-slide-up"
-        : placement === "left"
-          ? "runilib-react-walkit-slide-right"
-          : placement === "right"
-            ? "runilib-react-walkit-slide-left"
-            : "runilib-react-walkit-slide",
+      placement === 'top'
+        ? 'runilib-react-walkit-slide-up'
+        : placement === 'left'
+          ? 'runilib-react-walkit-slide-right'
+          : placement === 'right'
+            ? 'runilib-react-walkit-slide-left'
+            : 'runilib-react-walkit-slide',
   };
 
-  return `${keyframeMap[type] ?? "runilib-react-walkit-fade"} ${duration} ${easing} both`;
+  return `${keyframeMap[type] ?? 'runilib-react-walkit-fade'} ${duration} ${easing} both`;
 }
 
 // ─── Native animation configs ─────────────────────────────────────────────────
@@ -101,9 +104,11 @@ export const NATIVE_ANIMATIONS: Record<AnimationType, NativeAnimationConfig> = {
   flip: {
     useSpring: false,
     duration: 320,
-    rotateX: { from: "-20deg", to: "0deg" },
+    rotateX: { from: '-20deg', to: '0deg' },
   },
   glow: { useSpring: false, duration: 350, scale: { from: 0.9, to: 1 } },
 };
 
-export const ANIMATION_TYPES: AnimationType[] = Object.keys(NATIVE_ANIMATIONS) as AnimationType[];
+export const ANIMATION_TYPES: AnimationType[] = Object.keys(
+  NATIVE_ANIMATIONS,
+) as AnimationType[];

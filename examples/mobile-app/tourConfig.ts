@@ -1,4 +1,4 @@
-import type { WalkStepProps } from '@runilib/react-walkit';
+import type { WalkitStepProps } from '@runilib/react-walkit';
 
 export const TOUR_THEME = {
   primary:      '#e8a020',
@@ -18,7 +18,7 @@ export const TOUR_LABELS = {
   close:  '✕',
 };
 
-export const STEPS: {[key in string]: WalkStepProps} = {
+export const STEPS: {[key in string]: WalkitStepProps} = {
   GREETING:   { id: 'greeting',   order: 1, title: 'Welcome to Taskflow 👋',   text: 'Your portable productivity hub. We\'ll show you the key features.' },
   ADD_TASK:   { id: 'add-task',   order: 2, title: '➕ Add tasks fast',         text: 'Tap here to create a task in seconds — with priority and due date.' },
   FILTER_BAR: { id: 'filter-bar', order: 3, title: '🔍 Quick filters',          text: 'Switch between All, Active, and Done with a single tap.' },

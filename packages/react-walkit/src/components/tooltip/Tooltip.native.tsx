@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from 'react';
 import {
   Dimensions,
   Modal,
@@ -17,14 +17,15 @@ import {
   TouchableWithoutFeedback,
   View,
   type ViewStyle,
-} from "react-native";
+} from 'react-native';
+
 import type {
   TooltipApi,
   TooltipContentApi,
   TooltipPlacement,
   TooltipProps,
-} from "../../types/Tooltip.types";
-import { computeSimpleTooltipPosition } from "../../utils/Tooltip.positioning";
+} from '../../types/Tooltip.types';
+import { computeSimpleTooltipPosition } from '../../utils/Tooltip.positioning';
 
 type NativeRect = {
   x: number;
@@ -38,7 +39,7 @@ export const Tooltip = ({
   children,
   content,
   renderContent,
-  placement = "auto",
+  placement = 'auto',
   offset = 10,
   disabled = false,
   openOnPress = false,
@@ -56,12 +57,12 @@ export const Tooltip = ({
   const [visible, setVisible] = useState(false);
   const [anchorRect, setAnchorRect] = useState<NativeRect | null>(null);
   const [shellSize, setShellSize] = useState({ width: maxWidth, height: 60 });
-  const [screenSize, setScreenSize] = useState(Dimensions.get("window"));
+  const [screenSize, setScreenSize] = useState(Dimensions.get('window'));
 
   const trigger = anchor ?? children;
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener("change", ({ window }) => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
       setScreenSize(window);
     });
 
@@ -78,7 +79,7 @@ export const Tooltip = ({
     }
 
     return new Promise((resolve) => {
-      if (typeof element.measureInWindow === "function") {
+      if (typeof element.measureInWindow === 'function') {
         element.measureInWindow((x, y, width, height) => {
           const nextRect = { x, y, width, height };
           setAnchorRect(nextRect);
@@ -120,7 +121,7 @@ export const Tooltip = ({
       toggle,
       visible,
     }),
-    [start, stop, toggle, visible]
+    [start, stop, toggle, visible],
   );
 
   const contentApi: TooltipContentApi = useMemo(
@@ -128,7 +129,7 @@ export const Tooltip = ({
       stop,
       visible,
     }),
-    [stop, visible]
+    [stop, visible],
   );
 
   const computedPosition = useMemo(() => {
@@ -142,18 +143,21 @@ export const Tooltip = ({
       placement,
       screenSize.width,
       screenSize.height,
-      offset
+      offset,
     );
   }, [visible, anchorRect, shellSize, placement, screenSize, offset]);
 
-  const renderedTrigger: ReactNode = typeof trigger === "function" ? trigger(api) : trigger;
+  const renderedTrigger: ReactNode =
+    typeof trigger === 'function' ? trigger(api) : trigger;
 
   const renderedContent = renderContent?.(contentApi) ?? content ?? null;
 
   const nativeTooltipStyle = tooltipStyle as StyleProp<ViewStyle> | undefined;
-  const nativeTriggerWrapperStyle = triggerWrapperStyle as StyleProp<ViewStyle> | undefined;
+  const nativeTriggerWrapperStyle = triggerWrapperStyle as
+    | StyleProp<ViewStyle>
+    | undefined;
 
-  const defaultBackground = extractBackgroundColor(nativeTooltipStyle) ?? "#111827";
+  const defaultBackground = extractBackgroundColor(nativeTooltipStyle) ?? '#111827';
 
   const resolvedAnchorColor = anchorColor ?? defaultBackground;
 
@@ -174,8 +178,16 @@ export const Tooltip = ({
         )}
       </View>
 
-      <Modal visible={visible} transparent animationType="fade" onRequestClose={stop}>
-        <View style={styles.modalRoot} pointerEvents="box-none">
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={stop}
+      >
+        <View
+          style={styles.modalRoot}
+          pointerEvents="box-none"
+        >
           <Pressable
             style={StyleSheet.absoluteFill}
             onPress={closeOnOutsidePress ? stop : undefined}
@@ -204,7 +216,7 @@ export const Tooltip = ({
                 renderedContent
               ) : (
                 <View style={[styles.defaultBubble, { maxWidth }, nativeTooltipStyle]}>
-                  {typeof renderedContent === "string" ? (
+                  {typeof renderedContent === 'string' ? (
                     <Text style={styles.defaultText}>{renderedContent}</Text>
                   ) : (
                     renderedContent
@@ -218,7 +230,7 @@ export const Tooltip = ({
                     computedPosition.placement,
                     computedPosition.anchorOffset,
                     anchorSize,
-                    resolvedAnchorColor
+                    resolvedAnchorColor,
                   )}
                 />
               )}
@@ -230,7 +242,9 @@ export const Tooltip = ({
   );
 };
 
-function extractBackgroundColor(style: StyleProp<ViewStyle> | undefined): string | undefined {
+function extractBackgroundColor(
+  style: StyleProp<ViewStyle> | undefined,
+): string | undefined {
   if (!style) {
     return undefined;
   }
@@ -239,77 +253,77 @@ function extractBackgroundColor(style: StyleProp<ViewStyle> | undefined): string
 
   const backgroundColor = flattenedStyle?.backgroundColor;
 
-  return typeof backgroundColor === "string" ? backgroundColor : undefined;
+  return typeof backgroundColor === 'string' ? backgroundColor : undefined;
 }
 
 function buildNativeAnchorStyle(
   placement: TooltipPlacement,
   offset: number,
   size: number,
-  color: string
+  color: string,
 ): StyleProp<ViewStyle> {
   const base: ViewStyle = {
-    position: "absolute",
+    position: 'absolute',
     width: 0,
     height: 0,
   };
 
   switch (placement) {
-    case "bottom":
+    case 'bottom':
       return [
         base,
         {
           top: -size,
           left: offset - size,
           borderLeftWidth: size,
-          borderLeftColor: "transparent",
+          borderLeftColor: 'transparent',
           borderRightWidth: size,
-          borderRightColor: "transparent",
+          borderRightColor: 'transparent',
           borderBottomWidth: size,
           borderBottomColor: color,
         },
       ];
 
-    case "top":
+    case 'top':
       return [
         base,
         {
           bottom: -size,
           left: offset - size,
           borderLeftWidth: size,
-          borderLeftColor: "transparent",
+          borderLeftColor: 'transparent',
           borderRightWidth: size,
-          borderRightColor: "transparent",
+          borderRightColor: 'transparent',
           borderTopWidth: size,
           borderTopColor: color,
         },
       ];
 
-    case "right":
+    case 'right':
       return [
         base,
         {
           top: offset - size,
           left: -size,
           borderTopWidth: size,
-          borderTopColor: "transparent",
+          borderTopColor: 'transparent',
           borderBottomWidth: size,
-          borderBottomColor: "transparent",
+          borderBottomColor: 'transparent',
           borderRightWidth: size,
           borderRightColor: color,
         },
       ];
 
-    case "left":
+    case 'left':
       return [
         base,
         {
           top: offset - size,
           right: -size,
           borderTopWidth: size,
-          borderTopColor: "transparent",
+          borderTopColor: 'transparent',
           borderBottomWidth: size,
-          borderBottomColor: "transparent",
+          borderBottomColor: 'transparent',
           borderLeftWidth: size,
           borderLeftColor: color,
         },
@@ -322,22 +336,22 @@ function buildNativeAnchorStyle(
 
 const styles = StyleSheet.create({
   triggerWrapper: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
   },
   modalRoot: {
     flex: 1,
   },
   shell: {
-    position: "absolute",
+    position: 'absolute',
   },
   defaultBubble: {
-    backgroundColor: "#111827",
+    backgroundColor: '#111827',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
   defaultText: {
-    color: "#ffffff",
+    color: '#ffffff',
     fontSize: 13,
     lineHeight: 18,
   },

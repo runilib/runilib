@@ -4,15 +4,19 @@
   "main": "expo-router/entry",
   "private": true,
   "scripts": {
-    "start": "expo start",
-    "start:clear": "yarn run start --clear",
+    "dev": "expo start --clear",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "lint": "biome ci src",
-    "lint:fix": "biome check --write src",
-    "tsc:build": "tsc -b tsconfig-build.json",
-    "tsc:check": "tsc --noEmit",
-    "tsc:watch": "tsc --noEmit --watch"
+    "build": "echo \"No production build script yet for mobile example\"",
+    "lint": "biome lint app src .",
+    "lint:fix": "biome lint --write app src .",
+    "check": "biome check app src .",
+    "check:fix": "biome check --write app src .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rimraf coverage .expo"
   },
   "dependencies": {
     "@runilib/react-walkit": "workspace:*",
@@ -30,9 +34,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
-    "@biomejs/biome": "2.3.9",
-    "@runilib/biome-config": "workspace:*",
+    "@biomejs/biome": "^2.4.8",
     "@types/react": "~19.1.10",
-    "typescript": "^5.3.0"
+    "@vitest/coverage-v8": "^4.1.1",
+    "typescript": "^5.3.0",
+    "vitest": "^4.1.1"
   }
 }

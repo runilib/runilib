@@ -1,3 +1,4 @@
+import type { WalkitStepProps } from "@runilib/react-walkit";
 
 export const TOUR_THEME = {
   primaryButtonColor: "#f0a500",
@@ -18,49 +19,49 @@ export const TOUR_LABELS = {
 
 /**
  * All tour steps defined centrally.
- * Each key matches the `name` prop on <WalkStep>.
+ * Each key matches the `name` prop on <WalkitStep>.
  */
-export const STEPS = {
+export const STEPS: {[key in string]: WalkitStepProps} = {
   HEADER: {
-    name: "header",
+    id: "header",
     order: 1,
     title: "Welcome to Taskflow 👋",
-    text: "Your personal productivity command center. Let us show you around.",
+    content: "Your personal productivity command center. Let us show you around.",
   },
   NEW_TASK: {
-    name: "new-task",
+    id: "new-task",
     order: 2,
     title: "➕ Create a task",
-    text: "Click here to add a new task. You can set priority, due date, and assignees.",
+    content: "Click here to add a new task. You can set priority, due date, and assignees.",
   },
   FILTERS: {
-    name: "filters",
+    id: "filters",
     order: 3,
     title: "🔍 Filter & search",
-    text: "Filter tasks by status, priority or assignee. Find what you need instantly.",
+    content: "Filter tasks by status, priority or assignee. Find what you need instantly.",
   },
   STATS: {
-    name: "stats",
+    id: "stats",
     order: 4,
     title: "📊 Your progress",
-    text: "Track completed tasks, deadlines and team velocity at a glance.",
+    content: "Track completed tasks, deadlines and team velocity at a glance.",
   },
   TASK_CARD: {
-    name: "task-card",
+    id: "task-card",
     order: 5,
     title: "✅ Task cards",
-    text: "Each card shows priority, due date, and progress. Click to expand details.",
+    content: "Each card shows priority, due date, and progress. Click to expand details.",
   },
   SIDEBAR: {
-    name: "sidebar",
+    id: "sidebar",
     order: 6,
     title: "🗂️ Projects",
-    text: "Switch between projects here. All your work is organized by project.",
+    content: "Switch between projects here. All your work is organized by project.",
   },
   NOTIFICATIONS: {
-    name: "notifs",
+    id: "notifs",
     order: 7,
     title: "🔔 Notifications",
-    text: "Stay on top of mentions, deadlines and team updates.",
+    content: "Stay on top of mentions, deadlines and team updates.",
   },
 } as const;
