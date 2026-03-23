@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "expo start",
+    "start:clear": "yarn run start --clear",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "lint": "biome ci src",
@@ -14,7 +15,7 @@
     "tsc:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
-    "@runilib/tooltip": "workspace:*",
+    "@runilib/react-walkit": "workspace:*",
     "expo": "^54.0.0",
     "expo-constants": "~18.0.13",
     "expo-haptics": "~15.0.8",

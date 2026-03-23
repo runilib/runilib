@@ -26,6 +26,6 @@ export default defineConfig({
     dedupe: ["react", "react-dom", "react-native-web"],
   },
   optimizeDeps: {
-    exclude: ["@runilib/tooltip"],
+    exclude: ["@runilib/react-walkit"],
   },
 })

@@ -1,6 +1,6 @@
-import type { TooltipTheme, TooltipLabels } from '@runilib/tooltip';
+import type { WalkStepProps } from '@runilib/react-walkit';
 
-export const TOUR_THEME: TooltipTheme = {
+export const TOUR_THEME = {
   primary:      '#e8a020',
   primaryText:  '#1a1108',
   background:   '#ffffff',
@@ -11,18 +11,18 @@ export const TOUR_THEME: TooltipTheme = {
   borderRadius: '16px',
 };
 
-export const TOUR_LABELS: TooltipLabels = {
+export const TOUR_LABELS = {
   next:   'Next →',
   prev:   '← Back',
   finish: 'Let\'s go! 🚀',
   close:  '✕',
 };
 
-export const STEPS = {
-  GREETING:   { name: 'greeting',   order: 1, title: 'Welcome to Taskflow 👋',   text: 'Your portable productivity hub. We\'ll show you the key features.' },
-  ADD_TASK:   { name: 'add-task',   order: 2, title: '➕ Add tasks fast',         text: 'Tap here to create a task in seconds — with priority and due date.' },
-  FILTER_BAR: { name: 'filter-bar', order: 3, title: '🔍 Quick filters',          text: 'Switch between All, Active, and Done with a single tap.' },
-  TASK_ITEM:  { name: 'task-item',  order: 4, title: '✅ Task actions',           text: 'Swipe left to delete. Tap the circle to complete. Long press to edit.' },
-  STATS_CARD: { name: 'stats-card', order: 5, title: '📊 Progress at a glance',  text: 'See your completion rate and streak right here.' },
-  BOTTOM_NAV: { name: 'bottom-nav', order: 6, title: '🗂️ Navigate sections',     text: 'Jump between Dashboard, Tasks, Calendar and Profile from here.' },
+export const STEPS: {[key in string]: WalkStepProps} = {
+  GREETING:   { id: 'greeting',   order: 1, title: 'Welcome to Taskflow 👋',   text: 'Your portable productivity hub. We\'ll show you the key features.' },
+  ADD_TASK:   { id: 'add-task',   order: 2, title: '➕ Add tasks fast',         text: 'Tap here to create a task in seconds — with priority and due date.' },
+  FILTER_BAR: { id: 'filter-bar', order: 3, title: '🔍 Quick filters',          text: 'Switch between All, Active, and Done with a single tap.' },
+  TASK_ITEM:  { id: 'task-item',  order: 4, title: '✅ Task actions',           text: 'Swipe left to delete. Tap the circle to complete. Long press to edit.' },
+  STATS_CARD: { id: 'stats-card', order: 5, title: '📊 Progress at a glance',  text: 'See your completion rate and streak right here.' },
+  BOTTOM_NAV: { id: 'bottom-nav', order: 6, title: '🗂️ Navigate sections',     text: 'Jump between Dashboard, Tasks, Calendar and Profile from here.' },
 } as const;

@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import { TooltipProvider } from '@runilib/tooltip';
-import { Dashboard } from './pages/Dashboard';
-import { Settings  } from './pages/Settings';
-import { TOUR_THEME, TOUR_LABELS } from './tourConfig';
+import { WalkProvider } from "@runilib/react-walkit";
+import { useState } from "react";
+import { Dashboard } from "./pages/Dashboard";
+import { Settings } from "./pages/Settings";
+import { TOUR_LABELS, TOUR_THEME } from "./tourConfig";
 
-type Page = 'dashboard' | 'settings';
+type Page = "dashboard" | "settings";
 
 export default function App() {
-  const [page, setPage] = useState<Page>('dashboard');
+  const [page, setPage] = useState<Page>("dashboard");
 
   return (
-    <TooltipProvider
+    <WalkProvider
       animationType="bounce"
       overlayColor="rgba(10,9,7,0.82)"
       spotlightPadding={10}
@@ -18,19 +18,19 @@ export default function App() {
       theme={TOUR_THEME}
       labels={TOUR_LABELS}
       stopOnOutsideClick
-      onStart={() => console.log('[@runilib/tooltip]:onStart tour started')}
-      onStop={() => console.log('[@runilib/tooltip]:onStop tour ended')}
-      onStepChange={(step, i) => console.log(`[@runilib/tooltip]:onStepChange step ${i + 1}: ${step.name}`)}
+      onStart={() => console.log("[@runilib/react-walkit]:onStart tour started")}
+      onStop={() => console.log("[@runilib/react-walkit]:onStop tour ended")}
+      onStepChange={(step, i) =>
+        console.log(`[@runilib/react-walkit]:onStepChange step ${i + 1}: ${step.name}`)
+      }
     >
-      {page === 'dashboard' && (
+      {page === "dashboard" && (
         <Dashboard
-          onGoToSettings={() => setPage('settings')}
-          onRestartTour={() => setPage('dashboard')}
+          onGoToSettings={() => setPage("settings")}
+          onRestartTour={() => setPage("dashboard")}
         />
       )}
-      {page === 'settings' && (
-        <Settings onBack={() => setPage('dashboard')} />
-      )}
-    </TooltipProvider>
+      {page === "settings" && <Settings onBack={() => setPage("dashboard")} />}
+    </WalkProvider>
   );
 }

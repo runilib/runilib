@@ -1,20 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  TextInput, StyleSheet, SafeAreaView, Modal,
+  TextInput, StyleSheet, SafeAreaView,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { TooltipStep, useTooltip } from '@runilib/tooltip';
-import type { AnimationType } from '@runilib/tooltip';
+import { WalkStep, useWalk, type WalkStepProps } from '@runilib/react-walkit';
 
-// Showcase different animation types on this screen
-const ANIMATION: AnimationType = 'slide';
 
-const TASK_STEPS = {
-  SEARCH:   { name: 'tasks-search',   order: 1, title: '🔍 Smart search',      text: 'Search by title, project or tag. Results update as you type.' },
-  SORT:     { name: 'tasks-sort',     order: 2, title: '⇅ Sort & group',        text: 'Sort by priority, due date, or project. Tap to cycle through options.' },
-  ADD_FORM: { name: 'tasks-add-form', order: 3, title: '✍️ Quick add',           text: 'Type a task title here and hit Enter. Priority and due date are optional.' },
-  LIST:     { name: 'tasks-list',     order: 4, title: '📋 Full task list',      text: 'All your tasks across projects. Tap any card to open its details.' },
+const TASK_STEPS:{[key in string]: WalkStepProps} = {
+  SEARCH:   { id: 'tasks-search',   order: 1, title: '🔍 Smart search',      text: 'Search by title, project or tag. Results update as you type.' },
+  SORT:     { id: 'tasks-sort',     order: 2, title: '⇅ Sort & group',        text: 'Sort by priority, due date, or project. Tap to cycle through options.' },
+  ADD_FORM: { id: 'tasks-add-form', order: 3, title: '✍️ Quick add',           text: 'Type a task title here and hit Enter. Priority and due date are optional.' },
+  LIST:     { id: 'tasks-list',     order: 4, title: '📋 Full task list',      text: 'All your tasks across projects. Tap any card to open its details.' },
 };
 
 type SortKey = 'priority' | 'due' | 'project';
@@ -22,10 +19,10 @@ type SortKey = 'priority' | 'due' | 'project';
 const PRIORITY_RANK: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
 
 const ALL_TASKS = [
-  { id: 1,  title: 'Integrate @runilib/tooltip in mobile',  priority: 'High',   due: 'Today',    project: 'Mobile App',    done: false },
+  { id: 1,  title: 'Integrate @runilib/react-walkit in mobile',  priority: 'High',   due: 'Today',    project: 'Mobile App',    done: false },
   { id: 2,  title: 'Write formura docs',          priority: 'Medium', due: 'Tomorrow', project: 'formura',    done: false },
   { id: 3,  title: 'Design token audit',             priority: 'Medium', due: 'Mar 22',   project: 'Design System', done: false },
-  { id: 4,  title: 'Deploy @runilib/tooltip v1.0',           priority: 'High',   due: 'Done',     project: 'Mobile App',    done: true  },
+  { id: 4,  title: 'Deploy @runilib/react-walkit v1.0',           priority: 'High',   due: 'Done',     project: 'Mobile App',    done: true  },
   { id: 5,  title: 'Setup CI/CD pipeline',           priority: 'High',   due: 'Mar 24',   project: 'Infrastructure',done: false },
   { id: 6,  title: 'Migrate auth to JWT',            priority: 'High',   due: 'Mar 25',   project: 'API',           done: false },
   { id: 7,  title: 'Update color tokens',            priority: 'Low',    due: 'Mar 28',   project: 'Design System', done: false },
@@ -37,7 +34,7 @@ export default function TasksScreen() {
   const [sortBy,  setSortBy]  = useState<SortKey>('priority');
   const [newTask, setNewTask] = useState('');
   const [tasks,   setTasks]   = useState(ALL_TASKS);
-  const { start, isRunning }  = useTooltip();
+  const { start, isRunning }  = useWalk();
   const tourStarted           = useRef(false);
 
   useEffect(() => {
@@ -87,7 +84,7 @@ export default function TasksScreen() {
       </View>
 
       {/* Search */}
-      <TooltipStep {...TASK_STEPS.SEARCH}>
+      <WalkStep {...TASK_STEPS.SEARCH}>
         <View style={s.searchWrap}>
           <Text style={s.searchIcon}>🔍</Text>
           <TextInput
@@ -103,21 +100,21 @@ export default function TasksScreen() {
             </TouchableOpacity>
           )}
         </View>
-      </TooltipStep>
+      </WalkStep>
 
       {/* Sort + count */}
       <View style={s.toolbar}>
         <Text style={s.taskCount}>{filteredAndSorted.length} tasks</Text>
-        <TooltipStep {...TASK_STEPS.SORT}>
+        <WalkStep {...TASK_STEPS.SORT}>
           <TouchableOpacity style={s.sortBtn} onPress={cycleSortBy}>
             <Text style={s.sortIcon}>⇅</Text>
             <Text style={s.sortLabel}>{sortLabels[sortBy]}</Text>
           </TouchableOpacity>
-        </TooltipStep>
+        </WalkStep>
       </View>
 
       {/* Quick add */}
-      <TooltipStep {...TASK_STEPS.ADD_FORM} >
+      <WalkStep {...TASK_STEPS.ADD_FORM} >
         <View style={s.addRow}>
           <TextInput
             style={s.addInput}
@@ -132,10 +129,10 @@ export default function TasksScreen() {
             <Text style={s.addBtnText}>+</Text>
           </TouchableOpacity>
         </View>
-      </TooltipStep>
+      </WalkStep>
 
       {/* Task list */}
-      <TooltipStep {...TASK_STEPS.LIST}>
+      <WalkStep {...TASK_STEPS.LIST}>
         <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
           {filteredAndSorted.map(task => (
             <TouchableOpacity
@@ -170,7 +167,7 @@ export default function TasksScreen() {
           )}
           <View style={{ height: 120 }} />
         </ScrollView>
-      </TooltipStep>
+      </WalkStep>
     </SafeAreaView>
   );
 }

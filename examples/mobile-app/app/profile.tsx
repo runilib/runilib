@@ -1,20 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, Switch, Platform,
+  StyleSheet, SafeAreaView, Switch,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { TooltipStep, useTooltip } from '@runilib/tooltip';
+import { WalkStep, type WalkStepProps, useWalk } from '@runilib/react-walkit';
 
-const PROFILE_STEPS = {
-  AVATAR:   { name: 'profile-avatar',   order: 1, title: 'Your profile',        text: 'Tap your avatar to update your photo and personal info.' },
-  STATS:    { name: 'profile-stats',    order: 2, title: '🏆 Your achievements', text: 'Track your productivity streak, tasks completed and team ranking.' },
-  SETTINGS: { name: 'profile-settings', order: 3, title: '⚙️ Preferences',       text: 'Customise notifications, theme, and sync settings from here.' },
-  LIBS:     { name: 'profile-libs',     order: 4, title: '📦 Powered by',        text: 'This app is built with runilib libraries — the same code runs on web and native.' },
+const PROFILE_STEPS: {[key in string]: WalkStepProps} = {
+  AVATAR:   { id: 'profile-avatar',   order: 1, title: 'Your profile',        text: 'Tap your avatar to update your photo and personal info.' },
+  STATS:    { id: 'profile-stats',    order: 2, title: '🏆 Your achievements', text: 'Track your productivity streak, tasks completed and team ranking.' },
+  SETTINGS: { id: 'profile-settings', order: 3, title: '⚙️ Preferences',       text: 'Customise notifications, theme, and sync settings from here.' },
+  LIBS:     { id: 'profile-libs',     order: 4, title: '📦 Powered by',        text: 'This app is built with runilib libraries — the same code runs on web and native.' },
 };
 
 export default function ProfileScreen() {
-  const { start, isRunning } = useTooltip();
+  const { start, isRunning } = useWalk();
   const tourStarted = useRef(false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* Avatar card */}
-        <TooltipStep {...PROFILE_STEPS.AVATAR}>
+        <WalkStep {...PROFILE_STEPS.AVATAR}>
           <View style={s.avatarCard}>
             <View style={s.avatarCircle}>
               <Text style={s.avatarInitials}>AK</Text>
@@ -56,10 +56,10 @@ export default function ProfileScreen() {
               <Text style={s.editBtnText}>Edit</Text>
             </TouchableOpacity>
           </View>
-        </TooltipStep>
+        </WalkStep>
 
         {/* Stats */}
-        <TooltipStep {...PROFILE_STEPS.STATS}>
+        <WalkStep {...PROFILE_STEPS.STATS}>
           <View style={s.statsRow}>
             {[
               { v: '14', l: 'Day streak', icon: '🔥' },
@@ -73,10 +73,10 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
-        </TooltipStep>
+        </WalkStep>
 
         {/* Settings */}
-        <TooltipStep {...PROFILE_STEPS.SETTINGS}>
+        <WalkStep {...PROFILE_STEPS.SETTINGS}>
           <View style={s.section}>
             <Text style={s.sectionTitle}>Preferences</Text>
             {[
@@ -98,16 +98,16 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
-        </TooltipStep>
+        </WalkStep>
 
         {/* Powered by runilib */}
-        <TooltipStep {...PROFILE_STEPS.LIBS}>
+        <WalkStep {...PROFILE_STEPS.LIBS}>
           <View style={s.libsCard}>
             <Text style={s.libsTitle}>⚡ Powered by runilib</Text>
             <Text style={s.libsSub}>Libraries used in this app</Text>
             <View style={s.libsList}>
               {[
-                { name: '@runilib/tooltip', desc: 'Onboarding tours', status: 'active' },
+                { name: '@runilib/react-walkit', desc: 'Onboarding tours', status: 'active' },
                 { name: 'formura', desc: 'Form state', status: 'soon' },
                 { name: 'toastly', desc: 'Notifications', status: 'soon' },
               ].map(lib => (
@@ -125,7 +125,7 @@ export default function ProfileScreen() {
               ))}
             </View>
           </View>
-        </TooltipStep>
+        </WalkStep>
 
         {/* Sign out */}
         <TouchableOpacity style={s.signOutBtn} onPress={() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)}>

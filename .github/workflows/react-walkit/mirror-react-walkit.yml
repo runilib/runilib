@@ -1,0 +1,23 @@
+name: Mirror @runilib/react-walkit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/react-walkit/**"
+      - ".github/workflows/react-walkit/mirror-package.yml"
+      - ".github/workflows/react-walkit/mirror-react-walkit.yml"
+  workflow_dispatch:
+
+jobs:
+  mirror-react-walkit:
+    uses: ./.github/workflows/react-walkit/mirror-package.yml
+    with:
+      package_path: packages/react-walkit
+      target_repo: runilib/react-walkit
+      target_branch: main
+      mirror_git_user_name:  ${{ secrets.MIRROR_GIT_USER_NAME }}
+      mirror_git_user_email:  ${{ secrets.MIRROR_GIT_USER_EMAIL }}
+    secrets:
+      mirror_push_token: ${{ secrets.MIRROR_PUSH_TOKEN }}

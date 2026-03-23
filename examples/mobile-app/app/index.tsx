@@ -4,7 +4,7 @@ import {
   StyleSheet, SafeAreaView, Pressable, Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { TooltipStep, useTooltip } from '@runilib/tooltip';
+import { Tooltip, WalkStep, useWalk } from '@runilib/react-walkit';
 import { STEPS } from '../tourConfig';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,10 +24,10 @@ interface Task {
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const INITIAL_TASKS: Task[] = [
-  { id: 1, title: 'Set up @runilib/tooltip in mobile app', priority: 'High',   due: 'Today',     status: 'active', project: 'Mobile App' },
+  { id: 1, title: 'Set up @runilib/react-walkit in mobile app', priority: 'High',   due: 'Today',     status: 'active', project: 'Mobile App' },
   { id: 2, title: 'Write unit tests for useForm',  priority: 'High',   due: 'Tomorrow',  status: 'active', project: 'formura' },
   { id: 3, title: 'Design token audit',            priority: 'Medium', due: 'Mar 22',    status: 'active', project: 'Design System' },
-  { id: 4, title: 'Deploy v1.0 of @runilib/tooltip',       priority: 'High',   due: 'Done',      status: 'done',   project: 'Mobile App' },
+  { id: 4, title: 'Deploy v1.0 of @runilib/react-walkit',       priority: 'High',   due: 'Done',      status: 'done',   project: 'Mobile App' },
   { id: 5, title: 'Add dark mode support',         priority: 'Low',    due: 'Mar 28',    status: 'active', project: 'Design System' },
   { id: 6, title: 'Migrate auth endpoints',        priority: 'High',   due: 'Mar 25',    status: 'active', project: 'API' },
 ];
@@ -44,7 +44,7 @@ export default function HomeScreen() {
   const [tasks,      setTasks]      = useState<Task[]>(INITIAL_TASKS);
   const [filter,     setFilter]     = useState<'all' | 'active' | 'done'>('all');
   const [activeTab,  setActiveTab]  = useState(0);
-  const { start, isRunning }        = useTooltip();
+  const { start, isRunning }        = useWalk();
   const tourStarted                 = useRef(false);
 
   // Auto-start tour on mount
@@ -75,7 +75,7 @@ export default function HomeScreen() {
       <ScrollView style={s.scroll} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {/* ── Header ── */}
-        <TooltipStep {...STEPS.GREETING}>
+        <WalkStep {...STEPS.GREETING}>
           <View style={s.header}>
             <View>
               <Text style={s.greeting}>Good morning, AKS 👋</Text>
@@ -89,10 +89,10 @@ export default function HomeScreen() {
               <Text style={s.restartBtnText}>{isRunning ? '▶…' : '▶ Tour'}</Text>
             </TouchableOpacity>
           </View>
-        </TooltipStep>
+        </WalkStep>
 
         {/* ── Stats card ── */}
-        <TooltipStep {...STEPS.STATS_CARD} placement="bottom">
+        <WalkStep {...STEPS.STATS_CARD}>
           <View style={s.statsCard}>
             <View style={s.statsLeft}>
               <Text style={s.statsPercent}>{pct}%</Text>
@@ -115,10 +115,10 @@ export default function HomeScreen() {
               ))}
             </View>
           </View>
-        </TooltipStep>
+        </WalkStep>
 
         {/* ── Filter bar ── */}
-        <TooltipStep {...STEPS.FILTER_BAR} placement="bottom">
+        <WalkStep {...STEPS.FILTER_BAR}>
           <View style={s.filterRow}>
             {(['all', 'active', 'done'] as const).map(f => (
               <TouchableOpacity
@@ -132,33 +132,79 @@ export default function HomeScreen() {
               </TouchableOpacity>
             ))}
           </View>
-        </TooltipStep>
+        </WalkStep>
 
         {/* ── Section header + add button ── */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>Tasks</Text>
-          <TooltipStep {...STEPS.ADD_TASK}>
+<Tooltip
+  content="Native custom tooltip"
+  openOnPress
+  tooltipStyle={{
+    backgroundColor: "#1d4ed8",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  }}
+>
+  {({ toggle }) => (
+    <Pressable onPress={toggle}>
+      <Text>Show</Text>
+    </Pressable>
+  )}
+</Tooltip>
+
+
+<Tooltip
+  openOnPress={false}
+  anchorColor="#0f766e"
+  renderContent={({ stop }) => (
+    <View
+      style={{
+        backgroundColor: "#0f766e",
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderRadius: 16,
+      }}
+    >
+      <Text style={{ color: "#fff", fontWeight: "700", marginBottom: 8 }}>
+        Custom native tooltip
+      </Text>
+      <Pressable onPress={stop}>
+        <Text style={{ color: "#ccfbf1" }}>Close</Text>
+      </Pressable>
+    </View>
+  )}
+>
+  {({ toggle }) => (
+    <Pressable onPress={toggle}>
+      <Text>Open</Text>
+    </Pressable>
+  )}
+</Tooltip>
+
+
+          <WalkStep {...STEPS.ADD_TASK}>
             <TouchableOpacity style={s.addBtn} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}>
               <Text style={s.addBtnText}>+ Add</Text>
             </TouchableOpacity>
-          </TooltipStep>
+          </WalkStep>
         </View>
 
         {/* ── Task list ── */}
         <View style={s.taskList}>
           {filtered.map((task, idx) => (
-            <TooltipStep
+            <WalkStep
               key={task.id}
               {...STEPS.TASK_ITEM}
               active={idx === 0}
-              placement="bottom"
             >
               <TaskCard
                 task={task}
                 onToggle={() => toggleTask(task.id)}
                 onDelete={() => deleteTask(task.id)}
               />
-            </TooltipStep>
+            </WalkStep>
           ))}
           {filtered.length === 0 && (
             <View style={s.emptyState}>
@@ -173,7 +219,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* ── Bottom nav ── */}
-      <TooltipStep {...STEPS.BOTTOM_NAV} placement="top">
+      <WalkStep {...STEPS.BOTTOM_NAV}>
         <View style={s.bottomNav}>
           {[
             { icon: '⊞', label: 'Dashboard', idx: 0 },
@@ -191,7 +237,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </View>
-      </TooltipStep>
+      </WalkStep>
     </SafeAreaView>
   );
 }

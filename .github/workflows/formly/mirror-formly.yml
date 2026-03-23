@@ -6,13 +6,13 @@ on:
       - main
     paths:
       - "packages/formura/**"
-      - ".github/workflows/tooltip/mirror-package.yml"
-      - ".github/workflows/tooltip/mirror-formura.yml"
+      - ".github/workflows/react-walkit/mirror-package.yml"
+      - ".github/workflows/react-walkit/mirror-formura.yml"
   workflow_dispatch:
 
 jobs:
   mirror-formura:
-    uses: ./.github/workflows/tooltip/mirror-package.yml
+    uses: ./.github/workflows/react-walkit/mirror-package.yml
     with:
       package_path: packages/formura
       target_repo: runilib/formura

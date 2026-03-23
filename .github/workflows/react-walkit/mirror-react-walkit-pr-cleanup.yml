@@ -1,0 +1,55 @@
+name: Cleanup react-walkit mirror PR
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - "packages/react-walkit/**"
+      - ".github/workflows/react-walkit/mirror-react-walkit-pr-cleanup.yml"
+
+jobs:
+  cleanup-mirror-pr:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+
+    env:
+      TARGET_REPO: your-org/runilib-react-walkit
+      SYNC_BRANCH: sync/pr-${{ github.event.pull_request.number }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "runilib-bot"
+          git config user.email "bot@runilib.dev"
+
+      - name: Close mirror PR if it exists
+        env:
+          GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: |
+          EXISTING_PR_NUMBER="$(gh pr list \
+            --repo "${TARGET_REPO}" \
+            --base main \
+            --head "${SYNC_BRANCH}" \
+            --json number \
+            --jq '.[0].number')"
+
+          if [ -n "${EXISTING_PR_NUMBER}" ] && [ "${EXISTING_PR_NUMBER}" != "null" ]; then
+            gh pr close "${EXISTING_PR_NUMBER}" \
+              --repo "${TARGET_REPO}" \
+              --comment "Closing automated mirror PR because the source PR in the monorepo has been closed."
+          fi
+
+      - name: Delete mirror sync branch
+        env:
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: |
+          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git push mirror --delete "${SYNC_BRANCH}" || true

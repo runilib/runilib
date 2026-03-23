@@ -1,100 +1,90 @@
-export interface Library {
-  slug: string;
-  name: string;
-  icon: string;
-  tagline: string;
-  description: string;
-  version: string | null;
-  status: "stable" | "beta" | "coming-soon";
-  npm: string;
-  github: string;
-  tags: string[];
-  color: string;
-}
+import type { LibraryInfo } from "../types";
 
-export const LIBRARIES: Library[] = [
-  {
-    slug: "tooltip",
-    name: "tooltip",
-    icon: "🪜",
-    tagline: "Guided onboarding tours with animated spotlight.",
-    description:
-      "Cross-platform onboarding tours with 6 animation types, SVG spotlight, and full TypeScript support. One setup — runs natively on React and React Native.",
+export const LIBRARIES: LibraryInfo[] = [
+   {
+    id: "stepwise",
+    name: "react-walkit",
+    tagline: "Cross-platform onboarding tours",
+    desc: "Guide your users with interactive tours and animated spotlights, Intelligent tooltips, popovers and contextual help - smart positioning, rich content, spotlight mode, analytics - the same code on React and React Native.",
+    color: "amber",
+    icon: "💬",
     version: "1.0.0",
+    tags: ["Onboarding", "Tours", "Spotlight"],
+    highlights: [
+      "CopilotStep — tag any element",
+      "6 animation types (bounce, flip, glow...)",
+      "Multi-screen & multi-route tours",
+      "Automatic tour state persistence",
+      "Full WCAG 2.1 accessibility",
+      "useCopilot() programmatic API",
+      "Tour branching & conditional steps",
+      "Built-in analytics & metrics",
+      "A/B testing built-in",
+      "AI-generated steps via CLI",
+    ],
+    install: "npm install react-walkit",
     status: "stable",
-    npm: "tooltip",
-    github: "https://github.com/your-org/unikit/tree/main/packages/tooltip",
-    tags: ["onboarding", "tour", "spotlight", "typescript"],
-    color: "#6d74f7",
+    npmUrl: "https://npmjs.com/package/react-walkit",
+    githubUrl: "https://github.com/runilib/react-walkit",
   },
   {
-    slug: "formura",
-    name: "formura",
+    id: "formbridge",
+    name: "react-formbridge",
+    tagline: "Schema-first cross-platform forms",
+    desc: "Describe your form in TypeScript — react-formbridge generates the components, validation, and UI automatically, identical on React and React Native.",
+    color: "blue",
     icon: "📋",
-    tagline: "Cross-platform form state management & validation.",
-    description:
-      "Unified form state with schema validation. Works on any React environment with the same API and hooks.",
-    version: null,
-    status: "coming-soon",
-    npm: "formura",
-    github: "https://github.com/your-org/unikit",
-    tags: ["forms", "validation", "state"],
-    color: "#34d399",
+    version: "1.0.0",
+    tags: ["Forms", "Validation", "Schema"],
+    highlights: [
+      "TypeScript schema → auto-generated components",
+      "Reactive validation with error messages",
+      "field.phone() with built-in country selector",
+      "Masks: IBAN, card number, date, phone",
+      "Password strength indicator",
+      "Draft persistence (localStorage / AsyncStorage)",
+      "Reactive conditional fields",
+      "Multi-step wizard forms",
+      "i18n — 5 languages built-in",
+      "Cross-platform file upload",
+    ],
+    install: "npm install react-formbridge",
+    status: "stable",
+    npmUrl: "https://npmjs.com/package/formbridge",
+    githubUrl: "https://github.com/runilib/formbridge",
   },
-  {
-    slug: "toastly",
-    name: "toastly",
-    icon: "🔔",
-    tagline: "Beautiful toast notifications with rich theming.",
-    description:
-      "Accessible, animated toast notifications. Identical API on web and native with multiple positions, icons, and actions.",
-    version: null,
-    status: "coming-soon",
-    npm: "toastly",
-    github: "https://github.com/your-org/unikit",
-    tags: ["notifications", "toast", "alerts"],
-    color: "#f59e0b",
-  },
-  {
-    slug: "modalkit",
-    name: "modalkit",
-    icon: "🪟",
-    tagline: "Modals, sheets & drawers for every platform.",
-    description:
-      "Accessible modals and bottom sheets. Bottom sheet on native, centered dialog on web — same props.",
-    version: null,
-    status: "coming-soon",
-    npm: "modalkit",
-    github: "https://github.com/your-org/unikit",
-    tags: ["modal", "sheet", "dialog"],
-    color: "#a78bfa",
-  },
-  {
-    slug: "datepick",
-    name: "datepick",
-    icon: "📅",
-    tagline: "Date & time pickers, cross-platform.",
-    description:
-      "Native date picker on mobile, polished calendar on web. One import, zero configuration.",
-    version: null,
-    status: "coming-soon",
-    npm: "datepick",
-    github: "https://github.com/your-org/unikit",
-    tags: ["date", "picker", "calendar"],
-    color: "#f472b6",
-  },
-  {
-    slug: "storex",
-    name: "storex",
-    icon: "🗃️",
-    tagline: "Persistent key-value storage with a universal API.",
-    description:
-      "AsyncStorage on native, localStorage on web — all behind a single async API with TypeScript generics.",
-    version: null,
-    status: "coming-soon",
-    npm: "storex",
-    github: "https://github.com/your-org/unikit",
-    tags: ["storage", "persistence", "async"],
-    color: "#38bdf8",
-  },
+ 
+  // {
+  //   id: "tooltip",
+  //   name: "tooltip",
+  //   tagline: "Cross-platform contextual help",
+  //   desc: "Intelligent tooltips, popovers and contextual help — smart positioning, rich content, spotlight mode, analytics.",
+  //   color: "teal",
+  //   icon: "💬",
+  //   version: "0.9.0",
+  //   tags: ["Tooltips", "Popovers", "In-app help"],
+  //   highlights: [
+  //     "Smart positioning — auto collision detection",
+  //     "Rich content (JSX, images, actions, video)",
+  //     "Multiple triggers (hover, focus, click, longPress)",
+  //     "Spotlight mode — focus on an element",
+  //     "Tooltip groups & sequences",
+  //     "Hover intent anti-flicker",
+  //     "In-app contextual help system",
+  //     "AI-powered content generation",
+  //     "Per-tooltip analytics",
+  //     "DevTools overlay",
+  //   ],
+  //   install: "npm install @runilib/tooltip",
+  //   status: "beta",
+  //   npmUrl: "https://npmjs.com/package/@runilib/tooltip",
+  //   githubUrl: "https://github.com/runilib/tooltip",
+  // },
 ];
+
+export const ROADMAP_LIBS = [
+  { name: "storex", tagline: "Unified AsyncStorage / localStorage", color: "purple", icon: "🗄️" },
+  { name: "toastly", tagline: "Cross-platform toast notifications", color: "green", icon: "🔔" },
+  { name: "modalkit", tagline: "Unified modals and bottom sheets", color: "blue", icon: "🪟" },
+  { name: "motionkit", tagline: "Framer Motion + Reanimated unified", color: "amber", icon: "✨" },
+] as const;
