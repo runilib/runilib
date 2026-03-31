@@ -1,20 +1,21 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-import { useApp } from "../context/AppContext";
-import { LIBRARIES, ROADMAP_LIBS } from "../data/libraries";
-import type { LibColor } from "../types";
+import { useState } from 'react';
+
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { useApp } from '../context/AppContext';
+import { LIBRARIES, ROADMAP_LIBS } from '../data/libraries';
+import type { LibColor } from '../types';
 
 export function Libraries() {
   const { t } = useApp();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
   const filtered = LIBRARIES.filter(
     (l) =>
       !search ||
       l.name.toLowerCase().includes(search.toLowerCase()) ||
       l.tagline.toLowerCase().includes(search.toLowerCase()) ||
-      l.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
+      l.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase())),
   );
 
   return (
@@ -28,6 +29,7 @@ export function Libraries() {
             <SearchBox>
               <SearchIco>
                 <svg
+                  aria-label="image"
                   width="15"
                   height="15"
                   viewBox="0 0 24 24"
@@ -36,14 +38,18 @@ export function Libraries() {
                   strokeWidth="2"
                   strokeLinecap="round"
                 >
-                  <circle cx="11" cy="11" r="8" />
+                  <circle
+                    cx="11"
+                    cy="11"
+                    r="8"
+                  />
                   <path d="m21 21-4.35-4.35" />
                 </svg>
               </SearchIco>
               <SearchInput
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="formbridge, stepwise, forms..."
+                placeholder="formbridge, walkit, forms..."
               />
             </SearchBox>
           </SearchRow>
@@ -52,7 +58,7 @@ export function Libraries() {
 
       <Body>
         <SectionLabel>
-          Available · {filtered.length} {filtered.length === 1 ? "library" : "libraries"}
+          Available · {filtered.length} {filtered.length === 1 ? 'library' : 'libraries'}
         </SectionLabel>
 
         <LibList>
@@ -65,7 +71,9 @@ export function Libraries() {
                     <RowName>{lib.name}</RowName>
                     <RowVer>{lib.version}</RowVer>
                     <RowStatus $status={lib.status}>
-                      {lib.status === "stable" ? t.libraryPage.stable : t.libraryPage.beta}
+                      {lib.status === 'stable'
+                        ? t.libraryPage.stable
+                        : t.libraryPage.beta}
                     </RowStatus>
                   </RowNameRow>
                   <RowTagline>{lib.tagline}</RowTagline>
@@ -87,7 +95,9 @@ export function Libraries() {
                     </HighlightItem>
                   ))}
                   {lib.highlights.length > 5 && (
-                    <HighlightMore>+{lib.highlights.length - 5} more features</HighlightMore>
+                    <HighlightMore>
+                      +{lib.highlights.length - 5} more features
+                    </HighlightMore>
                   )}
                 </HighlightList>
                 <InstallRow>
@@ -95,7 +105,11 @@ export function Libraries() {
                 </InstallRow>
                 <RowActions>
                   <DocBtn to={`/libraries/${lib.id}`}>{t.libs.docs}</DocBtn>
-                  <GhBtn href={lib.githubUrl} target="_blank" rel="noopener">
+                  <GhBtn
+                    href={lib.githubUrl}
+                    target="_blank"
+                    rel="noopener"
+                  >
                     {t.libs.github}
                   </GhBtn>
                 </RowActions>
@@ -264,7 +278,7 @@ const RowStatus = styled.div<{ $status: string }>`
   padding: 2px 7px;
   border-radius: 10px;
   ${({ theme, $status }) =>
-    $status === "stable"
+    $status === 'stable'
       ? `background:${theme.greenDim};color:${theme.green};border:1px solid ${theme.green}33;`
       : `background:${theme.amberDim};color:${theme.amber};border:1px solid ${theme.amber}33;`}
 `;

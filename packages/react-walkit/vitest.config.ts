@@ -5,6 +5,6 @@ export default mergeConfig(sharedVitestConfig, {
   test: {
     name: 'react-walkit',
     environment: 'jsdom',
-    include: ['src/**/*.test.{ts,tsx}']
-  }
+    include: ['src/**/*.test.{ts,tsx}'],
+  },
 });

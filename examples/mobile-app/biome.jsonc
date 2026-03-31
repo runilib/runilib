@@ -2,7 +2,7 @@
   "root": false,
   "extends": "//",
   "files": {
-    "includes": ["src/**", "vite.config.ts"]
+    "includes": ["src/**", "app/**", "vite.config.ts"]
   },
   "javascript": {
     "formatter": {

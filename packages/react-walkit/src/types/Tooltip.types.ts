@@ -2,19 +2,14 @@ import type { ReactNode } from 'react';
 
 export type TooltipPlacement = 'auto' | 'top' | 'bottom' | 'left' | 'right';
 
-export type TooltipApi = {
-  start: () => void;
-  stop: () => void;
-  toggle: () => void;
-  visible: boolean;
-};
-
 export type TooltipContentApi = {
-  stop: () => void;
+  toggle: () => void;
+  hide: () => void;
+  show: () => void;
   visible: boolean;
 };
 
-export type TooltipTrigger = ReactNode | ((api: TooltipApi) => ReactNode);
+export type TooltipTrigger = ReactNode | ((api: TooltipContentApi) => ReactNode);
 
 export type TooltipProps = {
   /**
@@ -41,7 +36,7 @@ export type TooltipProps = {
   disabled?: boolean;
 
   /**
-   * Web / shared trigger options
+   * Web/Native shared trigger options
    */
   openOnHover?: boolean;
   openOnPress?: boolean;

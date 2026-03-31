@@ -13,6 +13,5 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "useDefineForClassFields": true,
-    "baseUrl": "."
   }
 }

@@ -1,68 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { getSpotlightRect } from 'src/utils/positioning.shared';
-import { computeTooltipPosition } from 'src/utils/Walkit.positioning';
-import { WEB_KEYFRAMES } from '../../../animations';
+import { useDimensions } from '../../../hooks/useDimensions';
 import type { OverlayProps, SpotlightRect } from '../../../types/Walkit.types';
-import { Tooltip } from './Walkit.web';
-
-const TOOLTIP_WIDTH = 300;
-const TOOLTIP_HEIGHT = 180;
-const INJECT_ID = '__uc_styles__';
-const PORTAL_ID = '__uc_portal__';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function injectStyles(): void {
-  if (document.getElementById(INJECT_ID)) return;
-  const style = document.createElement('style');
-  style.id = INJECT_ID;
-  style.type = 'text/css';
-  style.textContent = WEB_KEYFRAMES;
-  document.head.appendChild(style);
-}
-
-function getOrCreatePortal(): HTMLElement {
-  let element = document.getElementById(PORTAL_ID);
-  if (!element) {
-    element = document.createElement('div');
-    element.id = PORTAL_ID;
-    document.body.appendChild(element);
-  }
-  return element;
-}
-
-function useDimensions(): { w: number; h: number } {
-  const [dimensions, setDimensions] = useState({
-    w: window.innerWidth,
-    h: window.innerHeight,
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setDimensions({
-        w: window.innerWidth,
-        h: window.innerHeight,
-      });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return dimensions;
-}
-
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
-function easeOut(t: number): number {
-  return 1 - (1 - t) ** 3;
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
+import { WALKIT_STEP_HEIGHT, WALKIT_STEP_WIDTH } from '../../../utils/constant';
+import { easeOut, getOrCreatePortal, injectStyles, lerp } from '../../../utils/helpers';
+import { getSpotlightRect } from '../../../utils/positioning.shared';
+import { getInnerSpotlightRingRect } from '../../../utils/spotlight';
+import { computeWalkitStepPosition } from '../../../utils/Walkit.positioning';
+import { WebWalkit } from './Walkit.web';
 
 export const WebOverlay = ({
   visible,
@@ -84,10 +30,16 @@ export const WebOverlay = ({
   onStop,
 }: OverlayProps) => {
   const [spot, setSpot] = useState<SpotlightRect | null>(null);
-  const [tooltipSize, setTooltipSize] = useState({
-    width: TOOLTIP_WIDTH,
-    height: TOOLTIP_HEIGHT,
+  const [walkitStepSize, setWalkitStepSize] = useState({
+    width: WALKIT_STEP_WIDTH,
+    height: WALKIT_STEP_HEIGHT,
   });
+
+  const effectiveSpotlightPadding =
+    currentWalkitStep?.spotlightPaddingOverride ?? spotlightPadding;
+
+  const effectiveSpotlightBorderRadius =
+    currentWalkitStep?.spotlightBorderRadiusOverride ?? spotlightBorderRadius;
 
   const previousRectRef = useRef<SpotlightRect | null>(null);
   const animationFrameRef = useRef<number>(0);
@@ -98,22 +50,35 @@ export const WebOverlay = ({
       return null;
     }
 
-    return getSpotlightRect(currentRect, spotlightPadding, spotlightBorderRadius);
-  }, [currentRect, spotlightPadding, spotlightBorderRadius]);
+    return getSpotlightRect(
+      currentRect,
+      effectiveSpotlightPadding,
+      effectiveSpotlightBorderRadius,
+    );
+  }, [currentRect, effectiveSpotlightPadding, effectiveSpotlightBorderRadius]);
 
-  const tooltipPos = useMemo(() => {
+  const walkitStepPosition = useMemo(() => {
     if (!visible || !spotlightTarget || !currentWalkitStep) {
       return null;
     }
 
-    return computeTooltipPosition(
-      spotlightTarget,
-      tooltipSize,
-      currentWalkitStep.placement ?? 'auto',
-      dimensions.w,
-      dimensions.h,
-    );
-  }, [visible, spotlightTarget, currentWalkitStep, tooltipSize, dimensions]);
+    return computeWalkitStepPosition({
+      target: spotlightTarget,
+      walkitStepSize,
+      preferredPlacement: currentWalkitStep.placement ?? 'auto',
+      screenWidth: dimensions.w,
+      screenHeight: dimensions.h,
+    });
+  }, [visible, spotlightTarget, currentWalkitStep, walkitStepSize, dimensions]);
+
+  const onMesure = useCallback((layout: { width: number; height: number }) => {
+    setWalkitStepSize((previousSize) => {
+      if (previousSize.width === layout.width && previousSize.height === layout.height) {
+        return previousSize;
+      }
+      return layout;
+    });
+  }, []);
 
   const animateSpotlight = useCallback((from: SpotlightRect, to: SpotlightRect): void => {
     cancelAnimationFrame(animationFrameRef.current);
@@ -166,6 +131,11 @@ export const WebOverlay = ({
 
   const fill = overlayColor ?? 'rgba(15,15,25,0.72)';
   const portal = getOrCreatePortal();
+
+  const SPOTLIGHT_RING_WIDTH = 2;
+  const spotlightRingRect = spot
+    ? getInnerSpotlightRingRect(spot, SPOTLIGHT_RING_WIDTH)
+    : null;
 
   const content = (
     <div
@@ -239,21 +209,21 @@ export const WebOverlay = ({
           mask="url(#uc-mask)"
         />
 
-        {spot && (
+        {spotlightRingRect && (
           <rect
-            x={spot.x}
-            y={spot.y}
-            width={spot.width}
-            height={spot.height}
-            rx={spot.borderRadius + 1}
+            x={spotlightRingRect.x}
+            y={spotlightRingRect.y}
+            width={spotlightRingRect.width}
+            height={spotlightRingRect.height}
+            rx={spotlightRingRect.borderRadius}
             fill="none"
             stroke="rgba(99,102,241,0.6)"
-            strokeWidth={2}
+            strokeWidth={SPOTLIGHT_RING_WIDTH}
           />
         )}
       </svg>
 
-      {tooltipPos && currentWalkitStep && (
+      {walkitStepPosition && currentWalkitStep && (
         <div
           style={{
             position: 'relative',
@@ -261,11 +231,11 @@ export const WebOverlay = ({
             pointerEvents: 'auto',
           }}
         >
-          <Tooltip
+          <WebWalkit
             walkitStep={currentWalkitStep}
             walkitStepIndex={walkitStepIndex}
             totalWalkitSteps={totalWalkitSteps}
-            walkitStepPos={tooltipPos}
+            walkitStepPosition={walkitStepPosition}
             animationType={animationType}
             theme={theme}
             walkitStyle={walkitStyle}
@@ -274,18 +244,7 @@ export const WebOverlay = ({
             onNext={onNext}
             onPrev={onPrev}
             onStop={onStop}
-            onMeasure={(nextSize) => {
-              setTooltipSize((previousSize) => {
-                if (
-                  previousSize.width === nextSize.width &&
-                  previousSize.height === nextSize.height
-                ) {
-                  return previousSize;
-                }
-
-                return nextSize;
-              });
-            }}
+            onMeasure={onMesure}
           />
         </div>
       )}

@@ -33,6 +33,7 @@
     "ts:build:watch": "tsc -b --watch",
     "commitlint": "commitlint --from=HEAD~1 --to=HEAD",
     "build:packages": "turbo run build --filter='./packages/*'",
+    "prepush:verify": "yarn check && yarn typecheck && yarn test",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",

@@ -1,0 +1,16 @@
+<svg width="720" height="1280" viewBox="0 0 720 1280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="1280" rx="40" fill="#08101F"/>
+  <rect x="170" y="56" width="380" height="1168" rx="46" fill="#020617" stroke="#334155" stroke-width="4"/>
+  <rect x="208" y="114" width="304" height="56" rx="18" fill="#111827"/>
+  <rect x="222" y="258" width="276" height="104" rx="26" fill="#142033"/>
+  <rect x="222" y="398" width="276" height="104" rx="26" fill="#142033"/>
+  <rect x="222" y="538" width="276" height="104" rx="26" fill="#142033"/>
+  <rect x="256" y="812" width="208" height="64" rx="24" fill="#0F766E"/>
+  <text x="306" y="852" fill="#F0FDFA" font-family="Arial, sans-serif" font-size="24" font-weight="700">Open help</text>
+  <rect x="110" y="648" width="372" height="128" rx="28" fill="#0F766E"/>
+  <path d="M352 776L390 820L418 768" fill="#0F766E"/>
+  <rect x="142" y="680" width="224" height="20" rx="10" fill="#CCFBF1"/>
+  <rect x="142" y="718" width="86" height="16" rx="8" fill="#99F6E4"/>
+  <text x="142" y="695" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Custom native tooltip</text>
+  <text x="142" y="731" fill="#CCFBF1" font-family="Arial, sans-serif" font-size="16">Close</text>
+</svg>

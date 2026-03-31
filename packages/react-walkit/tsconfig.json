@@ -3,7 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "./src",
-    "types": ["node", "react"]
+    "types": ["node", "react"],
+    "noEmit": true
   },
   "include": ["src"]
 }

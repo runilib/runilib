@@ -1,5 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 
+import type { SpotlightPadding } from '../utils/spotlight';
+import type { WalkitStopReason, WalkitTransitionAction } from './analitycs.types';
+
 // ─── Enums / Unions ───────────────────────────────────────────────────────────
 
 /**
@@ -19,6 +22,104 @@ export type AnimationType = 'fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glo
  * - other values express a preferred side.
  */
 export type Placement = 'auto' | 'top' | 'bottom' | 'left' | 'right';
+
+/**
+ * Auto-start strategies supported by `<WalkitStep autoStart />`.
+ *
+ * - `always`: auto-start every time the step mounts
+ * - `once`: auto-start only once per app session
+ */
+export type WalkitAutoStartMode = 'always' | 'once';
+
+/**
+ * Public auto-start configuration accepted by `<WalkitStep />`.
+ */
+export interface WalkitAutoStartOptions {
+  /**
+   * Auto-start strategy.
+   *
+   * Defaults to `always`.
+   */
+  mode?: WalkitAutoStartMode;
+
+  /**
+   * Optional session key used when `mode="once"`.
+   *
+   * Defaults to the step id.
+   */
+  key?: string;
+
+  /**
+   * Optional delay before the walkthrough starts automatically.
+   *
+   * Useful when entering a screen with transitions or async layout work.
+   */
+  delay?: number;
+}
+
+/**
+ * Shorthand accepted by the public `<WalkitStep autoStart />` prop.
+ */
+export type WalkitAutoStart = boolean | WalkitAutoStartMode | WalkitAutoStartOptions;
+
+/**
+ * Internal normalized auto-start configuration stored in context.
+ */
+export interface ResolvedWalkitAutoStart {
+  mode: WalkitAutoStartMode;
+  key: string;
+  delay: number;
+}
+
+interface WalkitFlowStepBase {
+  /**
+   * Unique step identifier.
+   *
+   * This must match the `id` used by the corresponding `<WalkitStep />`.
+   */
+  id: string;
+
+  /**
+   * Optional route or screen metadata for this step.
+   *
+   * The library does not navigate automatically; this value is passed back
+   * to `onFlowStepChange` so the app can decide how to navigate.
+   */
+  route?: string;
+}
+
+/**
+ * Minimal flow definition used by `<WalkitProvider steps />` to describe
+ * a tour sequence that may span multiple routes or screens.
+ */
+export interface WalkitFlowStep extends WalkitFlowStepBase {
+  /**
+   * Sort sequence inside the walkthrough flow.
+   */
+  sequence: number;
+}
+
+/**
+ * Request emitted when the next target step in a declared flow is not
+ * currently mounted and the app needs to move to another route/screen
+ * or reveal the target UI before the tour can continue.
+ */
+export interface WalkitFlowChangeRequest {
+  /**
+   * Transition action that triggered this flow change.
+   */
+  action: Exclude<WalkitTransitionAction, 'stop'>;
+
+  /**
+   * Flow step the tour is trying to activate.
+   */
+  toStep: WalkitFlowStep;
+
+  /**
+   * Previously active flow step, if any.
+   */
+  fromStep: WalkitFlowStep | null;
+}
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -127,11 +228,11 @@ export interface WalkitStepData {
   id: string;
 
   /**
-   * Sort order of the step in the walkthrough flow.
+   * Sort sequence of the step in the walkthrough flow.
    *
    * Lower values appear first.
    */
-  order: number;
+  sequence: number;
 
   /**
    * Optional title displayed by the default popover.
@@ -142,6 +243,11 @@ export interface WalkitStepData {
    * Optional descriptive text displayed by the default popover.
    */
   content?: string;
+
+  /**
+   * Optional route or screen metadata associated with this step.
+   */
+  route?: string;
 
   /**
    * Preferred popover placement for this step.
@@ -163,6 +269,25 @@ export interface WalkitStepData {
    * section, or wait for layout stabilization before measurement.
    */
   ensureVisible?: () => void | Promise<void>;
+
+  /**
+   * Optional auto-start configuration for this step.
+   *
+   * When present, the walkthrough starts automatically from this step
+   * after registration.
+   */
+  autoStart?: ResolvedWalkitAutoStart;
+
+  /**
+   * Optional step-level popover renderer.
+   *
+   * When present, it overrides the provider-level `renderPopover`
+   * for this step only.
+   */
+  renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
+
+  spotlightPaddingOverride?: SpotlightPadding;
+  spotlightBorderRadiusOverride?: number;
 }
 
 /**
@@ -285,6 +410,31 @@ export interface RenderWalkitStepProps {
  */
 export interface WalkitConfig {
   /**
+   * Optional global flow definition.
+   *
+   * When provided, Walkit uses this list as the source of truth for
+   * ordering and can continue a tour across routes/screens.
+   */
+  steps?: WalkitFlowStep[];
+
+  /**
+   * Called when the next target step in the declared flow is not mounted.
+   *
+   * Use this to navigate to another page/screen or reveal the UI that
+   * contains the target step. After this callback resolves, Walkit waits
+   * for the requested step to mount.
+   */
+  onFlowStepChange?: (request: WalkitFlowChangeRequest) => void | Promise<void>;
+
+  /**
+   * Maximum time to wait for a requested target step to mount after
+   * `onFlowStepChange` runs.
+   *
+   * Defaults to `5000`.
+   */
+  stepMountTimeoutMs?: number;
+
+  /**
    * Called when the walkthrough starts.
    */
   onStart?: () => void;
@@ -350,6 +500,14 @@ export interface WalkitProviderProps {
   spotlightBorderRadius?: number;
 
   /**
+   * Optional global tour flow definition.
+   *
+   * This is especially useful when a tour spans multiple pages/screens
+   * and not every target step is mounted at the same time.
+   */
+  steps?: WalkitFlowStep[];
+
+  /**
    * Whether clicking or pressing outside the active target / popover
    * should stop the walkthrough.
    */
@@ -367,6 +525,21 @@ export interface WalkitProviderProps {
    * becomes responsible for the content structure and styling.
    */
   renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
+
+  /**
+   * Called when the next target step in the declared flow is not mounted.
+   *
+   * Use this to navigate to another page/screen or reveal the target UI.
+   */
+  onFlowStepChange?: (request: WalkitFlowChangeRequest) => void | Promise<void>;
+
+  /**
+   * Maximum time to wait for a requested target step to mount after
+   * `onFlowStepChange` runs.
+   *
+   * Defaults to `5000`.
+   */
+  stepMountTimeoutMs?: number;
 
   /**
    * Called when the walkthrough starts.
@@ -391,16 +564,18 @@ export interface WalkitProviderProps {
  *
  * A Walkit step wraps the target element that should be measured and highlighted.
  */
-export interface WalkitStepProps {
+interface WalkitStepPropsBase {
   /**
    * Unique identifier of the step.
    */
   id: string;
 
   /**
-   * Sort order inside the walkthrough flow.
+   * Sort sequence of the step in the walkthrough flow.
+   *
+   * Lower values appear first.
    */
-  order: number;
+  sequence: number;
 
   /**
    * Optional title displayed in the default popover.
@@ -411,6 +586,14 @@ export interface WalkitStepProps {
    * Optional body text displayed in the default popover.
    */
   content?: string;
+
+  /**
+   * Optional route or screen metadata for this step.
+   *
+   * This is useful when the same step definition is also passed to the
+   * provider-level `steps` flow list.
+   */
+  route?: string;
 
   /**
    * Preferred popover placement for this step.
@@ -463,7 +646,32 @@ export interface WalkitStepProps {
    * to scroll a `ScrollView` manually before the step is shown.
    */
   onBeforeShow?: () => void | Promise<void>;
+
+  /**
+   * Optional auto-start behavior for this step.
+   *
+   * - `true` or `'always'` starts the walkthrough every time the step mounts
+   * - `'once'` starts it only once per app session
+   * - an object allows custom `mode`, `key`, and `delay`
+   *
+   * The walkthrough starts from this step's `id`.
+   */
+  autoStart?: WalkitAutoStart;
+
+  /**
+   * Optional custom popover renderer for this step only.
+   *
+   * When provided, it takes priority over the provider-level
+   * `renderPopover` while this step is active.
+   */
+  renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
+
+  spotlightPaddingOverride?: SpotlightPadding;
+
+  spotlightBorderRadiusOverride?: number;
 }
+
+export type WalkitStepProps = WalkitStepPropsBase;
 
 // ─── useWalkit return ───────────────────────────────────────────────────────────
 
@@ -545,7 +753,7 @@ export interface UseWalkitReturn {
  */
 export interface WalkitContextValue {
   /**
-   * Registered steps sorted by `order`.
+   * Registered steps sorted by `sequence`.
    */
   sortedSteps: WalkitStepData[];
 
@@ -563,6 +771,11 @@ export interface WalkitContextValue {
    * Current measured rectangle of the active target.
    */
   currentRect: TargetRect | null;
+
+  /**
+   * Total number of steps in the active flow.
+   */
+  totalSteps: number;
 
   /**
    * Whether the walkthrough overlay is visible.
@@ -620,7 +833,13 @@ export interface WalkitContextValue {
    *
    * This is primarily an internal orchestration method.
    */
-  measureAndShow: (index: number, steps: WalkitStepData[]) => Promise<void>;
+  measureAndShow: (index: number, steps?: WalkitStepData[]) => Promise<void>;
+
+  /**
+   * Internal analytics helpers
+   */
+  lastAction: WalkitTransitionAction | null;
+  lastStopReason: WalkitStopReason | null;
 }
 
 // ─── Overlay shared props ─────────────────────────────────────────────────────
@@ -742,7 +961,7 @@ export interface WalkitPopoverProps {
   /**
    * Final computed popover position.
    */
-  walkitStepPos: WalkitStepPosition;
+  walkitStepPosition: WalkitStepPosition;
 
   /**
    * Animation preset used by the popover.

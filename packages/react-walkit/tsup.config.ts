@@ -12,6 +12,7 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   target: "es2019",
+  outDir: 'dist',
   external: ["react", "react-dom", "react-native", "react-native-web"],
   tsconfig: "./tsconfig-build.json",
 });

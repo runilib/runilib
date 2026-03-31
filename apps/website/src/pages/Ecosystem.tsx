@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
-import styled, { keyframes } from "styled-components";
-import { LogoIcon } from "../components/Logo";
-import { useApp } from "../context/AppContext";
-import type { LibColor } from "../types";
+import { Link } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
+import { LogoIcon } from '../components/Logo';
+import { WEBSITE_FEATURES } from '../config/features';
+import { useApp } from '../context/AppContext';
+import type { LibColor } from '../types';
 
 const fadeUp = keyframes`from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}`;
 
@@ -12,75 +13,88 @@ const fadeUp = keyframes`from{opacity:0;transform:translateY(16px)}to{opacity:1;
 
 export function Ecosystem() {
   const { t } = useApp();
+  const docsEntryPath = WEBSITE_FEATURES.docs ? '/docs' : '/libraries';
 
   const principles = [
     {
-      icon: "🏗️",
-      title: "Schema-first",
-      desc: "Describe intent in TypeScript, not implementation. The lib generates everything.",
+      icon: '🏗️',
+      title: 'Schema-first',
+      desc: 'Describe intent in TypeScript, not implementation. The lib generates everything.',
     },
     {
-      icon: "🔄",
-      title: "Consistent API",
-      desc: "Learn one library and you understand all others. Same conventions across the ecosystem.",
+      icon: '🔄',
+      title: 'Consistent API',
+      desc: 'Learn one library and you understand all others. Same conventions across the ecosystem.',
     },
     {
-      icon: "🧪",
-      title: "Native TypeScript",
-      desc: "Zero casting, types inferred automatically from your schema — full autocomplete.",
+      icon: '🧪',
+      title: 'Native TypeScript',
+      desc: 'Zero casting, types inferred automatically from your schema — full autocomplete.',
     },
     {
-      icon: "♿",
-      title: "Accessible",
-      desc: "WCAG 2.1 AA by default on all libraries, without any configuration needed.",
+      icon: '♿',
+      title: 'Accessible',
+      desc: 'WCAG 2.1 AA by default on all libraries, without any configuration needed.',
     },
     {
-      icon: "📦",
-      title: "Tree-shakeable",
-      desc: "Import only what you use. The rest is excluded from your bundle automatically.",
+      icon: '📦',
+      title: 'Tree-shakeable',
+      desc: 'Import only what you use. The rest is excluded from your bundle automatically.',
     },
     {
-      icon: "🌍",
-      title: "i18n everywhere",
+      icon: '🌍',
+      title: 'i18n everywhere',
       desc: 'setLocale("fr") works on all RUNILIB libs. One call for your entire app.',
     },
   ];
 
   const timeline = [
     {
-      quarter: "Q1 2026",
-      status: "current" as const,
+      quarter: 'Q1 2026',
+      status: 'current' as const,
       items: [
-        { name: "formbridge v1.1", desc: "Nested fields, wizard, persistence, conditional fields" },
-        { name: "stepwise v1.1", desc: "Multi-screen tours, scroll-to-element, accessibility" },
-        { name: "tooltip v1.0", desc: "Smart positioning, rich content, WCAG 2.1" },
+        {
+          name: 'formbridge v1.1',
+          desc: 'Nested fields, wizard, persistence, conditional fields',
+        },
+        {
+          name: 'walkit v1.1',
+          desc: 'Multi-screen tours, scroll-to-element, accessibility',
+        },
+        { name: 'tooltip v1.0', desc: 'Smart positioning, rich content, WCAG 2.1' },
       ],
     },
     {
-      quarter: "Q2 2026",
-      status: "planned" as const,
+      quarter: 'Q2 2026',
+      status: 'planned' as const,
       items: [
-        { name: "formbridge v1.2", desc: "File upload, masks, password strength, DevTools" },
-        { name: "stepwise v1.2", desc: "AI-generated steps, video steps, A/B testing" },
-        { name: "storex v1.0", desc: "Unified AsyncStorage / localStorage" },
+        {
+          name: 'formbridge v1.2',
+          desc: 'File upload, masks, password strength, DevTools',
+        },
+        { name: 'walkit v1.2', desc: 'AI-generated steps, video steps, A/B testing' },
+        { name: 'storex v1.0', desc: 'Unified AsyncStorage / localStorage' },
       ],
     },
     {
-      quarter: "Q3 2026",
-      status: "planned" as const,
+      quarter: 'Q3 2026',
+      status: 'planned' as const,
       items: [
-        { name: "formbridge v1.3", desc: "field.infer(), JSON-driven forms, readonly/diff" },
-        { name: "toastly v1.0", desc: "Cross-platform toast notifications" },
-        { name: "modalkit v1.0", desc: "Unified modals and bottom sheets" },
+        {
+          name: 'formbridge v1.3',
+          desc: 'field.infer(), JSON-driven forms, readonly/diff',
+        },
+        { name: 'toastly v1.0', desc: 'Cross-platform toast notifications' },
+        { name: 'modalkit v1.0', desc: 'Unified modals and bottom sheets' },
       ],
     },
     {
-      quarter: "Q4 2026",
-      status: "vision" as const,
+      quarter: 'Q4 2026',
+      status: 'vision' as const,
       items: [
-        { name: "motionkit v1.0", desc: "Framer Motion + Reanimated unified" },
-        { name: "RUNILIB v2.0", desc: "Monorepo, CLI, global DevTools" },
-        { name: "@runilib/ui", desc: "Cross-platform design system" },
+        { name: 'motionkit v1.0', desc: 'Framer Motion + Reanimated unified' },
+        { name: 'RUNILIB v2.0', desc: 'Monorepo, CLI, global DevTools' },
+        { name: '@runilib/ui', desc: 'Cross-platform design system' },
       ],
     },
   ];
@@ -95,7 +109,10 @@ export function Ecosystem() {
           <ESub>{t.ecosystem.subtitle}</ESub>
         </EcoHeroContent>
         <EcoHeroVis>
-          <LogoIcon size={96} animated />
+          <LogoIcon
+            size={96}
+            animated
+          />
         </EcoHeroVis>
       </EcoHero>
 
@@ -109,15 +126,18 @@ export function Ecosystem() {
             <GraphCenterSub>React · React Native</GraphCenterSub>
           </GraphCenter>
           {[
-            { name: "formbridge", color: "blue" as LibColor, icon: "📋", angle: 0 },
-            { name: "stepwise", color: "amber" as LibColor, icon: "🎯", angle: 120 },
-            { name: "tooltip", color: "teal" as LibColor, icon: "💬", angle: 240 },
+            { name: 'formbridge', color: 'blue' as LibColor, icon: '📋', angle: 0 },
+            { name: 'walkit', color: 'amber' as LibColor, icon: '🎯', angle: 120 },
+            { name: 'tooltip', color: 'teal' as LibColor, icon: '💬', angle: 240 },
           ].map((lib) => {
             const rad = ((lib.angle - 90) * Math.PI) / 180;
             const x = 50 + 42 * Math.cos(rad);
             const y = 50 + 42 * Math.sin(rad);
             return (
-              <GraphNode key={lib.name} style={{ left: `${x}%`, top: `${y}%` }}>
+              <GraphNode
+                key={lib.name}
+                style={{ left: `${x}%`, top: `${y}%` }}
+              >
                 <GraphNodeIcon $color={lib.color}>{lib.icon}</GraphNodeIcon>
                 <GraphNodeName>{lib.name}</GraphNodeName>
               </GraphNode>
@@ -149,11 +169,17 @@ export function Ecosystem() {
         <ETitle2>{t.ecosystem.roadmap.title}</ETitle2>
         <Timeline>
           {timeline.map((q) => (
-            <TimeBlock key={q.quarter} $status={q.status}>
+            <TimeBlock
+              key={q.quarter}
+              $status={q.status}
+            >
               <TimeQuarter $status={q.status}>{q.quarter}</TimeQuarter>
               <TimeItems>
                 {q.items.map((item) => (
-                  <TimeItem key={item.name} $status={q.status}>
+                  <TimeItem
+                    key={item.name}
+                    $status={q.status}
+                  >
                     <TimeItemName>{item.name}</TimeItemName>
                     <TimeItemDesc>{item.desc}</TimeItemDesc>
                   </TimeItem>
@@ -169,8 +195,12 @@ export function Ecosystem() {
         <ECTATitle>Join the ecosystem</ECTATitle>
         <ECTADesc>RUNILIB is open source. Contributions welcome.</ECTADesc>
         <ECTABtns>
-          <PrimaryBtn to="/docs">Get started</PrimaryBtn>
-          <SecBtn href="https://github.com/runilib" target="_blank" rel="noopener">
+          <PrimaryBtn to={docsEntryPath}>Get started</PrimaryBtn>
+          <SecBtn
+            href="https://github.com/runilib"
+            target="_blank"
+            rel="noopener"
+          >
             ⭐ GitHub
           </SecBtn>
         </ECTABtns>
@@ -339,18 +369,18 @@ const Timeline = styled.div`
   @media (max-width: 860px) { grid-template-columns: repeat(2, 1fr); }
   @media (max-width: 500px) { grid-template-columns: 1fr; }
 `;
-const TimeBlock = styled.div<{ $status: "current" | "planned" | "vision" }>`
+const TimeBlock = styled.div<{ $status: 'current' | 'planned' | 'vision' }>`
   border-radius: 14px;
   background: ${({ theme }) => theme.bgCard};
   border: ${({ theme, $status }) =>
-    $status === "current" ? `2px solid ${theme.teal}55` : `1px solid ${theme.border}`};
+    $status === 'current' ? `2px solid ${theme.teal}55` : `1px solid ${theme.border}`};
   padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 13px;
-  opacity: ${({ $status }) => ($status === "vision" ? 0.6 : 1)};
+  opacity: ${({ $status }) => ($status === 'vision' ? 0.6 : 1)};
 `;
-const TimeQuarter = styled.div<{ $status: "current" | "planned" | "vision" }>`
+const TimeQuarter = styled.div<{ $status: 'current' | 'planned' | 'vision' }>`
   font-family: 'DM Mono', monospace;
   font-size: 10.5px;
   font-weight: 500;
@@ -359,18 +389,22 @@ const TimeQuarter = styled.div<{ $status: "current" | "planned" | "vision" }>`
   border-radius: 20px;
   width: fit-content;
   ${({ theme, $status }) => {
-    if ($status === "current")
+    if ($status === 'current')
       return `background:${theme.tealDim};color:${theme.teal};border:1px solid ${theme.teal}44;`;
-    if ($status === "planned")
+    if ($status === 'planned')
       return `background:${theme.blueDim};color:${theme.blue};border:1px solid ${theme.blue}44;`;
     return `background:${theme.border};color:${theme.textMuted};`;
   }}
 `;
 const TimeItems = styled.div`display: flex; flex-direction: column; gap: 9px;`;
-const TimeItem = styled.div<{ $status: "current" | "planned" | "vision" }>`
+const TimeItem = styled.div<{ $status: 'current' | 'planned' | 'vision' }>`
   padding-left: 11px;
   border-left: 2px solid ${({ theme, $status }) =>
-    $status === "current" ? theme.teal : $status === "planned" ? theme.blue : theme.border};
+    $status === 'current'
+      ? theme.teal
+      : $status === 'planned'
+        ? theme.blue
+        : theme.border};
 `;
 const TimeItemName = styled.div`
   font-family: 'Sora', sans-serif;

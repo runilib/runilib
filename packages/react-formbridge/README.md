@@ -1,7 +1,7 @@
 # formura
 
-> **Schema-first, cross-platform forms for React and React Native.**
-> One schema. One API. Every platform. No duplicated logic ever.
+> **A schema-driven form builder/runtime for React and React Native.**
+> One schema. One API. Generated fields, validation, and form flows across every platform.
 
 [![npm](https://img.shields.io/npm/v/formura)](https://npmjs.com/package/formura)
 [![license](https://img.shields.io/npm/l/formura)](./LICENSE)
@@ -13,7 +13,7 @@
 
 Most form libraries make you wire things up manually — `register()`, spread props, write `onChange`, track errors yourself. **formura flips this completely.**
 
-You describe your form **once** using a fluent schema. formura generates:
+You describe your form **once** using a fluent schema. formura acts as a schema-driven form builder/runtime and generates:
 - The right input component for each field type
 - Labels, placeholders, hints and error messages
 - Validation (sync + async)
@@ -97,6 +97,64 @@ field.email('Email address')
   // Email format validation is built-in automatically
 ```
 
+You can override the default email pattern when you need a stricter rule, for example to require a company domain:
+
+```ts
+field.email('Work email')
+  .required()
+  .trim()
+  .lowercase()
+  .pattern(/^[^\s@]+@aks\.com$/i, 'Please use your @aks.com email address.')
+```
+
+You can also allow several company domains by passing multiple patterns:
+
+```ts
+field.email('Work email')
+  .required()
+  .trim()
+  .lowercase()
+  .pattern(
+    [/^[^\s@]+@aks\.com$/i, /^[^\s@]+@sosthene\.dev$/i],
+    'Please use your company email address.',
+  )
+```
+
+Chaining `.pattern(...)` also works and keeps adding accepted alternatives:
+
+```ts
+field.email('Work email')
+  .required()
+  .pattern(/^[^\s@]+@aks\.com$/i, 'Please use your company email address.')
+  .pattern(/^[^\s@]+@sosthene\.dev$/i)
+```
+
+If you prefer a more readable API for blocking personal inbox providers while still accepting any custom domain:
+
+```ts
+field.email('Work email')
+  .required()
+  .trim()
+  .lowercase()
+  .excludeEmailDomains(
+    ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'],
+    'Please use a non-personal email address.',
+  )
+```
+
+If you want to allow any business domain except common free inbox providers:
+
+```ts
+field.email('Work email')
+  .required()
+  .trim()
+  .lowercase()
+  .pattern(
+    /^[^\s@]+@(?!gmail\.com$|yahoo\.com$|outlook\.com$)[^\s@]+\.[^\s@]+$/i,
+    'Please use your company email address.',
+  )
+```
+
 ### Password
 
 ```ts
@@ -162,6 +220,44 @@ field.radio('Role')
   .required()
 ```
 
+Custom picker / modal:
+
+```tsx
+field
+  .select('City')
+  .optionsFrom(fetchCities, {
+    key: 'city-search',
+    debounce: 250,
+    minChars: 2,
+  })
+  .searchable()
+  .appearance({
+    renderPicker: ({
+      open,
+      search,
+      setSearch,
+      options,
+      loading,
+      error,
+      closePicker,
+      selectOption,
+    }) =>
+      open ? (
+        <CityLookupModal
+          query={search}
+          items={options}
+          loading={loading}
+          error={error}
+          onQueryChange={setSearch}
+          onClose={closePicker}
+          onSelect={selectOption}
+        />
+      ) : null,
+  })
+```
+
+`renderPicker` can also be provided globally via `useFormBridge(schema, { globalAppearance })`, or locally on a rendered field via `<fields.city appearance={{ renderPicker }} />`.
+
 ### OTP / PIN code
 
 ```ts
@@ -177,6 +273,33 @@ field.otp('Verification code')
 field.date('Date of birth')
   .required()
 ```
+
+### Masked inputs
+
+```ts
+import { MASKS } from '@runilib/react-formbridge';
+
+field.masked('Card number', MASKS.CARD_16)
+  .required()
+  .showMaskInPlaceholder()
+  .validateComplete('Card is incomplete.');
+
+field.masked('License plate', 'LL-999-LL')
+  .tokens({
+    L: /[A-Z]/,
+  })
+  .uppercase();
+```
+
+Use a built-in preset from `MASKS` when it matches your use case, or pass your own pattern string directly.
+
+- Built-in tokens: `9` for digits, `a` for letters, `*` for any character
+- `tokens(map)` lets you add or override custom token characters for advanced masks
+- Masked fields store the formatted value by default, so `23/2027` stays `23/2027`
+- Use `storeRaw()` if you explicitly need the unformatted raw payload instead
+- `showPlaceholder()` renders placeholder characters in the value
+- `showMaskInPlaceholder()` keeps the value empty and renders the mask as the input placeholder
+- Common presets include `CARD_16`, `CARD_AMEX`, `CARD_19`, `CVV`, `CVV_AMEX`, `EXPIRY`, `DATE_DMY`, `DATE_ISO`, `TIME_HM`, `IBAN`, `SIRET`, `ZIP_FR`, `SSN`, and `IP_ADDRESS`
 
 ### Custom renderer
 
@@ -314,26 +437,42 @@ useForm(schema, {
 Use Zod, Yup, Joi or Valibot for full schema validation. The resolver replaces field-level validators.
 
 ```ts
-import { z }           from 'zod';
-import { zodResolver } from 'formura';
+import { z } from 'zod';
+import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge';
 
-const schema = z.object({
+const zodSchema = z.object({
   email:    z.string().email('Invalid email.'),
   password: z.string().min(8, 'Min 8 characters.'),
   age:      z.coerce.number().min(18, 'Must be 18+.'),
 });
 
-const { Form, fields } = useForm(
+const { Form, fields } = useFormBridge(
   {
     email:    field.email('Email').required(),
     password: field.password('Password').required(),
     age:      field.number('Age').required(),
   },
-  { resolver: zodResolver(schema) }
+  { resolver: zodResolver(zodSchema) }
 );
 ```
 
 Available resolvers: `zodResolver`, `yupResolver`, `joiResolver`, `valibotResolver`.
+
+Common resolver options:
+- `rootKey`: where pathless errors land. Default: `'_root'`
+- `errorMode`: `'first'`, `'last'`, or `'join'`
+- `joinMessagesWith`: separator used with `'join'`
+- `formatPath(path, issue)`: customize final error keys
+- `mapIssue(context)`: rewrite, reroute, or skip issues
+- `normalizeMessage(message, issue)`: centralize cleanup or translation
+
+Library-specific options:
+- `zodResolver(schema, { mode, parseOptions })`
+- `yupResolver(schema, { mode, validateOptions })`
+- `joiResolver(schema, { mode, validateOptions, stripQuotes })`
+- `valibotResolver(schema, { mode, parseOptions, module })`
+
+Successful parsed values are forwarded to `onSubmit`, so schema coercion and transforms are preserved. For Valibot in stricter ESM/browser environments, pass the module explicitly with `module: v`.
 
 ---
 

@@ -14,13 +14,13 @@ on:
         type: string
         default: main
       mirror_git_user_name:
-        required: true
+        required: false
         type: string
-        default: main
+        default: runilib-bot
       mirror_git_user_email:
-        required: true
+        required: false
         type: string
-        default: main
+        default: bot@runilib.dev
     secrets:
       mirror_push_token:
         required: true

@@ -17,7 +17,7 @@ import type { UseWalkitReturn } from '../types/Walkit.types';
  */
 export function useWalkit(): UseWalkitReturn {
   const {
-    sortedSteps,
+    totalSteps,
     currentIndex,
     currentStep,
     currentRect,
@@ -42,9 +42,9 @@ export function useWalkit(): UseWalkitReturn {
     currentStep,
     currentRect,
     isRunning: visible,
-    totalSteps: sortedSteps.length,
+    totalSteps,
     currentIndex,
-    isFirstStep: currentIndex === 0,
-    isLastStep: currentIndex === sortedSteps.length - 1,
+    isFirstStep: totalSteps > 0 && currentIndex === 0,
+    isLastStep: totalSteps > 0 && currentIndex === totalSteps - 1,
   };
 }

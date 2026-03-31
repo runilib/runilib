@@ -10,30 +10,16 @@ import {
 } from 'react-native';
 
 import { NATIVE_ANIMATIONS } from '../../../animations';
-import type {
-  Placement,
-  WalkitPopoverProps,
-  WalkitTheme,
-} from '../../../types/Walkit.types';
+import type { Placement, WalkitPopoverProps } from '../../../types/Walkit.types';
+import { DEFAULT_THEME } from '../../../utils/constant';
 
-const DEFAULT_THEME: Required<WalkitTheme> = {
-  primaryButtonColor: '#6366f1',
-  primaryButtonTextColor: '#ffffff',
-  background: '#ffffff',
-  titleColor: '#1e1e2e',
-  subTitleColor: '#6b7280',
-  border: '#e5e7eb',
-  shadow: '',
-  borderRadius: '14px',
-};
-
-export const NativeTooltip = ({
+export const NativeWalkitContent = ({
   walkitStep,
   walkitStepIndex,
   totalWalkitSteps,
-  walkitStepPos,
+  walkitStepPosition,
   animationType = 'slide',
-  theme,
+  theme: themeProp,
   walkitStyle,
   renderPopover,
   labels = {},
@@ -42,23 +28,23 @@ export const NativeTooltip = ({
   onStop,
   onMeasure,
 }: WalkitPopoverProps) => {
-  const t = { ...DEFAULT_THEME, ...theme };
+  const theme = { ...DEFAULT_THEME, ...themeProp };
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     progress.setValue(0);
-    const cfg = NATIVE_ANIMATIONS[animationType] ?? NATIVE_ANIMATIONS.fade;
+    const animationConfig = NATIVE_ANIMATIONS[animationType] ?? NATIVE_ANIMATIONS.fade;
 
-    if (cfg.useSpring && cfg.spring) {
+    if (animationConfig.useSpring && animationConfig.spring) {
       Animated.spring(progress, {
         toValue: 1,
         useNativeDriver: true,
-        ...cfg.spring,
+        ...animationConfig.spring,
       }).start();
     } else {
       Animated.timing(progress, {
         toValue: 1,
-        duration: cfg.duration ?? 300,
+        duration: animationConfig.duration ?? 100,
         useNativeDriver: true,
       }).start();
     }
@@ -66,16 +52,16 @@ export const NativeTooltip = ({
 
   const isFirst = walkitStepIndex === 0;
   const isLast = walkitStepIndex === totalWalkitSteps - 1;
-  const cfg = NATIVE_ANIMATIONS[animationType] ?? NATIVE_ANIMATIONS.fade;
-  const animStyle = buildAnimatedStyle(progress, cfg);
+  const animationConfig = NATIVE_ANIMATIONS[animationType] ?? NATIVE_ANIMATIONS.fade;
+  const animationStyle = buildAnimatedStyle(progress, animationConfig);
 
   const containerStyle = [
     styles.container,
     {
-      top: walkitStepPos.top,
-      left: walkitStepPos.left,
-      backgroundColor: t.background,
-      borderColor: t.border,
+      top: walkitStepPosition.top,
+      left: walkitStepPosition.left,
+      backgroundColor: theme.background,
+      borderColor: theme.border,
     },
     walkitStyle,
   ];
@@ -88,7 +74,7 @@ export const NativeTooltip = ({
     return (
       <Animated.View
         onLayout={handleLayout}
-        style={[containerStyle, animStyle]}
+        style={[containerStyle, animationStyle]}
       >
         {renderPopover({
           walkitStep,
@@ -99,9 +85,9 @@ export const NativeTooltip = ({
           onStop,
         })}
         <Arrow
-          placement={walkitStepPos.placement}
-          color={t.background}
-          offset={walkitStepPos.arrowOffset}
+          placement={walkitStepPosition.placement}
+          color={theme.background}
+          offset={walkitStepPosition.arrowOffset}
         />
       </Animated.View>
     );
@@ -110,12 +96,12 @@ export const NativeTooltip = ({
   return (
     <Animated.View
       onLayout={handleLayout}
-      style={[containerStyle, animStyle]}
+      style={[containerStyle, animationStyle]}
     >
       <View style={styles.header}>
         {walkitStep.title ? (
           <Text
-            style={[styles.title, { color: t.titleColor }]}
+            style={[styles.title, { color: theme.titleColor }]}
             numberOfLines={2}
           >
             {walkitStep.title}
@@ -127,12 +113,12 @@ export const NativeTooltip = ({
           style={styles.closeBtn}
           hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
         >
-          <Text style={[styles.closeText, { color: t.subTitleColor }]}>✕</Text>
+          <Text style={[styles.closeText, { color: theme.subTitleColor }]}>✕</Text>
         </TouchableOpacity>
       </View>
 
       {walkitStep.content ? (
-        <Text style={[styles.body, { color: t.subTitleColor }]}>
+        <Text style={[styles.body, { color: theme.subTitleColor }]}>
           {walkitStep.content}
         </Text>
       ) : null}
@@ -147,7 +133,7 @@ export const NativeTooltip = ({
                 {
                   width: i === walkitStepIndex ? 18 : 6,
                   backgroundColor:
-                    i === walkitStepIndex ? t.primaryButtonColor : t.border,
+                    i === walkitStepIndex ? theme.primaryButtonColor : theme.border,
                 },
               ]}
             />
@@ -158,9 +144,9 @@ export const NativeTooltip = ({
           {!isFirst && (
             <TouchableOpacity
               onPress={onPrev}
-              style={[styles.btnSecondary, { borderColor: t.border }]}
+              style={[styles.btnSecondary, { borderColor: theme.border }]}
             >
-              <Text style={[styles.btnSecondaryText, { color: t.subTitleColor }]}>
+              <Text style={[styles.btnSecondaryText, { color: theme.subTitleColor }]}>
                 {labels.prev ?? '← Back'}
               </Text>
             </TouchableOpacity>
@@ -168,9 +154,11 @@ export const NativeTooltip = ({
 
           <TouchableOpacity
             onPress={onNext}
-            style={[styles.btnPrimary, { backgroundColor: t.primaryButtonColor }]}
+            style={[styles.btnPrimary, { backgroundColor: theme.primaryButtonColor }]}
           >
-            <Text style={[styles.btnPrimaryText, { color: t.primaryButtonTextColor }]}>
+            <Text
+              style={[styles.btnPrimaryText, { color: theme.primaryButtonTextColor }]}
+            >
               {isLast ? (labels.finish ?? 'Finish 🎉') : (labels.next ?? 'Next →')}
             </Text>
           </TouchableOpacity>
@@ -178,9 +166,9 @@ export const NativeTooltip = ({
       </View>
 
       <Arrow
-        placement={walkitStepPos.placement}
-        color={t.background}
-        offset={walkitStepPos.arrowOffset}
+        placement={walkitStepPosition.placement}
+        color={theme.background}
+        offset={walkitStepPosition.arrowOffset}
       />
     </Animated.View>
   );
@@ -264,43 +252,43 @@ const Arrow: FC<{ placement: Placement; color: string; offset: number }> = ({
   );
 };
 
-type AnimCfg = (typeof NATIVE_ANIMATIONS)[keyof typeof NATIVE_ANIMATIONS];
+type AnimationConfig = (typeof NATIVE_ANIMATIONS)[keyof typeof NATIVE_ANIMATIONS];
 
-function buildAnimatedStyle(progress: Animated.Value, cfg: AnimCfg) {
+function buildAnimatedStyle(progress: Animated.Value, animationConfig: AnimationConfig) {
   const opacity = progress.interpolate({
     inputRange: [0, 1],
     outputRange: [0, 1],
   });
 
-  if ('scale' in cfg && cfg.scale) {
+  if ('scale' in animationConfig && animationConfig.scale) {
     return {
       opacity,
       transform: [
         {
           scale: progress.interpolate({
             inputRange: [0, 1],
-            outputRange: [cfg.scale.from, cfg.scale.to],
+            outputRange: [animationConfig.scale.from, animationConfig.scale.to],
           }),
         },
       ],
     };
   }
 
-  if ('translateY' in cfg && cfg.translateY) {
+  if ('translateY' in animationConfig && animationConfig.translateY) {
     return {
       opacity,
       transform: [
         {
           translateY: progress.interpolate({
             inputRange: [0, 1],
-            outputRange: [cfg.translateY.from, cfg.translateY.to],
+            outputRange: [animationConfig.translateY.from, animationConfig.translateY.to],
           }),
         },
       ],
     };
   }
 
-  if ('rotateX' in cfg && cfg.rotateX) {
+  if ('rotateX' in animationConfig && animationConfig.rotateX) {
     return {
       opacity,
       transform: [
@@ -308,7 +296,7 @@ function buildAnimatedStyle(progress: Animated.Value, cfg: AnimCfg) {
         {
           rotateX: progress.interpolate({
             inputRange: [0, 1],
-            outputRange: [cfg.rotateX.from, cfg.rotateX.to],
+            outputRange: [animationConfig.rotateX.from, animationConfig.rotateX.to],
           }),
         },
       ],

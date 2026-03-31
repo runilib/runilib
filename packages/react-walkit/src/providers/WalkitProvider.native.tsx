@@ -1,4 +1,4 @@
-import { WalkitOverlayBridge } from '../components/overlay/Overlay.native';
+import { WalkitOverlayBridge } from '../components/walkit/overlay-bridge/WalkitOverlayBridge.native';
 import { WalkitContextProvider } from '../context/WalkitContext';
 import type { WalkitProviderProps } from '../types/Walkit.types';
 
@@ -21,14 +21,26 @@ export const WalkitProvider = ({
   overlayColor,
   spotlightPadding = 8,
   spotlightBorderRadius = 8,
+  steps,
   stopOnOutsideClick = false,
   labels = {},
   renderPopover,
+  onFlowStepChange,
+  stepMountTimeoutMs,
   onStart,
   onStop,
   onStepChange,
 }: WalkitProviderProps) => (
-  <WalkitContextProvider config={{ onStart, onStop, onStepChange }}>
+  <WalkitContextProvider
+    config={{
+      steps,
+      onFlowStepChange,
+      stepMountTimeoutMs,
+      onStart,
+      onStop,
+      onStepChange,
+    }}
+  >
     <WalkitOverlayBridge
       animationType={animationType}
       theme={theme}

@@ -47,7 +47,7 @@ function Dashboard() {
       {/* Header */}
       <WalkitStep
         id="header"
-        order={1}
+        sequence={1}
         title="Welcome to your Dashboard 👋"
         content="All your key metrics and tools are available right from here."
         placement="bottom"
@@ -75,7 +75,7 @@ function Dashboard() {
         {/* Search */}
         <WalkitStep
           id="search"
-          order={2}
+          sequence={2}
           title="🔍 Search"
           content="Quickly find any content, user, or report across the whole app."
           placement="bottom"
@@ -89,7 +89,7 @@ function Dashboard() {
         {/* Stats */}
         <WalkitStep
           id="stats"
-          order={3}
+          sequence={3}
           title="📊 Your Stats"
           content="Monitor your daily and monthly KPIs at a glance. Data refreshes every hour."
           placement="bottom"
@@ -118,7 +118,7 @@ function Dashboard() {
         <div style={styles.actions}>
           <WalkitStep
             id="export"
-            order={4}
+            sequence={4}
             title="📥 Export"
             content="Download your data as CSV or PDF with one click."
             placement="top"
@@ -133,7 +133,7 @@ function Dashboard() {
 
           <WalkitStep
             id="new-report"
-            order={5}
+            sequence={5}
             title="✨ New Report"
             content="Create a custom report with the metrics that matter most to you."
             placement="top"
@@ -221,78 +221,86 @@ function StatCard({
 // ─── Custom react-walkit example ───────────────────────────────────────────────────
 
 export function AppWithCustomTooltip() {
-  const renderPopover = ({
-    step,
-    stepIndex,
-    totalSteps,
-    onNext,
-    onPrev,
-    onStop,
-  }: any) => (
-    <div style={{ fontFamily: 'sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-        <strong style={{ fontSize: 14, color: '#1e1e2e' }}>{step.title}</strong>
-        <button
-          type="button"
-          onClick={onStop}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: '#9ca3af',
-          }}
-        >
-          ✕
-        </button>
-      </div>
-      {step.text && (
-        <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 12px' }}>{step.text}</p>
-      )}
-      <div
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-      >
-        <span style={{ fontSize: 12, color: '#9ca3af' }}>
-          {stepIndex + 1} / {totalSteps}
-        </span>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {stepIndex > 0 && (
+  return (
+    <WalkitProvider
+      renderPopover={({
+        walkitStep,
+        walkitStepIndex,
+        totalWalkitSteps,
+        onNext,
+        onPrev,
+        onStop,
+      }) => (
+        <div style={{ fontFamily: 'sans-serif' }}>
+          <div
+            style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}
+          >
+            <strong style={{ fontSize: 14, color: '#1e1e2e' }}>{walkitStep.title}</strong>
             <button
               type="button"
-              onClick={onPrev}
+              onClick={onStop}
               style={{
-                fontSize: 12,
                 background: 'none',
-                border: '1px solid #e5e7eb',
-                borderRadius: 6,
-                padding: '4px 10px',
+                border: 'none',
                 cursor: 'pointer',
+                color: '#9ca3af',
               }}
             >
-              Back
+              ✕
             </button>
+          </div>
+          {walkitStep.content && (
+            <p style={{ color: '#6b7280', fontSize: 13, margin: '0 0 12px' }}>
+              {walkitStep.content}
+            </p>
           )}
-          <button
-            type="button"
-            onClick={onNext}
+          <div
             style={{
-              fontSize: 12,
-              background: '#6366f1',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 6,
-              padding: '4px 12px',
-              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            {stepIndex === totalSteps - 1 ? 'Done ✓' : 'Next'}
-          </button>
+            <span style={{ fontSize: 12, color: '#9ca3af' }}>
+              {walkitStepIndex + 1} / {totalWalkitSteps}
+            </span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {walkitStepIndex > 0 && (
+                <button
+                  type="button"
+                  onClick={onPrev}
+                  style={{
+                    fontSize: 12,
+                    background: 'none',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 6,
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Back
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onNext}
+                style={{
+                  fontSize: 12,
+                  background: '#6366f1',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '4px 12px',
+                  cursor: 'pointer',
+                }}
+              >
+                {walkitStepIndex === totalWalkitSteps - 1 ? 'Done ✓' : 'Next'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <WalkitProvider renderPopover={renderPopover}>
+      )}
+    >
       <Dashboard />
     </WalkitProvider>
   );

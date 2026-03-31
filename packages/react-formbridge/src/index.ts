@@ -1,99 +1,115 @@
-// ─── Core ─────────────────────────────────────────────────────────────────────
-export { useFormBridge }       from './hooks/useFormura';
-export { field }         from './builders/field';
-
-// ─── Resolvers ────────────────────────────────────────────────────────────────
-export { zodResolver, yupResolver, joiResolver, valibotResolver } from './adapters/resolvers';
-
-// ─── field.infer() & field.inferType() ────────────────────────────────────────
-export { inferFromObject, inferFromType }  from './builders/infer';
-export type { InferFieldOptions, InferOverrides } from './builders/infer';
-
-// ─── Dynamic / JSON-driven forms ──────────────────────────────────────────────
-export { parseDynamicForm, parseJsonSchema } from './builders/dynamic';
-export { useDynamicForm }                    from './hooks/useDynamicForm';
 export type {
-  JsonFormDefinition,
   JsonFieldDescriptor,
   JsonFieldType,
-  JsonValidationRule,
-  UseDynamicFormOptions,
-  UseDynamicFormReturn,
-} from './builders/dynamic';
-
-// ─── Readonly & diff mode ─────────────────────────────────────────────────────
-export { useReadonlyForm }  from './hooks/useReadonlyForm';
+  JsonFormDefinition,
+} from './core/field-builders/dynamic/types';
+export { field } from './core/field-builders/field';
+export { inferFromObject, inferFromType } from './core/field-builders/infer';
+export type { MaskPreset } from './core/field-builders/mask/constants';
+export { MASKS } from './core/field-builders/mask/constants';
+export type { MaskPatternInput } from './core/field-builders/mask/masks';
 export type {
-  UseReadonlyFormOptions,
-  UseReadonlyFormReturn,
-  FieldReadonlyState,
-  ReadonlyFieldProps,
-  ReadonlyMode,
-} from './hooks/useReadonlyForm';
-
-
-
-// ─── Feature: Masks ───────────────────────────────────────────────────────────
-export { MaskedFieldBuilder }                          from './fields/mask/MaskedField';
-export { isMaskedDescriptor }                          from './fields/mask/MaskedField';
-export { MASKS, applyMask, extractRaw, parsePattern }  from './fields/mask/masks';
-export { maskCompleteValidator }                       from './fields/mask/masks';
-export type { MaskPreset, MaskResult, MaskToken, ApplyMaskOptions } from './fields/mask/masks';
-export type { MaskedDescriptor, MaskedFieldMeta }      from './fields/mask/MaskedField';
-
-// ─── Feature: Password strength ──────────────────────────────────────────────
-export { scorePassword }                               from './fields/password/strength';
-export { STRENGTH_CONFIG_STRICT }                      from './fields/password/strength';
-export { STRENGTH_CONFIG_SIMPLE }                      from './fields/password/strength';
-export { STRENGTH_CONFIG_FR }                          from './fields/password/strength';
-export { PasswordStrengthMixin, isStrengthDescriptor } from './fields/password/PasswordWithStrength';
-export { DEFAULT_STRENGTH_META }                       from './fields/password/PasswordWithStrength';
+  MaskPatternConfig,
+  MaskTokenMap,
+} from './core/field-builders/mask/types';
+export type { InferFieldOptions, InferOverrides } from './core/field-builders/types';
+export {
+  type JoiResolverIssue,
+  type JoiResolverOptions,
+  joiResolver,
+  type ValibotResolverIssue,
+  type ValibotResolverOptions,
+  valibotResolver,
+  type YupResolverIssue,
+  type YupResolverOptions,
+  yupResolver,
+  type ZodResolverIssue,
+  type ZodResolverOptions,
+  zodResolver,
+} from './core/resolvers';
 export type {
-  StrengthResult,
-  StrengthConfig,
-  StrengthScoreLevel,
-  StrengthRuleConfig,
-  PasswordRule,
-}                                                      from './fields/password/strength';
-export type { PasswordStrengthMeta }                   from './fields/password/PasswordWithStrength';
-
-// ─── Feature: File upload ─────────────────────────────────────────────────────
-export { FileFieldBuilder, isFileDescriptor }          from './fields/file/FileField';
+  ResolverAdapterOptions,
+  ResolverErrorMode,
+  ResolverIssueContext,
+  ResolverIssueMapResult,
+  ResolverPathInput,
+} from './core/resolvers/types';
 export type {
-  FileValue,
-  FileFieldMeta,
-  FileSourceType,
-}                                                      from './fields/file/FileField';
-
-// ─── Web renderers (for integration into WebField.tsx) ────────────────────────
-// These are imported dynamically inside useForm — not re-exported here.
-
-// ─── Integration note ─────────────────────────────────────────────────────────
-// To integrate these features into the main formura package:
-// 1. Copy this entire src/ into formura/src/
-// 2. In formura/src/hooks/useForm.ts, add checks for masked/strength/file
-//    descriptors when rendering fields (see INTEGRATION.md)
-// 3. Add exports from this index.ts to formura/src/index.ts
-// 4. In formura/src/builders/field.ts, add:
-//    masked: (label, pattern) => new MaskedFieldBuilder(label, pattern)
-//    file:   (label) => new FileFieldBuilder(label)
-
-
+  AsyncDependencyShape,
+  AsyncOptionsConfig,
+  UseAsyncOptionsReturn,
+} from './hooks/shared/useAsyncOptions';
+export { useAsyncOptions } from './hooks/shared/useAsyncOptions';
+export {
+  type UseDynamicFormOptions,
+  type UseDynamicFormReturn,
+  useDynamicFormBridge,
+} from './hooks/shared/useDynamicFormBridge';
+export {
+  type UseFormWizardOptions,
+  type UseFormWizardReturn,
+  useFormWizardBridge,
+  type WizardStep,
+} from './hooks/shared/useFormBridgeWizard';
+export {
+  type UseReadonlyFormOptions,
+  type UseReadonlyFormReturn,
+  useReadonlyFormBridge,
+} from './hooks/shared/useReadonlyFormBridge';
+export { useFormBridge } from './hooks/useFormBridge.web';
+// ─── FormHost ────────────────────────────────────────────────────────────────────
+export {
+  FieldHost,
+  type FieldHostProps,
+  FormHost,
+  type FormHostProps,
+  SubmitHost,
+  type SubmitHostProps,
+} from './renderers/hosts/Host';
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type {
+  AsyncValidator,
+  ExtraFieldProps,
+  FieldAppearanceConfig,
+  FieldAppearanceOverrides,
+  FieldComponent,
+  FieldComponents,
+  FieldDescriptor,
+  FieldRenderProps,
+  FieldState,
+  FieldStyleProps,
+  FieldStyleValue,
+  FieldTheme,
+  FieldType,
+  FormBridgeUiOptions,
+  FormComponent,
+  FormProps,
   FormSchema,
   FormState,
   FormStatus,
-  FieldDescriptor,
-  FieldType,
-  FieldRenderProps,
-  UseFormReturn,
-  UseFormOptions,
-  ValidationTrigger,
+  FormUiOverrides,
+  NativeFieldSlot,
+  NativeFieldUiOverrides,
+  NativeFormUiOverrides,
+  NativeStyleValue,
+  NativeSubmitUiOverrides,
+  OptionsFetcher,
+  OptionsFetcherContext,
+  ResolverResult,
+  SchemaResolver,
   SchemaValues,
   SelectOption,
-  SchemaResolver,
-  ResolverResult,
-  ExtraFieldProps,
+  SelectPickerRenderContext,
+  SubmitButtonComponent,
   SubmitButtonProps,
+  SubmitUiOverrides,
+  SyncValidator,
+  UseFormBridgeReturn,
+  UseFormOptions,
+  ValidationTrigger,
+  Validator,
+  WebFieldSlot,
+  WebFieldUiOverrides,
+  WebFormUiOverrides,
+  WebSubmitUiOverrides,
 } from './types';

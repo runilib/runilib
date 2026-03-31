@@ -17,6 +17,7 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
+    "@runilib/react-formbridge": "workspace:*",
     "@runilib/react-walkit": "workspace:*",
     "lucide-react": "^0.577.0",
     "react": "^18.2.0",

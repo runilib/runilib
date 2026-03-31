@@ -1,54 +1,142 @@
 import { describe, expect, it } from 'vitest';
-import type { TargetRect } from '../types/Walkit.types';
+import type { SpotlightRect, TargetRect } from '../types/Walkit.types';
 import { getSpotlightRect } from '../utils/positioning.shared';
-import { computeTooltipPosition } from '../utils/Walkit.positioning';
+import { computeWalkitStepPosition } from '../utils/Walkit.positioning';
 
 const SCREEN = { w: 375, h: 812 };
 const TOOLTIP = { width: 300, height: 180 };
 
 describe('computeTooltipPosition', () => {
   it('places react-walkit below target when there is room', () => {
-    const target: TargetRect = { x: 37, y: 100, width: 300, height: 50 };
-    const result = computeTooltipPosition(target, TOOLTIP, 'bottom', SCREEN.w, SCREEN.h);
+    const target: SpotlightRect = {
+      x: 37,
+      y: 100,
+      width: 300,
+      height: 50,
+      borderRadius: 0,
+    };
+    const result = computeWalkitStepPosition({
+      target,
+      walkitStepSize: TOOLTIP,
+      preferredPlacement: 'bottom',
+      screenWidth: SCREEN.w,
+      screenHeight: SCREEN.h,
+    });
     expect(result.placement).toBe('bottom');
     expect(result.top).toBeGreaterThan(target.y + target.height);
   });
 
   it('falls back to top when no room below', () => {
-    const target: TargetRect = { x: 37, y: 650, width: 300, height: 50 };
-    const result = computeTooltipPosition(target, TOOLTIP, 'auto', SCREEN.w, SCREEN.h);
+    const target: SpotlightRect = {
+      x: 37,
+      y: 650,
+      width: 300,
+      height: 50,
+      borderRadius: 0,
+    };
+    const result = computeWalkitStepPosition({
+      target,
+      walkitStepSize: TOOLTIP,
+      preferredPlacement: 'auto',
+      screenWidth: SCREEN.w,
+      screenHeight: SCREEN.h,
+    });
     expect(result.placement).toBe('top');
     expect(result.top).toBeLessThan(target.y);
   });
 
   it('respects explicit placement', () => {
-    const target: TargetRect = { x: 37, y: 100, width: 300, height: 50 };
-    const result = computeTooltipPosition(target, TOOLTIP, 'top', SCREEN.w, SCREEN.h);
+    const target: SpotlightRect = {
+      x: 37,
+      y: 260,
+      width: 300,
+      height: 50,
+      borderRadius: 0,
+    };
+    const result = computeWalkitStepPosition({
+      target,
+      walkitStepSize: TOOLTIP,
+      preferredPlacement: 'top',
+      screenWidth: SCREEN.w,
+      screenHeight: SCREEN.h,
+    });
     expect(result.placement).toBe('top');
   });
 
   it('clamps left to screen padding', () => {
-    const target: TargetRect = { x: 0, y: 100, width: 10, height: 10 };
-    const result = computeTooltipPosition(target, TOOLTIP, 'bottom', SCREEN.w, SCREEN.h);
+    const target: SpotlightRect = {
+      x: 0,
+      y: 100,
+      width: 10,
+      height: 10,
+      borderRadius: 0,
+    };
+
+    const result = computeWalkitStepPosition({
+      target,
+      walkitStepSize: TOOLTIP,
+      preferredPlacement: 'bottom',
+      screenWidth: SCREEN.w,
+      screenHeight: SCREEN.h,
+    });
     expect(result.left).toBeGreaterThanOrEqual(10);
   });
 
   it('clamps right to screen width - react-walkit width - padding', () => {
-    const target: TargetRect = { x: 350, y: 100, width: 20, height: 30 };
-    const result = computeTooltipPosition(target, TOOLTIP, 'bottom', SCREEN.w, SCREEN.h);
+    const target: SpotlightRect = {
+      x: 350,
+      y: 100,
+      width: 20,
+      height: 30,
+      borderRadius: 0,
+    };
+
+    const result = computeWalkitStepPosition({
+      target,
+      walkitStepSize: TOOLTIP,
+      preferredPlacement: 'top',
+      screenWidth: SCREEN.w,
+      screenHeight: SCREEN.h,
+    });
     expect(result.left + TOOLTIP.width).toBeLessThanOrEqual(SCREEN.w);
   });
 
   it('places right when given explicit right and fits', () => {
-    const target: TargetRect = { x: 10, y: 300, width: 40, height: 40 };
-    const result = computeTooltipPosition(target, TOOLTIP, 'right', SCREEN.w, SCREEN.h);
+    const target: SpotlightRect = {
+      x: 20,
+      y: 300,
+      width: 20,
+      height: 40,
+      borderRadius: 0,
+    };
+
+    const result = computeWalkitStepPosition({
+      target,
+      walkitStepSize: TOOLTIP,
+      preferredPlacement: 'right',
+      screenWidth: SCREEN.w,
+      screenHeight: SCREEN.h,
+    });
     expect(result.placement).toBe('right');
     expect(result.left).toBeGreaterThan(target.x + target.width);
   });
 
   it('returns a numeric arrowOffset', () => {
-    const target: TargetRect = { x: 37, y: 100, width: 100, height: 50 };
-    const result = computeTooltipPosition(target, TOOLTIP, 'auto', SCREEN.w, SCREEN.h);
+    const target: SpotlightRect = {
+      x: 37,
+      y: 100,
+      width: 100,
+      height: 50,
+      borderRadius: 0,
+    };
+
+    const result = computeWalkitStepPosition({
+      target,
+      walkitStepSize: TOOLTIP,
+      preferredPlacement: 'auto',
+      screenWidth: SCREEN.w,
+      screenHeight: SCREEN.h,
+    });
     expect(typeof result.arrowOffset).toBe('number');
   });
 });

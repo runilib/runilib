@@ -16,8 +16,6 @@
       "outputs": [
         "dist/**",
         "build/**",
-        ".next/**",
-        "!.next/cache/**",
         "lib/**"
       ]
     },

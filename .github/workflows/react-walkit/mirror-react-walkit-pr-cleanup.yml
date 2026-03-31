@@ -16,7 +16,7 @@ jobs:
       pull-requests: read
 
     env:
-      TARGET_REPO: your-org/runilib-react-walkit
+      TARGET_REPO: runilib/react-walkit
       SYNC_BRANCH: sync/pr-${{ github.event.pull_request.number }}
 
     steps:

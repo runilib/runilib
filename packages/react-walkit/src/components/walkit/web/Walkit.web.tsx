@@ -6,24 +6,13 @@ import type {
   WalkitPopoverProps,
   WalkitTheme,
 } from '../../../types/Walkit.types';
+import { DEFAULT_THEME } from '../../../utils/constant';
 
-// ─── Default theme ────────────────────────────────────────────────────────────
-const DEFAULT_THEME: Required<WalkitTheme> = {
-  primaryButtonColor: '#6366f1',
-  primaryButtonTextColor: '#ffffff',
-  background: '#ffffff',
-  titleColor: '#1e1e2e',
-  subTitleColor: '#6b7280',
-  border: '#e5e7eb',
-  shadow: '',
-  borderRadius: '14px',
-};
-
-export const Tooltip = ({
+export const WebWalkit = ({
   walkitStep,
   walkitStepIndex,
   totalWalkitSteps,
-  walkitStepPos,
+  walkitStepPosition,
   animationType = 'slide',
   theme: themeProp,
   walkitStyle,
@@ -51,17 +40,23 @@ export const Tooltip = ({
   }, [animationResetKey]);
 
   const measureKey = `${walkitStepIndex}-${walkitStep.id}`;
+
+  const onMeasureRef = useRef(onMeasure);
+
+  useEffect(() => {
+    onMeasureRef.current = onMeasure;
+  }, [onMeasure]);
+
   useEffect(() => {
     void measureKey;
-
     const element = containerRef.current;
-    if (!element || !onMeasure) {
+    if (!element || !onMeasureRef.current) {
       return;
     }
 
     const reportSize = () => {
       const rect = element.getBoundingClientRect();
-      onMeasure({
+      onMeasureRef.current?.({
         width: Math.ceil(rect.width),
         height: Math.ceil(rect.height),
       });
@@ -75,18 +70,18 @@ export const Tooltip = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [onMeasure, measureKey]);
+  }, [measureKey]);
 
   const isFirst = walkitStepIndex === 0;
   const isLast = walkitStepIndex === totalWalkitSteps - 1;
-  const { placement, arrowOffset = 0 } = walkitStepPos;
+  const { placement, arrowOffset = 0 } = walkitStepPosition;
   const animation = ready ? getWebAnimation(animationType, placement) : 'none';
   const arrowStyle = buildArrowStyle(placement, arrowOffset, theme.background);
 
   const containerStyle: CSSProperties = {
     position: 'fixed',
-    top: walkitStepPos.top,
-    left: walkitStepPos.left,
+    top: walkitStepPosition.top,
+    left: walkitStepPosition.left,
     width: 300,
     background: theme.background,
     borderRadius: theme.borderRadius,
@@ -221,12 +216,12 @@ export const Tooltip = ({
 };
 
 // ─── Style helpers ────────────────────────────────────────────────────────────
-function closeButtonStyle(t: Required<WalkitTheme>): CSSProperties {
+function closeButtonStyle(theme: Required<WalkitTheme>): CSSProperties {
   return {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: t.subTitleColor,
+    color: theme.subTitleColor,
     fontSize: 14,
     lineHeight: 1,
     padding: '2px 4px',
@@ -238,10 +233,10 @@ function closeButtonStyle(t: Required<WalkitTheme>): CSSProperties {
   };
 }
 
-function primaryButtonStyle(t: Required<WalkitTheme>): CSSProperties {
+function primaryButtonStyle(theme: Required<WalkitTheme>): CSSProperties {
   return {
-    background: t.primaryButtonColor,
-    color: t.primaryButtonTextColor,
+    background: theme.primaryButtonColor,
+    color: theme.primaryButtonTextColor,
     border: 'none',
     borderRadius: '8px',
     padding: '7px 14px',
@@ -252,11 +247,11 @@ function primaryButtonStyle(t: Required<WalkitTheme>): CSSProperties {
   };
 }
 
-function secondaryButtonStyle(t: Required<WalkitTheme>): CSSProperties {
+function secondaryButtonStyle(theme: Required<WalkitTheme>): CSSProperties {
   return {
     background: 'transparent',
-    color: t.subTitleColor,
-    border: `1px solid ${t.border}`,
+    color: theme.subTitleColor,
+    border: `1px solid ${theme.border}`,
     borderRadius: '8px',
     padding: '7px 12px',
     fontSize: 13,

@@ -1,12 +1,10 @@
-import type { LibraryDoc } from "../../types";
-import { formbridgeDocs } from "./formbridge";
-import { reactWalkitDocs } from "./react-walkit";
-import { tooltipDocs } from "./tooltip";
+import type { LibraryDoc } from '../../types';
+import { formbridgeDocs } from './formbridge';
+import { reactWalkitDocs } from './react-walkit';
 
 export const DOCS: Record<string, LibraryDoc> = {
   formbridge: formbridgeDocs,
-  stepwise: reactWalkitDocs,
-  tooltip: tooltipDocs,
+  walkit: reactWalkitDocs,
 };
 
-export { formbridgeDocs, reactWalkitDocs, tooltipDocs };
+export { formbridgeDocs, reactWalkitDocs };

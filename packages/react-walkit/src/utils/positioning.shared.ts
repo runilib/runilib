@@ -4,6 +4,7 @@ import type {
   TargetRect,
   Placement as WalkitPlacement,
 } from '../types/Walkit.types';
+import { normalizeSpotlightPadding, type SpotlightPadding } from './spotlight';
 
 /**
  * Shared placement union used by both walkthroughs and simple tooltips.
@@ -81,20 +82,22 @@ function clamp(value: number, min: number, max: number): number {
  * Useful for walkthrough overlays where the highlighted area should include
  * extra padding around the target.
  */
+
 export function getSpotlightRect(
   targetRect: TargetRect,
-  padding = 8,
+  padding: SpotlightPadding = 8,
   borderRadius = 8,
 ): SpotlightRect {
+  const normalizedPadding = normalizeSpotlightPadding(padding);
+
   return {
-    x: targetRect.x - padding,
-    y: targetRect.y - padding,
-    width: targetRect.width + padding * 2,
-    height: targetRect.height + padding * 2,
+    x: targetRect.x - normalizedPadding.left,
+    y: targetRect.y - normalizedPadding.top,
+    width: targetRect.width + normalizedPadding.left + normalizedPadding.right,
+    height: targetRect.height + normalizedPadding.top + normalizedPadding.bottom,
     borderRadius,
   };
 }
-
 /**
  * Shared floating positioning engine used by both walkthrough popovers
  * and standalone tooltips.

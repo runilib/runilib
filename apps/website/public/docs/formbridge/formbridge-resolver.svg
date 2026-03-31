@@ -1,0 +1,18 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="40" fill="#F6F8FF"/>
+  <rect x="92" y="96" width="1256" height="708" rx="34" fill="#FFFFFF"/>
+  <rect x="158" y="168" width="360" height="560" rx="28" fill="#0F172A"/>
+  <text x="200" y="228" fill="#FFFFFF" font-size="30" font-family="Arial, sans-serif" font-weight="700">UI schema</text>
+  <text x="200" y="284" fill="#93C5FD" font-size="22" font-family="Arial, sans-serif">field.email()</text>
+  <text x="200" y="324" fill="#93C5FD" font-size="22" font-family="Arial, sans-serif">field.password()</text>
+  <text x="200" y="364" fill="#93C5FD" font-size="22" font-family="Arial, sans-serif">field.number()</text>
+  <rect x="560" y="252" width="320" height="160" rx="26" fill="#E0E7FF"/>
+  <text x="612" y="330" fill="#4338CA" font-size="28" font-family="Arial, sans-serif" font-weight="700">resolver()</text>
+  <rect x="930" y="168" width="312" height="560" rx="28" fill="#ECFDF5"/>
+  <text x="966" y="228" fill="#15803D" font-size="30" font-family="Arial, sans-serif" font-weight="700">Domain schema</text>
+  <text x="966" y="286" fill="#166534" font-size="22" font-family="Arial, sans-serif">Zod</text>
+  <text x="966" y="326" fill="#166534" font-size="22" font-family="Arial, sans-serif">Yup</text>
+  <text x="966" y="366" fill="#166534" font-size="22" font-family="Arial, sans-serif">Valibot</text>
+  <text x="966" y="406" fill="#166534" font-size="22" font-family="Arial, sans-serif">Joi</text>
+  <text x="560" y="486" fill="#475569" font-size="24" font-family="Arial, sans-serif">Keep rendering in formbridge, validation in your existing domain schema.</text>
+</svg>

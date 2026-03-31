@@ -1,0 +1,18 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="40" fill="#F7F7FF"/>
+  <rect x="98" y="96" width="1244" height="708" rx="34" fill="#FFFFFF"/>
+  <rect x="160" y="166" width="408" height="566" rx="28" fill="#0F172A"/>
+  <text x="200" y="228" fill="#FFFFFF" font-size="30" font-family="Arial, sans-serif" font-weight="700">Remote definition</text>
+  <text x="200" y="288" fill="#C4B5FD" font-size="22" font-family="Arial, sans-serif">{ type: 'text', name: 'fullName' }</text>
+  <text x="200" y="328" fill="#C4B5FD" font-size="22" font-family="Arial, sans-serif">{ type: 'email', name: 'email' }</text>
+  <text x="200" y="368" fill="#C4B5FD" font-size="22" font-family="Arial, sans-serif">{ type: 'textarea', name: 'comment' }</text>
+  <rect x="614" y="308" width="220" height="112" rx="26" fill="#E0E7FF"/>
+  <text x="660" y="374" fill="#4338CA" font-size="28" font-family="Arial, sans-serif" font-weight="700">parse</text>
+  <rect x="888" y="166" width="344" height="566" rx="28" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="930" y="228" fill="#0F172A" font-size="30" font-family="Arial, sans-serif" font-weight="700">Rendered form</text>
+  <rect x="930" y="278" width="260" height="60" rx="18" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <rect x="930" y="360" width="260" height="60" rx="18" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <rect x="930" y="442" width="260" height="112" rx="18" fill="#FFFFFF" stroke="#CBD5E1"/>
+  <rect x="930" y="590" width="168" height="54" rx="18" fill="#2563EB"/>
+  <text x="978" y="624" fill="#FFFFFF" font-size="22" font-family="Arial, sans-serif" font-weight="700">Submit</text>
+</svg>

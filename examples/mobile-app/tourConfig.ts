@@ -1,4 +1,4 @@
-import type { WalkitStepProps } from '@runilib/react-walkit';
+import type { WalkitFlowStep, WalkitStepProps } from '@runilib/react-walkit';
 
 export const TOUR_THEME = {
   primary:      '#e8a020',
@@ -18,11 +18,90 @@ export const TOUR_LABELS = {
   close:  '✕',
 };
 
-export const STEPS: {[key in string]: WalkitStepProps} = {
-  GREETING:   { id: 'greeting',   order: 1, title: 'Welcome to Taskflow 👋',   text: 'Your portable productivity hub. We\'ll show you the key features.' },
-  ADD_TASK:   { id: 'add-task',   order: 2, title: '➕ Add tasks fast',         text: 'Tap here to create a task in seconds — with priority and due date.' },
-  FILTER_BAR: { id: 'filter-bar', order: 3, title: '🔍 Quick filters',          text: 'Switch between All, Active, and Done with a single tap.' },
-  TASK_ITEM:  { id: 'task-item',  order: 4, title: '✅ Task actions',           text: 'Swipe left to delete. Tap the circle to complete. Long press to edit.' },
-  STATS_CARD: { id: 'stats-card', order: 5, title: '📊 Progress at a glance',  text: 'See your completion rate and streak right here.' },
-  BOTTOM_NAV: { id: 'bottom-nav', order: 6, title: '🗂️ Navigate sections',     text: 'Jump between Dashboard, Tasks, Calendar and Profile from here.' },
+export const HOME_STEPS: { [key in string]: WalkitStepProps } = {
+  GREETING: {
+    id: 'greeting',
+    sequence: 1,
+    route: '/',
+    title: 'Welcome to Taskflow 👋',
+    content: "Your portable productivity hub. We'll show you the key features.",
+  },
+  ADD_TASK: {
+    id: 'add-task',
+    sequence: 2,
+    route: '/',
+    title: '➕ Add tasks fast',
+    content: 'Tap here to create a task in seconds — with priority and due date.',
+  },
+  FILTER_BAR: {
+    id: 'filter-bar',
+    sequence: 3,
+    route: '/',
+    title: '🔍 Quick filters',
+    content: 'Switch between All, Active, and Done with a single tap.',
+  },
+  TASK_ITEM: {
+    id: 'task-item',
+    sequence: 4,
+    route: '/',
+    title: '✅ Task actions',
+    content: 'Swipe left to delete. Tap the circle to complete. Long press to edit.',
+  },
+  STATS_CARD: {
+    id: 'stats-card',
+    sequence: 5,
+    route: '/',
+    title: '📊 Progress at a glance',
+    content: 'See your completion rate and streak right here.',
+  },
+  BOTTOM_NAV: {
+    id: 'bottom-nav',
+    sequence: 6,
+    route: '/',
+    title: '🗂️ Navigate sections',
+    content: 'Jump between Dashboard, Tasks, Calendar and Profile from here.',
+  },
 } as const;
+
+export const PROFILE_STEPS: { [key in string]: WalkitStepProps } = {
+  AVATAR: {
+    id: 'profile-avatar',
+    sequence: 7,
+    route: '/profile',
+    title: 'Your profile',
+    content: 'Tap your avatar to update your photo and personal info.',
+  },
+  STATS: {
+    id: 'profile-stats',
+    sequence: 8,
+    route: '/profile',
+    title: '🏆 Your achievements',
+    content: 'Track your productivity streak, tasks completed and team ranking.',
+  },
+  SETTINGS: {
+    id: 'profile-settings',
+    sequence: 9,
+    route: '/profile',
+    title: '⚙️ Preferences',
+    content: 'Customise notifications, theme, and sync settings from here.',
+  },
+  LIBS: {
+    id: 'profile-libs',
+    sequence: 10,
+    route: '/profile',
+    title: '📦 Powered by',
+    content:
+      'This app is built with runilib libraries — the same code runs on web and native.',
+  },
+} as const;
+
+export const APP_TOUR_STEPS: WalkitFlowStep[] = [
+  HOME_STEPS.GREETING,
+  HOME_STEPS.ADD_TASK,
+  HOME_STEPS.FILTER_BAR,
+  HOME_STEPS.BOTTOM_NAV,
+  PROFILE_STEPS.AVATAR,
+  PROFILE_STEPS.STATS,
+  PROFILE_STEPS.SETTINGS,
+  PROFILE_STEPS.LIBS,
+];

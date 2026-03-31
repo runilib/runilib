@@ -1,47 +1,50 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-import { useApp } from "../context/AppContext";
-import { LogoFull } from "./Logo";
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { WEBSITE_FEATURES } from '../config/features';
+import { useApp } from '../context/AppContext';
+import { LogoFull } from './Logo';
 
 export function Footer() {
   const { t } = useApp();
+  const docsIndexPath = WEBSITE_FEATURES.docs ? '/docs' : '/libraries';
+  const formbridgeDocsPath = WEBSITE_FEATURES.docs
+    ? '/docs/formbridge'
+    : '/libraries/formbridge';
+  const walkitDocsPath = WEBSITE_FEATURES.docs ? '/docs/walkit' : '/libraries/walkit';
 
   const cols = [
     {
       title: t.footer.cols.libraries,
       links: [
-        { label: "formbridge", to: "/libraries/formbridge" },
-        { label: "stepwise", to: "/libraries/stepwise" },
-        { label: "tooltip", to: "/libraries/tooltip" },
-        { label: "→ All libs", to: "/libraries" },
+        { label: 'formbridge', to: '/libraries/formbridge' },
+        { label: 'walkit', to: '/libraries/walkit' },
+        { label: '→ All libs', to: '/libraries' },
       ],
     },
     {
       title: t.footer.cols.docs,
       links: [
-        { label: "Quick start", to: "/docs" },
-        { label: "formbridge API", to: "/docs/formbridge" },
-        { label: "stepwise API", to: "/docs/stepwise" },
-        { label: "tooltip API", to: "/docs/tooltip" },
+        { label: 'Quick start', to: docsIndexPath },
+        { label: 'formbridge API', to: formbridgeDocsPath },
+        { label: 'walkit API', to: walkitDocsPath },
       ],
     },
     {
       title: t.footer.cols.community,
       links: [
-        { label: "GitHub", href: "https://github.com/runilib" },
-        { label: "npm", href: "https://npmjs.com/~runilib" },
-        { label: "Twitter", href: "https://twitter.com/runilib" },
-        { label: "Discord", href: "#" },
+        { label: 'GitHub', href: 'https://github.com/runilib' },
+        { label: 'npm', href: 'https://npmjs.com/~runilib' },
+        { label: 'Twitter', href: 'https://twitter.com/runilib' },
+        { label: 'Discord', href: '#' },
       ],
     },
     {
       title: t.footer.cols.project,
       links: [
-        { label: "Ecosystem", to: "/ecosystem" },
-        { label: "Roadmap", to: "/ecosystem" },
-        { label: "Changelog", href: "https://github.com/runilib/releases" },
-        { label: "MIT License", href: "https://opensource.org/licenses/MIT" },
+        { label: 'Ecosystem', to: '/ecosystem' },
+        { label: 'Roadmap', to: '/ecosystem' },
+        { label: 'Changelog', href: 'https://github.com/runilib/releases' },
+        { label: 'MIT License', href: 'https://opensource.org/licenses/MIT' },
       ],
     },
   ];
@@ -54,8 +57,11 @@ export function Footer() {
             <LogoFull />
             <Desc>{t.footer.desc}</Desc>
             <Badges>
-              {(["MIT License", "TypeScript", "React 18+"] as const).map((b, i) => (
-                <Badge key={b} $color={(["teal", "blue", "amber"] as const)[i]}>
+              {(['MIT License', 'TypeScript', 'React 18+'] as const).map((b, i) => (
+                <Badge
+                  key={b}
+                  $color={(['teal', 'blue', 'amber'] as const)[i]}
+                >
                   {b}
                 </Badge>
               ))}
@@ -68,14 +74,22 @@ export function Footer() {
                 <ColTitle>{col.title}</ColTitle>
                 {col.links.map((l) =>
                   l.href ? (
-                    <ColExt key={l.label} href={l.href} target="_blank" rel="noopener">
+                    <ColExt
+                      key={l.label}
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener"
+                    >
                       {l.label}
                     </ColExt>
                   ) : (
-                    <ColInt key={l.label} to={l.to!}>
+                    <ColInt
+                      key={l.label}
+                      to={l.to ?? '/libraries'}
+                    >
                       {l.label}
                     </ColInt>
-                  )
+                  ),
                 )}
               </Col>
             ))}
@@ -124,7 +138,7 @@ const Desc = styled.p`
   max-width: 230px;
 `;
 const Badges = styled.div`display: flex; flex-wrap: wrap; gap: 7px;`;
-const Badge = styled.span<{ $color: "teal" | "blue" | "amber" }>`
+const Badge = styled.span<{ $color: 'teal' | 'blue' | 'amber' }>`
   font-family: 'DM Mono', monospace;
   font-size: 10px;
   padding: 3px 9px;

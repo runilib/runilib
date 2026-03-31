@@ -1,9 +1,8 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import styled, { keyframes } from "styled-components";
-import { useApp } from "../context/AppContext";
-import { LIBRARIES } from "../data/libraries";
-import type { LibColor } from "../types";
+import { Link } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
+import { useApp } from '../context/AppContext';
+import { LIBRARIES } from '../data/libraries';
+import type { LibColor } from '../types';
 
 const fadeUp = keyframes`from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}`;
 
@@ -17,8 +16,8 @@ export function Docs() {
           <Label>{t.docs.title}</Label>
           <Title>Pick a library to get started</Title>
           <Sub>
-            Each library has its own complete documentation with installation guide, API reference,
-            and real-world examples.
+            Each library has its own complete documentation with installation guide, API
+            reference, and real-world examples.
           </Sub>
         </HeroInner>
       </Hero>
@@ -37,7 +36,7 @@ export function Docs() {
               <CardMeta>
                 <CardVer>{lib.version}</CardVer>
                 <CardStatus $status={lib.status}>
-                  {lib.status === "stable" ? t.libraryPage.stable : t.libraryPage.beta}
+                  {lib.status === 'stable' ? t.libraryPage.stable : t.libraryPage.beta}
                 </CardStatus>
               </CardMeta>
               <CardFeatures>
@@ -57,23 +56,27 @@ export function Docs() {
           <QuickTitle>Global settings</QuickTitle>
           <QuickGrid>
             <QuickCard>
-              <QuickName>i18n</QuickName>
+              <QuickName>Scoped package</QuickName>
               <QuickDesc>
-                All libraries share the same locale system. Call setLocale() once.
+                Import the published package name directly. No provider or bootstrapping
+                is required for the standard form flow.
               </QuickDesc>
-              <QuickCode>{`import { setLocale } from 'formbridge'\nsetLocale('fr') // applies to all RUNILIB libs`}</QuickCode>
+              <QuickCode>{`import { useFormBridge, field }\n  from '@runilib/react-formbridge'`}</QuickCode>
             </QuickCard>
             <QuickCard>
               <QuickName>TypeScript</QuickName>
               <QuickDesc>
-                Every schema is fully typed. Types are inferred — no manual annotations needed.
+                Every schema is fully typed. Types are inferred — no manual annotations
+                needed.
               </QuickDesc>
-              <QuickCode>{`// Types inferred automatically\nconst { Form, fields } = useForm({\n  email: field.email('Email').required(),\n})\n// fields.email is typed ✓`}</QuickCode>
+              <QuickCode>{`const form = useFormBridge({\n  email: field.email('Email').required(),\n})\n// form.fields.email is typed ✓`}</QuickCode>
             </QuickCard>
             <QuickCard>
               <QuickName>Zero config</QuickName>
-              <QuickDesc>No mandatory provider, no setup file. Import and use directly.</QuickDesc>
-              <QuickCode>{`// This is all you need:\nimport { useForm, field } from 'formbridge'\n\nconst { Form, fields } = useForm({ ... })`}</QuickCode>
+              <QuickDesc>
+                No mandatory provider, no setup file. Import and use directly.
+              </QuickDesc>
+              <QuickCode>{`import { useFormBridge, field }\n  from '@runilib/react-formbridge'\n\nconst { Form, fields } = useFormBridge({ ... })`}</QuickCode>
             </QuickCard>
           </QuickGrid>
         </QuickRef>
@@ -179,7 +182,7 @@ const CardStatus = styled.div<{ $status: string }>`
   padding: 2px 7px;
   border-radius: 10px;
   ${({ theme, $status }) =>
-    $status === "stable"
+    $status === 'stable'
       ? `background:${theme.greenDim};color:${theme.green};border:1px solid ${theme.green}33;`
       : `background:${theme.amberDim};color:${theme.amber};border:1px solid ${theme.amber}33;`}
 `;

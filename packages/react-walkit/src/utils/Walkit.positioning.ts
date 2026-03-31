@@ -20,13 +20,19 @@ export type WalkitPositionResult = {
  *
  * Keeps the existing return shape (`arrowOffset`) to avoid regressions.
  */
-export function computeTooltipPosition(
-  target: SpotlightRect,
-  walkitStepSize: WalkitStepSize,
-  preferredPlacement: Placement,
-  screenWidth: number,
-  screenHeight: number,
-): WalkitPositionResult {
+export function computeWalkitStepPosition({
+  target,
+  walkitStepSize,
+  preferredPlacement,
+  screenWidth,
+  screenHeight,
+}: {
+  target: SpotlightRect;
+  walkitStepSize: WalkitStepSize;
+  preferredPlacement: Placement;
+  screenWidth: number;
+  screenHeight: number;
+}): WalkitPositionResult {
   const result: FloatingPositionResult = computeFloatingPosition({
     targetRect: target,
     floatingSize: walkitStepSize,

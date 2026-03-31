@@ -32,7 +32,7 @@ npm run android    # Android emulator
 
 ```tsx
 // Exact same code as in the web app — only the wrapped element changes
-<WalkitStep name="add-task" order={2} title="Add tasks" text="Tap to add.">
+<WalkitStep id="add-task" sequence={2} title="Add tasks" content="Tap to add.">
   <TouchableOpacity style={s.addBtn}>   {/* RN element */}
     <Text>+ Add</Text>
   </TouchableOpacity>

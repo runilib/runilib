@@ -1,0 +1,18 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="40" fill="#F7F4FF"/>
+  <rect x="166" y="144" width="1108" height="612" rx="34" fill="#FFFFFF"/>
+  <text x="492" y="240" fill="#0F172A" font-size="38" font-family="Arial, sans-serif" font-weight="700">Verification code</text>
+  <rect x="306" y="326" width="112" height="132" rx="24" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <rect x="442" y="326" width="112" height="132" rx="24" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <rect x="578" y="326" width="112" height="132" rx="24" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <rect x="714" y="326" width="112" height="132" rx="24" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <rect x="850" y="326" width="112" height="132" rx="24" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <rect x="986" y="326" width="112" height="132" rx="24" fill="#EEF2FF" stroke="#C7D2FE"/>
+  <text x="344" y="408" fill="#4338CA" font-size="54" font-family="Arial, sans-serif" font-weight="700">1</text>
+  <text x="480" y="408" fill="#4338CA" font-size="54" font-family="Arial, sans-serif" font-weight="700">4</text>
+  <text x="616" y="408" fill="#4338CA" font-size="54" font-family="Arial, sans-serif" font-weight="700">8</text>
+  <text x="752" y="408" fill="#4338CA" font-size="54" font-family="Arial, sans-serif" font-weight="700">2</text>
+  <text x="888" y="408" fill="#4338CA" font-size="54" font-family="Arial, sans-serif" font-weight="700">0</text>
+  <text x="1024" y="408" fill="#4338CA" font-size="54" font-family="Arial, sans-serif" font-weight="700">9</text>
+  <text x="412" y="548" fill="#6D28D9" font-size="24" font-family="Arial, sans-serif">length(6) + digitsOnly() + validateOn: 'onChange'</text>
+</svg>

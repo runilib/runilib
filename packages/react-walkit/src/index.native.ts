@@ -13,19 +13,34 @@
 export { ANIMATION_TYPES } from './animations';
 export { Tooltip } from './components/tooltip/Tooltip.native';
 export {
-  type NativeTooltipStepProps as WalkitStepProps,
+  type NativeWalkitStepProps as WalkitStepProps,
   WalkitStep,
-} from './components/walkit/WalkitStep.native';
+} from './components/walkit/native/WalkitStep.native';
 export { useWalkit } from './hooks/useWalkit';
+export { useWalkitEvent } from './hooks/useWalkitEvent';
 export { WalkitProvider } from './providers/WalkitProvider.native';
 export type {
-  TooltipApi,
+  WalkitEventHandlers,
+  WalkitStepEnterEvent,
+  WalkitStepExitEvent,
+  WalkitStopReason,
+  WalkitTourAbandonEvent,
+  WalkitTourCompleteEvent,
+  WalkitTransitionAction,
+} from './types/analitycs.types';
+export type {
   TooltipContentApi,
   TooltipPlacement,
   TooltipProps,
 } from './types/Tooltip.types';
 export type {
   Placement,
+  RenderWalkitStepProps,
   TargetRect,
+  WalkitAutoStart,
+  WalkitAutoStartMode,
+  WalkitAutoStartOptions,
+  WalkitFlowChangeRequest,
+  WalkitFlowStep,
   WalkitProviderProps,
 } from './types/Walkit.types';

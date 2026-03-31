@@ -1,12 +1,4 @@
-import React, {
-  type ReactElement,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Dimensions,
   Modal,
@@ -14,13 +6,11 @@ import {
   type StyleProp,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
   View,
   type ViewStyle,
 } from 'react-native';
 
 import type {
-  TooltipApi,
   TooltipContentApi,
   TooltipPlacement,
   TooltipProps,
@@ -34,9 +24,9 @@ type NativeRect = {
   height: number;
 };
 
-export const Tooltip = ({
-  anchor,
+export const Tooltip: React.FC<Omit<TooltipProps, 'openOnHover'>> = ({
   children,
+  anchor,
   content,
   renderContent,
   placement = 'auto',
@@ -51,7 +41,7 @@ export const Tooltip = ({
   showAnchor = true,
   anchorSize = 8,
   anchorColor,
-}: TooltipProps): ReactElement => {
+}) => {
   const triggerWrapperRef = useRef<View | null>(null);
 
   const [visible, setVisible] = useState(false);
@@ -92,44 +82,36 @@ export const Tooltip = ({
     });
   }, []);
 
-  const start = useCallback(async () => {
+  const show = useCallback(async () => {
+    setVisible(true);
     if (disabled) {
       return;
     }
 
     await measureAnchor();
-    setVisible(true);
   }, [disabled, measureAnchor]);
 
-  const stop = useCallback(() => {
+  const hide = useCallback(() => {
     setVisible(false);
   }, []);
 
   const toggle = useCallback(async () => {
     if (visible) {
-      stop();
+      hide();
       return;
     }
 
-    await start();
-  }, [start, stop, visible]);
+    await show();
+  }, [show, hide, visible]);
 
-  const api: TooltipApi = useMemo(
+  const tooltipContentApi: TooltipContentApi = useMemo(
     () => ({
-      start,
-      stop,
       toggle,
       visible,
+      hide,
+      show,
     }),
-    [start, stop, toggle, visible],
-  );
-
-  const contentApi: TooltipContentApi = useMemo(
-    () => ({
-      stop,
-      visible,
-    }),
-    [stop, visible],
+    [toggle, hide, show, visible],
   );
 
   const computedPosition = useMemo(() => {
@@ -148,9 +130,9 @@ export const Tooltip = ({
   }, [visible, anchorRect, shellSize, placement, screenSize, offset]);
 
   const renderedTrigger: ReactNode =
-    typeof trigger === 'function' ? trigger(api) : trigger;
+    typeof trigger === 'function' ? trigger(tooltipContentApi) : trigger;
 
-  const renderedContent = renderContent?.(contentApi) ?? content ?? null;
+  const renderedContent = renderContent?.(tooltipContentApi) ?? content ?? null;
 
   const nativeTooltipStyle = tooltipStyle as StyleProp<ViewStyle> | undefined;
   const nativeTriggerWrapperStyle = triggerWrapperStyle as
@@ -170,9 +152,9 @@ export const Tooltip = ({
         style={[styles.triggerWrapper, nativeTriggerWrapperStyle]}
       >
         {openOnPress ? (
-          <TouchableWithoutFeedback onPress={toggle}>
-            <View>{renderedTrigger}</View>
-          </TouchableWithoutFeedback>
+          <View>
+            <Pressable onPress={toggle}>{renderedTrigger}</Pressable>
+          </View>
         ) : (
           renderedTrigger
         )}
@@ -182,7 +164,7 @@ export const Tooltip = ({
         visible={visible}
         transparent
         animationType="fade"
-        onRequestClose={stop}
+        onRequestClose={hide}
       >
         <View
           style={styles.modalRoot}
@@ -190,7 +172,7 @@ export const Tooltip = ({
         >
           <Pressable
             style={StyleSheet.absoluteFill}
-            onPress={closeOnOutsidePress ? stop : undefined}
+            onPress={closeOnOutsidePress ? hide : undefined}
           />
 
           {renderedContent && computedPosition && (
@@ -226,12 +208,12 @@ export const Tooltip = ({
 
               {showAnchor && (
                 <View
-                  style={buildNativeAnchorStyle(
-                    computedPosition.placement,
-                    computedPosition.anchorOffset,
-                    anchorSize,
-                    resolvedAnchorColor,
-                  )}
+                  style={buildNativeAnchorStyle({
+                    placement: computedPosition.placement,
+                    offset: computedPosition.anchorOffset,
+                    size: anchorSize,
+                    color: resolvedAnchorColor,
+                  })}
                 />
               )}
             </View>
@@ -256,12 +238,17 @@ function extractBackgroundColor(
   return typeof backgroundColor === 'string' ? backgroundColor : undefined;
 }
 
-function buildNativeAnchorStyle(
-  placement: TooltipPlacement,
-  offset: number,
-  size: number,
-  color: string,
-): StyleProp<ViewStyle> {
+function buildNativeAnchorStyle({
+  placement,
+  offset,
+  size,
+  color,
+}: {
+  placement: TooltipPlacement;
+  offset: number;
+  size: number;
+  color: string;
+}): StyleProp<ViewStyle> {
   const base: ViewStyle = {
     position: 'absolute',
     width: 0,
@@ -346,7 +333,7 @@ const styles = StyleSheet.create({
   },
   defaultBubble: {
     backgroundColor: '#111827',
-    borderRadius: 10,
+    borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 12,
   },

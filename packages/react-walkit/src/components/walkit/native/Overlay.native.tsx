@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -10,20 +10,13 @@ import {
 } from 'react-native';
 
 import Svg, { Defs, Mask, Rect } from 'react-native-svg';
-import { getSpotlightRect } from 'src/utils/positioning.shared';
-import { computeTooltipPosition } from 'src/utils/Walkit.positioning';
 import type { OverlayProps, SpotlightRect } from '../../../types/Walkit.types';
-import { NativeTooltip } from './Walkit.native';
+import { easeOut, lerp } from '../../../utils/helpers';
+import { getSpotlightRect } from '../../../utils/positioning.shared';
+import { computeWalkitStepPosition } from '../../../utils/Walkit.positioning';
+import { NativeWalkitContent } from './Walkit.native';
 
 const { width: SW, height: SH } = Dimensions.get('window');
-
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
-}
-
-function easeOut(t: number): number {
-  return 1 - (1 - t) ** 3;
-}
 
 export const NativeOverlay = ({
   visible,
@@ -46,29 +39,55 @@ export const NativeOverlay = ({
 }: OverlayProps) => {
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const [spot, setSpot] = useState<SpotlightRect | null>(null);
-  const [tooltipSize, setTooltipSize] = useState({ width: 290, height: 180 });
+  const [walkitStepSize, setWalkitStepSize] = useState({ width: 290, height: 180 });
   const prevRef = useRef<SpotlightRect | null>(null);
   const rafRef = useRef<number>(0);
 
-  const walkitStepPos = useMemo(() => {
+  const effectiveSpotlightPadding =
+    currentWalkitStep?.spotlightPaddingOverride ?? spotlightPadding;
+
+  const effectiveSpotlightBorderRadius =
+    currentWalkitStep?.spotlightBorderRadiusOverride ?? spotlightBorderRadius;
+
+  const walkitStepPosition = useMemo(() => {
     if (!currentRect || !currentWalkitStep) {
       return null;
     }
 
-    return computeTooltipPosition(
-      getSpotlightRect(currentRect, spotlightPadding, spotlightBorderRadius),
-      tooltipSize,
-      currentWalkitStep.placement ?? 'auto',
-      SW,
-      SH,
-    );
+    return computeWalkitStepPosition({
+      target: getSpotlightRect(
+        currentRect,
+        effectiveSpotlightPadding,
+        effectiveSpotlightBorderRadius,
+      ),
+      walkitStepSize,
+      preferredPlacement: currentWalkitStep.placement ?? 'auto',
+      screenWidth: SW,
+      screenHeight: SH,
+    });
   }, [
     currentRect,
     currentWalkitStep,
-    spotlightPadding,
-    spotlightBorderRadius,
-    tooltipSize,
+    walkitStepSize,
+    effectiveSpotlightPadding,
+    effectiveSpotlightBorderRadius,
   ]);
+
+  const onMesure = useCallback((layout: { width: number; height: number }) => {
+    const nextWidth = Math.ceil(layout?.width);
+    const nextHeight = Math.ceil(layout.height);
+
+    setWalkitStepSize((previousSize) => {
+      if (previousSize.width === nextWidth && previousSize.height === nextHeight) {
+        return previousSize;
+      }
+
+      return {
+        width: nextWidth,
+        height: nextHeight,
+      };
+    });
+  }, []);
 
   useEffect(() => {
     Animated.timing(overlayOpacity, {
@@ -191,12 +210,12 @@ export const NativeOverlay = ({
           </Svg>
         </TouchableWithoutFeedback>
 
-        {walkitStepPos && currentWalkitStep && (
-          <NativeTooltip
+        {walkitStepPosition && currentWalkitStep && (
+          <NativeWalkitContent
             walkitStep={currentWalkitStep}
             walkitStepIndex={walkitStepIndex}
             totalWalkitSteps={totalWalkitSteps}
-            walkitStepPos={walkitStepPos}
+            walkitStepPosition={walkitStepPosition}
             animationType={animationType}
             theme={theme}
             walkitStyle={walkitStyle}
@@ -205,24 +224,7 @@ export const NativeOverlay = ({
             onNext={onNext}
             onPrev={onPrev}
             onStop={onStop}
-            onMeasure={(layout) => {
-              const nextWidth = Math.ceil(layout.width);
-              const nextHeight = Math.ceil(layout.height);
-
-              setTooltipSize((previousSize) => {
-                if (
-                  previousSize.width === nextWidth &&
-                  previousSize.height === nextHeight
-                ) {
-                  return previousSize;
-                }
-
-                return {
-                  width: nextWidth,
-                  height: nextHeight,
-                };
-              });
-            }}
+            onMeasure={onMesure}
           />
         )}
       </Animated.View>

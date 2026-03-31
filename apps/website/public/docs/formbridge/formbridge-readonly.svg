@@ -1,0 +1,13 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="40" fill="#FFF8F5"/>
+  <rect x="106" y="104" width="1228" height="692" rx="34" fill="#FFFFFF"/>
+  <rect x="174" y="172" width="1092" height="128" rx="28" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="220" y="248" fill="#0F172A" font-size="34" font-family="Arial, sans-serif" font-weight="700">Review changes</text>
+  <rect x="174" y="350" width="1092" height="342" rx="28" fill="#FFF7ED" stroke="#FED7AA"/>
+  <text x="220" y="424" fill="#9A3412" font-size="24" font-family="Arial, sans-serif" font-weight="700">Email</text>
+  <text x="220" y="462" fill="#94A3B8" font-size="20" font-family="Arial, sans-serif">old@example.com</text>
+  <text x="220" y="500" fill="#0F172A" font-size="24" font-family="Arial, sans-serif">new@example.com</text>
+  <rect x="220" y="542" width="96" height="32" rx="16" fill="#FB923C"/>
+  <text x="242" y="564" fill="#FFFFFF" font-size="16" font-family="Arial, sans-serif" font-weight="700">edited</text>
+  <text x="220" y="626" fill="#475569" font-size="22" font-family="Arial, sans-serif">ReadonlyFields reuse the schema labels and option metadata.</text>
+</svg>

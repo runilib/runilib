@@ -2,14 +2,14 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg);
+  /* background: var(--bg); */
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────── */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: var(--bg2);
+  /* background: var(--bg2); */
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -134,7 +134,7 @@
   justify-content: space-between;
   padding: 20px 28px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg2);
+  /* background: var(--bg2); */
   flex-shrink: 0;
 }
 .pageTitle {
@@ -210,8 +210,6 @@
 }
 
 /* ── Tasks ────────────────────────────────────────────────────── */
-.tasksSection {
-}
 .tasksSectionHeader {
   display: flex;
   align-items: center;

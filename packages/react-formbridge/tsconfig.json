@@ -1,14 +1,12 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2020", "lib": ["ES2020", "DOM"],
-    "module": "ESNext", "moduleResolution": "Bundler",
-    "jsx": "react-jsx", "strict": true,
-    "esModuleInterop": true, "skipLibCheck": true,
-    "declaration": true, "declarationMap": true, "sourceMap": true,
-    "outDir": "./dist", "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": { "react-native": ["./src/__mocks__/react-native.ts"] }
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "customConditions": ["react-native"],
+    "resolvePackageJsonImports": false,
+    "types": ["node", "react"],
+    "noEmit": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "**/*.test.*", "**/__tests__/**", "**/__mocks__/**", "examples"]
+  "include": ["src"]
 }

@@ -9,7 +9,7 @@
  *   npx expo install react-native-svg
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -64,7 +64,7 @@ function Dashboard() {
       {/* Header */}
       <WalkitStep
         id="header"
-        order={1}
+        sequence={1}
         title="Welcome to MyApp 👋"
         content="Your personal dashboard — all key metrics in one place."
         placement="bottom"
@@ -80,7 +80,7 @@ function Dashboard() {
       {/* Search */}
       <WalkitStep
         id="search"
-        order={2}
+        sequence={2}
         title="🔍 Search"
         content="Quickly find any content, user, or report in the app."
         placement="bottom"
@@ -95,7 +95,7 @@ function Dashboard() {
       {/* Stats */}
       <WalkitStep
         id="stats"
-        order={3}
+        sequence={3}
         title="📊 Your Stats"
         content="Monitor daily KPIs at a glance. Refreshed every hour."
         placement="bottom"
@@ -124,7 +124,7 @@ function Dashboard() {
       <View style={styles.actionsRow}>
         <WalkitStep
           id="export"
-          order={4}
+          sequence={4}
           title="📥 Export"
           content="Download your data as CSV or PDF."
           placement="top"
@@ -136,7 +136,7 @@ function Dashboard() {
 
         <WalkitStep
           id="new-report"
-          order={5}
+          sequence={5}
           title="✨ New Report"
           content="Create a custom report from scratch."
           placement="top"
@@ -182,7 +182,7 @@ function Dashboard() {
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 
-function StatCard({
+const StatCard = ({
   label,
   value,
   trend,
@@ -192,7 +192,7 @@ function StatCard({
   value: string;
   trend: string;
   negative?: boolean;
-}) {
+}) => {
   return (
     <View style={styles.card}>
       <Text style={styles.cardValue}>{value}</Text>
@@ -202,80 +202,84 @@ function StatCard({
       </Text>
     </View>
   );
-}
+};
 
 // ─── App with custom react-walkit ──────────────────────────────────────────────────
 
 export function AppWithCustomTooltip() {
-  const renderPopover = ({
-    step,
-    stepIndex,
-    totalSteps,
-    onNext,
-    onPrev,
-    onStop,
-  }: any) => (
-    <View>
-      <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}
-      >
-        <Text style={{ fontWeight: '700', fontSize: 14, color: '#1e1e2e', flex: 1 }}>
-          {step.title}
-        </Text>
-        <TouchableOpacity onPress={onStop}>
-          <Text style={{ color: '#9ca3af' }}>✕</Text>
-        </TouchableOpacity>
-      </View>
-      {step.text && (
-        <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
-          {step.text}
-        </Text>
-      )}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ fontSize: 12, color: '#9ca3af' }}>
-          {stepIndex + 1} / {totalSteps}
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {stepIndex > 0 && (
-            <TouchableOpacity
-              onPress={onPrev}
-              style={{
-                borderWidth: 1,
-                borderColor: '#e5e7eb',
-                borderRadius: 6,
-                paddingVertical: 4,
-                paddingHorizontal: 10,
-              }}
-            >
-              <Text style={{ fontSize: 12, color: '#374151' }}>Back</Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            onPress={onNext}
+  return (
+    <WalkitProvider
+      renderPopover={({
+        walkitStep,
+        walkitStepIndex,
+        totalWalkitSteps,
+        onNext,
+        onPrev,
+        onStop,
+      }) => (
+        <View>
+          <View
             style={{
-              backgroundColor: '#6366f1',
-              borderRadius: 6,
-              paddingVertical: 4,
-              paddingHorizontal: 12,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 8,
             }}
           >
-            <Text style={{ fontSize: 12, color: '#fff' }}>
-              {stepIndex === totalSteps - 1 ? 'Done ✓' : 'Next'}
+            <Text style={{ fontWeight: '700', fontSize: 14, color: '#1e1e2e', flex: 1 }}>
+              {walkitStep.title}
             </Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={onStop}>
+              <Text style={{ color: '#9ca3af' }}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          {walkitStep.content && (
+            <Text style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>
+              {walkitStep.content}
+            </Text>
+          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ fontSize: 12, color: '#9ca3af' }}>
+              {walkitStepIndex + 1} / {totalWalkitSteps}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {walkitStepIndex > 0 && (
+                <TouchableOpacity
+                  onPress={onPrev}
+                  style={{
+                    borderWidth: 1,
+                    borderColor: '#e5e7eb',
+                    borderRadius: 6,
+                    paddingVertical: 4,
+                    paddingHorizontal: 10,
+                  }}
+                >
+                  <Text style={{ fontSize: 12, color: '#374151' }}>Back</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={onNext}
+                style={{
+                  backgroundColor: '#6366f1',
+                  borderRadius: 6,
+                  paddingVertical: 4,
+                  paddingHorizontal: 12,
+                }}
+              >
+                <Text style={{ fontSize: 12, color: '#fff' }}>
+                  {walkitStepIndex === totalWalkitSteps - 1 ? 'Done ✓' : 'Next'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
-    </View>
-  );
-
-  return (
-    <WalkitProvider renderPopover={renderPopover}>
+      )}
+    >
       <Dashboard />
     </WalkitProvider>
   );

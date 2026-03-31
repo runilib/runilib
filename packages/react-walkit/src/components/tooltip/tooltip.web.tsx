@@ -11,21 +11,20 @@ import React, {
 import ReactDOM from 'react-dom';
 
 import type {
-  TooltipApi,
   TooltipContentApi,
   TooltipPlacement,
   TooltipProps,
 } from '../../types/Tooltip.types';
 import { computeSimpleTooltipPosition } from '../../utils/Tooltip.positioning';
 
-const PORTAL_ID = '__react_walkit_tooltip_portal__';
+const WEB_PORTAL_ID = '__react_walkit_tooltip_portal__';
 
 function getOrCreatePortal(): HTMLElement {
-  let element = document.getElementById(PORTAL_ID);
+  let element = document.getElementById(WEB_PORTAL_ID);
 
   if (!element) {
     element = document.createElement('div');
-    element.id = PORTAL_ID;
+    element.id = WEB_PORTAL_ID;
     document.body.appendChild(element);
   }
 
@@ -39,9 +38,9 @@ type WebRect = {
   height: number;
 };
 
-export function Tooltip({
-  anchor,
+export const Tooltip: React.FC<TooltipProps> = ({
   children,
+  anchor,
   content,
   renderContent,
   placement = 'auto',
@@ -57,7 +56,7 @@ export function Tooltip({
   showAnchor = true,
   anchorSize = 8,
   anchorColor,
-}: Readonly<TooltipProps>): React.ReactElement {
+}) => {
   const triggerWrapperRef = useRef<HTMLSpanElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
 
@@ -88,7 +87,7 @@ export function Tooltip({
     return nextRect;
   }, []);
 
-  const start = useCallback(() => {
+  const show = useCallback(() => {
     if (disabled) {
       return;
     }
@@ -97,35 +96,27 @@ export function Tooltip({
     setVisible(true);
   }, [disabled, measureAnchor]);
 
-  const stop = useCallback(() => {
+  const hide = useCallback(() => {
     setVisible(false);
   }, []);
 
   const toggle = useCallback(() => {
     if (visible) {
-      stop();
+      hide();
       return;
     }
 
-    start();
-  }, [start, stop, visible]);
+    show();
+  }, [show, hide, visible]);
 
-  const api: TooltipApi = useMemo(
+  const api: TooltipContentApi = useMemo(
     () => ({
-      start,
-      stop,
       toggle,
       visible,
+      hide,
+      show,
     }),
-    [start, stop, toggle, visible],
-  );
-
-  const contentApi: TooltipContentApi = useMemo(
-    () => ({
-      stop,
-      visible,
-    }),
-    [stop, visible],
+    [toggle, visible, hide, show],
   );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -199,7 +190,7 @@ export function Tooltip({
         return;
       }
 
-      stop();
+      hide();
     };
 
     document.addEventListener('mousedown', handlePointerDown);
@@ -207,7 +198,7 @@ export function Tooltip({
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
     };
-  }, [visible, closeOnOutsidePress, stop]);
+  }, [visible, closeOnOutsidePress, hide]);
 
   const computedPosition = useMemo(() => {
     if (!visible || !anchorRect) {
@@ -227,7 +218,7 @@ export function Tooltip({
   const renderedTrigger: ReactNode =
     typeof trigger === 'function' ? trigger(api) : trigger;
 
-  const renderedContent = renderContent?.(contentApi) ?? content ?? null;
+  const renderedContent = renderContent?.(api) ?? content ?? null;
 
   const defaultBackground =
     ((tooltipStyle as CSSProperties | undefined)?.backgroundColor as
@@ -255,7 +246,7 @@ export function Tooltip({
     maxWidth,
     backgroundColor: '#111827',
     color: '#ffffff',
-    borderRadius: 10,
+    borderRadius: 5,
     padding: '10px 12px',
     fontSize: 13,
     lineHeight: 1.45,
@@ -272,8 +263,8 @@ export function Tooltip({
       <span
         ref={triggerWrapperRef}
         style={wrapperStyle}
-        onMouseEnter={openOnHover ? start : undefined}
-        onMouseLeave={openOnHover ? stop : undefined}
+        onMouseEnter={openOnHover ? show : undefined}
+        onMouseLeave={openOnHover ? hide : undefined}
         onClick={openOnPress ? toggle : undefined}
       >
         {renderedTrigger}
@@ -295,12 +286,12 @@ export function Tooltip({
 
             {showAnchor && computedPosition && (
               <div
-                style={buildWebAnchorStyle(
-                  computedPosition.placement,
-                  computedPosition.anchorOffset,
-                  anchorSize,
-                  resolvedAnchorColor,
-                )}
+                style={buildWebAnchorStyle({
+                  placement: computedPosition.placement,
+                  offset: computedPosition.anchorOffset,
+                  size: anchorSize,
+                  color: resolvedAnchorColor,
+                })}
               />
             )}
           </div>,
@@ -308,14 +299,19 @@ export function Tooltip({
         )}
     </>
   );
-}
+};
 
-function buildWebAnchorStyle(
-  placement: TooltipPlacement,
-  offset: number,
-  size: number,
-  color: string,
-): CSSProperties {
+function buildWebAnchorStyle({
+  placement,
+  offset,
+  size,
+  color,
+}: {
+  placement: TooltipPlacement;
+  offset: number;
+  size: number;
+  color: string;
+}): CSSProperties {
   const base: CSSProperties = {
     position: 'absolute',
     width: 0,

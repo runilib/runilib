@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import styled, { keyframes } from "styled-components";
-import { CodeBlock } from "../components/CodeBlock";
-import { LogoIcon } from "../components/Logo";
-import { useApp } from "../context/AppContext";
-import { LIBRARIES } from "../data/libraries";
-import type { LibColor } from "../types";
+import { useState } from 'react';
+
+import { Link } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
+import { CodeBlock } from '../components/CodeBlock';
+import { LogoIcon } from '../components/Logo';
+import { WEBSITE_FEATURES } from '../config/features';
+import { useApp } from '../context/AppContext';
+import { LIBRARIES } from '../data/libraries';
+import type { LibColor } from '../types';
 
 const fadeUp = keyframes`from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}`;
 const pulse = keyframes`0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}`;
@@ -13,13 +15,13 @@ const floatY = keyframes`0%,100%{transform:translateY(0)}50%{transform:translate
 const spinCW = keyframes`from{transform:rotate(0deg)}to{transform:rotate(360deg)}`;
 const spinCCW = keyframes`from{transform:rotate(0deg)}to{transform:rotate(-360deg)}`;
 
-const SNIPPETS: Record<string, { filename: string; lang: "tsx" | "ts"; code: string }> = {
+const SNIPPETS: Record<string, { filename: string; lang: 'tsx' | 'ts'; code: string }> = {
   formbridge: {
-    filename: "SignupForm.tsx",
-    lang: "tsx",
-    code: `import { useForm, field } from 'formbridge'
+    filename: 'SignupForm.tsx',
+    lang: 'tsx',
+    code: `import { useFormBridge, field } from '@runilib/react-formbridge'
 
-const { Form, fields } = useForm({
+const { Form, fields } = useFormBridge({
   name:     field.text('Full name').required().trim(),
   email:    field.email('Email').required(),
   phone:    field.phone('Phone').defaultCountry('FR'),
@@ -40,24 +42,25 @@ return (
   </Form>
 )`,
   },
-  stepwise: {
-    filename: "App.tsx",
-    lang: "tsx",
-    code: `import { WalkitProvider, WalkitStep, useWalkit }
-  from 'stepwise'
+  walkit: {
+    filename: 'App.tsx',
+    lang: 'tsx',
+    code: `import { WalkitProvider, WalkitStep, useWalkit } from '@runilib/react-walkit'
 
 // 1. Wrap your app
 <WalkitProvider
   animationType="spring"
-  persist={{ key: 'tour-v1', storage: 'local' }}
 >
   <App />
 </WalkitProvider>
 
 // 2. Tag any element
-<WalkitStep name="search" order={1}
+<WalkitStep
+  id="search"
+  sequence={1}
   title="Search anything"
-  text="Find tasks, projects and teammates instantly.">
+  content="Find tasks, projects and teammates instantly."
+  >
   <SearchBar />
 </WalkitStep>
 
@@ -66,10 +69,9 @@ const { start } = useWalkit()
 <button onClick={start}>Take the tour →</button>`,
   },
   tooltip: {
-    filename: "Dashboard.tsx",
-    lang: "tsx",
-    code: `import { Tooltip, TooltipContent, TooltipProvider }
-  from '@runilib/tooltip'
+    filename: 'Dashboard.tsx',
+    lang: 'tsx',
+    code: `import { Tooltip, TooltipContent } from '@runilib/react-walkit'
 
 // Simple string
 <Tooltip content="Archive this task" placement="top">
@@ -95,13 +97,14 @@ const { start } = useWalkit()
   },
 };
 
-const FEATURE_ICONS = ["⚡", "🔀", "🔒", "♿", "📦", "🧩"];
-const FEATURE_COLORS: LibColor[] = ["teal", "blue", "amber", "purple", "green", "teal"];
+const FEATURE_ICONS = ['⚡', '🔀', '🔒', '♿', '📦', '🧩'];
+const FEATURE_COLORS: LibColor[] = ['teal', 'blue', 'amber', 'purple', 'green', 'teal'];
 
 export function Home() {
   const { t } = useApp();
-  const [activeTab, setActiveTab] = useState<string>("formbridge");
+  const [activeTab, setActiveTab] = useState<string>('formbridge');
   const snippet = SNIPPETS[activeTab];
+  const docsEntryPath = WEBSITE_FEATURES.docs ? '/docs' : '/libraries';
 
   return (
     <Wrap>
@@ -120,17 +123,17 @@ export function Home() {
           </HeroH1>
           <HeroSub>{t.hero.subtitle}</HeroSub>
           <HeroCTAs>
-            <PrimaryBtn to="/docs">
+            <PrimaryBtn to={docsEntryPath}>
               {t.hero.cta} <Arrow>→</Arrow>
             </PrimaryBtn>
             <SecondaryBtn to="/libraries">{t.hero.ctaSecondary}</SecondaryBtn>
           </HeroCTAs>
           <StatsRow>
             {[
-              { val: "3", key: "libs" },
-              { val: "100%", key: "ts" },
-              { val: "2", key: "platforms" },
-              { val: "0", key: "config" },
+              { val: '3', key: 'libs' },
+              { val: '100%', key: 'ts' },
+              { val: '2', key: 'platforms' },
+              { val: '0', key: 'config' },
             ].map((s) => (
               <Stat key={s.key}>
                 <StatVal>{s.val}</StatVal>
@@ -142,22 +145,38 @@ export function Home() {
 
         <HeroRight>
           <OrbitalScene>
-            <Ring size={420} dur="44s" />
-            <Ring size={310} dur="30s" rev />
-            <Ring size={210} dur="18s" />
+            <Ring
+              size={420}
+              dur="44s"
+            />
+            <Ring
+              size={310}
+              dur="30s"
+              rev
+            />
+            <Ring
+              size={210}
+              dur="18s"
+            />
             <OrbCenter>
               <FloatBox>
-                <LogoIcon size={84} animated />
+                <LogoIcon
+                  size={84}
+                  animated
+                />
               </FloatBox>
             </OrbCenter>
-            <LibOrb pos={{ top: "3%", left: "50%", transform: "translateX(-50%)" }} color="blue">
-              formbridge
+            <LibOrb
+              pos={{ top: '0', left: '50%', transform: 'translateX(-50%)' }}
+              color="blue"
+            >
+              @runilib/react-formbridge
             </LibOrb>
-            <LibOrb pos={{ bottom: "12%", left: "6%" }} color="amber">
-              stepwise
-            </LibOrb>
-            <LibOrb pos={{ bottom: "12%", right: "6%" }} color="teal">
-              tooltip
+            <LibOrb
+              pos={{ bottom: '2%', left: '30%' }}
+              color="amber"
+            >
+              @runilib/react-walkit
             </LibOrb>
           </OrbitalScene>
         </HeroRight>
@@ -170,14 +189,15 @@ export function Home() {
           <StripCmds>
             {(
               [
-                "npm install formbridge stepwise @runilib/tooltip",
-                "yarn add formbridge stepwise @runilib/tooltip",
+                'npm install @runilib/react-formbridge @runilib/react-walkit @runilib/tooltip',
+                'yarn add @runilib/react-formbridge @runilib/react-walkit @runilib/tooltip',
               ] as const
-            ).map((cmd, i) => (
-              <StripCmd key={i}>
-                <Prompt>{i === 0 ? "npm" : "yarn"}</Prompt>
+            ).map((_cmd, i) => (
+              <StripCmd key={i === 0 ? 'npm-install' : 'yarn-add'}>
+                <Prompt>{i === 0 ? 'npm' : 'yarn'}</Prompt>
                 <CmdText>
-                  {i === 0 ? "install" : "add"} formbridge stepwise @runilib/tooltip
+                  {i === 0 ? 'install' : 'add'} @runilib/react-formbridge
+                  @runilib/react-walkit @runilib/tooltip
                 </CmdText>
               </StripCmd>
             ))}
@@ -192,7 +212,10 @@ export function Home() {
         <SSub>{t.features.subtitle}</SSub>
         <FeatGrid>
           {t.features.items.map((item, i) => (
-            <FeatCard key={i} $color={FEATURE_COLORS[i]}>
+            <FeatCard
+              key={item.title}
+              $color={FEATURE_COLORS[i]}
+            >
               <FeatIcon $color={FEATURE_COLORS[i]}>{FEATURE_ICONS[i]}</FeatIcon>
               <FeatTitle>{item.title}</FeatTitle>
               <FeatDesc>{item.desc}</FeatDesc>
@@ -208,7 +231,10 @@ export function Home() {
         <SSub>{t.libs.subtitle}</SSub>
         <LibsGrid>
           {LIBRARIES.map((lib) => (
-            <LibCard key={lib.id} to={`/libraries/${lib.id}`}>
+            <LibCard
+              key={lib.id}
+              to={`/libraries/${lib.id}`}
+            >
               <LibCardTop>
                 <LibCardIcon $color={lib.color}>{lib.icon}</LibCardIcon>
                 <LibCardMeta>
@@ -216,7 +242,7 @@ export function Home() {
                   <LibCardVersion>{lib.version}</LibCardVersion>
                 </LibCardMeta>
                 <StatusPill $status={lib.status}>
-                  {lib.status === "stable" ? t.libraryPage.stable : t.libraryPage.beta}
+                  {lib.status === 'stable' ? t.libraryPage.stable : t.libraryPage.beta}
                 </StatusPill>
               </LibCardTop>
               <LibCardDesc>{lib.desc}</LibCardDesc>
@@ -247,12 +273,20 @@ export function Home() {
         <DemoWrap>
           <DemoTabs>
             {Object.keys(SNIPPETS).map((k) => (
-              <DemoTab key={k} $active={activeTab === k} onClick={() => setActiveTab(k)}>
+              <DemoTab
+                key={k}
+                $active={activeTab === k}
+                onClick={() => setActiveTab(k)}
+              >
                 {k}
               </DemoTab>
             ))}
           </DemoTabs>
-          <CodeBlock code={snippet.code} lang={snippet.lang} filename={snippet.filename} />
+          <CodeBlock
+            code={snippet.code}
+            lang={snippet.lang}
+            filename={snippet.filename}
+          />
         </DemoWrap>
       </Section>
 
@@ -272,12 +306,16 @@ export function Home() {
           <CTATitle>{t.cta.title}</CTATitle>
           <CTADesc>{t.cta.desc}</CTADesc>
           <CTABtns>
-            <PrimaryBtn to="/docs">
+            <PrimaryBtn to={docsEntryPath}>
               {t.cta.primary} <Arrow>→</Arrow>
             </PrimaryBtn>
-            <SecondaryBtn as="a" href="https://github.com/runilib" target="_blank" rel="noopener">
+            <SecondaryAnchor
+              href="https://github.com/runilib"
+              target="_blank"
+              rel="noopener"
+            >
               {t.cta.secondary}
-            </SecondaryBtn>
+            </SecondaryAnchor>
           </CTABtns>
         </CTAContent>
       </CTASection>
@@ -431,6 +469,26 @@ const SecondaryBtn = styled(Link)`
     background: ${({ theme }) => theme.tealDim};
   }
 `;
+const SecondaryAnchor = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: 10px;
+  text-decoration: none;
+  border: 1px solid ${({ theme }) => theme.border};
+  color: ${({ theme }) => theme.textSecondary};
+  background: transparent;
+  transition: all 0.2s;
+  &:hover {
+    border-color: ${({ theme }) => theme.teal};
+    color: ${({ theme }) => theme.teal};
+    background: ${({ theme }) => theme.tealDim};
+  }
+`;
 const StatsRow = styled.div`
   display: flex;
   gap: 32px;
@@ -488,7 +546,7 @@ const LibOrb = styled.div<{ pos: Record<string, string>; color: LibColor }>`
   ${({ pos }) =>
     Object.entries(pos)
       .map(([k, v]) => `${k}:${v};`)
-      .join("")}
+      .join('')}
   font-family: 'DM Mono', monospace;
   font-size: 11px;
   padding: 6px 13px;
@@ -643,7 +701,7 @@ const StatusPill = styled.div<{ $status: string }>`
   padding: 2px 8px;
   border-radius: 20px;
   ${({ theme, $status }) =>
-    $status === "stable"
+    $status === 'stable'
       ? `background:${theme.greenDim};color:${theme.green};border:1px solid ${theme.green}33;`
       : `background:${theme.amberDim};color:${theme.amber};border:1px solid ${theme.amber}33;`}
 `;
@@ -703,8 +761,8 @@ const DemoTab = styled.button<{ $active: boolean }>`
   background: transparent;
   border: none;
   cursor: pointer;
-  border-bottom: 2px solid ${({ theme, $active }) => ($active ? theme.teal : "transparent")};
-  color: ${({ theme, $active }) => ($active ? theme.teal : "#8b949e")};
+  border-bottom: 2px solid ${({ theme, $active }) => ($active ? theme.teal : 'transparent')};
+  color: ${({ theme, $active }) => ($active ? theme.teal : '#8b949e')};
   white-space: nowrap;
   transition: all 0.15s;
   &:hover { color: #cdd9e5; }

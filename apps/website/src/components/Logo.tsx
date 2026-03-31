@@ -1,6 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import styled, { keyframes } from "styled-components";
+import { Link } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
 
 const orbitCW = keyframes`from{transform:rotate(0deg)}to{transform:rotate(360deg)}`;
 const orbitCCW = keyframes`from{transform:rotate(0deg)}to{transform:rotate(-360deg)}`;
@@ -11,10 +10,22 @@ interface LogoIconProps {
   animated?: boolean;
 }
 
-export function LogoIcon({ size = 36, animated = false }: LogoIconProps) {
+export const LogoIcon = ({ size = 36, animated = false }: LogoIconProps) => {
   return (
-    <svg width={size} height={size} viewBox="0 0 72 72" fill="none">
-      <circle cx="36" cy="36" r="35" fill="#00e5c8" fillOpacity="0.05" />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 72 72"
+      fill="none"
+      aria-label="Logo image"
+    >
+      <circle
+        cx="36"
+        cy="36"
+        r="35"
+        fill="#00e5c8"
+        fillOpacity="0.05"
+      />
       <ellipse
         cx="36"
         cy="36"
@@ -44,7 +55,7 @@ export function LogoIcon({ size = 36, animated = false }: LogoIconProps) {
             stroke="#4f8ef7"
             strokeWidth="1"
             opacity="0.18"
-            style={{ transform: "rotate(70deg)", transformOrigin: "36px 36px" }}
+            style={{ transform: 'rotate(70deg)', transformOrigin: '36px 36px' }}
           />
         </>
       ) : (
@@ -80,10 +91,31 @@ export function LogoIcon({ size = 36, animated = false }: LogoIconProps) {
         stroke="#00e5c8"
         strokeWidth="1.5"
       />
-      <circle cx="36" cy="36" r="9" fill="#00e5c8" fillOpacity="0.16" />
-      <circle cx="69" cy="36" r="3.5" fill="#00e5c8" />
-      <circle cx="36" cy="3" r="2.5" fill="#f0a500" />
-      <circle cx="5" cy="52" r="2.5" fill="#4f8ef7" />
+      <circle
+        cx="36"
+        cy="36"
+        r="9"
+        fill="#00e5c8"
+        fillOpacity="0.16"
+      />
+      <circle
+        cx="69"
+        cy="36"
+        r="3.5"
+        fill="#00e5c8"
+      />
+      <circle
+        cx="36"
+        cy="3"
+        r="2.5"
+        fill="#f0a500"
+      />
+      <circle
+        cx="5"
+        cy="52"
+        r="2.5"
+        fill="#4f8ef7"
+      />
       <text
         x="36"
         y="43"
@@ -97,7 +129,7 @@ export function LogoIcon({ size = 36, animated = false }: LogoIconProps) {
       </text>
     </svg>
   );
-}
+};
 
 const AnimRing1 = styled.ellipse`
   animation: ${orbitCW} 10s linear infinite;
@@ -115,7 +147,7 @@ interface LogoFullProps {
   hideTagline?: boolean;
 }
 
-export function LogoFull({ size = 30, hideTagline = false }: LogoFullProps) {
+export const LogoFull = ({ size = 30, hideTagline = false }: LogoFullProps) => {
   return (
     <LogoLink to="/">
       <FloatIcon>
@@ -129,7 +161,7 @@ export function LogoFull({ size = 30, hideTagline = false }: LogoFullProps) {
       </LogoText>
     </LogoLink>
   );
-}
+};
 
 const LogoLink = styled(Link)`
   display: flex;

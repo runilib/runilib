@@ -1,42 +1,46 @@
 import { useEffect } from 'react';
 
 import { act, render } from '@testing-library/react';
-import { StepwiseContextProvider, useStepwiseContext } from '../context/StepwiseContext';
-import type { StepwiseContextValue, StepwiseStepData } from '../types';
+import { describe, expect, it, vi } from 'vitest';
+import { useWalkitContext, WalkitContextProvider } from '../context/WalkitContext';
+import type { WalkitContextValue, WalkitStepData } from '../types/Walkit.types';
+import { withWalkitSequence } from '../utils/sequence';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function makeStep(name: string, order: number): StepwiseStepData {
-  return {
-    name,
-    order,
-    title: `Step ${order}`,
-    text: `Description ${order}`,
-    placement: 'auto',
-    measure: () => Promise.resolve({ x: 0, y: 0, width: 100, height: 50 }),
-  };
+function makeStep(id: string, sequence: number): WalkitStepData {
+  return withWalkitSequence(
+    {
+      id,
+      title: `Step ${sequence}`,
+      content: `Description ${sequence}`,
+      placement: 'auto',
+      measure: () => Promise.resolve({ x: 0, y: 0, width: 100, height: 50 }),
+    },
+    sequence,
+  );
 }
 
 /** Helper component that captures the context value. */
-function Inspector({ onCapture }: { onCapture: (ctx: StepwiseContextValue) => void }) {
-  const ctx = useStepwiseContext();
+function Inspector({ onCapture }: { onCapture: (ctx: WalkitContextValue) => void }) {
+  const ctx = useWalkitContext();
   useEffect(() => {
     onCapture(ctx);
-  });
+  }, [ctx, onCapture]);
   return null;
 }
 
 async function setup(config = {}) {
-  let captured!: StepwiseContextValue;
+  let captured!: WalkitContextValue;
 
   await act(async () => {
     render(
-      <StepwiseContextProvider config={config}>
+      <WalkitContextProvider config={config}>
         <Inspector
           onCapture={(ctx) => {
             captured = ctx;
           }}
         />
-      </StepwiseContextProvider>,
+      </WalkitContextProvider>,
     );
   });
 
@@ -45,22 +49,22 @@ async function setup(config = {}) {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('StepwiseContextProvider', () => {
+describe('WalkitContextProvider', () => {
   it('starts with visible=false and empty steps', async () => {
     const { ctx } = await setup();
     expect(ctx().visible).toBe(false);
     expect(ctx().sortedSteps).toHaveLength(0);
   });
 
-  it('registerStep adds and sorts steps by order', async () => {
+  it('registerStep adds and sorts steps by sequence', async () => {
     const { ctx } = await setup();
     await act(async () => {
       ctx().registerStep(makeStep('b', 2));
       ctx().registerStep(makeStep('a', 1));
     });
     expect(ctx().sortedSteps).toHaveLength(2);
-    expect(ctx().sortedSteps[0].name).toBe('a');
-    expect(ctx().sortedSteps[1].name).toBe('b');
+    expect(ctx().sortedSteps[0].id).toBe('a');
+    expect(ctx().sortedSteps[1].id).toBe('b');
   });
 
   it('unregisterStep removes a step', async () => {
@@ -73,7 +77,7 @@ describe('StepwiseContextProvider', () => {
       ctx().unregisterStep('b');
     });
     expect(ctx().sortedSteps).toHaveLength(1);
-    expect(ctx().sortedSteps[0].name).toBe('a');
+    expect(ctx().sortedSteps[0].id).toBe('a');
   });
 
   it('start() sets visible=true and currentIndex=0', async () => {
@@ -115,8 +119,8 @@ describe('StepwiseContextProvider', () => {
   });
 
   it('calls onStart and onStop callbacks', async () => {
-    const onStart = jest.fn();
-    const onStop = jest.fn();
+    const onStart = vi.fn();
+    const onStop = vi.fn();
     const { ctx } = await setup({ onStart, onStop });
     await act(async () => {
       ctx().registerStep(makeStep('a', 1));
@@ -130,7 +134,7 @@ describe('StepwiseContextProvider', () => {
   });
 
   it('calls onStepChange when advancing', async () => {
-    const onStepChange = jest.fn();
+    const onStepChange = vi.fn();
     const { ctx } = await setup({ onStepChange });
     await act(async () => {
       ctx().registerStep(makeStep('a', 1));
@@ -140,11 +144,14 @@ describe('StepwiseContextProvider', () => {
     await act(async () => {
       await ctx().next();
     });
-    expect(onStepChange).toHaveBeenCalledWith(expect.objectContaining({ name: 'b' }), 1);
+    expect(onStepChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'b' }),
+      1,
+    );
   });
 
   it('next() on last step calls stop()', async () => {
-    const onStop = jest.fn();
+    const onStop = vi.fn();
     const { ctx } = await setup({ onStop });
     await act(async () => {
       ctx().registerStep(makeStep('only', 1));
@@ -182,7 +189,7 @@ describe('StepwiseContextProvider', () => {
       await ctx().goTo(2);
     });
     expect(ctx().currentIndex).toBe(2);
-    expect(ctx().currentStep?.name).toBe('c');
+    expect(ctx().currentStep?.id).toBe('c');
   });
 
   it('goTo() does nothing for out-of-range index', async () => {
