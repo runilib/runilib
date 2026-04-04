@@ -31,7 +31,7 @@ export function CheckboxVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalAppearance: createDemoFormUi(styles),
+    globalUi: createDemoFormUi(styles),
   });
 
   const { Form, fields, watchAll } = form;
@@ -85,10 +85,10 @@ export function CheckboxVariantsExample() {
         <fields.acceptTerms />
         <fields.weeklyDigest />
         <fields.betaInvites />
-
         <Form.Submit
           className={styles.submitButton}
           loadingText="Saving preferences…"
+          disabled
         >
           Save checkbox preferences
         </Form.Submit>

@@ -1,7 +1,7 @@
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 // ─── OTP field builder ───────────────────────────────────────────────────────
-export class OtpFieldBuilder extends BaseFieldBuilder<string> {
+export class OtpFieldBuilder extends BaseFieldBuilder<string, 'otp'> {
   constructor(label: string) {
     super('otp', label, '');
   }

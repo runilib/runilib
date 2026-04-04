@@ -225,10 +225,11 @@ export const formbridgeDocs: LibraryDoc = {
         { id: 'fb-state', label: 'State' },
         { id: 'fb-actions', label: 'Actions & helpers' },
         { id: 'fb-validation', label: 'Validation' },
+        { id: 'fb-builder-basics', label: 'Builder basics' },
       ],
     },
     {
-      group: 'Field builders',
+      group: 'Available Field builders',
       color: 'blue',
       items: [
         { id: 'fb-text', label: 'field.text()' },
@@ -260,10 +261,10 @@ export const formbridgeDocs: LibraryDoc = {
         { id: 'fb-web-ui', label: 'Styling' },
         { id: 'fb-infer', label: 'field.infer()' },
         { id: 'fb-infer-type', label: 'field.inferType()' },
-        { id: 'fb-analytics', label: 'useFormBridgeAnalytics()' },
+        { id: 'fb-analytics', label: 'useFormAnalytics()' },
         { id: 'fb-use-async-options', label: 'useAsyncOptions()' },
-        { id: 'fb-dynamic', label: 'useDynamicFormBridge()' },
-        { id: 'fb-wizard', label: 'useFormWizardBridge()' },
+        { id: 'fb-dynamic', label: 'useDynamicForm()' },
+        { id: 'fb-wizard', label: 'useFormWizard()' },
         { id: 'fb-readonly', label: 'useReadonlyFormBridge()' },
       ],
     },
@@ -349,14 +350,33 @@ export function SignupScreen() {
 
 - Web peers: \`react\` and \`react-dom\`
 - Native peers: \`react-native\`
+- In React Native TypeScript projects, add \`"customConditions": ["react-native"]\` so the IDE picks the native type surface
 - Some field renderers can rely on extra ecosystem packages in your app, such as phone or file-picker helpers, but the form API itself stays the same.`,
       code: {
         filename: 'terminal',
         lang: 'bash',
         code: `npm install @runilib/react-formbridge
 # or
-yarn add @runilib/react-formbridge`,
+yarn add @runilib/react-formbridge
+# or
+pnpm add @runilib/react-formbridge
+`,
       },
+      subsections: [
+        {
+          id: 'fb-install-native-ts',
+          title: 'React Native TypeScript note',
+          content: `If your editor still shows web-only props in a React Native app, make sure TypeScript resolves the \`react-native\` export condition.
+
+\`\`\`json
+{
+  "compilerOptions": {
+    "customConditions": ["react-native"]
+  }
+}
+\`\`\``,
+        },
+      ],
     },
     {
       id: 'fb-quickstart',
@@ -365,20 +385,22 @@ yarn add @runilib/react-formbridge`,
 
 - Web and native can share the same schema.
 - The generated \`fields\` map is fully typed from the schema keys.
+- The generated \`ui\` prop is also typed from the exact field type, so text fields, textareas, and selects do not expose the same override surface.
 - \`Form.Submit\` automatically follows submit state and can be disabled from \`state.isValid\`.`,
       codeTabs: [
         {
           filename: 'RegistrationForm.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.overviewWeb,
-          code: `import { field, useFormBridge } from '@runilib/react-formbridge'
+          code: `import type { FormSchema } from '@runilib/react-formbridge'
+import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   fullName: field.text('Full name').required().trim(),
   email: field.email('Email').required(),
   password: field.password('Password').required().strong(),
   terms: field.checkbox('Accept terms').mustBeTrue(),
-}
+} satisfies FormSchema
 
 export function RegistrationForm() {
   const { Form, fields, state } = useFormBridge(schema, { validateOn: 'onTouched' })
@@ -399,13 +421,14 @@ export function RegistrationForm() {
           lang: 'tsx',
           preview: DOC_PREVIEWS.overviewNative,
           code: `import { ScrollView, View } from 'react-native'
+import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   fullName: field.text('Full name').required(),
   email: field.email('Email').required(),
   password: field.password('Password').required().strong(),
-}
+} satisfies FormSchema
 
 export function RegistrationScreen() {
   const { Form, fields, state } = useFormBridge(schema, { validateOn: 'onTouched' })
@@ -432,6 +455,7 @@ export function RegistrationScreen() {
 
 - The builder defines the field type, default value, label, validation, visibility conditions, and platform hints.
 - \`SchemaValues<typeof schema>\` gives you the submitted values shape automatically.
+- If you need to annotate the schema, prefer \`satisfies FormSchema\` over \`: FormSchema\` so TypeScript keeps the exact field type for each generated field.
 - Because the schema is just data, the same object can drive editing forms, wizards, readonly reviews, analytics, and even dynamic rendering.
 - The practical rule of thumb: if a behavior belongs to the field itself, keep it in the builder instead of scattering it across components.`,
       subsections: [
@@ -442,6 +466,22 @@ export function RegistrationScreen() {
 - Validation: required rules, length/number constraints, async validators, cross-field checks
 - UX metadata: labels, placeholders, hints, web overrides
 - Runtime conditions: visible, required, disabled, reset/clear/keep on hide`,
+        },
+        {
+          id: 'fb-schema-typing-tip',
+          title: 'Typing tip',
+          content: `Use \`satisfies FormSchema\` when you want an explicit schema contract without losing the precise field typing.
+
+\`\`\`tsx
+import type { FormSchema } from '@runilib/react-formbridge'
+
+const schema = {
+  bio: field.textarea('Bio'),
+  country: field.select('Country').options(['FR', 'US']),
+} satisfies FormSchema
+\`\`\`
+
+This keeps \`fields.bio\` aligned with textarea-only overrides and \`fields.country\` aligned with select-only overrides.`,
         },
       ],
     },
@@ -501,7 +541,9 @@ export function RegistrationScreen() {
 - \`formKey\` recreates the internal form instance when the form context changes, which is useful for step-based or tab-based flows
 - \`initialValues\` hydrates the runtime from existing data
 - \`analytics\` wires form analytics without changing field components
-- \`showErrorsOn\` is present in the public type surface; treat it as reserved until the shared runtime adds dedicated error-display timing on top of validation triggers`,
+- \`showErrorsOn\` is present in the public type surface; treat it as reserved until the shared runtime adds dedicated error-display timing on top of validation triggers
+- \`globalUi\` themes every generated field, the form wrapper, and the submit button from one shared runtime layer
+`,
         },
         {
           id: 'fb-use-form-bridge-return',
@@ -545,7 +587,8 @@ export function RegistrationScreen() {
           content: `- \`onSubmit(values)\` is required and can be sync or async
 - \`onError(errors)\` is called when validation fails before submit
 - \`onSubmitError(error)\` maps thrown submit errors to a user-facing message stored in \`state.submitError\`
-- Web rendering also accepts normal wrapper props such as \`className\` and \`style\``,
+- Web rendering also accepts normal wrapper props such as \`className\` and \`style\`
+- Native rendering exposes native-friendly wrapper props and \`style\`, but not \`className\``,
         },
         {
           id: 'fb-submit-props',
@@ -553,7 +596,8 @@ export function RegistrationScreen() {
           content: `- \`children\` defines the button label
 - \`loadingText\` replaces the label while the form is submitting
 - \`disabled\` lets you add extra blocking conditions on top of submit state
-- Visual props such as \`className\` and \`style\` are forwarded to the renderer`,
+- On web, visual props such as \`className\` and \`style\` are forwarded to the renderer
+- On native, use \`style\`, \`containerStyle\`, and \`textStyle\` instead of \`className\``,
         },
       ],
     },
@@ -564,62 +608,26 @@ export function RegistrationScreen() {
 
 - You never manually register inputs or bind value/error state for standard fields
 - Each generated component already knows its validation, current value, hidden/disabled state, and platform renderer
-- Per-render overrides stay possible for labels, hints, placeholders, styles, and event hooks without mutating the original schema`,
+- Per-render overrides stay possible for labels, hints, placeholders, and presentation without mutating the original schema`,
       subsections: [
         {
           id: 'fb-field-props',
           title: 'Props',
-          content: `- \`label\`
-- \`hint\`
-- \`placeholder\`
-- \`disabled\` (override runtime conditions)
-- \`required\` (override runtime conditions)
-- \`hidden\` (override runtime conditions)
-- \`value\` override
-- \`error\` override
-- \`onChange(value)\`
-- \`onBlur()\`
-- \`onFocus()\`
-
-Web appearance alias
-- \`web.id\`
-- \`web.classNames\`
-- \`web.styles\`
-- \`web.rootProps\`
-- \`web.labelProps\`
-- \`web.inputProps\`
-- \`web.textareaProps\`
-- \`web.selectProps\`
-- \`web.hintProps\`
-- \`web.errorProps\`
-- \`web.renderLabel\`
-- \`web.renderHint\`
-- \`web.renderError\`
-- \`web.renderRequiredMark\`
-- \`web.hideLabel\`
-- \`web.highlightOnError\`
-
-Native appearance alias
-- \`native.id\`
-- \`native.styles\`
-- \`native.rootProps\`
-- \`native.labelProps\`
-- \`native.inputProps\`
-- \`native.hintProps\`
-- \`native.errorProps\`
-- \`native.renderLabel\`
-- \`native.renderHint\`
-- \`native.renderError\`
-- \`native.renderRequiredMark\`
-- \`native.hideLabel\`
-- \`native.highlightOnError\``,
+          content: `- Common field props: \`label\`, \`hint\`, \`placeholder\`, \`style\`, \`ui.styles\`, \`ui.hideLabel\`, \`ui.highlightOnError\`, \`ui.renderLabel\`, \`ui.renderHint\`, \`ui.renderError\`, and \`ui.renderRequiredMark\`
+- Web-only root props: \`className\`, \`ui.classNames\`, \`ui.rootProps\`, \`ui.labelProps\`, \`ui.hintProps\`, and \`ui.errorProps\`
+- Native-only extras: \`ui.testID\` and native-friendly \`ui.*Props\` / \`ui.styles\`
+- Text-like fields expose \`ui.inputProps\`
+- \`textarea\` fields expose \`ui.textareaProps\` on web
+- \`select\` fields expose \`ui.selectProps\` on web
+- Picker-capable fields can expose \`ui.renderPicker\`
+- Native generated fields do not expose web-only props such as \`className\`, \`ui.textareaProps\`, or \`ui.selectProps\``,
         },
         {
           id: 'fb-field-behavior',
           title: 'How overrides behave',
           content: `- Schema-level builder methods define the default contract for every render of that field
-- Component props are useful for one-off overrides in a specific screen or section
-- Prefer schema-level configuration for business rules, and per-render props for local presentation tweaks`,
+- Component props are useful for one-off copy or presentation overrides in a specific screen or section
+- Field components do not accept value/state overrides directly; validation, visibility, disabled rules, and submit lifecycle stay owned by the form runtime`,
         },
       ],
     },
@@ -675,7 +683,7 @@ form.visibility.company?.visible`,
       title: 'Validation',
       content: `Validation in react-formbridge happens in two layers.
 
-- Field builders cover most everyday rules directly in the schema: \`required\`, \`min\`, \`max\`, \`pattern\`, \`matches/sameAs\`, number helpers, \`mustBeTrue\`, \`validate(fn)\`, and more.
+- Field builders cover most everyday rules directly in the schema: \`required\`, \`min\`, \`max\`, \`pattern/patterns\`, cross-field equality with \`matches/sameAs\`, number helpers, \`mustBeTrue\`, \`validate(fn)\`, and more.
 - A schema-level \`resolver\` lets an external validator such as Zod or Yup own the final result shape.
 - Defaults today: \`validateOn='onBlur'\`, \`revalidateOn='onChange'\`.`,
       subsections: [
@@ -688,6 +696,27 @@ form.visibility.company?.visible`,
           id: 'fb-validation-resolver',
           title: 'Resolver validation',
           content: `Use a resolver when you already own a domain schema elsewhere in the app. The resolver returns \`{ values, errors }\` and becomes the validation source of truth for the form runtime.`,
+        },
+      ],
+    },
+
+    {
+      id: 'fb-builder-basics',
+      title: 'Builder basics',
+      content: `Most builders share the same fluent base API, so once you know one string or numeric builder, the rest feel familiar.
+
+- Common builder methods include \`required()\`, \`optional()\`, \`label()\`, \`defaultValue()\`, \`placeholder()\`, \`hint()\`, \`disabled()\`, \`hidden()\`, \`debounce()\`, \`validate(fn)\`, and \`transform(fn)\`
+- \`behavior(config)\` is the shared place for field-owned behavior metadata such as ids, autocomplete, keyboard hints, picker rendering, and error highlighting
+- \`render(fn)\` is available on the base builders when you need to replace the generated UI while keeping the same form runtime
+- Conditional helpers such as \`visibleWhen()\`, \`requiredWhen()\`, \`disabledWhen()\`, \`resetOnHide()\`, \`clearOnHide()\`, and \`keepOnHide()\` are documented separately in the conditional logic section
+- \`field.file()\` is the main exception: it uses its own specialized builder surface for upload-specific behavior instead of the full base builder API`,
+      subsections: [
+        {
+          id: 'fb-builder-basics-behavior',
+          title: 'Behavior vs styling',
+          content: `- Put business rules and reusable field behavior in the builder
+- Put shared visual theme in \`useFormBridge(schema, { globalUi })\`
+- Put one-off styling exceptions on the rendered field component via \`className\`, \`style\`, and \`ui\` on web, or \`style\` and \`ui\` on native`,
         },
       ],
     },
@@ -711,7 +740,7 @@ form.visibility.company?.visible`,
     .trim()
     .min(2)
     .max(80)
-    .matches(/^[a-z\\s'-]+$/i, 'Only letters and spaces.'),
+    .pattern(/^[a-z\\s'-]+$/i, 'Only letters and spaces.'),
 }
 const { Form, fields } = useFormBridge(schema)
 <Form onSubmit={save}><fields.fullName /><Form.Submit>Save</Form.Submit></Form>`,
@@ -734,11 +763,15 @@ const { Form, fields } = useFormBridge(schema)
           content: `- label (string, required)
 - defaultValue (string, default '')
 - required(message?) (boolean, default false)
+- optional()
+- label(text)
 - placeholder (string | undefined)
 - hint (string | undefined)
 - min(length)
 - max(length)
-- matches(regex, message?) (RegExp)
+- pattern(regex | regex[])
+- patterns(regex[])
+- matches(fieldName, message?) / sameAs(fieldName, message?)
 - trim()
 - lowercase()
 - uppercase()
@@ -747,9 +780,7 @@ const { Form, fields } = useFormBridge(schema)
 - transform(fn)
 - disabled (boolean, default false)
 - hidden (boolean, default false)
-- appearance(config) for cross-platform field-owned appearance defaults
-- web(config) for explicit web-only defaults such as ids, class/style hints, autocomplete behavior, and renderer metadata
-- native(config) for explicit native-only defaults such as keyboard hints, autofill behavior, and renderer metadata`,
+- behavior(config) for cross-platform field-owned behavior defaults such as ids, autocomplete, keyboard hints, error highlighting, and custom picker rendering`,
         },
       ],
     },
@@ -770,7 +801,7 @@ const { Form, fields } = useFormBridge(schema)
   email: field.email('Work email').required().lowercase().trim(),
 }
 const { Form, fields } = useFormBridge(schema)
-<Form onSubmit={save}><fields.email appearance={{ inputProps:{ autoComplete:'email' }}} /><Form.Submit>Send</Form.Submit></Form>`,
+<Form onSubmit={save}><fields.email ui={{ inputProps:{ autoComplete:'email' }}} /><Form.Submit>Send</Form.Submit></Form>`,
         },
         {
           filename: 'Email.native.tsx',
@@ -838,7 +869,8 @@ const { Form, fields } = useFormBridge(schema)
 - validate(fn)
 - transform(fn)
 - disabled(default false)
-- hidden(default false)`,
+- hidden(default false)
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -876,9 +908,7 @@ const { Form, fields } = useFormBridge(schema)
 - transform(fn)
 - disabled(default false)
 - hidden(default false)
-- appearance(config)
-- web(config)
-- native(config)`,
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -904,6 +934,7 @@ const { Form, fields } = useFormBridge(schema)
           content: `- built-in URL check
 - defaultValue \`''\` (string)
 - required(default false)
+- optional()
 - trim()
 - lowercase()
 - uppercase()
@@ -914,9 +945,7 @@ const { Form, fields } = useFormBridge(schema)
 - transform(fn)
 - disabled(default false)
 - hidden(default false)
-- appearance(config)
-- web(config)
-- native(config)`,
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -948,9 +977,7 @@ const { Form, fields } = useFormBridge(schema)
 - transform(fn)
 - disabled(default false)
 - hidden(default false)
-- appearance(config)
-- web(config)
-- native(config)`,
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -991,7 +1018,8 @@ const { Form, fields } = useFormBridge(schema)
 - transform(fn)
 - validate(fn)
 - disabled(default false)
-- hidden(default false)`,
+- hidden(default false)
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -1031,9 +1059,7 @@ const { Form, fields } = useFormBridge(schema)
 - hint()
 - disabled(default false)
 - hidden(default false)
-- appearance(config)
-- web(config)
-- native(config)`,
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -1072,9 +1098,7 @@ const { Form, fields } = useFormBridge(schema)
 - hint()
 - disabled(default false)
 - hidden(default false)
-- appearance(config)
-- web(config)
-- native(config)`,
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -1131,9 +1155,9 @@ const { Form, fields } = useFormBridge(schema)
           content: `Need a custom modal, bottom sheet, command palette, or searchable dialog instead of the built-in picker? Pass \`renderPicker\`.
 
 - Works for local options and \`optionsFrom(...)\`
-- Works globally through \`useFormBridge(schema, { globalAppearance })\`
-- Works per schema field through \`appearance(...)\`, \`web(...)\`, or \`native(...)\`
-- Works per rendered field through \`<Fields.city appearance={{ renderPicker }} />\`
+- Works globally through \`useFormBridge(schema, { globalUi })\`
+- Works per schema field through \`behavior(...)\`
+- Works per rendered field through \`<fields.city ui={{ renderPicker }} />\`
 
 \`\`\`tsx
 const schema = {
@@ -1145,7 +1169,7 @@ const schema = {
       minChars: 2,
     })
     .searchable()
-    .appearance({
+    .behavior({
       renderPicker: ({
         open,
         search,
@@ -1187,9 +1211,7 @@ The \`renderPicker\` context gives you: \`open\`, \`search\`, \`setSearch\`, \`c
 - hint()
 - disabled(default false)
 - hidden(default false)
-- appearance(config) for shared picker styling and custom pickers via \`renderPicker\`
-- web(config) for ids, class/style hints, and web-specific picker behavior
-- native(config) for native-only styling, modal/sheet behavior, and renderer metadata`,
+- behavior(config) for shared picker behavior and custom pickers via \`renderPicker\``,
         },
       ],
     },
@@ -1223,9 +1245,7 @@ The \`renderPicker\` context gives you: \`open\`, \`search\`, \`setSearch\`, \`c
 - hint()
 - disabled(default false)
 - hidden(default false)
-- appearance(config)
-- web(config)
-- native(config)
+- behavior(config)
 - choose radio when all choices should remain visible at once`,
         },
       ],
@@ -1271,9 +1291,7 @@ The \`renderPicker\` context gives you: \`open\`, \`search\`, \`setSearch\`, \`c
 - debounce(300)
 - disabled(default false)
 - hidden(default false)
-- appearance(config)
-- web(config)
-- native(config)`,
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -1317,7 +1335,8 @@ The \`renderPicker\` context gives you: \`open\`, \`search\`, \`setSearch\`, \`c
 - validateFormat(default true)
 - required(default false)
 - disabled(default false)
-- hidden(default false)`,
+- hidden(default false)
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -1375,7 +1394,8 @@ const schema = {
 - validate(fn)
 - transform(fn)
 - disabled(default false)
-- hidden(default false)`,
+- hidden(default false)
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
         {
           id: 'fb-masked-tokens',
@@ -1475,6 +1495,7 @@ Other
 - maxSize(bytes) default no limit
 - multiple(maxFiles?) enables array mode and defaults maxFiles to 10
 - preview(sizePx?) enables image previews
+- dragLabel(text) customizes the dropzone copy on web
 - source('gallery' | 'camera' | 'documents' | 'all') is especially useful on native
 - withBase64()
 - resize(maxWidth, maxHeight, quality)
@@ -1519,7 +1540,8 @@ Other
 - validate(fn)
 - transform(fn)
 - disabled(default false)
-- hidden(default false)`,
+- hidden(default false)
+- behavior(config) for cross-platform field-owned behavior defaults`,
         },
       ],
     },
@@ -1566,15 +1588,22 @@ const { Form, fields } = useFormBridge(schema)
           content: `- label (string, required)
 - defaultValue (required, typed)
 - required(message?) default false
+- behavior(config) for cross-platform field-owned behavior defaults
 - render(fn) keeps the normal field runtime while letting you replace the UI
 
 render(fn) receives
+- name
 - label
 - value
+- placeholder
 - error
 - touched
 - dirty
 - validating
+- disabled
+- hint
+- options
+- otpLength
 - onChange
 - onBlur
 - onFocus
@@ -1810,7 +1839,9 @@ const form = useFormBridge(schema, {
           title: 'Reset on hide',
           content: `- \`resetOnHide()\`
 - \`clearOnHide()\`
-- \`keepOnHide()\` (default)`,
+- \`keepOnHide()\`
+
+Default behavior: hidden fields reset to their default value unless you opt into \`clearOnHide()\` or \`keepOnHide()\`.`,
         },
       ],
     },
@@ -1854,9 +1885,9 @@ await form.clearDraft()`,
       title: 'Styling',
       content: `react-formbridge is intentionally styling-framework agnostic. The form runtime owns value, validation, visibility, and submit lifecycle. Your app stays free to style that runtime with CSS Modules, styled-components, Tailwind-style utilities, inline objects, React Native StyleSheet, NativeWind-friendly wrappers, or an in-house design system.
 
-- Put styling in the schema when it should travel with the field everywhere the schema is reused
-- Put styling in \`useFormBridge(schema, { globalAppearance })\` when one screen, one route, or one product area needs a shared visual language
-- Put styling on \`<fields.name appearance={...} />\` when a single field needs a local exception
+- Put field-owned behavior metadata in the schema when it should travel with the field everywhere the schema is reused
+- Put styling in \`useFormBridge(schema, { globalUi })\` when one screen, one route, or one product area needs a shared visual language
+- Put styling on \`<fields.name ui={...} />\` when a single field needs a local exception, and let the generated field type decide which \`ui\` keys are available
 - Reach for \`field.custom().render(...)\` only when the UI structure itself must change; if the built-in renderer is already correct, stay on the styling layers`,
       codeTabs: [
         {
@@ -1874,7 +1905,7 @@ const schema = {
   ownerEmail: field
     .email('Owner email')
     .required()
-    .appearance({ autoComplete: 'email', inputMode: 'email' }),
+    .behavior({ autoComplete: 'email', inputMode: 'email' }),
   launchNotes: field
     .textarea('Launch notes')
     .hint('Textarea inherits the same ui theme.'),
@@ -1883,14 +1914,14 @@ const schema = {
 export function CheckoutForm() {
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalAppearance: {
+    globalUi: {
       form: { className: styles.form },
       submit: {
         className: styles.submit,
         loadingText: 'Saving...',
       },
       field: {
-        appearance: {
+        ui: {
           classNames: {
             root: styles.field,
             label: styles.label,
@@ -1908,7 +1939,7 @@ export function CheckoutForm() {
     <form.Form onSubmit={saveCheckout}>
       <form.fields.projectName />
       <form.fields.ownerEmail
-        appearance={{
+        ui={{
           styles: {
             input: { borderColor: '#38bdf8' },
           },
@@ -1956,13 +1987,13 @@ const checkoutUi = StyleSheet.create({
 const schema = {
   projectName: field.text('Project name')
     .required()
-    .appearance({
+    .behavior({
       autoComplete: 'organization',
     }),
   ownerEmail: field
     .email('Owner email')
     .required()
-    .appearance({ keyboardType: 'email-address', autoComplete: 'email' }),
+    .behavior({ keyboardType: 'email-address', autoComplete: 'email' }),
   launchNotes: field
     .textarea('Launch notes')
     .hint('Textarea inherits the same ui theme.'),
@@ -1970,14 +2001,14 @@ const schema = {
 
 export function CheckoutScreen() {
   const form = useFormBridge(schema, {
-    globalAppearance: {
+    globalUi: {
       submit: {
         containerStyle: checkoutUi.submitButton,
         textStyle: checkoutUi.submitText,
         loadingText: 'Saving...',
       },
       field: {
-        appearance: {
+        ui: {
           styles: {
             root: checkoutUi.fieldRoot,
             label: checkoutUi.fieldLabel,
@@ -1997,7 +2028,7 @@ export function CheckoutScreen() {
           <form.fields.projectName />
           <form.fields.ownerEmail />
           <form.fields.launchNotes
-            appearance={{
+            ui={{
               styles: {
                 input: { minHeight: 112 },
               },
@@ -2015,12 +2046,23 @@ export function CheckoutScreen() {
         {
           id: 'fb-web-ui-layers',
           title: 'Choose the right layer',
-          content: `1. Use \`field.text(...).appearance(...)\` for defaults that belong to the field contract itself: autocomplete, keyboard type, ids, class/style hints, or a reusable baseline chrome that should follow the schema everywhere.
-2. Use \`useFormBridge(schema, { globalAppearance })\` when a whole screen or product area needs the same theme. This is the default recommendation for CSS Modules, StyleSheet, utility-class maps, or design-system-wide field chrome.
-3. Use local \`appearance\` props on \`<fields.name />\` when one field needs a special variant without mutating the shared schema.
+          content: `1. Use \`field.text(...).behavior(...)\` for defaults that belong to the field contract itself: autocomplete, keyboard type, ids, error highlighting, or custom picker rendering that should follow the schema everywhere.
+2. Use \`useFormBridge(schema, { globalUi })\` when a whole screen or product area needs the same theme. This is the default recommendation for CSS Modules, StyleSheet, utility-class maps, or design-system-wide field chrome.
+3. Use local \`ui\` props on \`<fields.name />\` when one field needs a special variant without mutating the shared schema.
 4. Use \`field.custom().render(...)\` only when the structure itself must change. If the generated renderer is already the right input type, styling should usually stay in the layers above.
 
-Merge order is predictable: builder \`appearance\` -> \`globalAppearance\` theme appearance -> local field appearance -> custom render hooks.`,
+The public type surface guards these layers too: a text field does not expose textarea-only or select-only \`ui\` props, and native fields do not expose web-only props such as \`className\`.
+
+Merge order is predictable: builder \`behavior\` -> \`globalUi\` theme ui -> local field ui -> custom render hooks.`,
+        },
+        {
+          id: 'fb-web-ui-typing',
+          title: 'Typing rules',
+          content: `- Text-like fields use \`ui.inputProps\`
+- \`textarea\` fields use \`ui.textareaProps\` on web
+- \`select\` fields use \`ui.selectProps\` on web
+- Web fields can use root-level \`className\`
+- Native fields intentionally do not expose \`className\`, \`ui.textareaProps\`, or \`ui.selectProps\``,
         },
         {
           id: 'fb-web-ui-css-modules',
@@ -2029,21 +2071,21 @@ Merge order is predictable: builder \`appearance\` -> \`globalAppearance\` theme
 
 - One \`ui\` object themes the form wrapper, every generated field, and the submit button
 - The schema stays reusable across pages because the visual system lives at the screen level
-- You still keep an escape hatch for one field with local \`appearance\` overrides`,
+- You still keep an escape hatch for one field with local \`ui\` overrides`,
           codeTabs: [
             {
               filename: 'CssModulesTheme.web.tsx',
               lang: 'tsx',
               preview: DOC_PREVIEWS.stylingWeb,
               code: `const form = useFormBridge(schema, {
-  globalAppearance: {
+  globalUi: {
     form: { className: styles.formShell },
     submit: {
       className: styles.submitButton,
       loadingText: 'Applying CSS Modules theme...',
     },
     field: {
-      appearance: {
+      ui: {
         classNames: {
           root: styles.formField,
           label: styles.formLabel,
@@ -2061,7 +2103,7 @@ Merge order is predictable: builder \`appearance\` -> \`globalAppearance\` theme
 <form.Form onSubmit={save}>
   <form.fields.projectName />
   <form.fields.ownerEmail
-    appearance={{
+    ui={{
       styles: {
         input: { borderColor: '#38bdf8' },
       },
@@ -2076,9 +2118,9 @@ Merge order is predictable: builder \`appearance\` -> \`globalAppearance\` theme
               lang: 'tsx',
               preview: DOC_PREVIEWS.stylingNative,
               code: `const form = useFormBridge(schema, {
-  globalAppearance: {
+  globalUi: {
     field: {
-      appearance: {
+      ui: {
         styles: {
           root: s.fieldRoot,
           label: s.fieldLabel,
@@ -2139,7 +2181,7 @@ const StyledForm = styled(FormHost)\`
 \`
 
 const EmailField = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     inputProps: { autoComplete: 'email', inputMode: 'email' },
   },
 })\`
@@ -2186,7 +2228,7 @@ const StyledForm = styled(FormHost)\`
 \`
 
 const EmailField = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     inputProps: {
       autoComplete: 'email',
       keyboardType: 'email-address',
@@ -2235,7 +2277,7 @@ const form = useFormBridge({
 - Use the exported host helpers instead of rebuilding your own wrappers
 - Keep the styled shell stable and pass the generated field, submit button, or form through props
 - On web, normal CSS selectors can target \`label\`, \`input\`, \`textarea\`, and the other built-in elements
-- On native, use \`.attrs({ appearance: { styles: ... } })\` to feed slot styles into the generated field
+- On native, use \`.attrs({ ui: { styles: ... } })\` to feed slot styles into the generated field
 
 This stable-host pattern is the safest documented recipe because generated field components are runtime artifacts. It keeps styling ergonomic without forcing users to hand-build every field.`,
           codeTabs: [
@@ -2259,7 +2301,7 @@ const StudioForm = styled(FormHost)\`
 \`
 
 const EmailShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     inputProps: { autoComplete: 'email', inputMode: 'email' },
   },
 })\`
@@ -2315,7 +2357,7 @@ const StudioForm = styled(FormHost)\`
 \`
 
 const EmailShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     inputProps: {
       autoComplete: 'email',
       keyboardType: 'email-address',
@@ -2366,21 +2408,21 @@ const form = useFormBridge({
           content: `This recipe is a strong fit for Tailwind, UnoCSS, Windi, or any class-based utility stack.
 
 - The global \`classNames\` map gives most of the form its look
-- Local \`appearance.classNames\` and \`appearance.inputProps\` cover one-off field variations
+- Local \`ui.classNames\` and \`ui.inputProps\` cover one-off field variations
 - The runtime stays the same because the generated field still owns value, validation, and events`,
           code: {
             filename: 'UtilityClasses.web.tsx',
             lang: 'tsx',
             preview: DOC_PREVIEWS.stylingUtilityWeb,
             code: `const form = useFormBridge(schema, {
-  globalAppearance: {
+  globalUi: {
     form: { className: 'space-y-4' },
     submit: {
       className:
         'inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 font-semibold text-slate-950',
     },
     field: {
-      appearance: {
+      ui: {
         classNames: {
           root: 'space-y-2',
           label:
@@ -2401,7 +2443,7 @@ const form = useFormBridge({
 
 <form.Form onSubmit={save}>
   <form.fields.ownerEmail
-    appearance={{
+    ui={{
       classNames: {
         input: 'border-cyan-400 focus:ring-2 focus:ring-cyan-400/30',
       },
@@ -2421,7 +2463,7 @@ const form = useFormBridge({
           title: 'Recipe: local slot overrides with no extra styling library',
           content: `Use this when you want to prove the styling API quickly, or when one form needs a polished custom look without introducing a new styling dependency.
 
-- \`appearance.styles\` targets the built-in slots directly on both web and native
+- \`ui.styles\` targets the built-in slots directly on both web and native
 - \`renderHint\`, \`renderError\`, and \`renderRequiredMark\` cover the cases where plain styles are not enough
 - This is also a good recipe for incrementally migrating an existing screen to react-formbridge`,
           codeTabs: [
@@ -2431,7 +2473,7 @@ const form = useFormBridge({
               preview: DOC_PREVIEWS.stylingSlotWeb,
               code: `const form = useFormBridge(schema, {
   validateOn: 'onTouched',
-  globalAppearance: {
+  globalUi: {
     submit: {
       loadingText: 'Saving inline theme...',
       style: {
@@ -2442,7 +2484,7 @@ const form = useFormBridge({
       },
     },
     field: {
-      appearance: {
+      ui: {
         styles: {
           root: { marginBottom: 0, gap: 8 },
           label: {
@@ -2477,7 +2519,7 @@ const form = useFormBridge({
 })
 
 <form.fields.receiptEmail
-  appearance={{
+  ui={{
     highlightOnError: false,
     renderHint: () => (
       <span style={{ color: '#cbd5e1', fontSize: 12 }}>
@@ -2488,7 +2530,7 @@ const form = useFormBridge({
 />
 
 <form.fields.postalCode
-  appearance={{
+  ui={{
     styles: {
       input: { textAlign: 'center', letterSpacing: '0.14em' },
     },
@@ -2501,7 +2543,7 @@ const form = useFormBridge({
               preview: DOC_PREVIEWS.stylingSlotNative,
               code: `const form = useFormBridge(schema, {
   validateOn: 'onTouched',
-  globalAppearance: {
+  globalUi: {
     submit: {
       loadingText: 'Saving inline theme...',
       containerStyle: {
@@ -2515,7 +2557,7 @@ const form = useFormBridge({
       },
     },
     field: {
-      appearance: {
+      ui: {
         styles: {
           root: { marginBottom: 0, gap: 8 },
           label: {
@@ -2545,7 +2587,7 @@ const form = useFormBridge({
 })
 
 <form.fields.receiptEmail
-  appearance={{
+  ui={{
     highlightOnError: false,
     renderHint: () => (
       <Text style={{ color: '#cbd5e1', fontSize: 12 }}>
@@ -2556,7 +2598,7 @@ const form = useFormBridge({
 />
 
 <form.fields.postalCode
-  appearance={{
+  ui={{
     styles: {
       input: { textAlign: 'center', letterSpacing: 2 },
     },
@@ -2571,36 +2613,39 @@ const form = useFormBridge({
           content: `On web, the API is broad enough to work with CSS Modules, utility classes, styled-components, Emotion, or plain objects.
 
 - Root-level \`className\` and \`style\` theme the field container directly
-- \`ui.form\` and \`ui.submit\` style the generated form wrapper and submit button
-- \`appearance.classNames\` and \`appearance.styles\` target built-in slots such as \`root\`, \`label\`, \`input\`, \`textarea\`, \`select\`, \`hint\`, \`error\`, \`checkboxRow\`, \`checkboxInput\`, \`checkboxLabel\`, \`switchRoot\`, \`switchTrack\`, \`switchThumb\`, \`otpContainer\`, and \`otpInput\`
-- \`appearance.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
-- \`appearance.rootProps\`, \`appearance.labelProps\`, \`appearance.inputProps\`, \`appearance.textareaProps\`, \`appearance.selectProps\`, \`appearance.hintProps\`, and \`appearance.errorProps\` let you push DOM attributes without losing the generated renderer
-- \`appearance.renderLabel\`, \`appearance.renderHint\`, \`appearance.renderError\`, and \`appearance.renderRequiredMark\` cover the cases where styling alone is not enough
-- Builder-level \`.appearance(...)\` is the default layer for field-owned UI metadata and styling`,
+- \`globalUi.form\` and \`globalUi.submit\` style the generated form wrapper and submit button
+- \`ui.classNames\` and \`ui.styles\` target built-in slots such as \`root\`, \`label\`, \`input\`, \`textarea\`, \`select\`, \`hint\`, \`error\`, \`checkboxRow\`, \`checkboxInput\`, \`checkboxLabel\`, \`switchRoot\`, \`switchTrack\`, \`switchThumb\`, \`otpContainer\`, and \`otpInput\`
+- \`ui.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
+- \`ui.rootProps\`, \`ui.labelProps\`, \`ui.hintProps\`, and \`ui.errorProps\` let you push DOM attributes without losing the generated renderer
+- \`ui.inputProps\` is available on text-like web fields, \`ui.textareaProps\` on textarea fields, and \`ui.selectProps\` on select fields
+- \`ui.renderLabel\`, \`ui.renderHint\`, \`ui.renderError\`, and \`ui.renderRequiredMark\` cover the cases where styling alone is not enough
+- Builder-level \`.behavior(...)\` stays focused on field-owned behavior metadata such as ids, autocomplete, or picker behavior rather than visual theme`,
         },
         {
           id: 'fb-web-ui-native-surface',
           title: 'Native styling surface',
           content: `On React Native, the same layering applies, but the override points stay React Native-friendly instead of DOM-specific.
 
-- Root-level \`style\` themes the field wrapper, while \`ui.form\` and \`ui.submit\` theme the form container and submit button
-- \`appearance.styles\` targets \`root\`, \`label\`, \`input\`, \`hint\`, \`error\`, and \`requiredMark\`
-- \`appearance.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
-- Renderer-specific extra keys are also supported in \`appearance.styles\`, which is especially useful for inputs such as checkboxes, async selectors, or modal option lists
-- \`appearance.rootProps\`, \`appearance.labelProps\`, \`appearance.inputProps\`, \`appearance.hintProps\`, and \`appearance.errorProps\` help with test IDs, accessibility, or integration with surrounding layout primitives
-- \`appearance.renderLabel\`, \`appearance.renderHint\`, \`appearance.renderError\`, and \`appearance.renderRequiredMark\` cover the cases where a simple style object is not enough
-- Builder-level \`.appearance(...)\` is the default layer for field-owned UI metadata and styling`,
+- Root-level \`style\` themes the field wrapper, while \`globalUi.form\` and \`globalUi.submit\` theme the form container and submit button
+- \`ui.styles\` targets \`root\`, \`label\`, \`input\`, \`hint\`, \`error\`, and \`requiredMark\`
+- \`ui.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
+- Renderer-specific extra keys are also supported in \`ui.styles\`, which is especially useful for inputs such as checkboxes, async selectors, or modal option lists
+- \`ui.rootProps\`, \`ui.labelProps\`, \`ui.inputProps\`, \`ui.hintProps\`, and \`ui.errorProps\` help with test IDs, accessibility, or integration with surrounding layout primitives
+- Native fields do not expose web-only props such as \`className\`, \`ui.textareaProps\`, or \`ui.selectProps\`
+- \`ui.renderLabel\`, \`ui.renderHint\`, \`ui.renderError\`, and \`ui.renderRequiredMark\` cover the cases where a simple style object is not enough
+- Builder-level \`.behavior(...)\` stays focused on field-owned behavior metadata such as keyboard hints, test IDs, or picker behavior rather than visual theme`,
         },
         {
           id: 'fb-web-ui-guidance',
           title: 'Use-case guide',
           content: `- Use \`ui\` when a whole route, modal, onboarding flow, or checkout screen should share one visual system
-- Use builder-level \`.appearance()\` when the styling belongs to the field definition and should follow the schema everywhere it is reused
-- Keep platform-specific differences inside the same \`appearance\` object or at the screen-level \`ui\` theme
-- Use local \`appearance\` props when one field needs a variant, a special helper text, or a different accent color on one screen
+- Use builder-level \`.behavior()\` when behavior metadata belongs to the field definition and should follow the schema everywhere it is reused
+- Keep platform-specific differences inside the same \`ui\` object or at the screen-level \`globalUi\` theme
+- Use local \`ui\` props when one field needs a variant, a special helper text, or a different accent color on one screen
 - Use the stable host recipe for \`styled-components\` and \`styled-components/native\`
 - Use \`className\` and \`classNames\` slot maps for Tailwind-style utility frameworks on web
-- Use \`style\`, \`appearance.styles\`, wrappers, or the stable host recipe for React Native styling systems such as StyleSheet, NativeWind-friendly wrappers, or in-house component kits
+- Use \`style\`, \`ui.styles\`, wrappers, or the stable host recipe for React Native styling systems such as StyleSheet, NativeWind-friendly wrappers, or in-house component kits
+- Let the field type guide the override point: \`inputProps\` for text-like fields, \`textareaProps\` for textareas, \`selectProps\` for selects
 - The API stays agnostic on purpose, so the same schema can power web and native without forcing the same styling stack on both platforms`,
         },
       ],
@@ -2609,6 +2654,8 @@ const form = useFormBridge({
       id: 'fb-infer',
       title: 'field.infer()',
       content: `\`field.infer(obj, overrides?)\` generates a complete form schema from an existing JavaScript object. It auto-detects field types based on key names and value types, so you can go from a plain object to a working form in one line.
+
+The same helper is also exported as \`inferFromObject(obj, overrides?)\` when you prefer a direct utility import.
 
 **How auto-detection works:**
 - **Key-based** — keys containing \`email\`, \`password\`, \`phone\`, \`url\`, \`bio\`, \`description\`, \`date\`, \`active\`, \`enabled\`, \`toggle\` etc. are mapped to their matching field type
@@ -2695,11 +2742,15 @@ function EditUserForm({ user }: { user: User }) {
     role:     { type: 'select', options: ['admin', 'user', 'viewer'] },
   })
 
-  const { Form, fields } = useFormBridge(schema, {
-    onSubmit: (values) => updateUser(user.id, values),
-  })
+  const { Form, fields } = useFormBridge(schema)
 
-  return <Form>{fields}</Form>
+  return (
+    <Form onSubmit={(values) => updateUser(user.id, values)}>
+      <fields.email />
+      <fields.role />
+      <Form.Submit>Save user</Form.Submit>
+    </Form>
+  )
 }`,
           },
         },
@@ -2716,6 +2767,8 @@ function EditUserForm({ user }: { user: User }) {
       id: 'fb-infer-type',
       title: 'field.inferType()',
       content: `\`field.inferType<T>(fields)\` generates a schema purely from a TypeScript type — no object instance needed. You describe each property with its configuration, and the schema is fully typed against \`T\`.
+
+The same helper is also exported as \`inferFromType<T>(fields)\` when you prefer a direct utility import.
 
 This is useful when:
 - You don't have an existing object to infer from (e.g. a creation form)
@@ -2787,18 +2840,19 @@ const schema = field.inferType<Settings>({
     },
     {
       id: 'fb-analytics',
-      title: 'useFormBridgeAnalytics()',
+      title: 'useFormAnalytics()',
       content: `Add analytics to a form without rewriting any field component.
 
 - Track focus, completion time, change counts, abandonment, errors, and successful completion
 - Keep callbacks metadata-oriented so analytics stays safe and privacy-conscious
-- Works best when paired with a stable getter for current values`,
+- Works best when paired with a stable getter for current values
+- For most forms, passing \`analytics\` directly to \`useFormBridge(schema, { analytics })\` is the simplest path; the standalone hook is the lower-level escape hatch`,
       codeTabs: [
         {
           filename: 'Analytics.web.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.analyticsWeb,
-          code: `import { field, useFormBridge, useFormBridgeAnalytics } from '@runilib/react-formbridge'
+          code: `import { field, useFormBridge, useFormAnalytics } from '@runilib/react-formbridge'
 
 const schema = {
   email: field.email('Email').required(),
@@ -2808,11 +2862,11 @@ const schema = {
 export function SignupWithAnalytics() {
   const { Form, fields, state } = useFormBridge(schema)
 
-  useFormBridgeAnalytics(
+  useFormAnalytics(
     {
       formId: 'signup',
       exclude: ['password'],
-      callbacks: {
+      handlers: {
         onFieldComplete: (name, ms) => analytics.track('field_complete', { name, ms }),
         onFormCompleted: (durationMs, submitCount, fieldCount) =>
           analytics.track('form_done', { durationMs, submitCount, fieldCount }),
@@ -2837,16 +2891,16 @@ export function SignupWithAnalytics() {
           lang: 'tsx',
           preview: DOC_PREVIEWS.analyticsNative,
           code: `import { ScrollView, View } from 'react-native'
-import { field, useFormBridge, useFormBridgeAnalytics } from '@runilib/react-formbridge'
+import { field, useFormBridge, useFormAnalytics } from '@runilib/react-formbridge'
 
 const schema = { phone: field.phone('Phone').required() }
 
 export function PhoneCapture() {
   const { Form, fields, state } = useFormBridge(schema)
 
-  useFormBridgeAnalytics(
+  useFormAnalytics(
     {
-      callbacks: {
+      handlers: {
         onFieldFocus: (name) => console.log('focus', name),
         onFieldChange: (name, count) => console.log('changes', name, count),
         onFormCompleted: (ms) => console.log('done in', ms),
@@ -3005,18 +3059,19 @@ export function CityPickerNative({ country }: { country: string }) {
     },
     {
       id: 'fb-dynamic',
-      title: 'useDynamicFormBridge()',
+      title: 'useDynamicForm()',
       content: `Turn a JSON form definition into a real formbridge runtime.
 
 - Useful for CMS-driven forms, experiments, back-office builders, or remote configuration
 - The hook parses the definition, preserves field order, and gives you a normal formbridge instance back
-- This helper is most compelling when the form shape changes outside the deployed frontend code`,
+- This helper is most compelling when the form shape changes outside the deployed frontend code
+- A very practical pattern is “one dynamic step per route” for cross-page wizards whose step definitions come from a backend`,
       codeTabs: [
         {
           filename: 'DynamicForm.web.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.dynamic,
-          code: `import { useDynamicFormBridge } from '@runilib/react-formbridge'
+          code: `import { useDynamicForm } from '@runilib/react-formbridge'
 
 const definition = {
   title: 'Feedback',
@@ -3028,7 +3083,7 @@ const definition = {
 }
 
 export function DynamicFeedback() {
-  const { form, fieldOrder, isLoading, loadError } = useDynamicFormBridge(definition, {
+  const { form, fieldOrder, isLoading, loadError } = useDynamicForm(definition, {
     validateOn: 'onSubmit',
     defaultValues: { fullName: 'Ava Stone' },
   })
@@ -3052,10 +3107,10 @@ export function DynamicFeedback() {
           lang: 'tsx',
           preview: DOC_PREVIEWS.dynamic,
           code: `import { ScrollView, View, Text } from 'react-native'
-import { useDynamicFormBridge } from '@runilib/react-formbridge'
+import { useDynamicForm } from '@runilib/react-formbridge'
 
 export function RemoteDynamic({ url }: { url: string }) {
-  const { form, fieldOrder, isLoading, loadError } = useDynamicFormBridge(
+  const { form, fieldOrder, isLoading, loadError } = useDynamicForm(
     async () => {
       const res = await fetch(url)
       return res.json()
@@ -3081,6 +3136,151 @@ export function RemoteDynamic({ url }: { url: string }) {
   )
 }`,
         },
+        {
+          filename: 'DynamicWizardStep.web.tsx',
+          lang: 'tsx',
+          preview: DOC_PREVIEWS.dynamic,
+          code: `import { useMemo } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useDynamicForm } from '@runilib/react-formbridge'
+
+const NEXT_STEP_BY_ID = {
+  personal: 'company',
+  company: 'review',
+} as const
+
+export function DynamicSignupStepRoute() {
+  const navigate = useNavigate()
+  const { stepId = 'personal' } = useParams<{ stepId?: string }>()
+
+  const loadDefinition = useMemo(
+    () => async () => {
+      const response = await fetch('/api/forms/signup/' + stepId)
+      if (!response.ok) throw new Error('Failed to load step definition')
+      return response.json()
+    },
+    [stepId],
+  )
+
+  const { form, fieldOrder, meta, isLoading, loadError } = useDynamicForm(
+    loadDefinition,
+    {
+      formKey: stepId,
+      validateOn: 'onBlur',
+      persist: {
+        key: 'signup-step:' + stepId,
+        storage: 'local',
+      },
+    },
+  )
+
+  if (!form) {
+    return isLoading ? <p>Loading…</p> : <p>Error: {loadError}</p>
+  }
+
+  const nextStepId = NEXT_STEP_BY_ID[stepId as keyof typeof NEXT_STEP_BY_ID]
+  const { Form, fields } = form
+
+  return (
+    <Form
+      onSubmit={async (values) => {
+        await api.saveStep(stepId, values)
+
+        if (nextStepId) navigate('/signup/' + nextStepId)
+        else navigate('/signup/review')
+      }}
+    >
+      <h1>{meta.title ?? 'Signup'}</h1>
+
+      {fieldOrder.map((name) => {
+        const Field = fields[name]
+        return <Field key={name} />
+      })}
+
+      <Form.Submit>
+        {meta.submitLabel ?? (nextStepId ? 'Continue' : 'Finish')}
+      </Form.Submit>
+    </Form>
+  )
+}`,
+        },
+        {
+          filename: 'DynamicWizardStep.native.tsx',
+          lang: 'tsx',
+          preview: DOC_PREVIEWS.dynamic,
+          code: `import { ScrollView, Text, View } from 'react-native'
+import { useMemo } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useDynamicForm } from '@runilib/react-formbridge'
+
+const NEXT_STEP_BY_ID = {
+  personal: 'company',
+  company: 'review',
+} as const
+
+export function DynamicSignupStepScreen() {
+  const router = useRouter()
+  const { stepId = 'personal' } = useLocalSearchParams<{ stepId?: string }>()
+
+  const loadDefinition = useMemo(
+    () => async () => {
+      const response = await fetch('https://api.example.com/forms/signup/' + stepId)
+      if (!response.ok) throw new Error('Failed to load step definition')
+      return response.json()
+    },
+    [stepId],
+  )
+
+  const { form, fieldOrder, meta, isLoading, loadError } = useDynamicForm(
+    loadDefinition,
+    {
+      formKey: stepId,
+      validateOn: 'onBlur',
+      persist: {
+        key: 'signup-step:' + stepId,
+        storage: 'async',
+      },
+    },
+  )
+
+  if (!form) {
+    return (
+      <View>
+        <Text>{isLoading ? 'Loading…' : loadError}</Text>
+      </View>
+    )
+  }
+
+  const nextStepId = NEXT_STEP_BY_ID[stepId as keyof typeof NEXT_STEP_BY_ID]
+  const { Form, fields } = form
+
+  return (
+    <ScrollView>
+      <Form
+        onSubmit={async (values) => {
+          await api.saveStep(stepId, values)
+
+          if (nextStepId) router.replace('/signup/' + nextStepId)
+          else router.replace('/signup/review')
+        }}
+      >
+        <View style={{ gap: 12, padding: 16 }}>
+          <Text>{meta.title ?? 'Signup'}</Text>
+
+          {fieldOrder.map((name) => {
+            const Field = fields[name]
+            return <Field key={name} />
+          })}
+
+          <Form.Submit>
+            {meta.submitLabel ?? (nextStepId ? 'Continue' : 'Finish')}
+          </Form.Submit>
+        </View>
+      </Form>
+    </ScrollView>
+  )
+}`,
+        },
       ],
       subsections: [
         {
@@ -3089,6 +3289,18 @@ export function RemoteDynamic({ url }: { url: string }) {
           content: `- First argument: a JSON form definition object or an async loader returning one
 - Second argument: the normal \`useFormBridge()\` options plus \`defaultValues\`
 - Because the returned \`form\` is a standard bridge instance, submit/error handlers still live on \`<Form>\``,
+        },
+        {
+          id: 'fb-dynamic-wizard',
+          title: 'Cross-page / cross-screen wizard pattern',
+          content: `Use \`useDynamicForm()\` for cross-page or cross-screen wizards when the backend already decides the fields for each step and the router or navigator already decides which page is active.
+
+- Put the route param in the dynamic loader so each page fetches only its own step definition
+- On native, treat the screen param the same way and fetch one step definition per screen
+- Set \`formKey: stepId\` so the form runtime resets cleanly when the route changes
+- Include the step id in \`persist.key\` to avoid draft collisions between pages
+- Submit the current step to your API, then let the router navigate to the next page
+- This pattern is ideal when the server owns the canonical onboarding session or partial payload`,
         },
         {
           id: 'fb-dynamic-return',
@@ -3103,24 +3315,29 @@ export function RemoteDynamic({ url }: { url: string }) {
         {
           id: 'fb-dynamic-notes',
           title: 'Platform note',
-          content: `Dynamic forms are easiest to adopt in web dashboards first. If you target native too, validate the exact field set and renderer combination you plan to ship, because dynamic helpers tend to surface edge cases later than static schemas.`,
+          content: `Dynamic forms are easiest to adopt in web dashboards first. If you target native too, validate the exact field set and renderer combination you plan to ship, because dynamic helpers tend to surface edge cases later than static schemas.
+
+- \`useDynamicForm()\` is excellent for one dynamic step per route
+- If you also want a client-owned wizard state machine with \`progress\`, \`completedSteps\`, \`allValues\`, \`goToStep()\`, and route-driven restoration, prefer \`useFormWizard({ stepId, onStepChange })\` once the step schemas are known in the client`,
         },
       ],
     },
     {
       id: 'fb-wizard',
-      title: 'useFormWizardBridge()',
+      title: 'useFormWizard()',
       content: `Compose multiple formbridge schemas into a step-by-step flow.
 
 - Each step owns its own schema
 - Values are accumulated across steps automatically
-- The hook gives you navigation, progress, skip, and final submission helpers without introducing a separate mental model`,
+- The hook gives you navigation, progress, skip, and final submission helpers without introducing a separate mental model
+- Pass \`stepId\` + \`onStepChange\` to let a router or native navigator own cross-page / cross-screen navigation while the wizard keeps the state machine`,
       codeTabs: [
         {
           filename: 'Wizard.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.wizard,
-          code: `import { field, useFormWizardBridge } from '@runilib/react-formbridge'
+          code: `import type { FormSchema } from '@runilib/react-formbridge'
+import { field, useFormWizard } from '@runilib/react-formbridge'
 
 const steps = [
   {
@@ -3129,7 +3346,7 @@ const steps = [
     schema: {
       email: field.email('Email').required(),
       password: field.password('Password').required(),
-    },
+    } satisfies FormSchema,
   },
   {
     id: 'profile',
@@ -3137,19 +3354,19 @@ const steps = [
     schema: {
       firstName: field.text('First name').required(),
       country: field.select('Country').options(['FR','US','GB']).required(),
-    },
+    } satisfies FormSchema,
     condition: (values) => values.email?.endsWith('@company.com'),
     optional: true,
   },
   {
     id: 'review',
     label: 'Review',
-    schema: {},
+    schema: {} satisfies FormSchema,
   },
 ]
 
 export function SignupWizard() {
-  const wizard = useFormWizardBridge(steps, {
+  const wizard = useFormWizard(steps, {
     persist: { key: 'signup-wizard' },
     onSubmit: (allValues) => api.save(allValues),
   })
@@ -3174,6 +3391,69 @@ export function SignupWizard() {
   )
 }`,
         },
+        {
+          filename: 'WizardRoute.web.tsx',
+          lang: 'tsx',
+          preview: DOC_PREVIEWS.wizard,
+          code: `import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import type { FormSchema } from '@runilib/react-formbridge'
+import { field, useFormWizard } from '@runilib/react-formbridge'
+
+const steps = [
+  {
+    id: 'account',
+    label: 'Account',
+    schema: {
+      email: field.email('Email').required(),
+      password: field.password('Password').required(),
+    } satisfies FormSchema,
+  },
+  {
+    id: 'company',
+    label: 'Company',
+    schema: {
+      companyName: field.text('Company name').required(),
+    } satisfies FormSchema,
+  },
+  { id: 'review', label: 'Review', schema: {} satisfies FormSchema },
+]
+
+export function SignupWizardRoute() {
+  const navigate = useNavigate()
+  const { stepId } = useParams()
+
+  const wizard = useFormWizard(steps, {
+    stepId,
+    initialStepId: 'account',
+    persist: { key: 'signup-wizard', storage: 'local' },
+    onStepChange: ({ step }) => navigate('/signup/' + step.id),
+    onSubmit: (allValues) => api.save(allValues),
+  })
+
+  useEffect(() => {
+    if (!wizard.isHydrating && wizard.currentStepId && stepId !== wizard.currentStepId) {
+      navigate('/signup/' + wizard.currentStepId, { replace: true })
+    }
+  }, [navigate, stepId, wizard.currentStepId, wizard.isHydrating])
+
+  if (wizard.isHydrating || !wizard.step) return null
+
+  const { Form, fields } = wizard.currentStep
+
+  return (
+    <Form onSubmit={async () => {
+      if (wizard.isLastStep) await wizard.submit()
+      else await wizard.next()
+    }}>
+      {'email' in fields && <fields.email />}
+      {'password' in fields && <fields.password />}
+      {'companyName' in fields && <fields.companyName />}
+      <Form.Submit>{wizard.isLastStep ? 'Finish' : 'Next'}</Form.Submit>
+    </Form>
+  )
+}`,
+        },
       ],
       subsections: [
         {
@@ -3181,7 +3461,7 @@ export function SignupWizard() {
           title: 'Step shape',
           content: `- id: string (required)
 - label: string
-- schema: FormSchema for the step
+- schema: FormSchema for the step, preferably declared inline with \`satisfies FormSchema\` to preserve exact generated field typing
 - optional?: boolean (enables skip())
 - condition?(allValues): boolean to include step
 - formOptions?: partial UseFormOptions per step`,
@@ -3191,27 +3471,34 @@ export function SignupWizard() {
           title: 'Options',
           content: `- onSubmit(allValues) is required
 - onSubmitError?(error) lets you map thrown submit errors to a user-facing message
-- persist: { key, storage?, ttl?, debounce?, exclude?, version? } is applied per step under a derived key
-- validateOn and revalidateOn define the defaults for each step unless a step overrides them with formOptions`,
+- persist: { key, storage?, ttl?, debounce?, exclude?, version? } is applied per step under a derived key and also stores the wizard snapshot (current step id + merged values)
+- validateOn and revalidateOn define the defaults for each step unless a step overrides them with formOptions
+- initialStepId? defines the first step in uncontrolled mode
+- stepId? turns the wizard into a controlled flow so a route param or navigation state can drive the active step
+- onStepChange?(event) is the bridge to router.push, router.replace, navigate, or any other navigation layer`,
         },
         {
           id: 'fb-wizard-return',
           title: 'Return',
           content: `- step: current step meta or null
 - currentStep: UseFormBridge return for step
-- currentStepIndex, totalSteps
+- currentStepId, currentStepIndex, totalSteps
 - visibleSteps, allSteps, completedSteps
 - progress: percent of visibleSteps completed
 - isFirstStep, isLastStep
-- next(), prev(), goTo(index, skipValidation?), skip()
+- next(), prev(), goTo(index, skipValidation?), goToStep(stepId, skipValidation?), skip()
 - submit(): runs final submit
 - allValues: accumulated across steps
-- isSubmitting, isSuccess, submitError`,
+- isSubmitting, isSuccess, submitError
+- isHydrating: true while persisted wizard state is being restored before the active step mounts`,
         },
         {
           id: 'fb-wizard-notes',
           title: 'Why it matters',
-          content: `Use the wizard hook when one large form would feel heavy or fragile. It keeps the same schema-first API while making multi-step onboarding, checkout, or settings flows much easier to maintain.`,
+          content: `Use the wizard hook when one large form would feel heavy or fragile. It keeps the same schema-first API while making multi-step onboarding, checkout, or settings flows much easier to maintain.
+
+- Same-page usage still works great for classic steppers
+- Controlled mode lets the same hook power route-based web flows and screen-based native flows without rewriting validation or persistence`,
         },
       ],
     },

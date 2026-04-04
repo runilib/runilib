@@ -134,7 +134,7 @@ const OptionPicker = ({
 
 export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => {
   const native = d._ui ?? {};
-  const ui = extra?.appearance;
+  const ui = extra?.ui;
   const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
@@ -242,18 +242,10 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
           borderColor: defaultBorderColor(hasError, highlightOnError),
           backgroundColor: p.disabled ? '#f9fafb' : '#fff',
         },
-        native.inputStyle,
         ui?.styles?.input,
         inputPropsStyle,
       ),
-    [
-      hasError,
-      highlightOnError,
-      inputPropsStyle,
-      native.inputStyle,
-      p.disabled,
-      ui?.styles?.input,
-    ],
+    [hasError, highlightOnError, inputPropsStyle, p.disabled, ui?.styles?.input],
   );
 
   const renderLabel = () => {
@@ -273,7 +265,7 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
 
     return (
       <Text
-        style={sx(styles.label, native.labelStyle, ui?.styles?.label, labelPropsStyle)}
+        style={sx(styles.label, ui?.styles?.label, labelPropsStyle)}
         {...labelPropsRest}
       >
         {p.label}
@@ -287,12 +279,7 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
       return (
         ui?.renderError?.({ id: `${id}-error`, error: p.error }) ?? (
           <Text
-            style={sx(
-              styles.error,
-              native.errorStyle,
-              ui?.styles?.error,
-              errorPropsStyle,
-            )}
+            style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
             {...errorPropsRest}
           >
             {p.error}
@@ -305,7 +292,7 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
       return (
         ui?.renderHint?.({ id: `${id}-hint`, hint: p.hint }) ?? (
           <Text
-            style={sx(styles.hint, native.hintStyle, ui?.styles?.hint, hintPropsStyle)}
+            style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
             {...hintPropsRest}
           >
             {p.hint}
@@ -540,7 +527,6 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
       style={sx(
         styles.root,
         extra?.style as StyleProp<ViewStyle>,
-        native.rootStyle,
         ui?.styles?.root,
         rootPropsStyle,
       )}

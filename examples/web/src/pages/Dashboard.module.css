@@ -74,8 +74,8 @@
   color: var(--text);
 }
 .navActive {
-  background: rgba(240, 165, 0, 0.1) !important;
-  color: var(--accent) !important;
+  background: rgba(240, 165, 0, 0.1);
+  color: var(--accent);
 }
 
 .projectDot {
@@ -241,9 +241,9 @@
   color: var(--text);
 }
 .filterActive {
-  background: var(--surface2) !important;
-  color: var(--text) !important;
-  border-color: var(--border2) !important;
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border2);
 }
 
 .taskList {
@@ -304,7 +304,7 @@
   color: var(--muted2);
 }
 .metaToday {
-  color: var(--accent3) !important;
+  color: var(--accent3);
   font-weight: 500;
 }
 

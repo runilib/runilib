@@ -22,7 +22,7 @@ export function StyleSheetStylingExample() {
         .required('Owner email is required')
         .trim()
         .placeholder('owner@runilib.dev')
-        .appearance({
+        .behavior({
           autoComplete: 'email',
           keyboardType: 'email-address',
         }),
@@ -41,7 +41,7 @@ export function StyleSheetStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalAppearance: createNativeFormUi(),
+    globalUi: createNativeFormUi(),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -96,7 +96,7 @@ export function StyleSheetStylingExample() {
           </View>
 
           <fields.department
-            appearance={{
+            ui={{
               styles: {
                 optionTrigger: {
                   borderColor: '#f5bf67',

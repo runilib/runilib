@@ -6,4 +6,3 @@ export const DOCS: Record<string, LibraryDoc> = {
   formbridge: formbridgeDocs,
   walkit: reactWalkitDocs,
 };
-

@@ -33,7 +33,7 @@ export function SlotOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalAppearance: {
+    globalUi: {
       form: {
         style: {
           display: 'flex',
@@ -54,7 +54,7 @@ export function SlotOverridesStylingExample() {
         },
       },
       field: {
-        appearance: {
+        ui: {
           styles: {
             root: {
               marginBottom: 0,
@@ -103,7 +103,7 @@ export function SlotOverridesStylingExample() {
       recipeName="Slot overrides"
       accent="#f59e0b"
       title="Style everything with plain objects and slot hooks"
-      description="No CSS framework required here. The whole look comes from ui.field.appearance and a couple of local field appearances."
+      description="No CSS framework required here. The whole look comes from ui.field.ui and a couple of local field ui overrides."
       highlights={['inline objects', 'custom required mark', 'field-level tweaks']}
       preview={
         <>
@@ -132,7 +132,7 @@ export function SlotOverridesStylingExample() {
       >
         <div className={styles.formRow}>
           <fields.receiptEmail
-            appearance={{
+            ui={{
               highlightOnError: false,
               renderHint: () => (
                 <span style={{ color: '#cbd5e1', fontSize: 12 }}>
@@ -142,7 +142,7 @@ export function SlotOverridesStylingExample() {
             }}
           />
           <fields.postalCode
-            appearance={{
+            ui={{
               styles: {
                 input: {
                   textAlign: 'center',

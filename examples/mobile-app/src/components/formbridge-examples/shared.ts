@@ -1,5 +1,4 @@
 import type {
-  ExtraFieldProps,
   FormBridgeUiOptions,
   OptionsFetcherContext,
   SelectOption,
@@ -92,7 +91,7 @@ export async function searchCityDirectory({
 
 export function createNativeFieldProps() {
   return {
-    appearance: {
+    ui: {
       styles: {
         root: s.fieldRoot,
         label: s.fieldLabel,
@@ -109,17 +108,13 @@ export function createNativeFieldProps() {
         modalCard: s.optionModalCard,
       },
     },
-  } as ExtraFieldProps & {
-    appearance: {
-      styles: Record<string, unknown>;
-    };
   };
 }
 
 export function createNativeFormUi(): FormBridgeUiOptions {
   return {
     field: {
-      appearance: {
+      ui: {
         styles: {
           root: s.fieldRoot,
           label: s.fieldLabel,

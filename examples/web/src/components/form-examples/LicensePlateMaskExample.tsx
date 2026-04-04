@@ -4,21 +4,18 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';
-import { createDemoFieldAppearance, simulateSubmitDelay } from './shared';
+import { createDemoFieldUi, createDemoFormUi, simulateSubmitDelay } from './shared';
 
 export function LicensePlateMaskExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
+  const { compactFieldUi } = createDemoFieldUi(styles);
 
-  const formSchema = useMemo(() => {
-    const { baseFieldAppearance, compactFieldAppearance } =
-      createDemoFieldAppearance(styles);
-
-    return {
+  const formSchema = useMemo(
+    () => ({
       vehicleName: field
         .text('Vehicle label')
         .required('Vehicle label is required')
-        .placeholder('North district van')
-        .appearance(baseFieldAppearance),
+        .placeholder('North district van'),
       licensePlate: field
         .masked('License plate', 'LL-999-LL')
         .tokens({
@@ -27,14 +24,15 @@ export function LicensePlateMaskExample() {
         .required('License plate is required')
         .showMaskInPlaceholder()
         .uppercase()
-        .validateComplete('Complete the license plate.')
-        .appearance(compactFieldAppearance),
-    };
-  }, []);
+        .validateComplete('Complete the license plate.'),
+    }),
+    [],
+  );
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
+    globalUi: createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -80,7 +78,7 @@ export function LicensePlateMaskExample() {
       >
         <div className={styles.formRow}>
           <fields.vehicleName />
-          <fields.licensePlate />
+          <fields.licensePlate ui={compactFieldUi} />
         </div>
 
         <div className={styles.footerRow}>

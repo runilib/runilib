@@ -1,35 +1,30 @@
 import type { ColorValue, ImageStyle, StyleProp } from 'react-native';
 
-import type {
-  ExtraFieldProps,
-  NativeFieldUiOverrides,
-  NativeStyleValue,
-} from '../../types';
+import type { ExtraFieldProps, NativeFieldUiOverrides } from '../../types';
 
 export type NativeExtraProps<TNative = NativeFieldUiOverrides> = Omit<
   ExtraFieldProps,
-  'appearance'
+  'ui'
 > & {
-  appearance?: TNative;
+  ui?: TNative;
 };
 
 export type NativeBaseUiOverrides = NativeFieldUiOverrides;
 
-export type ResolvedNativeFieldUi = NativeFieldUiOverrides & {
-  id?: string;
-  testID?: string;
-  readOnly?: boolean;
-  autoComplete?: string;
-  autoFocus?: boolean;
-  keyboardType?: string;
-  secureTextEntry?: boolean;
-  rootStyle?: NativeStyleValue;
-  labelStyle?: NativeStyleValue;
-  inputStyle?: NativeStyleValue;
-  hintStyle?: NativeStyleValue;
-  errorStyle?: NativeStyleValue;
-};
+export type ResolvedNativeFieldUi = Pick<
+  NativeFieldUiOverrides,
+  | 'id'
+  | 'testID'
+  | 'readOnly'
+  | 'autoComplete'
+  | 'autoFocus'
+  | 'keyboardType'
+  | 'secureTextEntry'
+  | 'highlightOnError'
+  | 'renderPicker'
+>;
 
+// biome-ignore lint/suspicious/noExplicitAny: React Native style props mix registered numeric styles with view/text/image objects, so this helper needs a permissive bridge type.
 export function sx(...styles: Array<StyleProp<any> | undefined | null | false>) {
   return styles.filter(Boolean);
 }

@@ -1,0 +1,38 @@
+name: Setup Monorepo
+description: Enable Corepack, install Node.js, restore Turbo cache, and install dependencies.
+
+inputs:
+  node-version:
+    description: Node.js version to use.
+    required: false
+    default: '20'
+  install:
+    description: Whether to run yarn install --immutable.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: yarn
+
+    - name: Restore Turbo cache
+      uses: actions/cache@v4
+      with:
+        path: .turbo
+        key: ${{ runner.os }}-turbo-${{ hashFiles('turbo.jsonc', 'package.json', 'yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-
+
+    - name: Install dependencies
+      if: ${{ inputs.install == 'true' }}
+      shell: bash
+      run: yarn install --immutable

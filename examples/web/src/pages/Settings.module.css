@@ -49,8 +49,8 @@
   color: var(--text);
 }
 .navActive {
-  background: rgba(240, 165, 0, 0.1) !important;
-  color: var(--accent) !important;
+  background: rgba(240, 165, 0, 0.1);
+  color: var(--accent);
 }
 .main {
   flex: 1;
@@ -94,8 +94,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-.section {
 }
 .sectionTitle {
   font-family: var(--font-head);

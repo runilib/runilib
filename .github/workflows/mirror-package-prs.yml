@@ -1,0 +1,269 @@
+name: Mirror Package PRs
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+      - converted_to_draft
+      - closed
+    branches:
+      - main
+    paths:
+      - 'packages/**'
+      - '.github/mirror-packages.json'
+      - '.github/workflows/mirror-package-prs.yml'
+
+concurrency:
+  group: mirror-package-prs-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Prepare Mirror PR Matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_packages: ${{ steps.matrix.outputs.has_packages }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build mirror matrix
+        id: matrix
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          config_file=".github/mirror-packages.json"
+          empty_matrix='{"include":[]}'
+
+          if [ ! -f "$config_file" ]; then
+            echo "matrix=${empty_matrix}" >> "$GITHUB_OUTPUT"
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch origin "pull/${PR_NUMBER}/head:mirror-pr-head"
+
+          changed_json="$(git diff --name-only "$BASE_SHA" mirror-pr-head | jq -R -s 'split("\n") | map(select(length > 0))')"
+
+          if echo "$changed_json" | jq -e '
+            any(.[]; . == ".github/mirror-packages.json" or . == ".github/workflows/mirror-package-prs.yml")
+          ' > /dev/null; then
+            matrix="$(jq -c '{include: .packages}' "$config_file")"
+          else
+            matrix="$(jq -c --argjson changed "$changed_json" '
+              {
+                include: [
+                  .packages[] as $pkg
+                  | select(any($changed[]; . == $pkg.package_path or startswith($pkg.package_path + "/")))
+                  | $pkg
+                ]
+              }
+            ' "$config_file")"
+          fi
+
+          if [ "$(echo "$matrix" | jq '.include | length')" -gt 0 ]; then
+            echo "has_packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  mirror-open-update:
+    name: Mirror PR for ${{ matrix.workspace }}
+    needs: prepare
+    if: needs.prepare.outputs.has_packages == 'true' && github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        env:
+          SECRET_GIT_USER_NAME: ${{ secrets.MIRROR_GIT_USER_NAME }}
+          SECRET_GIT_USER_EMAIL: ${{ secrets.MIRROR_GIT_USER_EMAIL }}
+        run: |
+          git config user.name "${SECRET_GIT_USER_NAME:-runilib-bot}"
+          git config user.email "${SECRET_GIT_USER_EMAIL:-bot@runilib.dev}"
+
+      - name: Create subtree branch from source PR
+        id: subtree
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PACKAGE_PATH: ${{ matrix.package_path }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin "pull/${PR_NUMBER}/head:mirror-pr-head"
+
+          if ! git cat-file -e "mirror-pr-head:${PACKAGE_PATH}" 2>/dev/null; then
+            echo "Package path ${PACKAGE_PATH} does not exist in PR head. Skipping."
+            echo "has_branch=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git subtree split --prefix="${PACKAGE_PATH}" mirror-pr-head -b mirror-pr-branch
+          echo "has_branch=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push subtree branch to mirror repository
+        if: steps.subtree.outputs.has_branch == 'true'
+        env:
+          TARGET_REPO: ${{ matrix.target_repo }}
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git push mirror mirror-pr-branch:"mirror/pr-${PR_NUMBER}" --force
+
+      - name: Create or update mirror pull request
+        if: steps.subtree.outputs.has_branch == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+          TARGET_REPO: ${{ matrix.target_repo }}
+          TARGET_BRANCH: ${{ matrix.target_branch }}
+          PACKAGE_PATH: ${{ matrix.package_path }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_PR_URL: ${{ github.event.pull_request.html_url }}
+          SOURCE_PR_TITLE: ${{ github.event.pull_request.title }}
+          SOURCE_PR_BODY: ${{ github.event.pull_request.body }}
+          SOURCE_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          mirror_branch="mirror/pr-${PR_NUMBER}"
+          title="[Mirror] ${SOURCE_PR_TITLE} (#${PR_NUMBER})"
+          body="$(cat <<EOF
+          This draft pull request is automatically mirrored from the monorepo so users of this standalone package repository can see that work is in progress.
+
+          Source of truth:
+          - Monorepo PR: ${SOURCE_PR_URL}
+          - Monorepo repo: ${SOURCE_REPO}
+          - Package path: \`${PACKAGE_PATH}\`
+
+          Important:
+          - Do not open parallel code changes directly from this mirrored PR.
+          - Do not rely on this repository as the source of truth while the monorepo PR is open.
+          - This draft PR is updated automatically while the monorepo PR changes.
+          EOF
+          )"
+
+          existing_number="$(gh pr list \
+            --repo "$TARGET_REPO" \
+            --state open \
+            --head "$mirror_branch" \
+            --base "$TARGET_BRANCH" \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [ -n "$existing_number" ]; then
+            gh pr edit "$existing_number" \
+              --repo "$TARGET_REPO" \
+              --title "$title" \
+              --body "$body"
+          else
+            gh pr create \
+              --repo "$TARGET_REPO" \
+              --base "$TARGET_BRANCH" \
+              --head "$mirror_branch" \
+              --title "$title" \
+              --body "$body" \
+              --draft
+          fi
+
+      - name: Cleanup local branches
+        if: always()
+        run: |
+          git branch -D mirror-pr-branch || true
+          git branch -D mirror-pr-head || true
+
+  mirror-close:
+    name: Close mirror PR for ${{ matrix.workspace }}
+    needs: prepare
+    if: needs.prepare.outputs.has_packages == 'true' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        env:
+          SECRET_GIT_USER_NAME: ${{ secrets.MIRROR_GIT_USER_NAME }}
+          SECRET_GIT_USER_EMAIL: ${{ secrets.MIRROR_GIT_USER_EMAIL }}
+        run: |
+          git config user.name "${SECRET_GIT_USER_NAME:-runilib-bot}"
+          git config user.email "${SECRET_GIT_USER_EMAIL:-bot@runilib.dev}"
+
+      - name: Close mirror pull request
+        env:
+          GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+          TARGET_REPO: ${{ matrix.target_repo }}
+          TARGET_BRANCH: ${{ matrix.target_branch }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          set -euo pipefail
+
+          mirror_branch="mirror/pr-${PR_NUMBER}"
+
+          existing_number="$(gh pr list \
+            --repo "$TARGET_REPO" \
+            --state open \
+            --head "$mirror_branch" \
+            --base "$TARGET_BRANCH" \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [ -n "$existing_number" ]; then
+            if [ "$PR_MERGED" = "true" ]; then
+              note="Closing because the source monorepo PR was merged: ${SOURCE_PR_URL}. The normal mirror-to-main workflow will sync the standalone repository branch."
+            else
+              note="Closing because the source monorepo PR was closed: ${SOURCE_PR_URL}."
+            fi
+
+            gh pr close "$existing_number" \
+              --repo "$TARGET_REPO" \
+              --comment "$note"
+          fi
+
+      - name: Delete mirror branch from target repository
+        env:
+          TARGET_REPO: ${{ matrix.target_repo }}
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git push mirror --delete "mirror/pr-${PR_NUMBER}" || true

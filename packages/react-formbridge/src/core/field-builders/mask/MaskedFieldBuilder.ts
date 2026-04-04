@@ -6,7 +6,7 @@ import {
 } from './masks';
 import type { MaskedDescriptor, MaskedFieldMeta, MaskTokenMap } from './types';
 
-export class MaskedFieldBuilder extends StringFieldBuilder {
+export class MaskedFieldBuilder extends StringFieldBuilder<'text'> {
   private readonly _meta: MaskedFieldMeta;
 
   constructor(label: string, patternInput: MaskPatternInput) {

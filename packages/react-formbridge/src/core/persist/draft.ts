@@ -21,7 +21,7 @@ interface DraftEnvelope {
   version: string;
 }
 
-const PREFIX = 'formura:';
+const PREFIX = 'react-formbridge:';
 
 export class DraftManager {
   private readonly adapter: StorageAdapter;

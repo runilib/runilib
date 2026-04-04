@@ -1,0 +1,36 @@
+{
+  "_comment": "All numeric budget values in this file are raw bytes.",
+  "_comment_metrics": {
+    "publishedTarballSize": "Bytes of the final npm .tgz archive produced by `npm pack --dry-run`. This is the compressed download size from the registry.",
+    "publishedUnpackedSize": "Bytes of the package contents once the npm tarball is extracted.",
+    "publishedWebRuntimeSize": "Bytes of the published web runtime entry file itself, before gzip/brotli compression.",
+    "publishedNativeRuntimeSize": "Bytes of the published react-native runtime entry file itself, before gzip/brotli compression.",
+    "localWebRuntimeGzip": "Bytes of the local `dist/index.mjs` runtime file after gzip compression.",
+    "localNativeRuntimeGzip": "Bytes of the local `dist/index.native.mjs` runtime file after gzip compression.",
+    "localWebRuntimeBrotli": "Bytes of the local `dist/index.mjs` runtime file after brotli compression.",
+    "localNativeRuntimeBrotli": "Bytes of the local `dist/index.native.mjs` runtime file after brotli compression."
+  },
+  "mode": {
+    "stripPublishedSourcemaps": true
+  },
+  "packages": {
+    "@runilib/react-walkit": {
+      "_comment": "Package-specific thresholds, still expressed in raw bytes.",
+      "_comment_publishedTarballSize": "50000 bytes ~= 48.8 KiB (~50 kB). npm compressed download size.",
+      "publishedTarballSize": 50000,
+      "_comment_localWebRuntimeGzip": "20000 bytes ~= 19.5 KiB (~20 kB). gzip size of local dist/index.mjs.",
+      "localWebRuntimeGzip": 20000,
+      "_comment_localNativeRuntimeGzip": "18000 bytes ~= 17.6 KiB (~18 kB). gzip size of local dist/index.native.mjs.",
+      "localNativeRuntimeGzip": 18000
+    },
+    "@runilib/react-formbridge": {
+      "_comment": "Package-specific thresholds, still expressed in raw bytes.",
+      "_comment_publishedTarballSize": "180000 bytes ~= 175.8 KiB (~180 kB). npm compressed download size.",
+      "publishedTarballSize": 180000,
+      "_comment_localWebRuntimeGzip": "70000 bytes ~= 68.4 KiB (~70 kB). gzip size of local dist/index.mjs.",
+      "localWebRuntimeGzip": 70000,
+      "_comment_localNativeRuntimeGzip": "60000 bytes ~= 58.6 KiB (~60 kB). gzip size of local dist/index.native.mjs.",
+      "localNativeRuntimeGzip": 60000
+    }
+  }
+}

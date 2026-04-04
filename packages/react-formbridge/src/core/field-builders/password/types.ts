@@ -55,4 +55,6 @@ export interface StrengthRuleConfig {
   test: (password: string) => boolean;
   /** Points awarded when this rule passes (default: 1) */
   weight?: number;
+  /** Whether this rule must pass for the password to be acceptable */
+  required?: boolean;
 }

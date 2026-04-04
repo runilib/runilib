@@ -56,7 +56,7 @@ export function CustomerCheckoutExample() {
   const customerForm = useFormBridge(customerSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalAppearance: createNativeFormUi(),
+    globalUi: createNativeFormUi(),
     persist: {
       key: 'mobile-customer-checkout',
       storage: 'local',
@@ -153,7 +153,7 @@ export function CustomerCheckoutExample() {
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Payment</Text>
           <fields.cardNumber
-            appearance={{
+            ui={{
               styles: {
                 input: {
                   letterSpacing: 1.8,
@@ -188,6 +188,7 @@ export function CustomerCheckoutExample() {
         <Form.Submit
           style={s.submitButton}
           loadingText="Saving customer..."
+          disabled
         >
           Save customer
         </Form.Submit>

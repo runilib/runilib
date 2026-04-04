@@ -1,7 +1,7 @@
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 // ─── Number field builder ────────────────────────────────────────────────────
-export class NumberFieldBuilder extends BaseFieldBuilder<number> {
+export class NumberFieldBuilder extends BaseFieldBuilder<number, 'number'> {
   constructor(label: string) {
     super('number', label, 0);
   }

@@ -37,7 +37,7 @@ function getMaskKeyboardType(pattern: string): TextInputProps['keyboardType'] {
 
 export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => {
   const pendingSelectionRef = useRef<{ start: number; end: number } | null>(null);
-  const ui = extra?.appearance;
+  const ui = extra?.ui;
   const highlightOnError = shouldHighlightOnError(
     ui?.highlightOnError,
     d._ui?.highlightOnError,

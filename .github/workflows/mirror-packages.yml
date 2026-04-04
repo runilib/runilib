@@ -1,0 +1,120 @@
+name: Mirror Packages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/**'
+      - '.github/mirror-packages.json'
+      - '.github/workflows/mirror-package.yml'
+      - '.github/workflows/mirror-packages.yml'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Workspace name, package path, target repo, or `all`.
+        required: false
+        default: all
+        type: string
+
+concurrency:
+  group: mirror-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Prepare Mirror Matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_packages: ${{ steps.matrix.outputs.has_packages }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build mirror matrix
+        id: matrix
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+          PACKAGE_FILTER: ${{ github.event_name == 'workflow_dispatch' && inputs.package || '' }}
+        run: |
+          set -euo pipefail
+
+          config_file=".github/mirror-packages.json"
+          empty_matrix='{"include":[]}'
+
+          if [ ! -f "$config_file" ]; then
+            echo "matrix=${empty_matrix}" >> "$GITHUB_OUTPUT"
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -n "$PACKAGE_FILTER" ] && [ "$PACKAGE_FILTER" != "all" ]; then
+            matrix="$(jq -c --arg filter "$PACKAGE_FILTER" '
+              {
+                include: [
+                  .packages[]
+                  | select(
+                      .workspace == $filter
+                      or .package_path == $filter
+                      or .target_repo == $filter
+                    )
+                ]
+              }
+            ' "$config_file")"
+          elif [ "$PACKAGE_FILTER" = "all" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            matrix="$(jq -c '{include: .packages}' "$config_file")"
+          elif [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            matrix="$(jq -c '{include: .packages}' "$config_file")"
+          else
+            changed_json="$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA" | jq -R -s 'split("\n") | map(select(length > 0))')"
+
+            if echo "$changed_json" | jq -e '
+              any(.[]; . == ".github/mirror-packages.json" or . == ".github/workflows/mirror-package.yml" or . == ".github/workflows/mirror-packages.yml")
+            ' > /dev/null; then
+              matrix="$(jq -c '{include: .packages}' "$config_file")"
+            else
+              matrix="$(jq -c --argjson changed "$changed_json" '
+                {
+                  include: [
+                    .packages[] as $pkg
+                    | select(any($changed[]; . == $pkg.package_path or startswith($pkg.package_path + "/")))
+                    | $pkg
+                  ]
+                }
+              ' "$config_file")"
+            fi
+          fi
+
+          if [ "$(echo "$matrix" | jq '.include | length')" -gt 0 ]; then
+            echo "has_packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  mirror:
+    name: Mirror ${{ matrix.workspace }}
+    needs: prepare
+    if: needs.prepare.outputs.has_packages == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    uses: ./.github/workflows/mirror-package.yml
+    with:
+      package_path: ${{ matrix.package_path }}
+      target_repo: ${{ matrix.target_repo }}
+      target_branch: ${{ matrix.target_branch }}
+    secrets:
+      mirror_push_token: ${{ secrets.MIRROR_PUSH_TOKEN }}
+      mirror_git_user_name_secret: ${{ secrets.MIRROR_GIT_USER_NAME }}
+      mirror_git_user_email_secret: ${{ secrets.MIRROR_GIT_USER_EMAIL }}

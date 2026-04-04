@@ -1,5 +1,5 @@
 /**
- * formura — Storage Adapters
+ * react-formbridge — Storage Adapters
  * ──────────────────────────────
  * Unified storage interface across:
  *   - web localStorage

@@ -3,8 +3,13 @@ import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 // ─── Boolean field builder ───────────────────────────────────────────────────
 
-export class BooleanFieldBuilder extends BaseFieldBuilder<boolean> {
-  constructor(type: FieldType, label: string) {
+export class BooleanFieldBuilder<
+  TType extends Extract<FieldType, 'checkbox' | 'switch'> = Extract<
+    FieldType,
+    'checkbox' | 'switch'
+  >,
+> extends BaseFieldBuilder<boolean, TType> {
+  constructor(type: TType, label: string) {
     super(type, label, false);
   }
 

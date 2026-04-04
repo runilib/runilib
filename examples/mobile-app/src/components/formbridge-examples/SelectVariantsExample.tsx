@@ -173,7 +173,7 @@ export function SelectVariantsExample() {
         .searchable()
         .placeholder('Search a city')
         .hint('Async search with a fully custom picker modal.')
-        .appearance({
+        .behavior({
           renderPicker: renderCityPicker,
         }),
     }),
@@ -183,7 +183,7 @@ export function SelectVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalAppearance: createNativeFormUi(),
+    globalUi: createNativeFormUi(),
   });
 
   const { Form, fields, watchAll } = form;

@@ -2,8 +2,10 @@ import type { FieldType } from '../../../types';
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 // ─── String field builder ────────────────────────────────────────────────────
-export class StringFieldBuilder extends BaseFieldBuilder<string> {
-  constructor(type: FieldType, label: string) {
+export class StringFieldBuilder<
+  TType extends FieldType = FieldType,
+> extends BaseFieldBuilder<string, TType> {
+  constructor(type: TType, label: string) {
     super(type, label, '');
   }
 

@@ -33,10 +33,15 @@
     "ts:build:watch": "tsc -b --watch",
     "commitlint": "commitlint --from=HEAD~1 --to=HEAD",
     "build:packages": "turbo run build --filter='./packages/*'",
+    "size": "node ./scripts/package-size-report.mjs",
+    "size:no-maps": "node ./scripts/package-size-report.mjs --without-published-sourcemaps",
+    "size:check": "node ./scripts/package-size-report.mjs --without-published-sourcemaps --check-budget",
+    "size:markdown": "node ./scripts/package-size-report.mjs --without-published-sourcemaps --write-markdown SIZE_REPORT.md",
     "prepush:verify": "yarn check && yarn typecheck && yarn test",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish",
+    "release": "node ./scripts/changeset-publish.mjs",
+    "release:with-maps": "node ./scripts/changeset-publish.mjs --with-published-sourcemaps",
     "changeset:status": "changeset status"
   },
   "lint-staged": {

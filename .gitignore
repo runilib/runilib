@@ -16,3 +16,4 @@ apps/**/dist
 examples/**/dist
 examples/mobile/.expo
 examples/mobile/web-build
+packages/*/.pack-tmp

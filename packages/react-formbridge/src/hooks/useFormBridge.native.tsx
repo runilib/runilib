@@ -21,12 +21,9 @@ import { NativeMaskedInput } from '../renderers/native/MaskedInput';
 import { NativePasswordStrength } from '../renderers/native/PasswordStrength';
 import { NativePhoneInput } from '../renderers/native/PhoneInput';
 import type {
-  ExtraFieldProps,
   FieldComponents,
   FormComponent,
   FormSchema,
-  NativeFormUiOverrides,
-  NativeSubmitUiOverrides,
   SchemaValues,
   SubmitButtonProps,
   UseFormBridgeReturn,
@@ -37,8 +34,8 @@ import {
   mergeNativeFormUi,
   mergeNativeSubmitUi,
   resolveNativeFieldConfig,
-} from './shared/appearance';
-import { useFormBridgeCore } from './shared/useFormBridge.shared';
+} from './shared/ui-utils';
+import { useFormBridgeCore } from './shared/useFormBridge';
 
 type NativeSubmitExtraProps = {
   containerStyle?: StyleProp<ViewStyle>;
@@ -48,8 +45,8 @@ type NativeSubmitExtraProps = {
 
 export function useFormBridge<const S extends FormSchema>(
   schema: S,
-  options: UseFormOptions<S> = {},
-): UseFormBridgeReturn<S> {
+  options: UseFormOptions<S, 'native'> = {},
+): UseFormBridgeReturn<S, 'native'> {
   const core = useFormBridgeCore(schema, options);
 
   const {
@@ -71,8 +68,8 @@ export function useFormBridge<const S extends FormSchema>(
     trackFieldFocus,
   } = core;
 
-  const globalAppearanceRef = useRef(options.globalAppearance);
-  globalAppearanceRef.current = options.globalAppearance;
+  const globalUiRef = useRef(options.globalUi);
+  globalUiRef.current = options.globalUi;
 
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
@@ -181,24 +178,21 @@ export function useFormBridge<const S extends FormSchema>(
     await handleSubmit();
   }, [handleSubmit]);
 
-  const Form = useMemo((): FormComponent<S> => {
+  const Form = useMemo((): FormComponent<S, 'native'> => {
     const FormInner = ({
       children,
       onSubmit,
       onError,
       onSubmitError,
       style,
-    }: Parameters<FormComponent<S>>[0]) => {
+    }: Parameters<FormComponent<S, 'native'>>[0]) => {
       submitConfigRef.current = {
         onSubmit,
         onError,
         onSubmitError,
       };
 
-      const mergedUi = mergeNativeFormUi(
-        globalAppearanceRef.current?.form as NativeFormUiOverrides | undefined,
-        style,
-      );
+      const mergedUi = mergeNativeFormUi(globalUiRef.current?.form, style);
 
       return React.createElement(
         View,
@@ -218,11 +212,11 @@ export function useFormBridge<const S extends FormSchema>(
       loadingText,
       disabled,
       ...rest
-    }: SubmitButtonProps & NativeSubmitExtraProps) => {
+    }: SubmitButtonProps<'native'> & NativeSubmitExtraProps) => {
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
       const mergedUi = mergeNativeSubmitUi(
-        globalAppearanceRef.current?.submit as NativeSubmitUiOverrides | undefined,
+        globalUiRef.current?.submit,
         style,
         loadingText,
       );
@@ -291,17 +285,20 @@ export function useFormBridge<const S extends FormSchema>(
 
     Submit.displayName = 'FormBridgeSubmit';
 
-    (FormInner as unknown as FormComponent<S>).Submit =
-      Submit as unknown as FormComponent<S>['Submit'];
+    (FormInner as unknown as FormComponent<S, 'native'>).Submit =
+      Submit as unknown as FormComponent<S, 'native'>['Submit'];
 
-    return FormInner as unknown as FormComponent<S>;
+    return FormInner as unknown as FormComponent<S, 'native'>;
   }, [stateRef, submit, submitConfigRef]);
 
-  const fields = useMemo((): FieldComponents<S> => {
-    const result = {} as FieldComponents<S>;
+  const fields = useMemo((): FieldComponents<S, 'native'> => {
+    const result = {} as FieldComponents<S, 'native'>;
 
     for (const name of Object.keys(descriptors) as Array<keyof S & string>) {
-      const FieldComponent = (props?: ExtraFieldProps) => {
+      type LocalFieldComponent = FieldComponents<S, 'native'>[typeof name];
+      type LocalFieldProps = Parameters<LocalFieldComponent>[0];
+
+      const FieldComponent: LocalFieldComponent = (props?: LocalFieldProps) => {
         const descriptor = descriptorsRef.current[name];
 
         if (!descriptor) {
@@ -310,7 +307,7 @@ export function useFormBridge<const S extends FormSchema>(
 
         const mergedProps = mergeFieldStyleProps(
           'native',
-          globalAppearanceRef.current?.field,
+          globalUiRef.current?.field,
           props,
         );
         const state = stateRef.current;
@@ -336,7 +333,7 @@ export function useFormBridge<const S extends FormSchema>(
 
         const effectiveDescriptor = {
           ...descriptor,
-          _ui: resolveNativeFieldConfig(descriptor._appearance),
+          _ui: resolveNativeFieldConfig(descriptor._behavior),
           ...(mergedProps && {
             _label: mergedProps.label ?? descriptor._label,
             _placeholder: mergedProps.placeholder ?? descriptor._placeholder,
@@ -499,9 +496,9 @@ export function useFormBridge<const S extends FormSchema>(
         );
       };
 
-      FieldComponent.displayName = `FormBridgeField(${name})`;
+      (FieldComponent as React.FC).displayName = `FormBridgeField(${name})`;
 
-      result[name] = FieldComponent as FieldComponents<S>[typeof name];
+      result[name] = FieldComponent;
     }
 
     return result;

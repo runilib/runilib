@@ -1,46 +1,62 @@
-name: Release
+name: Release Packages
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '.changeset/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'turbo.jsonc'
+      - '.github/workflows/release.yml'
+      - '.github/actions/setup-monorepo/action.yml'
   workflow_dispatch:
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+
+env:
+  CI: true
+  TURBO_TELEMETRY_DISABLED: 1
+
 jobs:
   release:
-    runs-on: ubuntu-latest
     if: github.repository == 'runilib/runilib'
-    permissions:
-      contents: write
-      pull-requests: write
-      packages: write
-    env:
-      CI: true
-      TURBO_TELEMETRY_DISABLED: 1
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Setup monorepo
+        uses: ./.github/actions/setup-monorepo
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: yarn
+      - name: Run checks
+        run: yarn check
 
-      - name: Install dependencies
-        run: yarn install --immutable
+      - name: Run typecheck
+        run: yarn typecheck
 
-      - name: Create release PR or publish
-        id: changesets
+      - name: Run tests
+        run: yarn test
+
+      - name: Build workspaces
+        run: yarn build
+
+      - name: Run size budgets
+        run: yarn size:check
+
+      - name: Create release PR or publish packages
         uses: changesets/action@v1
         with:
           version: yarn version-packages

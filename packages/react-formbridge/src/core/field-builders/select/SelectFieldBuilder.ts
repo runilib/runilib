@@ -3,7 +3,7 @@ import type {
   AsyncOptionsConfig,
   OptionsFetcher,
 } from '../../../hooks/shared/useAsyncOptions';
-import type { FieldType, SelectOption, Validator } from '../../../types';
+import type { SelectOption, Validator } from '../../../types';
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 const OPTIONS_VALIDATOR_TAG = Symbol('options-validator');
@@ -26,8 +26,10 @@ function isEmptyValue(value: unknown): boolean {
   return value === null || value === undefined || value === '';
 }
 
-export class SelectFieldBuilder extends BaseFieldBuilder<string> {
-  constructor(type: FieldType, label: string) {
+export class SelectFieldBuilder<
+  TType extends 'select' | 'radio' = 'select' | 'radio',
+> extends BaseFieldBuilder<string, TType> {
+  constructor(type: TType, label: string) {
     super(type, label, '');
   }
 

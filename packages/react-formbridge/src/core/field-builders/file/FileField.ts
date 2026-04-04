@@ -1,5 +1,5 @@
 /**
- * formura — File Upload Field
+ * react-formbridge — File Upload Field
  * ────────────────────────────────
  * Cross-platform file upload field.
  * Web: input[type=file] with drag & drop.

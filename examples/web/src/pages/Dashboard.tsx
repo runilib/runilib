@@ -12,6 +12,7 @@ import styles from './Dashboard.module.css';
 
 interface Props {
   onGoToSettings: () => void;
+  onGoToWizard: () => void;
   onRestartTour: () => void;
 }
 
@@ -104,7 +105,7 @@ const priorityDot: Record<string, string> = {
   Low: '#5bbf7a',
 };
 
-export function Dashboard({ onGoToSettings }: Props) {
+export function Dashboard({ onGoToSettings, onGoToWizard }: Props) {
   const { start, isRunning } = useWalkit();
 
   return (
@@ -122,6 +123,12 @@ export function Dashboard({ onGoToSettings }: Props) {
               { icon: '◼', label: 'Dashboard', active: true, action: undefined },
               { icon: '◻', label: 'My Tasks', active: false, action: undefined },
               { icon: '◻', label: 'Calendar', active: false, action: undefined },
+              {
+                icon: '⇄',
+                label: 'Cross-page Wizard',
+                active: false,
+                action: onGoToWizard,
+              },
               { icon: '⚙', label: 'Settings', active: false, action: onGoToSettings },
             ].map((item) => (
               <button
@@ -195,6 +202,14 @@ export function Dashboard({ onGoToSettings }: Props) {
                 onClick={onGoToSettings}
               >
                 ⚙ Settings
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ fontSize: 12 }}
+                onClick={onGoToWizard}
+              >
+                ⇄ Wizard
               </button>
               <button
                 type="button"

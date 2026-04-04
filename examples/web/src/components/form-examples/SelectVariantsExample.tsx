@@ -108,7 +108,7 @@ export function SelectVariantsExample() {
         .searchable()
         .placeholder('Search a city')
         .hint('Custom picker modal powered by remote search.')
-        .appearance({
+        .behavior({
           renderPicker: renderCityPicker,
         }),
     }),
@@ -118,7 +118,7 @@ export function SelectVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalAppearance: createDemoFormUi(styles),
+    globalUi: createDemoFormUi(styles),
   });
 
   const { Form, fields, watchAll } = form;

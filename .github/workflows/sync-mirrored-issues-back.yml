@@ -1,0 +1,42 @@
+name: Sync Mirrored Issue Status Back
+
+on:
+  issues:
+    types:
+      - reopened
+      - closed
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    if: github.repository == 'runilib/runilib' && contains(github.event.issue.body || '', '<!-- mirror-source: ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Sync issue state back to mirror repository
+        env:
+          GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_STATE: ${{ github.event.action == 'closed' && 'closed' || 'open' }}
+        run: |
+          set -euo pipefail
+
+          body_file="$(mktemp)"
+          printf '%s\n' "${ISSUE_BODY}" > "$body_file"
+
+          mirror_source="$(sed -n 's/.*<!-- mirror-source: \(.*\) -->.*/\1/p' "$body_file" | head -n 1)"
+
+          if [ -z "${mirror_source:-}" ]; then
+            echo "No mirror-source marker found."
+            exit 0
+          fi
+
+          mirror_repo="${mirror_source%%#*}"
+          mirror_issue_number="${mirror_source##*#}"
+
+          gh api -X PATCH "repos/${mirror_repo}/issues/${mirror_issue_number}" \
+            -F state="${ISSUE_STATE}" > /dev/null

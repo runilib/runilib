@@ -1,4 +1,9 @@
-import type { OptionsFetcherContext, SelectOption } from '@runilib/react-formbridge';
+import type {
+  FormBridgeUiOptions,
+  OptionsFetcherContext,
+  SelectOption,
+  WebFieldUiOverrides,
+} from '@runilib/react-formbridge';
 
 export const CUSTOMER_DEPARTMENTS = [
   { label: 'Paris (75)', value: '75' },
@@ -83,73 +88,76 @@ export async function searchCityDirectory({
   );
 }
 
-export function createDemoFieldAppearance(styles: Record<string, string>) {
-  const baseFieldAppearance = {
-    rootClassName: styles.formField,
-    labelClassName: styles.formLabel,
-    inputClassName: styles.formInput,
-    rootStyle: { gap: 8, marginBottom: 0 },
-    labelStyle: {
-      color: '#e7dbc5',
-      fontSize: 11.5,
-      fontWeight: 700,
-      letterSpacing: '0.08em',
-      textTransform: 'uppercase' as const,
+function createBaseDemoFieldUi(styles: Record<string, string>): WebFieldUiOverrides {
+  return {
+    classNames: {
+      root: styles.formField,
+      label: styles.formLabel,
+      input: styles.formInput,
     },
-    inputStyle: {
-      background: 'rgba(12, 10, 7, 0.78)',
-      border: '1.5px solid rgba(255, 240, 200, 0.08)',
-      borderRadius: 16,
-      color: '#f5efe0',
-      padding: '14px 16px',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+    styles: {
+      root: {
+        gap: 8,
+        marginBottom: 0,
+      },
+      label: {
+        color: '#e7dbc5',
+        fontSize: 11.5,
+        fontWeight: 700,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+      },
+      input: {
+        background: 'rgba(12, 10, 7, 0.78)',
+        border: '1.5px solid rgba(255, 240, 200, 0.08)',
+        borderRadius: 16,
+        color: '#f5efe0',
+        padding: '14px 16px',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+      },
     },
-  } as const;
+  };
+}
+
+export function createDemoFieldUi(styles: Record<string, string>): {
+  baseFieldUi: WebFieldUiOverrides;
+  compactFieldUi: WebFieldUiOverrides;
+} {
+  const baseFieldUi = createBaseDemoFieldUi(styles);
 
   return {
-    baseFieldAppearance,
-    compactFieldAppearance: {
-      ...baseFieldAppearance,
-      inputStyle: {
-        ...baseFieldAppearance.inputStyle,
-        letterSpacing: '0.08em',
+    baseFieldUi,
+    compactFieldUi: {
+      ...baseFieldUi,
+      styles: {
+        ...baseFieldUi.styles,
+        input: {
+          ...baseFieldUi.styles?.input,
+          letterSpacing: '0.08em',
+        },
       },
     },
   } as const;
 }
 
-export function createDemoFormUi(styles: Record<string, string>) {
+export function createDemoFormUi(styles: Record<string, string>): FormBridgeUiOptions {
+  const baseFieldUi = createBaseDemoFieldUi(styles);
+
   return {
     field: {
-      appearance: {
+      ui: {
         classNames: {
-          root: styles.formField,
-          label: styles.formLabel,
-          input: styles.formInput,
+          ...baseFieldUi.classNames,
           select: styles.formInput,
           textarea: styles.formInput,
           error: styles.errorBox,
           hint: styles.helperText,
         },
         styles: {
-          root: {
-            gap: 8,
-            marginBottom: 0,
-          },
-          label: {
-            color: '#e7dbc5', 
-            fontSize: 11.5,
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-          },
+          ...baseFieldUi.styles,
           input: {
-            background: 'rgba(12, 10, 7, 0.78)',
-            border: '1.5px solid rgba(255, 240, 200, 0.08)',
+            ...baseFieldUi.styles?.input,
             borderRadius: 8,
-            color: '#f5efe0',
-            padding: '14px 16px',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
           },
           select: {
             background: 'rgba(12, 10, 7, 0.78)',

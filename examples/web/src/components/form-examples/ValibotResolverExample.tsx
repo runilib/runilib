@@ -5,36 +5,27 @@ import { field, useFormBridge, valibotResolver } from '@runilib/react-formbridge
 import * as v from 'valibot';
 import styles from './FormExamples.module.css';
 import { ResolverExampleFrame } from './ResolverExampleFrame';
-import { createDemoFieldAppearance, DEMO_PLANS, simulateSubmitDelay } from './shared';
+import { createDemoFormUi, DEMO_PLANS, simulateSubmitDelay } from './shared';
 
 export function ValibotResolverExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
-  const formSchema = useMemo(() => {
-    const { baseFieldAppearance } = createDemoFieldAppearance(styles);
-
-    return {
-      plan: field.select('Plan').options(DEMO_PLANS).appearance(baseFieldAppearance),
-      cardholder: field
-        .text('Cardholder')
-        .placeholder('Ava Stone')
-        .appearance(baseFieldAppearance),
+  const formSchema = useMemo(
+    () => ({
+      plan: field.select('Plan').options(DEMO_PLANS),
+      cardholder: field.text('Cardholder').placeholder('Ava Stone'),
       receiptEmail: field
         .email('Receipt email')
         .placeholder('billing@runilib.dev')
-        .appearance({
-          ...baseFieldAppearance,
+        .behavior({
           inputMode: 'email',
         }),
-      cardLast4: field
-        .text('Card last 4')
-        .placeholder('1842')
-        .appearance({
-          ...baseFieldAppearance,
-          inputMode: 'numeric',
-        }),
-    };
-  }, []);
+      cardLast4: field.text('Card last 4').placeholder('1842').behavior({
+        inputMode: 'numeric',
+      }),
+    }),
+    [],
+  );
 
   const schema = useMemo(
     () =>
@@ -70,6 +61,7 @@ export function ValibotResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
+    globalUi: createDemoFormUi(styles),
     resolver,
   });
 

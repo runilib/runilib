@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-
 import { AnalyticsLayer } from './AnalyticsLayer';
 import { Dashboard } from './pages/Dashboard';
 import { SETTINGS_STEPS, Settings } from './pages/Settings';
+import { Wizard } from './pages/Wizard';
 import { STEPS, TOUR_LABELS, TOUR_THEME } from './tourConfig';
 
 const APP_TOUR_STEPS = [
@@ -52,9 +53,14 @@ export default function App() {
           element={
             <Dashboard
               onGoToSettings={() => navigate('/settings')}
+              onGoToWizard={() => navigate('/wizard/personal')}
               onRestartTour={() => navigate('/')}
             />
           }
+        />
+        <Route
+          path="/wizard/:stepId"
+          element={<Wizard onBack={() => navigate('/')} />}
         />
         <Route
           path="/settings"

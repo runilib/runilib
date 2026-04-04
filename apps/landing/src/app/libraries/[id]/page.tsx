@@ -1,7 +1,5 @@
 'use client';
 
-/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
-
 import React, { useEffect, useState } from 'react';
 
 import Link from 'next/link';

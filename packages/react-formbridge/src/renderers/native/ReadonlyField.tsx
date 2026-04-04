@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type {
   FieldReadonlyState,
   ReadonlyFieldProps,
-} from '../../hooks/shared/useReadonlyFormBridge';
+} from '../../hooks/shared/useReadonlyForm';
 
 interface Props {
   state: FieldReadonlyState;

@@ -16,7 +16,7 @@ export function FieldOverridesStylingExample() {
         .email('Receipt email')
         .required('Receipt email is required')
         .placeholder('billing@runilib.dev')
-        .appearance({
+        .behavior({
           keyboardType: 'email-address',
         }),
       postalCode: field
@@ -37,7 +37,7 @@ export function FieldOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalAppearance: {
+    globalUi: {
       submit: {
         loadingText: 'Saving inline theme...',
         containerStyle: {
@@ -52,7 +52,7 @@ export function FieldOverridesStylingExample() {
         },
       },
       field: {
-        appearance: {
+        ui: {
           styles: {
             root: {
               marginBottom: 0,
@@ -97,7 +97,7 @@ export function FieldOverridesStylingExample() {
       recipeName="Field overrides"
       accent="#f59e0b"
       title="Style the form with plain objects and local overrides"
-      description="This recipe uses only native style objects, a global ui theme, and one-off field appearances. No styling library is required."
+      description="This recipe uses only native style objects, a global ui theme, and one-off field ui overrides. No styling library is required."
       highlights={[
         'inline native styles',
         'custom required mark',
@@ -130,7 +130,7 @@ export function FieldOverridesStylingExample() {
           <Text style={s.sectionBlockTitle}>Billing context</Text>
 
           <fields.receiptEmail
-            appearance={{
+            ui={{
               highlightOnError: false,
               renderHint: () => (
                 <Text style={{ color: '#cbd5e1', fontSize: 12 }}>
@@ -143,7 +143,7 @@ export function FieldOverridesStylingExample() {
           <View style={s.formRow}>
             <View style={s.halfField}>
               <fields.postalCode
-                appearance={{
+                ui={{
                   styles: {
                     input: {
                       textAlign: 'center',

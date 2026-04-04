@@ -1,27 +1,41 @@
 # Changelog
 
-All notable changes are documented here.  
-Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) — versioning: [SemVer](https://semver.org/).
-
----
-
 ## [1.0.0] — 2026-03-17
 
-### Added
+### Added — initial public release
 
-- ✅ Initial release
-- `<WalkitProvider>` — wraps the app, hosts state and the overlay
-- `<react-walkit>` — registers elements as tour steps, cross-platform
-- `useWalkit()` — TypeScript hook to control the tour programmatically
-- 6 animations: `fade`, `slide`, `zoom`, `bounce`, `flip`, `glow`
-- SVG animated spotlight for web (ReactDOM portal) and React Native (Modal)
-- Auto-placement engine with viewport clamping (`'auto'` mode)
-- Step progress dots indicator
-- `renderPopover` prop for full custom react-walkit
-- `theme` prop for color overrides
-- `labels` prop for button label overrides
-- `active` prop on `<WalkitStep>` for conditional steps
-- `onStart`, `onStop`, `onStepChange` lifecycle callbacks
-- TypeScript-first: 100% typed source, `dist/*.d.ts` shipped
-- Full unit test suite (positioning, animations, context, hook, step)
-- Peer deps: React ≥ 17, react-dom (web), react-native, react-native-svg (native)
+`@runilib/react-walkit` is a cross-platform walkthrough and tooltip library for React and React Native. It focuses on onboarding tours, contextual guidance, and spotlight-driven product education with one shared API.
+
+**Core walkthrough API**
+
+- `WalkitProvider` to host the tour state, overlay, and renderer
+- `WalkitStep` to register steps directly around real UI targets
+- `useWalkit()` to start, stop, navigate, and inspect the current tour state
+- `useWalkitEvent()` for lifecycle-driven analytics and side effects
+
+**Tooltip primitive**
+
+- `Tooltip` component for lightweight contextual help outside full walkthrough flows
+- controlled and uncontrolled trigger patterns
+- custom tooltip content via render functions and content API helpers
+
+**Flow control**
+
+- ordered multi-step flows with direct navigation and progress tracking
+- support for conditional steps and flow change requests
+- lifecycle hooks and analytics events for start, stop, step enter, step exit, and completion
+- auto-start options for onboarding scenarios
+
+**Rendering and motion**
+
+- animated spotlight overlays on web and native
+- auto-placement with viewport clamping
+- built-in animation presets through `ANIMATION_TYPES`
+- customizable popover rendering, labels, and theme options
+
+**Platform support**
+
+- one API for web and React Native
+- web overlay rendering through a portal-based renderer
+- native overlay rendering with platform-native primitives and `react-native-svg`
+- packaged TypeScript declarations for both the default and `react-native` entry points

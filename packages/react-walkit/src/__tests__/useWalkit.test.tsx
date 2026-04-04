@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { act, render, waitFor } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { useWalkitContext, WalkitContextProvider } from '../context/WalkitContext';
 import { useWalkit } from '../hooks/useWalkit';
@@ -200,43 +201,13 @@ describe('useWalkit', () => {
   });
 
   it('throws when used outside WalkitProvider', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    class ErrorBoundary extends React.Component<
-      React.PropsWithChildren,
-      { error: Error | null }
-    > {
-      state = { error: null as Error | null };
-
-      static getDerivedStateFromError(error: Error) {
-        return { error };
-      }
-
-      render() {
-        if (this.state.error) {
-          return <p>{this.state.error.message}</p>;
-        }
-
-        return this.props.children;
-      }
-    }
-
     function Broken() {
       useWalkit();
       return null;
     }
 
-    const { getByText } = render(
-      <ErrorBoundary>
-        <Broken />
-      </ErrorBoundary>,
+    expect(() => renderToStaticMarkup(<Broken />)).toThrow(
+      '[runilib/react-walkit] useWalkitContext must be used inside <WalkitProvider>.',
     );
-
-    expect(
-      getByText(
-        '[runilib/react-walkit] useWalkitContext must be used inside <WalkitProvider>.',
-      ),
-    ).toBeTruthy();
-    spy.mockRestore();
   });
 });

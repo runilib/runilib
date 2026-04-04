@@ -127,7 +127,7 @@ export const en: Translations = {
       label: 'Open Source',
       title: 'Contribute to RUNILIB',
       subtitle:
-        'RUNILIB is built by the community, for the community. Whether you fix a typo, improve docs, or ship a new feature — every contribution counts.',
+        'RUNILIB is built by the community, for the community. Whether you fix a typo, improve docs, or ship a new feature - every contribution counts.',
     },
     whyContribute: {
       label: 'Why contribute',
@@ -315,7 +315,7 @@ export const en: Translations = {
       label: 'Recognition',
       title: 'Contributors wall',
       subtitle:
-        'Every merged contribution earns a spot here. Code, docs, design, translations, bug reports — all count.',
+        'Every merged contribution earns a spot here. Code, docs, design, translations, bug reports - all count.',
     },
     cta: {
       title: 'Ready to make your first contribution?',

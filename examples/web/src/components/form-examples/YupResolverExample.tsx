@@ -5,36 +5,24 @@ import { field, useFormBridge, yupResolver } from '@runilib/react-formbridge';
 import * as yup from 'yup';
 import styles from './FormExamples.module.css';
 import { ResolverExampleFrame } from './ResolverExampleFrame';
-import { createDemoFieldAppearance, simulateSubmitDelay } from './shared';
+import { createDemoFormUi, simulateSubmitDelay } from './shared';
 
 export function YupResolverExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
-  const formSchema = useMemo(() => {
-    const { baseFieldAppearance } = createDemoFieldAppearance(styles);
-
-    return {
-      companyName: field
-        .text('Company')
-        .placeholder('Runilib Studio')
-        .appearance(baseFieldAppearance),
-      website: field
-        .url('Website')
-        .placeholder('https://runilib.dev')
-        .appearance({
-          ...baseFieldAppearance,
-          inputMode: 'url',
-        }),
-      monthlyBudget: field
-        .text('Monthly budget')
-        .placeholder('2500')
-        .appearance({
-          ...baseFieldAppearance,
-          inputMode: 'numeric',
-        }),
-      acceptsPilot: field.checkbox('Approve pilot terms').appearance(baseFieldAppearance),
-    };
-  }, []);
+  const formSchema = useMemo(
+    () => ({
+      companyName: field.text('Company').placeholder('Runilib Studio'),
+      website: field.url('Website').placeholder('https://runilib.dev').behavior({
+        inputMode: 'url',
+      }),
+      monthlyBudget: field.text('Monthly budget').placeholder('2500').behavior({
+        inputMode: 'numeric',
+      }),
+      acceptsPilot: field.checkbox('Approve pilot terms'),
+    }),
+    [],
+  );
 
   const schema = useMemo(
     () =>
@@ -60,6 +48,7 @@ export function YupResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
+    globalUi: createDemoFormUi(styles),
     resolver: yupResolver(schema, { mode: 'sync' }),
   });
 

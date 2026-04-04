@@ -1,7 +1,5 @@
 'use client';
 
-/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
-
 import styled, { css, keyframes } from 'styled-components';
 import { CodeBlock } from '../../components/CodeBlock';
 import { useApp } from '../../context/AppContext';
@@ -138,8 +136,8 @@ export default function Contributing() {
           </HeroLeft>
           <HeroRight>
             <HeroStat>
-              <StatNum>3</StatNum>
-              <StatLbl>Libraries</StatLbl>
+              <StatNum>2</StatNum>
+              <StatLbl>Available Libraries</StatLbl>
             </HeroStat>
             <HeroStat>
               <StatNum>MIT</StatNum>
@@ -160,7 +158,7 @@ export default function Contributing() {
         <WhyGrid>
           {c.whyContribute.items.map((item, i) => (
             <WhyCard
-              key={i}
+              key={i.toString()}
               $delay={i * 80}
             >
               <WhyEmoji>{['🚀', '🏆', '🧠', '🔍', '🤝', '⭐'][i]}</WhyEmoji>
@@ -179,7 +177,7 @@ export default function Contributing() {
 
           <StepsList>
             {c.steps.items.map((step, i) => (
-              <StepRow key={i}>
+              <StepRow key={i.toString()}>
                 {/* Step number + connector */}
                 <StepLeft>
                   <StepNum>{step.step}</StepNum>
@@ -244,7 +242,7 @@ export default function Contributing() {
         <SectionTitle>{c.codeStyle.title}</SectionTitle>
         <StyleGrid>
           {c.codeStyle.rules.map((rule, i) => (
-            <StyleCard key={i}>
+            <StyleCard key={i.toString()}>
               <StyleCardTop>
                 <StyleNum>{String(i + 1).padStart(2, '0')}</StyleNum>
                 <StyleTitle>{rule.title}</StyleTitle>
@@ -276,7 +274,7 @@ export default function Contributing() {
           </ChecklistNote>
           <ChecklistGrid>
             {c.prChecklist.items.map((item, i) => (
-              <ChecklistItem key={i}>
+              <ChecklistItem key={i.toString()}>
                 <CheckBox>
                   <CheckMark>✓</CheckMark>
                 </CheckBox>
@@ -295,10 +293,12 @@ export default function Contributing() {
 
         <IssuesGrid>
           {loading
-            ? Array.from({ length: 6 }).map((_, i) => <IssueCardPlaceholder key={i} />)
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <IssueCardPlaceholder key={i.toString()} />
+              ))
             : issues.map((issue, i) => (
                 <IssueCard
-                  key={i}
+                  key={i.toString()}
                   href={issue.url}
                   target="_blank"
                   rel="noopener"
@@ -341,14 +341,14 @@ export default function Contributing() {
                 color: 'purple',
                 cta: 'Join Discord',
               },
-              {
-                icon: <TwitterIcon />,
-                name: 'Twitter / X',
-                desc: 'Follow @runilib for releases, tips and community highlights.',
-                href: 'https://twitter.com/runilib',
-                color: 'blue',
-                cta: 'Follow us',
-              },
+              // {
+              //   icon: <TwitterIcon />,
+              //   name: 'Twitter / X',
+              //   desc: 'Follow @runilib for releases, tips and community highlights.',
+              //   href: 'https://twitter.com/runilib',
+              //   color: 'blue',
+              //   cta: 'Follow us',
+              // },
             ].map((ch) => (
               <CommunityCard
                 key={ch.name}
@@ -376,7 +376,7 @@ export default function Contributing() {
 
         {/* Placeholder avatars — in a real app, fetched from GitHub API */}
         <ContributorsWall>
-          {[...Array(62)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <ContribAvatar
               key={i.toString()}
               $seed={i}
@@ -467,7 +467,7 @@ function DiscordIcon() {
     </svg>
   );
 }
-function TwitterIcon() {
+function _TwitterIcon() {
   return (
     <svg
       aria-label="image"

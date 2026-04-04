@@ -72,8 +72,8 @@ function getStrengthMeta(score: number): {
   return { label: 'Very strong', width: '100%' };
 }
 
-export function NativePasswordStrength({ strengthMeta: d, extra, ...p }: Props) {
-  const ui = extra?.appearance;
+export const NativePasswordStrength = ({ strengthMeta: d, extra, ...p }: Props) => {
+  const ui = extra?.ui;
   const highlightOnError = shouldHighlightOnError(
     ui?.highlightOnError,
     d._ui?.highlightOnError,
@@ -201,7 +201,7 @@ export function NativePasswordStrength({ strengthMeta: d, extra, ...p }: Props) 
           : null}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   root: {

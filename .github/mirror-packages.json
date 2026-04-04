@@ -1,0 +1,16 @@
+{
+  "packages": [
+    {
+      "workspace": "@runilib/react-formbridge",
+      "package_path": "packages/react-formbridge",
+      "target_repo": "runilib/react-formbridge",
+      "target_branch": "main"
+    },
+    {
+      "workspace": "@runilib/react-walkit",
+      "package_path": "packages/react-walkit",
+      "target_repo": "runilib/react-walkit",
+      "target_branch": "main"
+    }
+  ]
+}

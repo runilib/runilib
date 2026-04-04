@@ -76,7 +76,7 @@ const StudioFormComp = styled(FormHost)`
 `;
 
 const StudioNameFieldShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     styles: {
       root: {
         marginBottom: 0,
@@ -120,7 +120,7 @@ const StudioNameFieldShell = styled(FieldHost).attrs({
 `;
 
 const ContactEmailFieldShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     styles: {
       root: {
         marginBottom: 0,
@@ -164,7 +164,7 @@ const ContactEmailFieldShell = styled(FieldHost).attrs({
 `;
 
 const CityFieldShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     styles: {
       root: {
         marginBottom: 0,
@@ -204,7 +204,7 @@ const CityFieldShell = styled(FieldHost).attrs({
 `;
 
 const LaunchNotesFieldShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     styles: {
       root: {
         marginBottom: 0,

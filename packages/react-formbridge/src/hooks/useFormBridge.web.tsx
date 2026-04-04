@@ -5,7 +5,6 @@ import { isMaskedDescriptor } from '../core/field-builders/mask/MaskedFieldBuild
 import { isStrengthDescriptor } from '../core/field-builders/password/PasswordWithStrength';
 import { isPhoneDescriptor } from '../core/field-builders/phone/PhoneFieldBuilder';
 import type {
-  ExtraFieldProps,
   FieldComponents,
   FormComponent,
   FormSchema,
@@ -19,13 +18,13 @@ import {
   mergeWebFormUi,
   mergeWebSubmitUi,
   resolveWebFieldConfig,
-} from './shared/appearance';
-import { useFormBridgeCore } from './shared/useFormBridge.shared';
+} from './shared/ui-utils';
+import { useFormBridgeCore } from './shared/useFormBridge';
 
 export function useFormBridge<const S extends FormSchema>(
   schema: S,
-  options: UseFormOptions<S> = {},
-): UseFormBridgeReturn<S> {
+  options: UseFormOptions<S, 'web'> = {},
+): UseFormBridgeReturn<S, 'web'> {
   const core = useFormBridgeCore(schema, options);
 
   const {
@@ -47,8 +46,8 @@ export function useFormBridge<const S extends FormSchema>(
     trackFieldFocus,
   } = core;
 
-  const globalAppearanceRef = useRef(options.globalAppearance);
-  globalAppearanceRef.current = options.globalAppearance;
+  const globalUiRef = useRef(options.globalUi);
+  globalUiRef.current = options.globalUi;
 
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
@@ -157,7 +156,7 @@ export function useFormBridge<const S extends FormSchema>(
     await handleSubmit();
   }, [handleSubmit]);
 
-  const Form = useMemo((): FormComponent<S> => {
+  const Form = useMemo((): FormComponent<S, 'web'> => {
     const FormInner = ({
       children,
       onSubmit,
@@ -165,18 +164,14 @@ export function useFormBridge<const S extends FormSchema>(
       onSubmitError,
       className,
       style,
-    }: Parameters<FormComponent<S>>[0]) => {
+    }: Parameters<FormComponent<S, 'web'>>[0]) => {
       submitConfigRef.current = {
         onSubmit,
         onError,
         onSubmitError,
       };
 
-      const mergedUi = mergeWebFormUi(
-        globalAppearanceRef.current?.form,
-        className,
-        style,
-      );
+      const mergedUi = mergeWebFormUi(globalUiRef.current?.form, className, style);
 
       const onPress = (event?: { preventDefault?: () => void }) => {
         event?.preventDefault?.();
@@ -204,11 +199,11 @@ export function useFormBridge<const S extends FormSchema>(
       style,
       loadingText,
       disabled,
-    }: SubmitButtonProps) => {
+    }: SubmitButtonProps<'web'>) => {
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
       const mergedUi = mergeWebSubmitUi(
-        globalAppearanceRef.current?.submit,
+        globalUiRef.current?.submit,
         className,
         style,
         loadingText,
@@ -232,15 +227,18 @@ export function useFormBridge<const S extends FormSchema>(
 
     Submit.displayName = 'FormBridgeSubmit';
 
-    (FormInner as unknown as FormComponent<S>).Submit = Submit;
-    return FormInner as unknown as FormComponent<S>;
+    (FormInner as unknown as FormComponent<S, 'web'>).Submit = Submit;
+    return FormInner as unknown as FormComponent<S, 'web'>;
   }, [handleSubmit, stateRef, submitConfigRef]);
 
-  const fields = useMemo((): FieldComponents<S> => {
-    const result = {} as FieldComponents<S>;
+  const fields = useMemo((): FieldComponents<S, 'web'> => {
+    const result = {} as FieldComponents<S, 'web'>;
 
     for (const name of Object.keys(descriptors) as Array<keyof S & string>) {
-      const FieldComponent = (props?: ExtraFieldProps) => {
+      type LocalFieldComponent = FieldComponents<S, 'web'>[typeof name];
+      type LocalFieldProps = Parameters<LocalFieldComponent>[0];
+
+      const FieldComponent: LocalFieldComponent = (props?: LocalFieldProps) => {
         const descriptor = descriptorsRef.current[name];
 
         if (!descriptor) {
@@ -249,9 +247,9 @@ export function useFormBridge<const S extends FormSchema>(
 
         const mergedProps = mergeFieldStyleProps(
           'web',
-          globalAppearanceRef.current?.field,
+          globalUiRef.current?.field,
           props,
-        );
+        ) as LocalFieldProps;
         const state = stateRef.current;
         const rawValue = (state.values as Record<string, unknown>)[name];
         const value =
@@ -272,7 +270,7 @@ export function useFormBridge<const S extends FormSchema>(
 
         const effectiveDescriptor = {
           ...descriptor,
-          _ui: resolveWebFieldConfig(descriptor._appearance),
+          _ui: resolveWebFieldConfig(descriptor._behavior),
           ...(mergedProps && {
             _label: mergedProps.label ?? descriptor._label,
             _placeholder: mergedProps.placeholder ?? descriptor._placeholder,
@@ -317,8 +315,8 @@ export function useFormBridge<const S extends FormSchema>(
         }
 
         if (isMaskedDescriptor(effectiveDescriptor)) {
-          const { WebMaskedInput } = require('../renderers/web/WebMaskedInput');
-          return React.createElement(WebMaskedInput, {
+          const { MaskedInput } = require('../renderers/web/MaskedInput');
+          return React.createElement(MaskedInput, {
             descriptor: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
@@ -326,8 +324,8 @@ export function useFormBridge<const S extends FormSchema>(
         }
 
         if (isFileDescriptor(effectiveDescriptor)) {
-          const { WebFileField } = require('../renderers/web/WebFileField');
-          return React.createElement(WebFileField, {
+          const { FileField } = require('../renderers/web/FileField');
+          return React.createElement(FileField, {
             descriptor: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
@@ -338,8 +336,8 @@ export function useFormBridge<const S extends FormSchema>(
           effectiveDescriptor._type === 'password' &&
           isStrengthDescriptor(effectiveDescriptor)
         ) {
-          const { WebPasswordStrength } = require('../renderers/web/WebPasswordStrength');
-          return React.createElement(WebPasswordStrength, {
+          const { PasswordStrength } = require('../renderers/web/PasswordStrength');
+          return React.createElement(PasswordStrength, {
             strengthMeta: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
@@ -347,8 +345,8 @@ export function useFormBridge<const S extends FormSchema>(
         }
 
         if (isPhoneDescriptor(effectiveDescriptor)) {
-          const { WebPhoneInput } = require('../renderers/web/WebPhoneInput');
-          return React.createElement(WebPhoneInput, {
+          const { PhoneInput } = require('../renderers/web/PhoneInput');
+          return React.createElement(PhoneInput, {
             descriptor: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
@@ -361,27 +359,27 @@ export function useFormBridge<const S extends FormSchema>(
           effectiveDescriptor._searchable
         ) {
           const {
-            WebAsyncAutocompleteField,
-          } = require('../renderers/web/WebAsyncAutocompleteField');
+            AsyncAutocompleteField,
+          } = require('../renderers/web/AsyncAutocompleteField');
 
-          return React.createElement(WebAsyncAutocompleteField, {
+          return React.createElement(AsyncAutocompleteField, {
             descriptor: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
           });
         }
 
-        const { WebField } = require('../renderers/web/WebField');
-        return React.createElement(WebField, {
+        const { Field } = require('../renderers/web/Field');
+        return React.createElement(Field, {
           descriptor: effectiveDescriptor,
           ...renderProps,
           extra: mergedProps,
         });
       };
 
-      FieldComponent.displayName = `FormBridgeField(${name})`;
+      (FieldComponent as React.FC).displayName = `FormBridgeField(${name})`;
 
-      result[name] = FieldComponent as FieldComponents<S>[typeof name];
+      result[name] = FieldComponent;
     }
 
     return result;

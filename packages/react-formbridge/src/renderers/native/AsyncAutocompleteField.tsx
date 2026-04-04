@@ -89,8 +89,8 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
   extra,
 }) => {
   const [open, setOpen] = useState(false);
-  const ui = extra?.appearance;
-  const renderPicker = ui?.renderPicker;
+  const ui = extra?.ui;
+  const renderPicker = ui?.renderPicker ?? d._ui?.renderPicker;
   const highlightOnError = shouldHighlightOnError(
     ui?.highlightOnError,
     d._ui?.highlightOnError,

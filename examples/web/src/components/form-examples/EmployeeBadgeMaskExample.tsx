@@ -4,21 +4,18 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';
-import { createDemoFieldAppearance, simulateSubmitDelay } from './shared';
+import { createDemoFieldUi, createDemoFormUi, simulateSubmitDelay } from './shared';
 
 export function EmployeeBadgeMaskExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
+  const { compactFieldUi } = createDemoFieldUi(styles);
 
-  const formSchema = useMemo(() => {
-    const { baseFieldAppearance, compactFieldAppearance } =
-      createDemoFieldAppearance(styles);
-
-    return {
+  const formSchema = useMemo(
+    () => ({
       teammateName: field
         .text('Teammate name')
         .required('Teammate name is required')
-        .placeholder('Ava Stone')
-        .appearance(baseFieldAppearance),
+        .placeholder('Ava Stone'),
       badgeCode: field
         .masked('Badge code', 'EMP-9999-LL')
         .tokens({
@@ -27,14 +24,15 @@ export function EmployeeBadgeMaskExample() {
         .required('Badge code is required')
         .showMaskInPlaceholder()
         .uppercase()
-        .validateComplete('Complete the badge code.')
-        .appearance(compactFieldAppearance),
-    };
-  }, []);
+        .validateComplete('Complete the badge code.'),
+    }),
+    [],
+  );
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
+    globalUi: createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -76,7 +74,7 @@ export function EmployeeBadgeMaskExample() {
       >
         <div className={styles.formRow}>
           <fields.teammateName />
-          <fields.badgeCode />
+          <fields.badgeCode ui={compactFieldUi} />
         </div>
 
         <div className={styles.footerRow}>

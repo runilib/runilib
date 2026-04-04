@@ -1,5 +1,5 @@
 /**
- * formura — Password Strength Engine
+ * react-formbridge — Password Strength Engine
  * ──────────────────────────────────────
  * Scores a password from 0 to 4 based on multiple criteria.
  * Fully customizable: rules, labels, colors, feedback messages.
@@ -63,6 +63,7 @@ export function scorePassword(
     label: r.label,
     passed: r.test(password),
     weight: r.weight ?? 1,
+    required: r.required ?? false,
   }));
 
   // Compute weighted score
@@ -78,14 +79,20 @@ export function scorePassword(
 
   // Find label & color
   const level = [...levels].reverse().find((l) => score >= l.minScore) ?? levels[0];
+  const requiredRulesPassed = evaluated.every((rule) => !rule.required || rule.passed);
 
   return {
     score,
     percent: Math.round(ratio * 100),
     label: level.label,
     color: level.color,
-    rules: evaluated.map((r) => ({ id: r.id, label: r.label, passed: r.passed })),
-    acceptable: score >= minAcceptable,
+    rules: evaluated.map((r) => ({
+      id: r.id,
+      label: r.label,
+      passed: r.passed,
+      required: r.required,
+    })),
+    acceptable: score >= minAcceptable && requiredRulesPassed,
     entropy: Math.round(estimateEntropy(password)),
   };
 }

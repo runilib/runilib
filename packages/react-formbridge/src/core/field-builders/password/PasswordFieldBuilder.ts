@@ -7,7 +7,7 @@ import {
 
 // ─── Password field builder ──────────────────────────────────────────────────
 
-export class PasswordFieldBuilder extends StringFieldBuilder {
+export class PasswordFieldBuilder extends StringFieldBuilder<'password'> {
   protected _strength: PasswordStrengthMeta = { ...DEFAULT_STRENGTH_META };
   constructor(label: string) {
     super('password', label);

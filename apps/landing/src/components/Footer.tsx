@@ -77,7 +77,7 @@ export function Footer() {
                   'ext' in l ? (
                     <ColExt
                       key={l.label}
-                      href={l.ext!}
+                      href={l.ext}
                       target="_blank"
                       rel="noopener"
                     >
@@ -86,7 +86,7 @@ export function Footer() {
                   ) : (
                     <ColInt
                       key={l.label}
-                      href={l.href!}
+                      href={l.href}
                     >
                       {l.label}
                     </ColInt>
@@ -128,7 +128,7 @@ const Badge = styled.span<{ $color: 'teal' | 'blue' | 'amber' }>`
   font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 20px;
   border: 1px solid ${({ theme, $color }) => theme[$color]};
   color: ${({ theme, $color }) => theme[$color]};
-  background: ${({ theme, $color }) => theme[`${$color}Dim` as keyof typeof theme] as string};
+  background: ${({ theme, $color }) => theme[`${$color}Dim` as keyof typeof theme]};
 `;
 const Cols = styled.div`
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;

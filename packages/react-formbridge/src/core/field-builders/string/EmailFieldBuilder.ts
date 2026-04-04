@@ -10,7 +10,7 @@ function normalizeEmailDomains(domains: string[]): string[] {
   ];
 }
 
-export class EmailFieldBuilder extends StringFieldBuilder {
+export class EmailFieldBuilder extends StringFieldBuilder<'email'> {
   /** Reject common personal inbox domains while still accepting any other valid email domain */
   excludeEmailDomains(domains: string[], message?: string): this {
     const blockedDomains = normalizeEmailDomains(domains);

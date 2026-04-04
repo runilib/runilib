@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import type { FieldDescriptor, FieldType } from '../../types';
 import { field } from '../field-builders/field';
 import { validateField } from './engine';
 
-const desc = (builder: { _build: () => any }) => builder._build();
+const desc = <TValue, TType extends FieldType>(builder: {
+  _build: () => FieldDescriptor<TValue, TType>;
+}) => builder._build();
 
 describe('validateField patterns', () => {
   it('accepts multiple pattern alternatives from a single call', async () => {

@@ -75,7 +75,7 @@ export const NativeFileField: React.FC<Props> = ({
   extra,
 }) => {
   const [loading, setLoading] = useState(false);
-  const ui = extra?.appearance;
+  const ui = extra?.ui;
   const { rootProps, labelProps, hintProps, errorProps } = ui ?? {};
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
     style?: StyleProp<ViewStyle>;

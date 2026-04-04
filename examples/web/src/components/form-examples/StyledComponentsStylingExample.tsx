@@ -93,7 +93,7 @@ const FooterCopy = styled.p`
 `;
 
 const StudioNameFieldShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     inputProps: {
       autoComplete: 'organization',
     },
@@ -138,7 +138,7 @@ const StudioFormComp = styled(FormHost)`
 `;
 
 const ContactEmailFieldShell = styled(FieldHost).attrs({
-  appearance: {
+  ui: {
     inputProps: {
       autoComplete: 'email',
       inputMode: 'email',

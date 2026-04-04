@@ -16,33 +16,32 @@ import type { StringFieldBuilder } from './string/StringFieldBuilder';
 
 export type AnyFieldBuilder =
   | EmailFieldBuilder
-  | StringFieldBuilder
+  | StringFieldBuilder<FieldType>
   | PasswordFieldBuilder
   | NumberFieldBuilder
-  | BooleanFieldBuilder
-  | SelectFieldBuilder
+  | BooleanFieldBuilder<'checkbox' | 'switch'>
+  | SelectFieldBuilder<'select' | 'radio'>
   | DateFieldBuilder
   | OtpFieldBuilder
   | MaskedFieldBuilder
   | FileFieldBuilder
   | PhoneFieldBuilder
-  // biome-ignore lint/suspicious/noExplicitAny: builder value type is intentionally open here
-  | BaseFieldBuilder<any>;
+  | BaseFieldBuilder<unknown>;
 
 // ─── field namespace ─────────────────────────────────────────────────────────
 
 export type FieldNamespace = {
-  text: (label: string) => StringFieldBuilder;
+  text: (label: string) => StringFieldBuilder<'text'>;
   email: (label: string) => EmailFieldBuilder;
   password: (label: string) => PasswordFieldBuilder;
   number: (label: string) => NumberFieldBuilder;
-  tel: (label: string) => StringFieldBuilder;
-  url: (label: string) => StringFieldBuilder;
-  textarea: (label: string) => StringFieldBuilder;
-  checkbox: (label: string) => BooleanFieldBuilder;
-  switch: (label: string) => BooleanFieldBuilder;
-  select: (label: string) => SelectFieldBuilder;
-  radio: (label: string) => SelectFieldBuilder;
+  tel: (label: string) => StringFieldBuilder<'tel'>;
+  url: (label: string) => StringFieldBuilder<'url'>;
+  textarea: (label: string) => StringFieldBuilder<'textarea'>;
+  checkbox: (label: string) => BooleanFieldBuilder<'checkbox'>;
+  switch: (label: string) => BooleanFieldBuilder<'switch'>;
+  select: (label: string) => SelectFieldBuilder<'select'>;
+  radio: (label: string) => SelectFieldBuilder<'radio'>;
   date: (label: string) => DateFieldBuilder;
   otp: (label: string) => OtpFieldBuilder;
   masked: (label: string, pattern: MaskPatternInput) => MaskedFieldBuilder;

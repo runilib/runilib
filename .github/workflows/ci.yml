@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-  pull_request:
+  push:
     branches:
       - main
   workflow_dispatch:
@@ -13,48 +13,55 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
+env:
+  CI: true
+  TURBO_TELEMETRY_DISABLED: 1
+
 jobs:
-  quality:
+  validate:
+    name: Validate Monorepo
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    env:
-      CI: true
-      TURBO_TELEMETRY_DISABLED: 1
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Setup monorepo
+        uses: ./.github/actions/setup-monorepo
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: yarn
+      - name: Run checks
+        run: yarn check
 
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Cache turbo
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('turbo.json', 'yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
-      - name: Lint
-        run: yarn lint
-
-      - name: Typecheck
+      - name: Run typecheck
         run: yarn typecheck
 
-      - name: Test
+      - name: Run tests
         run: yarn test
 
-      - name: Build
+      - name: Build workspaces
         run: yarn build
+
+      - name: Run size budgets
+        run: yarn size:check
+
+  validate-changesets:
+    name: Validate Changesets
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup monorepo
+        uses: ./.github/actions/setup-monorepo
+
+      - name: Validate pending changesets
+        run: yarn changeset:status

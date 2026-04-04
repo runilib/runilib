@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 import type React from 'react';
 import { useCallback, useState } from 'react';
 
@@ -295,14 +294,21 @@ function renderLine(line: string, lang: string): React.ReactNode {
   }
 
   const tokens = tokenize(line, lang);
-  return tokens.map((tok, i) => (
-    <span
-      key={i}
-      style={{ color: C[tok.type] }}
-    >
-      {tok.value}
-    </span>
-  ));
+  let cursor = 0;
+
+  return tokens.map((tok) => {
+    const key = `${tok.type}:${cursor}:${tok.value}`;
+    cursor += tok.value.length;
+
+    return (
+      <span
+        key={key}
+        style={{ color: C[tok.type] }}
+      >
+        {tok.value}
+      </span>
+    );
+  });
 }
 
 // ── Props ─────────────────────────────────────────────────────
@@ -333,6 +339,7 @@ export function CodeBlock({
   const lines = code.split('\n');
   // trim trailing empty line
   while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+  const lineOccurrences = new Map<string, number>();
 
   return (
     <Wrap>
@@ -354,15 +361,21 @@ export function CodeBlock({
       <Pre style={maxHeight ? { maxHeight } : undefined}>
         <table>
           <tbody>
-            {lines.map((line, idx) => (
-              <tr key={idx}>
-                {showLines && <LineNum>{idx + 1}</LineNum>}
-                <LineCode>
-                  {renderLine(line, lang)}
-                  {'\n'}
-                </LineCode>
-              </tr>
-            ))}
+            {lines.map((line, idx) => {
+              const occurrence = lineOccurrences.get(line) ?? 0;
+              lineOccurrences.set(line, occurrence + 1);
+              const lineKey = `${occurrence}:${line}`;
+
+              return (
+                <tr key={lineKey}>
+                  {showLines && <LineNum>{idx + 1}</LineNum>}
+                  <LineCode>
+                    {renderLine(line, lang)}
+                    {'\n'}
+                  </LineCode>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </Pre>

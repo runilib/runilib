@@ -1,7 +1,5 @@
 'use client';
 
-/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
-
 import { useState } from 'react';
 
 import Link from 'next/link';
@@ -187,14 +185,15 @@ export default function Home() {
       </HeroSection>
 
       {/* ── INSTALL STRIP ── */}
-      <InstallStrip>
+      {/* <InstallStrip>
         <StripInner>
           <StripLabel>{t.install.label}</StripLabel>
           <StripCmds>
             {(
               [
-                'npm install @runilib/react-formbridge @runilib/react-walkit @runilib/tooltip',
-                'yarn add @runilib/react-formbridge @runilib/react-walkit @runilib/tooltip',
+                'npm install @runilib/react-formbridge @runilib/react-walkit',
+                'yarn add @runilib/react-formbridge @runilib/react-walkit',
+                'pnpm add @runilib/react-formbridge @runilib/react-walkit',
               ] as const
             ).map((_cmd, i) => (
               <StripCmd key={i === 0 ? 'npm-install' : 'yarn-add'}>
@@ -207,7 +206,7 @@ export default function Home() {
             ))}
           </StripCmds>
         </StripInner>
-      </InstallStrip>
+      </InstallStrip> */}
 
       {/* ── FEATURES ── */}
       <Section>
@@ -555,55 +554,11 @@ const LibOrb = styled.div<{ pos: Record<string, string>; color: LibColor }>`
   font-size: 11px;
   padding: 6px 13px;
   border-radius: 20px;
-  background: ${({ theme, color }) => theme[`${color}Dim` as keyof typeof theme] as string};
+  background: ${({ theme, color }) => theme[`${color}Dim` as keyof typeof theme]};
   border: 1px solid ${({ theme, color }) => `${theme[color as keyof typeof theme]}55`};
-  color: ${({ theme, color }) => theme[color as keyof typeof theme] as string};
+  color: ${({ theme, color }) => theme[color as keyof typeof theme]};
   white-space: nowrap;
   letter-spacing: 0.04em;
-`;
-// Install strip
-const InstallStrip = styled.div`
-  background: ${({ theme }) => theme.bgCodeBlock};
-  border-top: 1px solid ${({ theme }) => theme.border};
-  border-bottom: 1px solid ${({ theme }) => theme.border};
-`;
-const StripInner = styled.div`
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 18px 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-`;
-const StripLabel = styled.div`
-  font-family: 'DM Mono', monospace;
-  font-size: 10.5px;
-  color: ${({ theme }) => theme.textMuted};
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  flex-shrink: 0;
-`;
-const StripCmds = styled.div`
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  flex: 1;
-`;
-const StripCmd = styled.div`display: flex; align-items: center; gap: 10px;`;
-const Prompt = styled.span`
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: ${({ theme }) => theme.teal};
-  background: ${({ theme }) => theme.tealDim};
-  padding: 2px 8px;
-  border-radius: 4px;
-  flex-shrink: 0;
-`;
-const CmdText = styled.code`
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  color: #cdd9e5;
 `;
 // Feature grid
 const FeatGrid = styled.div`
@@ -628,7 +583,7 @@ const FeatIcon = styled.div<{ $color: LibColor }>`
   font-size: 26px;
   width: 46px; height: 46px;
   border-radius: 12px;
-  background: ${({ theme, $color }) => theme[`${$color}Dim` as keyof typeof theme] as string};
+  background: ${({ theme, $color }) => theme[`${$color}Dim` as keyof typeof theme]};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -680,7 +635,7 @@ const LibCardIcon = styled.div<{ $color: LibColor }>`
   font-size: 26px;
   width: 46px; height: 46px;
   border-radius: 12px;
-  background: ${({ theme, $color }) => theme[`${$color}Dim` as keyof typeof theme] as string};
+  background: ${({ theme, $color }) => theme[`${$color}Dim` as keyof typeof theme]};
   border: 1px solid ${({ theme, $color }) => `${theme[$color as keyof typeof theme]}33`};
   display: flex;
   align-items: center;

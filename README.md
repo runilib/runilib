@@ -1,101 +1,102 @@
 # runilib monorepo
 
-Monorepo Yarn Workspaces pour développer des librairies React / React Native avec la même API, les tester localement sans publication NPM, puis les publier quand elles sont prêtes.
+Yarn Workspaces monorepo for building React / React Native libraries with the same API, testing them locally without publishing to npm, and publishing them when they are ready.
 
 ## Structure
 
 ```txt
 runilib-monorepo/
 ├─ apps/
-│  └─ web/                # site vitrine / doc / playground
+│  └─ web/                # marketing site / docs / playground
 ├─ examples/
-│  ├─ web/                # app web de test des libs
-│  └─ mobile/             # app mobile Expo de test des libs
+│  ├─ web/                # web app for testing the libraries
+│  └─ mobile/             # Expo mobile app for testing the libraries
 ├─ packages/
-│  ├─ primitives/         # composants cross-platform
-│  └─ theme/              # design tokens partagés
+│  ├─ primitives/         # cross-platform components
+│  └─ theme/              # shared design tokens
 ├─ package.json
 ├─ turbo.json
 └─ tsconfig.base.json
 ```
 
-## Pourquoi cette structure
+## Why this structure
 
-- `packages/*` contient les libs partageables.
-- `apps/web` sert de site principal du projet.
-- `examples/*` sert de sandbox pour valider les libs en local.
-- Les apps consomment les packages du monorepo avec `workspace:*`, donc aucun publish NPM n'est nécessaire pour tester localement.
-- Quand une lib est prête, `changesets` permet de versionner et publier proprement.
+- `packages/*` contains the reusable libraries.
+- `apps/web` is the main project website.
+- `examples/*` acts as a sandbox to validate libraries locally.
+- The apps consume monorepo packages through `workspace:*`, so no npm publish is needed for local testing.
+- When a library is ready, `changesets` helps version and publish it cleanly.
 
-## Démarrage
+## Getting started
 
-### 1. Initialiser Yarn 4 avec Corepack
+### 1. Initialize Yarn 4 with Corepack
 
 ```bash
 corepack enable
 yarn install
 ```
 
-### 2. Lancer tout le repo
+### 2. Start the whole repo
 
 ```bash
 yarn dev
 ```
 
-Cela va :
+This will:
 
-1. builder une première fois les packages,
-2. lancer les builds en watch sur les libs,
-3. lancer les apps web et mobile.
+1. build the packages once,
+2. start the libraries in watch mode,
+3. launch the web and mobile apps.
 
-## Commandes utiles
+## Useful commands
 
 ```bash
 yarn build
 yarn typecheck
 yarn lint
+yarn size
+yarn size:no-maps
+yarn size:check
+yarn size:markdown
+yarn size @runilib/react-walkit
 yarn workspace @runilib/primitives build
 yarn workspace @runilib/example-web dev
 yarn workspace @runilib/example-mobile dev
 ```
 
-## Ajouter une nouvelle lib
+## Size Tracking
 
-1. créer `packages/ma-lib`
-2. ajouter un `package.json`
-3. ajouter `build`, `dev`, `typecheck`
-4. consommer la lib depuis une app avec :
+- `yarn size` shows the current published and local bundle footprint.
+- `yarn size:no-maps` simulates npm publication without sourcemaps.
+- `yarn size:check` enforces the budgets defined in [size-budgets.json](/Users/m989281/Documents/PROJECTS/runilib-monorepo/size-budgets.json).
+- `yarn size:markdown` regenerates [SIZE_REPORT.md](/Users/m989281/Documents/PROJECTS/runilib-monorepo/SIZE_REPORT.md).
 
-```json
-{
-  "dependencies": {
-    "@runilib/ma-lib": "workspace:*"
-  }
-}
-```
+## Add a new library
 
-## Publier plus tard sur npm
+See [ADD_LIBRARY.md](/Users/m989281/Documents/PROJECTS/runilib-monorepo/ADD_LIBRARY.md) for the full step-by-step guide to create a new package, wire it into apps/examples, and validate it end to end.
 
-### Ajouter un changeset
+## Publish later to npm
+
+### Add a changeset
 
 ```bash
 yarn changeset
 ```
 
-### Bumper les versions
+### Bump versions
 
 ```bash
 yarn version-packages
 ```
 
-### Publier
+### Publish
 
 ```bash
 yarn release
 ```
 
-## Notes importantes
+## Important notes
 
-- Le repo est configuré avec `nodeLinker: node-modules` pour éviter les frictions classiques entre PnP et l'écosystème React Native.
-- `enableTransparentWorkspaces: false` force l'utilisation explicite de `workspace:*`, ce qui évite les résolutions implicites trompeuses.
-- Les apps web utilisent `react-native-web` pour rendre les composants issus des packages React Native.
+- The repo uses `nodeLinker: node-modules` to avoid the usual friction between Plug'n'Play and the React Native ecosystem.
+- `enableTransparentWorkspaces: false` forces explicit `workspace:*` usage, which avoids misleading implicit resolutions.
+- The web apps use `react-native-web` to render components coming from React Native packages.

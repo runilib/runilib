@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "./apps/website" },
+    { "path": "./apps/landing" },
     { "path": "./examples/web" },
     { "path": "./examples/mobile-app" },
     { "path": "./packages/react-walkit" },

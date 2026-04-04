@@ -1,7 +1,6 @@
-import type { FieldDescriptor, FieldType } from '../../types';
-import type { BaseFieldBuilder } from './base/BaseFieldBuilder';
+import type { FieldDescriptor, FieldType, SelectOption } from '../../types';
 import { field } from './field';
-import type { InferFieldOptions, InferOverrides } from './types';
+import type { AnyFieldBuilder, InferFieldOptions, InferOverrides } from './types';
 
 // ─── Label prettifier ─────────────────────────────────────────────────────────
 
@@ -14,8 +13,8 @@ function prettifyKey(key: string): string {
       .replace(/_/g, ' ')
       // kebab-case → words
       .replace(/-/g, ' ')
-      // Capitalize first letter
-      .replace(/^./, (s) => s.toUpperCase())
+      // Capitalize every word
+      .replace(/\b\w/g, (s) => s.toUpperCase())
       .trim()
   );
 }
@@ -56,6 +55,19 @@ function detectType(key: string, value: unknown): FieldType {
 
 // ─── Build a single FieldDescriptor from a key + value + override ────────────
 
+type InferBuilderOps = {
+  placeholder: (value?: string) => unknown;
+  hint: (value: string) => unknown;
+  required: (message?: string) => unknown;
+  min?: (value: number, message?: string) => unknown;
+  max?: (value: number, message?: string) => unknown;
+  disabled: (value?: boolean) => unknown;
+  hidden: (value?: boolean) => unknown;
+  validate: (fn: NonNullable<InferFieldOptions<unknown>['validate']>) => unknown;
+  options?: (value: SelectOption[] | string[]) => unknown;
+  _build: () => FieldDescriptor<unknown>;
+};
+
 function buildFieldFromEntry(
   key: string,
   value: unknown,
@@ -65,7 +77,7 @@ function buildFieldFromEntry(
   const type = override.type ?? detectType(key, value);
 
   // Use the right builder
-  let builder: BaseFieldBuilder<any>;
+  let builder: AnyFieldBuilder;
 
   switch (type) {
     case 'email':
@@ -109,21 +121,24 @@ function buildFieldFromEntry(
   }
 
   // Apply overrides
-  if (override.required)
-    builder.required(
+  const inferredBuilder = builder as InferBuilderOps;
+
+  if (override.required) {
+    inferredBuilder.required(
       typeof override.required === 'string' ? override.required : undefined,
     );
-  if (override.min !== undefined) (builder as any).min?.(override.min);
-  if (override.max !== undefined) (builder as any).max?.(override.max);
-  if (override.placeholder) builder.placeholder(override.placeholder);
-  if (override.hint) builder.hint(override.hint);
-  if (override.disabled) (builder as any).disabled(true);
-  if (override.hidden) (builder as any).hidden(true);
-  if (override.validate) (builder as any).validate(override.validate);
-  if (override.options) (builder as any).options?.(override.options);
+  }
+  if (override.min !== undefined) inferredBuilder.min?.(override.min);
+  if (override.max !== undefined) inferredBuilder.max?.(override.max);
+  if (override.placeholder) inferredBuilder.placeholder(override.placeholder);
+  if (override.hint) inferredBuilder.hint(override.hint);
+  if (override.disabled) inferredBuilder.disabled(true);
+  if (override.hidden) inferredBuilder.hidden(true);
+  if (override.validate) inferredBuilder.validate(override.validate);
+  if (override.options) inferredBuilder.options?.(override.options);
 
   // Set default value from the object
-  const desc = (builder as any)._build() as FieldDescriptor<unknown>;
+  const desc = inferredBuilder._build();
   desc._defaultValue = value ?? desc._defaultValue;
 
   return desc;

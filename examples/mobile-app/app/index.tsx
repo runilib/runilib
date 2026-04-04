@@ -49,11 +49,11 @@ const INITIAL_TASKS: Task[] = [
   },
   {
     id: 2,
-    title: 'Write unit tests for useForm',
+    title: 'Write unit tests for useFormBridge',
     priority: 'High',
     due: 'Tomorrow',
     status: 'active',
-    project: 'formura',
+    project: 'react-formbridge',
   },
   {
     id: 3,
@@ -148,6 +148,16 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </WalkitStep>
+
+        <TouchableOpacity
+          style={s.wizardBtn}
+          onPress={() => router.push('/wizard/personal')}
+        >
+          <Text style={s.wizardBtnTitle}>Cross-screen Wizard</Text>
+          <Text style={s.wizardBtnText}>
+            Open a real route-driven formbridge onboarding flow.
+          </Text>
+        </TouchableOpacity>
 
         {/* ── Stats card ── */}
         <WalkitStep {...HOME_STEPS.STATS_CARD}>
@@ -420,6 +430,16 @@ const s = StyleSheet.create({
     paddingVertical: 7,
   },
   restartBtnText: { fontSize: 12, fontWeight: '600', color: AMBER },
+  wizardBtn: {
+    backgroundColor: '#1a1108',
+    borderRadius: 18,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    marginBottom: 18,
+    gap: 4,
+  },
+  wizardBtnTitle: { color: '#f7f1e7', fontSize: 16, fontWeight: '700' },
+  wizardBtnText: { color: '#d6c4ae', fontSize: 13, lineHeight: 18 },
 
   // Stats card
   statsCard: {

@@ -55,10 +55,10 @@ const ALL_TASKS = [
   },
   {
     id: 2,
-    title: 'Write formura docs',
+    title: 'Write react-formbridge docs',
     priority: 'Medium',
     due: 'Tomorrow',
-    project: 'formura',
+    project: 'react-formbridge',
     done: false,
   },
   {

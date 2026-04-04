@@ -5,7 +5,7 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 import styles from './FormExamples.module.css';
 import {
   CUSTOMER_DEPARTMENTS,
-  createDemoFieldAppearance,
+  createDemoFieldUi,
   createDemoFormUi,
   simulateSubmitDelay,
 } from './shared';
@@ -14,25 +14,24 @@ export function CustomerCheckoutExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
     null,
   );
+  const { compactFieldUi } = createDemoFieldUi(styles);
 
   const checkoutSchema = useMemo(() => {
-    const { compactFieldAppearance } = createDemoFieldAppearance(styles);
-
     return {
       firstName: field
         .text('First name')
         .required('First name is required')
         .trim()
         .placeholder('Ava')
-        .appearance({
-          autoComplete: 'given-name'
+        .behavior({
+          autoComplete: 'given-name',
         }),
       lastName: field
         .text('Last name')
         .required('Last name is required')
         .trim()
         .placeholder('Stone')
-        .appearance({
+        .behavior({
           autoComplete: 'family-name',
         }),
       email: field
@@ -41,7 +40,7 @@ export function CustomerCheckoutExample() {
         .trim()
         .lowercase()
         .placeholder('ava@runilib.dev')
-        .appearance({
+        .behavior({
           autoComplete: 'email',
           inputMode: 'email',
         })
@@ -55,7 +54,7 @@ export function CustomerCheckoutExample() {
         .trim()
         .lowercase()
         .placeholder('ava@runilib.dev')
-        .appearance({
+        .behavior({
           autoComplete: 'email',
           inputMode: 'email',
         })
@@ -67,21 +66,20 @@ export function CustomerCheckoutExample() {
         .tel('Phone')
         .required('Phone is required')
         .placeholder('+33 6 12 34 56 78')
-        .appearance({
+        .behavior({
           autoComplete: 'tel',
           inputMode: 'tel',
         }),
       department: field
         .select('Department')
         .options(CUSTOMER_DEPARTMENTS)
-        .required('Department is required')
-        .appearance({}),
+        .required('Department is required'),
       city: field
         .text('City')
         .required('City is required')
         .trim()
         .placeholder('Paris')
-        .appearance({
+        .behavior({
           autoComplete: 'address-level2',
         }),
       customerCode: field
@@ -94,8 +92,7 @@ export function CustomerCheckoutExample() {
         .uppercase()
         .validateComplete('Complete the customer code.')
         .hint('Custom mask example: two uppercase letters and four digits.')
-        .appearance({
-          ...compactFieldAppearance,
+        .behavior({
           autoComplete: 'off',
         }),
       cardNumber: field
@@ -103,7 +100,7 @@ export function CustomerCheckoutExample() {
         .required('Card number is required')
         .showMaskInPlaceholder()
         .validateComplete('Complete the card number.')
-        .appearance({
+        .behavior({
           autoComplete: 'cc-number',
         }),
       expiry: field
@@ -111,8 +108,7 @@ export function CustomerCheckoutExample() {
         .required('Expiry date is required')
         .showMaskInPlaceholder()
         .validateComplete('Complete the expiry date.')
-        .appearance({
-          ...compactFieldAppearance,
+        .behavior({
           autoComplete: 'cc-exp',
         }),
       cvv: field
@@ -120,8 +116,7 @@ export function CustomerCheckoutExample() {
         .required('CVV is required')
         .showMaskInPlaceholder()
         .validateComplete('Complete the CVV.')
-        .appearance({
-          ...compactFieldAppearance,
+        .behavior({
           autoComplete: 'cc-csc',
         }),
     };
@@ -130,7 +125,7 @@ export function CustomerCheckoutExample() {
   const checkoutForm = useFormBridge(checkoutSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalAppearance: createDemoFormUi(styles),
+    globalUi: createDemoFormUi(styles),
     persist: {
       key: 'dashboard-customer-checkout',
       storage: 'local',
@@ -216,9 +211,7 @@ export function CustomerCheckoutExample() {
             }}
           >
             <div className={styles.formRow}>
-              <fields.firstName
-                appearance={{ inputProps: { 'aria-checked': 'false' } }}
-              />
+              <fields.firstName ui={{ inputProps: { 'aria-checked': 'false' } }} />
               <fields.lastName />
             </div>
 
@@ -232,7 +225,7 @@ export function CustomerCheckoutExample() {
 
             <div className={styles.formRow}>
               <fields.city />
-              <fields.customerCode />
+              <fields.customerCode ui={compactFieldUi} />
             </div>
 
             <div className={styles.paymentSection}>
@@ -249,11 +242,14 @@ export function CustomerCheckoutExample() {
               <fields.cardNumber />
 
               <div className={styles.formRow}>
-                <fields.expiry />
+                <fields.expiry ui={compactFieldUi} />
                 <fields.cvv
-                  appearance={{
+                  ui={{
+                    ...compactFieldUi,
                     styles: {
+                      ...compactFieldUi.styles,
                       input: {
+                        ...compactFieldUi.styles?.input,
                         letterSpacing: '0.18em',
                         textAlign: 'center',
                       },

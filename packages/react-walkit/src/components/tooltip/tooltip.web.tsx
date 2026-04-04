@@ -119,7 +119,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
     [toggle, visible, hide, show],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useLayoutEffect(() => {
     if (!visible || !shellRef.current) {
       return;
@@ -132,7 +131,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       width: Math.ceil(rect.width),
       height: Math.ceil(rect.height),
     });
-  }, [visible, content, renderContent, maxWidth]);
+  }, [visible]);
 
   useEffect(() => {
     if (!visible || !shellRef.current) {
@@ -234,6 +233,25 @@ export const Tooltip: React.FC<TooltipProps> = ({
     ...(triggerWrapperStyle as CSSProperties),
   };
 
+  const handleTriggerKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLSpanElement>) => {
+      if (!openOnPress) {
+        return;
+      }
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggle();
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        hide();
+      }
+    },
+    [hide, openOnPress, toggle],
+  );
+
   const shellStyle: CSSProperties = {
     position: 'fixed',
     top: computedPosition?.top ?? -9999,
@@ -258,14 +276,16 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <>
-      {/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation> */}
-      {/** biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: The wrapper preserves arbitrary inline trigger markup, so we keep a neutral span and add explicit keyboard support when it becomes pressable. */}
       <span
         ref={triggerWrapperRef}
         style={wrapperStyle}
+        role={openOnPress ? 'button' : undefined}
+        tabIndex={openOnPress ? 0 : undefined}
         onMouseEnter={openOnHover ? show : undefined}
         onMouseLeave={openOnHover ? hide : undefined}
         onClick={openOnPress ? toggle : undefined}
+        onKeyDown={openOnPress ? handleTriggerKeyDown : undefined}
       >
         {renderedTrigger}
       </span>

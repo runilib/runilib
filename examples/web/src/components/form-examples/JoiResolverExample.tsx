@@ -5,40 +5,24 @@ import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge';
 import Joi from 'joi';
 import styles from './FormExamples.module.css';
 import { ResolverExampleFrame } from './ResolverExampleFrame';
-import {
-  CUSTOMER_DEPARTMENTS,
-  createDemoFieldAppearance,
-  simulateSubmitDelay,
-} from './shared';
+import { CUSTOMER_DEPARTMENTS, createDemoFormUi, simulateSubmitDelay } from './shared';
 
 export function JoiResolverExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
-  const formSchema = useMemo(() => {
-    const { baseFieldAppearance } = createDemoFieldAppearance(styles);
-
-    return {
-      city: field.text('City').placeholder('Lyon').appearance(baseFieldAppearance),
-      department: field
-        .select('Department')
-        .options(CUSTOMER_DEPARTMENTS)
-        .appearance(baseFieldAppearance),
-      phone: field
-        .tel('Phone')
-        .placeholder('+33 6 98 12 45 78')
-        .appearance({
-          ...baseFieldAppearance,
-          inputMode: 'tel',
-        }),
-      postalCode: field
-        .text('Postal code')
-        .placeholder('69002')
-        .appearance({
-          ...baseFieldAppearance,
-          inputMode: 'numeric',
-        }),
-    };
-  }, []);
+  const formSchema = useMemo(
+    () => ({
+      city: field.text('City').placeholder('Lyon'),
+      department: field.select('Department').options(CUSTOMER_DEPARTMENTS),
+      phone: field.tel('Phone').placeholder('+33 6 98 12 45 78').behavior({
+        inputMode: 'tel',
+      }),
+      postalCode: field.text('Postal code').placeholder('69002').behavior({
+        inputMode: 'numeric',
+      }),
+    }),
+    [],
+  );
 
   const schema = useMemo(
     () =>
@@ -73,6 +57,7 @@ export function JoiResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
+    globalUi: createDemoFormUi(styles),
     resolver: joiResolver(schema, {
       stripQuotes: true,
       validateOptions: {

@@ -111,7 +111,7 @@ export default function ProfileScreen() {
                   desc: 'Onboarding tours',
                   status: 'active',
                 },
-                { name: 'formura', desc: 'Form state', status: 'soon' },
+                { name: 'react-formbridge', desc: 'Form state', status: 'soon' },
                 { name: 'toastly', desc: 'Notifications', status: 'soon' },
               ].map((lib) => (
                 <View

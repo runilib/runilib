@@ -21,7 +21,7 @@ export function CssModulesStylingExample() {
         .required('Owner email is required')
         .trim()
         .placeholder('owner@runilib.dev')
-        .appearance({
+        .behavior({
           autoComplete: 'email',
           inputMode: 'email',
         }),
@@ -42,7 +42,7 @@ export function CssModulesStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalAppearance: createDemoFormUi(styles),
+    globalUi: createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -91,7 +91,7 @@ export function CssModulesStylingExample() {
         </div>
 
         <fields.department
-          appearance={{
+          ui={{
             styles: {
               select: {
                 background: 'rgba(17, 24, 39, 0.76)',
@@ -102,7 +102,7 @@ export function CssModulesStylingExample() {
         />
 
         <fields.launchNotes
-          appearance={{
+          ui={{
             styles: {
               textarea: {
                 minHeight: 110,

@@ -19,7 +19,7 @@ export function TooltipAnchorWeb() {
 
       <Tooltip content="This trigger reads tooltip visibility and drives it manually.">
         {({ hide, show, visible }) => (
-          // biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
+          // biome-ignore lint/a11y/noStaticElementInteractions: This demo intentionally keeps a lightweight inline span trigger and only attaches hover handlers.
           <span
             onMouseEnter={show}
             onMouseLeave={hide}

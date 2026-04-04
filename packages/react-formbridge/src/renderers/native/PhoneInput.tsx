@@ -67,7 +67,7 @@ interface Props extends FieldRenderProps<PhoneValue | string | null> {
 }
 
 export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...props }) => {
-  const ui = extra?.appearance;
+  const ui = extra?.ui;
   const highlightOnError = shouldHighlightOnError(
     ui?.highlightOnError,
     d._ui?.highlightOnError,

@@ -8,8 +8,8 @@ function matchesPattern(pattern: RegExp, value: string): boolean {
  * Runs all validation rules for a field descriptor against a value.
  * Returns the first error message found, or null if valid.
  */
-export async function validateField(
-  descriptor: FieldDescriptor<unknown>,
+export async function validateField<V>(
+  descriptor: FieldDescriptor<V>,
   value: unknown,
   allValues: Record<string, unknown>,
 ): Promise<string | null> {
@@ -70,7 +70,7 @@ export async function validateField(
 
   // ── custom validators ─────────────────────────────────────────────────────
   for (const validator of d._validators) {
-    const result = await validator(v, allValues);
+    const result = await validator(v as V, allValues);
     if (result) return result;
   }
 

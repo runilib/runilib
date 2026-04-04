@@ -1,19 +1,27 @@
 import type { FieldDescriptor, FieldType, SelectOption } from '../../../types';
 import { field } from '../field';
+import type { AnyFieldBuilder } from '../types';
 import type { JsonFieldDescriptor, JsonFormDefinition, JsonSchemaDraft7 } from './types';
 
 // ─── Convert a single JSON descriptor to a FieldDescriptor ───────────────────
 
+type DynamicBuilderOps = {
+  placeholder: (value?: string) => unknown;
+  hint: (value: string) => unknown;
+  disabled: (value?: boolean) => unknown;
+  hidden: (value?: boolean) => unknown;
+  required: (message?: string) => unknown;
+  min?: (value: number, message?: string) => unknown;
+  max?: (value: number, message?: string) => unknown;
+  pattern?: (regex: RegExp, message?: string) => unknown;
+  options?: (value: SelectOption[] | string[]) => unknown;
+  length?: (value: number, message?: string) => unknown;
+  _build: () => FieldDescriptor<unknown>;
+};
+
 function jsonToFieldDescriptor(json: JsonFieldDescriptor): FieldDescriptor<unknown> {
   const label = json.label;
-  let builder: ReturnType<
-    | typeof field.text
-    | typeof field.email
-    | typeof field.number
-    | typeof field.checkbox
-    | typeof field.select
-    | typeof field.otp
-  >;
+  let builder: AnyFieldBuilder;
 
   const type = json.type === 'hidden' ? 'text' : json.type;
 
@@ -58,7 +66,7 @@ function jsonToFieldDescriptor(json: JsonFieldDescriptor): FieldDescriptor<unkno
       builder = field.text(label);
   }
 
-  const b = builder as any;
+  const b = builder as DynamicBuilderOps;
 
   // Apply common properties
   if (json.placeholder) b.placeholder(json.placeholder);
@@ -131,7 +139,7 @@ function jsonToFieldDescriptor(json: JsonFieldDescriptor): FieldDescriptor<unkno
 
 /**
  * Convert a JSON form definition (from an API or config file) into a
- * formura schema ready to pass to `useForm()`.
+ * react-formbridge schema ready to pass to `useForm()`.
  *
  * @example
  * // From an API response
@@ -191,7 +199,7 @@ export function parseDynamicForm(definition: JsonFormDefinition): {
 }
 
 /**
- * `parseJsonSchema()` — convert a standard JSON Schema (draft-07) into a formura schema.
+ * `parseJsonSchema()` — convert a standard JSON Schema (draft-07) into a react-formbridge schema.
  *
  * @example
  * const jsonSchema = {
@@ -218,7 +226,7 @@ export function parseJsonSchema(
     const types = Array.isArray(prop.type) ? prop.type : [prop.type ?? 'string'];
     const pType = types.find((t) => t !== 'null') ?? 'string';
 
-    // Map JSON Schema type + format to formura field type
+    // Map JSON Schema type + format to react-formbridge field type
     let fieldType: FieldType = 'text';
     if (pType === 'number' || pType === 'integer') fieldType = 'number';
     else if (pType === 'boolean') fieldType = 'switch';

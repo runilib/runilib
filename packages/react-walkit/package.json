@@ -2,13 +2,19 @@
   "name": "@runilib/react-walkit",
   "version": "1.0.0",
   "description": "Cross-platform tooltip, onboarding tours, product walkthroughs and contextual help for React and React Native. One API. Declarative. Animated. Accessible.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "react-native": "./dist/index.native.mjs",
   "exports": {
     ".": {
+      "react-native": {
+        "types": "./dist/index.native.d.mts",
+        "default": "./dist/index.native.mjs"
+      },
       "types": "./dist/index.d.mts",
-      "react-native": "./dist/index.native.mjs",
       "import": "./dist/index.mjs",
       "default": "./dist/index.mjs"
     }
@@ -34,6 +40,8 @@
     "tsc:build": "tsc -b tsconfig-build.json",
     "tsc:check": "tsc --noEmit",
     "tsc:watch": "tsc --noEmit --watch",
+    "prepack": "node ../../scripts/package-pack-sourcemaps.mjs hide",
+    "postpack": "node ../../scripts/package-pack-sourcemaps.mjs restore",
     "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "keywords": [

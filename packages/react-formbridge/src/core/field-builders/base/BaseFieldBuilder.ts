@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type {
-  FieldAppearanceConfig,
+  FieldBehaviorConfig,
   FieldDescriptor,
   FieldRenderProps,
   FieldType,
@@ -16,13 +16,15 @@ import { DEFAULT_FIELD_CONDITIONS } from '../../conditions/conditions';
  * @param descriptor - The field descriptor to clone.
  * @returns A new `FieldDescriptor` with cloned arrays and objects.
  */
-function cloneDescriptor<V>(descriptor: FieldDescriptor<V>): FieldDescriptor<V> {
+function cloneDescriptor<V, TType extends FieldType>(
+  descriptor: FieldDescriptor<V, TType>,
+): FieldDescriptor<V, TType> {
   return {
     ...descriptor,
     _validators: [...descriptor._validators],
     _options: descriptor._options ? [...descriptor._options] : undefined,
     _patterns: descriptor._patterns ? [...descriptor._patterns] : undefined,
-    _appearance: descriptor._appearance ? { ...descriptor._appearance } : undefined,
+    _behavior: descriptor._behavior ? { ...descriptor._behavior } : undefined,
   };
 }
 
@@ -46,8 +48,8 @@ function cloneDescriptor<V>(descriptor: FieldDescriptor<V>): FieldDescriptor<V> 
  * };
  * ```
  */
-export class BaseFieldBuilder<FD = unknown> {
-  protected _desc: FieldDescriptor<FD>;
+export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType> {
+  protected _desc: FieldDescriptor<FD, TType>;
   protected _conditions: FieldConditions = {
     ...DEFAULT_FIELD_CONDITIONS,
     visible: [],
@@ -62,7 +64,7 @@ export class BaseFieldBuilder<FD = unknown> {
    * @param label - The human-readable label displayed alongside the field.
    * @param defaultValue - The initial value of the field when the form is first rendered.
    */
-  constructor(type: FieldType, label: string, defaultValue: FD) {
+  constructor(type: TType, label: string, defaultValue: FD) {
     this._desc = {
       _type: type,
       _label: label,
@@ -78,21 +80,24 @@ export class BaseFieldBuilder<FD = unknown> {
   }
 
   /**
-   * Configures the visual appearance of the field (e.g. variant, size, colors).
-   * Merges with any previously set appearance config.
+   * Configures field-level UI behavior such as ids, autocomplete, and picker rendering.
+   * Merges with any previously set behavior config.
    *
-   * @param config - An appearance configuration object.
+   * Prefer render-time styling via `className`, `style`, or field/global
+   * `ui` overrides so schema builders stay focused on business rules.
+   *
+   * @param config - A behavior configuration object.
    * @returns The builder instance for chaining.
    *
    * @example
    * ```ts
    * field.text('Name', '')
-   *   .appearance({ variant: 'outlined', size: 'lg' });
+   *   .behavior({ autoComplete: 'name' });
    * ```
    */
-  appearance(config: FieldAppearanceConfig): this {
-    this._desc._appearance = {
-      ...this._desc._appearance,
+  behavior(config: FieldBehaviorConfig): this {
+    this._desc._behavior = {
+      ...this._desc._behavior,
       ...config,
     };
     return this;
@@ -546,7 +551,7 @@ export class BaseFieldBuilder<FD = unknown> {
    *
    * @internal
    */
-  _build(): FieldDescriptor<FD> & { _conditions?: FieldConditions } {
+  _build(): FieldDescriptor<FD, TType> & { _conditions?: FieldConditions } {
     const desc = cloneDescriptor(this._desc);
 
     return {

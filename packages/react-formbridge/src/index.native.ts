@@ -1,3 +1,16 @@
+import {
+  FieldHost as SharedFieldHost,
+  type FieldHostProps as SharedFieldHostProps,
+  FormHost as SharedFormHost,
+  type FormHostProps as SharedFormHostProps,
+  SubmitHost as SharedSubmitHost,
+  type SubmitHostProps as SharedSubmitHostProps,
+} from './renderers/hosts/Host';
+import type {
+  FormSchema,
+  ExtraFieldProps as NativeExtraFieldProps,
+} from './types.native';
+
 // ─── Core ─────────────────────────────────────────────────────────────────────
 
 export type {
@@ -43,75 +56,44 @@ export type {
 } from './hooks/shared/useAsyncOptions';
 export { useAsyncOptions } from './hooks/shared/useAsyncOptions';
 export {
-  type UseDynamicFormOptions,
-  type UseDynamicFormReturn,
-  useDynamicFormBridge,
-} from './hooks/shared/useDynamicFormBridge';
-export {
-  type UseFormWizardOptions,
-  type UseFormWizardReturn,
-  useFormWizardBridge,
-  type WizardStep,
-} from './hooks/shared/useFormBridgeWizard';
+  type AnalyticsHandlers,
+  type AnalyticsOptions,
+  FormAnalyticsTracker,
+  useFormBridgeAnalytics,
+} from './hooks/shared/useFormAnalytics';
 export {
   type UseReadonlyFormOptions,
   type UseReadonlyFormReturn,
   useReadonlyFormBridge,
-} from './hooks/shared/useReadonlyFormBridge';
-export { useFormBridge } from './hooks/useFormBridge.native';
-// ─── FormHost ────────────────────────────────────────────────────────────────────
+} from './hooks/shared/useReadonlyForm';
 export {
-  FieldHost,
-  type FieldHostProps,
-  FormHost,
-  type FormHostProps,
-  SubmitHost,
-  type SubmitHostProps,
-} from './renderers/hosts/Host';
+  type UseDynamicFormOptions,
+  type UseDynamicFormReturn,
+  useDynamicForm,
+} from './hooks/useDynamicForm.native';
+export { useFormBridge } from './hooks/useFormBridge.native';
+export {
+  type UseFormWizardOptions,
+  type UseFormWizardReturn,
+  useFormWizard,
+  type WizardStep,
+  type WizardStepChangeEvent,
+  type WizardStepChangeReason,
+} from './hooks/useFormWizard.native';
+// ─── FormHost ────────────────────────────────────────────────────────────────────
+export type FieldHostProps<TProps extends NativeExtraFieldProps = NativeExtraFieldProps> =
+  SharedFieldHostProps<TProps>;
+export const FieldHost = SharedFieldHost as <TProps extends NativeExtraFieldProps>(
+  props: FieldHostProps<TProps>,
+) => JSX.Element;
+
+export type SubmitHostProps = SharedSubmitHostProps<'native'>;
+export const SubmitHost = SharedSubmitHost as (props: SubmitHostProps) => JSX.Element;
+
+export type FormHostProps<F extends FormSchema> = SharedFormHostProps<F, 'native'>;
+export const FormHost = SharedFormHost as <F extends FormSchema>(
+  props: FormHostProps<F>,
+) => JSX.Element;
+
 // ─── Types ────────────────────────────────────────────────────────────────────
-export type {
-  AsyncValidator,
-  ExtraFieldProps,
-  FieldAppearanceConfig,
-  FieldAppearanceOverrides,
-  FieldComponent,
-  FieldComponents,
-  FieldDescriptor,
-  FieldRenderProps,
-  FieldState,
-  FieldStyleProps,
-  FieldStyleValue,
-  FieldTheme,
-  FieldType,
-  FormBridgeUiOptions,
-  FormComponent,
-  FormProps,
-  FormSchema,
-  FormState,
-  FormStatus,
-  FormUiOverrides,
-  NativeFieldSlot,
-  NativeFieldUiOverrides,
-  NativeFormUiOverrides,
-  NativeStyleValue,
-  NativeSubmitUiOverrides,
-  OptionsFetcher,
-  OptionsFetcherContext,
-  ResolverResult,
-  SchemaResolver,
-  SchemaValues,
-  SelectOption,
-  SelectPickerRenderContext,
-  SubmitButtonComponent,
-  SubmitButtonProps,
-  SubmitUiOverrides,
-  SyncValidator,
-  UseFormBridgeReturn,
-  UseFormOptions,
-  ValidationTrigger,
-  Validator,
-  WebFieldSlot,
-  WebFieldUiOverrides,
-  WebFormUiOverrides,
-  WebSubmitUiOverrides,
-} from './types';
+export type * from './types.native';

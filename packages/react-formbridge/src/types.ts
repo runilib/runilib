@@ -11,9 +11,10 @@ import type {
 } from 'react';
 
 import type { VisibilityMap } from './core/conditions/conditions';
+import type { FileValue } from './core/field-builders/file/types';
 import type { PersistOptions } from './core/persist/draft';
 import type { AsyncOptionsConfig } from './hooks/shared/useAsyncOptions';
-import type { AnalyticsOptions } from './hooks/shared/useFormBridgeAnalytics';
+import type { AnalyticsOptions } from './hooks/shared/useFormAnalytics';
 
 // ─── Field types ───────────────────────────────────────────────────────────────
 
@@ -35,6 +36,9 @@ export type FieldType =
   | 'phone'
   | 'custom';
 
+export type Platform = 'web' | 'native';
+type EmptyProps = Record<never, never>;
+
 // ─── Form state machine ────────────────────────────────────────────────────────
 
 export type FormStatus = 'idle' | 'validating' | 'submitting' | 'success' | 'error';
@@ -48,6 +52,7 @@ export type AsyncValidator<V = unknown> = (
   value: V,
   allValues: Record<string, unknown>,
 ) => Promise<string | null>;
+
 export type Validator<V = unknown> = SyncValidator<V> | AsyncValidator<V>;
 
 export type NativeStyleValue =
@@ -57,7 +62,7 @@ export type NativeStyleValue =
 
 export type FieldStyleValue = React.CSSProperties | NativeStyleValue;
 
-export interface FieldAppearanceConfig {
+export interface FieldBehaviorConfig {
   id?: string;
   testID?: string;
   readOnly?: boolean;
@@ -76,21 +81,13 @@ export interface FieldAppearanceConfig {
   enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
   keyboardType?: string;
   secureTextEntry?: boolean;
-  rootClassName?: string;
-  labelClassName?: string;
-  inputClassName?: string;
-  rootStyle?: FieldStyleValue;
-  labelStyle?: FieldStyleValue;
-  inputStyle?: FieldStyleValue;
-  hintStyle?: FieldStyleValue;
-  errorStyle?: FieldStyleValue;
   highlightOnError?: boolean;
   renderPicker?: (ctx: SelectPickerRenderContext) => ReactNode;
 }
 
-export interface FieldDescriptor<V = unknown> {
+export interface FieldDescriptor<V = unknown, TType extends FieldType = FieldType> {
   /** Internal type used to pick the right renderer */
-  _type: FieldType;
+  _type: TType;
   /** Human-readable label */
   _label: string;
   /** Placeholder text */
@@ -142,10 +139,10 @@ export interface FieldDescriptor<V = unknown> {
   /** Accepted file types */
   _accept?: string[];
 
-  /** Cross-platform field-owned appearance defaults shared by web and native */
-  _appearance?: FieldAppearanceConfig;
+  /** Cross-platform field-owned behavior defaults shared by web and native */
+  _behavior?: FieldBehaviorConfig;
 
-  _asyncOptions?: AsyncOptionsConfig<any>;
+  _asyncOptions?: AsyncOptionsConfig<Record<string, unknown>>;
 
   _searchable?: boolean;
 }
@@ -209,20 +206,36 @@ export interface FormState<Schema extends FormSchema> {
 }
 
 // ─── Schema = map of field descriptors ────────────────────────────────────────
-export type FormSchema = Record<
-  string,
-  FieldDescriptor<any> | { _build(): FieldDescriptor<any> }
->;
+export type FormSchemaEntry = { _type: FieldType } | { _build(): { _type: FieldType } };
+
+export type FormSchema = Record<string, FormSchemaEntry>;
 
 /** Extract the value type of a FieldDescriptor */
 
 /** Extract the values object type from a schema */
 
-type InferFieldValue<T> = T extends { _build(): FieldDescriptor<infer V> }
-  ? V
-  : T extends FieldDescriptor<infer V>
-    ? V
+export type ResolvedFieldDescriptor<T> = T extends { _build(): infer TField }
+  ? TField extends FieldDescriptor<infer TValue, infer TType>
+    ? FieldDescriptor<TValue, TType>
+    : never
+  : T extends FieldDescriptor<infer TValue, infer TType>
+    ? FieldDescriptor<TValue, TType>
     : never;
+
+export type SchemaFieldType<T> =
+  ResolvedFieldDescriptor<T> extends FieldDescriptor<infer _TValue, infer TType>
+    ? TType
+    : T extends FormSchemaEntry
+      ? FieldType
+      : never;
+
+type InferFieldValue<T> = T extends { _build(): FieldDescriptor<infer V, FieldType> }
+  ? V
+  : T extends FieldDescriptor<infer V, FieldType>
+    ? V
+    : T extends FormSchemaEntry
+      ? unknown
+      : never;
 
 export type SchemaValues<S extends FormSchema> = {
   [K in keyof S]: InferFieldValue<S[K]>;
@@ -251,12 +264,15 @@ export interface FieldRenderProps<V = unknown> {
 
 // ─── useForm return ────────────────────────────────────────────────────────────
 
-export interface UseFormBridgeReturn<Schema extends FormSchema> {
+export interface UseFormBridgeReturn<
+  Schema extends FormSchema,
+  TPlatform extends Platform = Platform,
+> {
   /**
    * The smart Form component — renders a form wrapper.
    * @example <form.Form onSubmit={handleSignUp}> ... <.Form>
    */
-  Form: FormComponent<Schema>;
+  Form: FormComponent<Schema, TPlatform>;
   // Form: FormComponent<S>;
 
   /**
@@ -265,7 +281,7 @@ export interface UseFormBridgeReturn<Schema extends FormSchema> {
    * On native: renders <TextInput>, <Switch>, <Picker>, etc.
    * @example <form.fields.email />
    */
-  fields: FieldComponents<Schema>;
+  fields: FieldComponents<Schema, TPlatform>;
 
   /**
    * Current form state (reactive).
@@ -351,156 +367,641 @@ export interface UseFormBridgeReturn<Schema extends FormSchema> {
 
 // ─── Form component type ─────────────────────────────────────────────────────
 
-export interface FormProps<Schema extends FormSchema> {
+export interface BaseFormProps<Schema extends FormSchema> {
   children: ReactNode;
   onSubmit: (values: SchemaValues<Schema>) => void | Promise<void>;
   onError?: (errors: Partial<Record<keyof Schema, string>>) => void;
   /** Called when submission throws — message shown as submitError */
   onSubmitError?: (error: unknown) => string;
-
-  // Only on web
-  className?: string;
-  style?: FieldStyleValue;
 }
 
-export type FormComponent<Schema extends FormSchema> = {
-  (props: FormProps<Schema>): JSX.Element;
+export type PlatformStyleValue<TPlatform extends Platform = Platform> =
+  TPlatform extends 'web' ? CSSProperties : NativeStyleValue;
+
+export type FormProps<
+  Schema extends FormSchema,
+  TPlatform extends Platform = Platform,
+> = BaseFormProps<Schema> &
+  (TPlatform extends 'web' ? { className?: string } : EmptyProps) & {
+    style?: PlatformStyleValue<TPlatform>;
+  };
+
+export type FormComponent<
+  Schema extends FormSchema,
+  TPlatform extends Platform = Platform,
+> = {
+  (props: FormProps<Schema, TPlatform>): JSX.Element;
   /** A submit button that is automatically disabled + shows loading state */
-  Submit: SubmitButtonComponent;
+  Submit: SubmitButtonComponent<TPlatform>;
 };
 
-export interface SubmitButtonProps {
+export type SubmitButtonProps<TPlatform extends Platform = Platform> = {
   children?: ReactNode;
-  className?: string;
-  style?: FieldStyleValue;
+  style?: PlatformStyleValue<TPlatform>;
   loadingText?: string;
   disabled?: boolean;
-}
-export type SubmitButtonComponent = (props: SubmitButtonProps) => JSX.Element;
+  containerStyle?: TPlatform extends 'native' ? NativeStyleValue : never;
+  textStyle?: TPlatform extends 'native' ? NativeStyleValue : never;
+  indicatorColor?: TPlatform extends 'native' ? string : never;
+} & (TPlatform extends 'web' ? { className?: string } : EmptyProps);
+export type SubmitButtonComponent<TPlatform extends Platform = Platform> = (
+  props: SubmitButtonProps<TPlatform>,
+) => JSX.Element;
 
 // ─── Field components map ─────────────────────────────────────────────────────
 
-export type FieldComponent = (props?: ExtraFieldProps) => React.ReactElement | null;
+type WebClassNames<TSlots extends string> = Partial<Record<TSlots, string>> &
+  Record<string, string | undefined>;
+type WebStyles<TSlots extends string> = Partial<Record<TSlots, CSSProperties>> &
+  Record<string, CSSProperties | undefined>;
+type NativeStyles<TSlots extends string> = Partial<Record<TSlots, NativeStyleValue>> &
+  Record<string, NativeStyleValue | undefined>;
 
-export type FieldComponents<S extends FormSchema> = {
-  [K in keyof S]: FieldComponent;
-};
-
-export type WebFieldSlot =
-  | 'root'
-  | 'label'
-  | 'input'
-  | 'textarea'
-  | 'select'
-  | 'hint'
-  | 'error'
-  | 'checkboxRow'
-  | 'checkboxInput'
-  | 'checkboxLabel'
-  | 'switchRoot'
-  | 'switchTrack'
-  | 'switchThumb'
-  | 'otpContainer'
-  | 'otpInput';
-
-export interface WebFieldUiOverrides {
-  id?: string;
-  hideLabel?: boolean;
-  /** When false, the default red field chrome is suppressed while the error message still renders. */
-  highlightOnError?: boolean;
-
-  classNames?: Partial<Record<WebFieldSlot, string>> & Record<string, string | undefined>;
-  styles?: Partial<Record<WebFieldSlot, CSSProperties>> &
-    Record<string, CSSProperties | undefined>;
-
-  rootProps?: HTMLAttributes<HTMLDivElement>;
-  labelProps?: LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: InputHTMLAttributes<HTMLInputElement>;
-  textareaProps?: TextareaHTMLAttributes<HTMLTextAreaElement>;
-  selectProps?: SelectHTMLAttributes<HTMLSelectElement>;
-  hintProps?: HTMLAttributes<HTMLSpanElement>;
-  errorProps?: HTMLAttributes<HTMLSpanElement>;
-
+type FieldUiRenderers = {
   renderLabel?: (ctx: {
     id: string;
     label: React.ReactNode;
     required: boolean;
   }) => React.ReactNode;
-
   renderHint?: (ctx: { id: string; hint: React.ReactNode }) => React.ReactNode;
-
   renderError?: (ctx: { id: string; error: React.ReactNode }) => React.ReactNode;
-
   renderRequiredMark?: () => React.ReactNode;
+};
 
+type WebFieldUiBase<TSlots extends string> = FieldUiRenderers & {
+  id?: string;
+  hideLabel?: boolean;
+  /** When false, the default red field chrome is suppressed while the error message still renders. */
+  highlightOnError?: boolean;
+  classNames?: WebClassNames<TSlots>;
+  styles?: WebStyles<TSlots>;
+  rootProps?: HTMLAttributes<HTMLDivElement>;
+  labelProps?: LabelHTMLAttributes<HTMLLabelElement>;
+  hintProps?: HTMLAttributes<HTMLSpanElement>;
+  errorProps?: HTMLAttributes<HTMLSpanElement>;
+};
+
+type WebInputBehaviorUi = {
+  readOnly?: boolean;
+  autoComplete?: string;
+  autoFocus?: boolean;
+  spellCheck?: boolean;
+  inputMode?: InputHTMLAttributes<HTMLInputElement>['inputMode'];
+  enterKeyHint?: InputHTMLAttributes<HTMLInputElement>['enterKeyHint'];
+};
+
+type NativeFieldUiBase<TSlots extends string> = FieldUiRenderers & {
+  id?: string;
+  testID?: string;
+  hideLabel?: boolean;
+  /** When false, the default red field chrome is suppressed while the error message still renders. */
+  highlightOnError?: boolean;
+  styles?: NativeStyles<TSlots>;
+  rootProps?: Record<string, unknown>;
+  labelProps?: Record<string, unknown>;
+  hintProps?: Record<string, unknown>;
+  errorProps?: Record<string, unknown>;
+};
+
+type NativeInputBehaviorUi = {
+  readOnly?: boolean;
+  autoComplete?: string;
+  autoFocus?: boolean;
+  keyboardType?: string;
+  secureTextEntry?: boolean;
+};
+
+type WebSharedFieldSlot = 'root' | 'label' | 'hint' | 'error' | 'requiredMark';
+type WebTextFieldSlot = WebSharedFieldSlot | 'input';
+type WebTextareaFieldSlot = WebSharedFieldSlot | 'textarea';
+type WebCheckboxFieldSlot =
+  | WebSharedFieldSlot
+  | 'checkboxRow'
+  | 'checkboxInput'
+  | 'checkboxLabel';
+type WebSwitchFieldSlot =
+  | WebSharedFieldSlot
+  | 'switchRoot'
+  | 'switchTrack'
+  | 'switchThumb';
+type WebSelectFieldSlot = WebSharedFieldSlot | 'select';
+type WebOtpFieldSlot = WebSharedFieldSlot | 'otpContainer' | 'otpInput';
+type WebPasswordFieldSlot =
+  | WebTextFieldSlot
+  | 'toggle'
+  | 'strengthRow'
+  | 'strengthBar'
+  | 'strengthFill'
+  | 'strengthLabel'
+  | 'strengthEntropy'
+  | 'rulesList'
+  | 'ruleItem'
+  | 'ruleBullet'
+  | 'ruleText';
+type WebPhoneFieldSlot =
+  | WebTextFieldSlot
+  | 'row'
+  | 'countryButton'
+  | 'countrySearchInput'
+  | 'countryList'
+  | 'countryItem'
+  | 'countryName'
+  | 'countryDial'
+  | 'e164';
+type WebFileFieldSlot =
+  | WebSharedFieldSlot
+  | 'dropZone'
+  | 'dropZoneIcon'
+  | 'dropZoneText'
+  | 'browseButton'
+  | 'list'
+  | 'listItem'
+  | 'previewImage'
+  | 'fileIcon'
+  | 'fileName'
+  | 'fileMeta'
+  | 'removeButton'
+  | 'addMoreButton';
+type WebAsyncAutocompleteFieldSlot =
+  | WebTextFieldSlot
+  | 'select'
+  | 'listbox'
+  | 'option'
+  | 'optionActive'
+  | 'optionSelected'
+  | 'empty'
+  | 'loading';
+
+export type WebFieldSlot =
+  | WebTextFieldSlot
+  | WebTextareaFieldSlot
+  | WebCheckboxFieldSlot
+  | WebSwitchFieldSlot
+  | WebSelectFieldSlot
+  | WebOtpFieldSlot
+  | WebPasswordFieldSlot
+  | WebPhoneFieldSlot
+  | WebFileFieldSlot
+  | WebAsyncAutocompleteFieldSlot;
+
+export interface WebGlobalFieldUiOverrides extends WebFieldUiBase<WebFieldSlot> {}
+
+export interface WebTextFieldUiOverrides
+  extends WebFieldUiBase<WebTextFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
+}
+
+export interface WebTextareaFieldUiOverrides
+  extends WebFieldUiBase<WebTextareaFieldSlot>,
+    WebInputBehaviorUi {
+  textareaProps?: Omit<
+    TextareaHTMLAttributes<HTMLTextAreaElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
+}
+
+export interface WebCheckboxFieldUiOverrides
+  extends WebFieldUiBase<WebCheckboxFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'checked'
+    | 'defaultChecked'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+    | 'type'
+  >;
+}
+
+export interface WebSwitchFieldUiOverrides
+  extends WebFieldUiBase<WebSwitchFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'checked'
+    | 'defaultChecked'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+    | 'type'
+  >;
+}
+
+export interface WebSelectFieldUiOverrides extends WebFieldUiBase<WebSelectFieldSlot> {
+  selectProps?: Omit<
+    SelectHTMLAttributes<HTMLSelectElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
-export type NativeFieldSlot =
+export interface WebRadioFieldUiOverrides
+  extends WebFieldUiBase<WebCheckboxFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'checked'
+    | 'defaultChecked'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+    | 'type'
+  >;
+  renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
+}
+
+export interface WebOtpFieldUiOverrides
+  extends WebFieldUiBase<WebOtpFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+    | 'type'
+  >;
+}
+
+export interface WebPasswordFieldUiOverrides
+  extends WebFieldUiBase<WebPasswordFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'type'
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
+}
+
+export interface WebPhoneFieldUiOverrides
+  extends WebFieldUiBase<WebPhoneFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'type'
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
+  searchInputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    'value' | 'defaultValue' | 'onChange'
+  >;
+}
+
+export interface WebFileFieldUiOverrides extends WebFieldUiBase<WebFileFieldSlot> {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'type'
+    | 'value'
+    | 'defaultValue'
+    | 'name'
+    | 'id'
+    | 'accept'
+    | 'multiple'
+    | 'disabled'
+    | 'onChange'
+  >;
+  renderFileIcon?: (file: FileValue) => ReactNode;
+}
+
+export interface WebAsyncAutocompleteFieldUiOverrides
+  extends WebFieldUiBase<WebAsyncAutocompleteFieldSlot> {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+    | 'type'
+    | 'role'
+    | 'aria-autocomplete'
+    | 'aria-controls'
+    | 'aria-expanded'
+    | 'aria-activedescendant'
+  >;
+  renderOption?: (
+    option: SelectOption,
+    state: { active: boolean; selected: boolean },
+  ) => React.ReactNode;
+  renderEmpty?: () => React.ReactNode;
+  renderLoading?: () => React.ReactNode;
+  renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
+}
+
+type NativeSharedFieldSlot =
   | 'root'
   | 'label'
   | 'input'
   | 'error'
   | 'hint'
   | 'requiredMark';
+type NativeCheckboxFieldSlot =
+  | NativeSharedFieldSlot
+  | 'checkboxRow'
+  | 'checkboxBox'
+  | 'checkboxLabel';
+type NativeSelectFieldSlot =
+  | NativeSharedFieldSlot
+  | 'optionTrigger'
+  | 'optionRow'
+  | 'optionLabel'
+  | 'modalBackdrop'
+  | 'modalCard';
+type NativeOtpFieldSlot = NativeSharedFieldSlot | 'otpContainer' | 'otpInput';
+type NativePasswordFieldSlot =
+  | NativeSharedFieldSlot
+  | 'strengthRow'
+  | 'strengthBar'
+  | 'strengthFill'
+  | 'toggle'
+  | 'toggleText'
+  | 'strengthLabel';
+type NativePhoneFieldSlot =
+  | NativeSharedFieldSlot
+  | 'row'
+  | 'countryButton'
+  | 'countryFlag'
+  | 'countryDial'
+  | 'chevron'
+  | 'e164'
+  | 'modalBackdrop'
+  | 'modalCard'
+  | 'searchInput'
+  | 'separator'
+  | 'countryRow'
+  | 'countryName';
+type NativeFileFieldSlot =
+  | NativeSharedFieldSlot
+  | 'pickButton'
+  | 'pickButtonText'
+  | 'fileList'
+  | 'fileItem'
+  | 'fileIcon'
+  | 'fileIconText'
+  | 'fileName'
+  | 'fileMeta'
+  | 'removeButton'
+  | 'removeText';
+type NativeAsyncAutocompleteFieldSlot =
+  | NativeSharedFieldSlot
+  | 'trigger'
+  | 'triggerValue'
+  | 'triggerPlaceholder'
+  | 'modalBackdrop'
+  | 'modalCard'
+  | 'searchInput'
+  | 'loadingRow'
+  | 'loadingText'
+  | 'optionRow'
+  | 'optionLabel'
+  | 'emptyText';
 
-export interface NativeFieldUiOverrides {
-  id?: string;
-  hideLabel?: boolean;
-  /** When false, the default red field chrome is suppressed while the error message still renders. */
-  highlightOnError?: boolean;
+export type NativeFieldSlot =
+  | NativeSharedFieldSlot
+  | NativeCheckboxFieldSlot
+  | NativeSelectFieldSlot
+  | NativeOtpFieldSlot
+  | NativePasswordFieldSlot
+  | NativePhoneFieldSlot
+  | NativeFileFieldSlot
+  | NativeAsyncAutocompleteFieldSlot;
 
-  styles?: Partial<Record<NativeFieldSlot, NativeStyleValue>> &
-    Record<string, NativeStyleValue | undefined>;
+export interface NativeGlobalFieldUiOverrides
+  extends NativeFieldUiBase<NativeFieldSlot> {}
 
-  rootProps?: Record<string, unknown>;
-  labelProps?: Record<string, unknown>;
+export interface NativeTextFieldUiOverrides
+  extends NativeFieldUiBase<NativeSharedFieldSlot>,
+    NativeInputBehaviorUi {
   inputProps?: Record<string, unknown>;
-  hintProps?: Record<string, unknown>;
-  errorProps?: Record<string, unknown>;
+}
 
-  renderLabel?: (ctx: {
-    id: string;
-    label: React.ReactNode;
-    required: boolean;
-  }) => React.ReactNode;
+export interface NativeCheckboxFieldUiOverrides
+  extends NativeFieldUiBase<NativeCheckboxFieldSlot> {}
 
-  renderHint?: (ctx: { id: string; hint: React.ReactNode }) => React.ReactNode;
+export interface NativeSwitchFieldUiOverrides
+  extends NativeFieldUiBase<NativeSharedFieldSlot> {}
 
-  renderError?: (ctx: { id: string; error: React.ReactNode }) => React.ReactNode;
-
-  renderRequiredMark?: () => React.ReactNode;
-
+export interface NativeSelectFieldUiOverrides
+  extends NativeFieldUiBase<NativeSelectFieldSlot> {
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
-export type FieldAppearanceOverrides = WebFieldUiOverrides | NativeFieldUiOverrides;
-
-export interface FieldStyleProps {
-  /** Forwarded to the field root on platforms that support it. */
-  className?: string;
-  /** Forwarded to the field root. */
-  style?: FieldStyleValue;
-  /** Cross-platform local field appearance override. */
-  appearance?: FieldAppearanceOverrides;
+export interface NativeOtpFieldUiOverrides
+  extends NativeFieldUiBase<NativeOtpFieldSlot>,
+    NativeInputBehaviorUi {
+  inputProps?: Record<string, unknown>;
 }
 
-export interface ExtraFieldProps extends FieldStyleProps {
+export interface NativePasswordFieldUiOverrides
+  extends NativeFieldUiBase<NativePasswordFieldSlot>,
+    NativeInputBehaviorUi {
+  inputProps?: Record<string, unknown>;
+}
+
+export interface NativePhoneFieldUiOverrides
+  extends NativeFieldUiBase<NativePhoneFieldSlot>,
+    NativeInputBehaviorUi {
+  inputProps?: Record<string, unknown>;
+}
+
+export interface NativeFileFieldUiOverrides
+  extends NativeFieldUiBase<NativeFileFieldSlot> {
+  pickFiles?: (ctx: {
+    descriptor: {
+      _label: string;
+      _required: boolean;
+      _hint?: string;
+      _disabled: boolean;
+      _fileAccept: string[];
+      _fileMaxSize: number | null;
+      _fileMultiple: boolean;
+      _fileMaxFiles: number;
+      _filePreview: boolean;
+      _filePreviewHeight: number;
+      _fileBase64: boolean;
+      _fileDragDropLabel: string;
+    };
+    multiple: boolean;
+  }) => Promise<FileValue[] | FileValue | null>;
+}
+
+export interface NativeAsyncAutocompleteFieldUiOverrides
+  extends NativeFieldUiBase<NativeAsyncAutocompleteFieldSlot>,
+    NativeInputBehaviorUi {
+  inputProps?: Record<string, unknown>;
+  renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
+}
+
+export interface WebFieldUiOverrides
+  extends WebFieldUiBase<WebFieldSlot>,
+    WebInputBehaviorUi {
+  inputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
+  textareaProps?: Omit<
+    TextareaHTMLAttributes<HTMLTextAreaElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
+  selectProps?: Omit<
+    SelectHTMLAttributes<HTMLSelectElement>,
+    | 'value'
+    | 'defaultValue'
+    | 'onChange'
+    | 'onBlur'
+    | 'onFocus'
+    | 'disabled'
+    | 'name'
+    | 'id'
+  >;
+  searchInputProps?: Omit<
+    InputHTMLAttributes<HTMLInputElement>,
+    'value' | 'defaultValue' | 'onChange'
+  >;
+  renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
+  renderOption?: (
+    option: SelectOption,
+    state: { active: boolean; selected: boolean },
+  ) => React.ReactNode;
+  renderEmpty?: () => React.ReactNode;
+  renderLoading?: () => React.ReactNode;
+  renderFileIcon?: (file: FileValue) => ReactNode;
+}
+
+export interface NativeFieldUiOverrides
+  extends NativeFieldUiBase<NativeFieldSlot>,
+    NativeInputBehaviorUi {
+  inputProps?: Record<string, unknown>;
+  renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
+  pickFiles?: (ctx: {
+    descriptor: {
+      _label: string;
+      _required: boolean;
+      _hint?: string;
+      _disabled: boolean;
+      _fileAccept: string[];
+      _fileMaxSize: number | null;
+      _fileMultiple: boolean;
+      _fileMaxFiles: number;
+      _filePreview: boolean;
+      _filePreviewHeight: number;
+      _fileBase64: boolean;
+      _fileDragDropLabel: string;
+    };
+    multiple: boolean;
+  }) => Promise<FileValue[] | FileValue | null>;
+}
+
+export type FieldUiOverrides = WebFieldUiOverrides | NativeFieldUiOverrides;
+
+export type FieldStyleProps<
+  TUi = FieldUiOverrides,
+  TPlatform extends Platform = Platform,
+> = (TPlatform extends 'web'
+  ? {
+      /** Forwarded to the field root on platforms that support it. */
+      className?: string;
+    }
+  : EmptyProps) & {
+  /** Forwarded to the field root. */
+  style?: PlatformStyleValue<TPlatform>;
+  /** Platform-local field UI override. */
+  ui?: TUi;
+};
+
+export type ExtraFieldProps<
+  TUi = FieldUiOverrides,
+  TPlatform extends Platform = Platform,
+> = FieldStyleProps<TUi, TPlatform> & {
   /** Override the label defined in the schema */
   label?: string;
   /** Override placeholder */
   placeholder?: string;
   /** Override hint */
   hint?: string;
-}
+};
 
-export interface FieldTheme extends Pick<FieldStyleProps, 'className' | 'style'> {
-  appearance?: FieldAppearanceOverrides;
-}
+export type FieldTheme<
+  TUi = FieldUiOverrides,
+  TPlatform extends Platform = Platform,
+> = (TPlatform extends 'web' ? { className?: string } : EmptyProps) & {
+  style?: PlatformStyleValue<TPlatform>;
+  ui?: TUi;
+};
 
 export interface WebFormUiOverrides {
   className?: string;
-  style?: FieldStyleValue;
+  style?: CSSProperties;
   props?: Omit<
     FormHTMLAttributes<HTMLFormElement>,
     'children' | 'onSubmit' | 'className' | 'style'
@@ -509,7 +1010,7 @@ export interface WebFormUiOverrides {
 
 export interface WebSubmitUiOverrides {
   className?: string;
-  style?: FieldStyleValue;
+  style?: CSSProperties;
   loadingText?: string;
   props?: Omit<
     ButtonHTMLAttributes<HTMLButtonElement>,
@@ -536,16 +1037,97 @@ export type FormUiOverrides = WebFormUiOverrides | NativeFormUiOverrides;
 
 export type SubmitUiOverrides = WebSubmitUiOverrides | NativeSubmitUiOverrides;
 
-export interface FormBridgeUiOptions {
-  field?: FieldTheme;
-  form?: FormUiOverrides;
-  submit?: SubmitUiOverrides;
-}
+export type PlatformFormUiOverrides<TPlatform extends Platform> = TPlatform extends 'web'
+  ? WebFormUiOverrides
+  : NativeFormUiOverrides;
+
+export type PlatformSubmitUiOverrides<TPlatform extends Platform> =
+  TPlatform extends 'web' ? WebSubmitUiOverrides : NativeSubmitUiOverrides;
+
+export type PlatformGlobalFieldUiOverrides<TPlatform extends Platform> =
+  TPlatform extends 'web' ? WebGlobalFieldUiOverrides : NativeGlobalFieldUiOverrides;
+
+export type PlatformFieldUiOverrides<TPlatform extends Platform> = TPlatform extends 'web'
+  ? WebFieldUiOverrides
+  : NativeFieldUiOverrides;
+
+export type PlatformFieldUiForType<
+  TPlatform extends Platform,
+  TType extends FieldType,
+> = TPlatform extends 'web'
+  ? TType extends 'textarea'
+    ? WebTextareaFieldUiOverrides
+    : TType extends 'checkbox'
+      ? WebCheckboxFieldUiOverrides
+      : TType extends 'switch'
+        ? WebSwitchFieldUiOverrides
+        : TType extends 'select'
+          ? WebSelectFieldUiOverrides | WebAsyncAutocompleteFieldUiOverrides
+          : TType extends 'radio'
+            ? WebRadioFieldUiOverrides
+            : TType extends 'otp'
+              ? WebOtpFieldUiOverrides
+              : TType extends 'password'
+                ? WebPasswordFieldUiOverrides
+                : TType extends 'phone'
+                  ? WebPhoneFieldUiOverrides
+                  : TType extends 'file'
+                    ? WebFileFieldUiOverrides
+                    : TType extends 'custom'
+                      ? WebGlobalFieldUiOverrides
+                      : WebTextFieldUiOverrides
+  : TType extends 'checkbox'
+    ? NativeCheckboxFieldUiOverrides
+    : TType extends 'switch'
+      ? NativeSwitchFieldUiOverrides
+      : TType extends 'select'
+        ? NativeSelectFieldUiOverrides | NativeAsyncAutocompleteFieldUiOverrides
+        : TType extends 'radio'
+          ? NativeSelectFieldUiOverrides
+          : TType extends 'otp'
+            ? NativeOtpFieldUiOverrides
+            : TType extends 'password'
+              ? NativePasswordFieldUiOverrides
+              : TType extends 'phone'
+                ? NativePhoneFieldUiOverrides
+                : TType extends 'file'
+                  ? NativeFileFieldUiOverrides
+                  : TType extends 'custom'
+                    ? NativeGlobalFieldUiOverrides
+                    : NativeTextFieldUiOverrides;
+
+export type FieldPropsForSchemaEntry<
+  TEntry,
+  TPlatform extends Platform,
+> = ExtraFieldProps<
+  PlatformFieldUiForType<TPlatform, SchemaFieldType<TEntry>>,
+  TPlatform
+>;
+
+export type FieldComponent<TProps = ExtraFieldProps> = (
+  props?: TProps,
+) => React.ReactElement | null;
+
+export type FieldComponents<
+  S extends FormSchema,
+  TPlatform extends Platform = Platform,
+> = {
+  [K in keyof S]: FieldComponent<FieldPropsForSchemaEntry<S[K], TPlatform>>;
+};
+
+export type FormBridgeUiOptions<TPlatform extends Platform = Platform> = {
+  field?: FieldTheme<PlatformGlobalFieldUiOverrides<TPlatform>, TPlatform>;
+  form?: PlatformFormUiOverrides<TPlatform>;
+  submit?: PlatformSubmitUiOverrides<TPlatform>;
+};
 
 // ─── useForm options ──────────────────────────────────────────────────────────
 export type ValidationTrigger = 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched';
 
-export interface UseFormOptions<S extends FormSchema> {
+export interface UseFormOptions<
+  S extends FormSchema,
+  TPlatform extends Platform = Platform,
+> {
   /**
    * When validation runs:
    * - `onBlur`   (default) — after field loses focus
@@ -604,7 +1186,7 @@ export interface UseFormOptions<S extends FormSchema> {
    * Global UI layer applied to every rendered field, form wrapper, and submit button.
    * Local field props still win over these defaults.
    */
-  globalAppearance?: FormBridgeUiOptions;
+  globalUi?: FormBridgeUiOptions<TPlatform>;
 }
 
 // ─── Resolver ────────────────────────────────────────────────────────────────

@@ -5,40 +5,28 @@ import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge';
 import { z } from 'zod';
 import styles from './FormExamples.module.css';
 import { ResolverExampleFrame } from './ResolverExampleFrame';
-import { createDemoFieldAppearance, simulateSubmitDelay } from './shared';
+import { createDemoFormUi, simulateSubmitDelay } from './shared';
 
 export function ZodResolverExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
-  const formSchema = useMemo(() => {
-    const { baseFieldAppearance } = createDemoFieldAppearance(styles);
-
-    return {
-      workspaceName: field
-        .text('Workspace')
-        .placeholder('Runi Commerce')
-        .appearance(baseFieldAppearance),
+  const formSchema = useMemo(
+    () => ({
+      workspaceName: field.text('Workspace').placeholder('Runi Commerce'),
       contactEmail: field
         .email('Contact email')
         .placeholder('founder@runilib.dev')
-        .appearance({
-          ...baseFieldAppearance,
+        .behavior({
           inputMode: 'email',
           autoComplete: 'email',
         }),
-      teamSize: field
-        .text('Team size')
-        .placeholder('12')
-        .appearance({
-          ...baseFieldAppearance,
-          inputMode: 'numeric',
-        }),
-      launchDate: field
-        .date('Launch date')
-        .placeholder('2026-05-10')
-        .appearance(baseFieldAppearance),
-    };
-  }, []);
+      teamSize: field.text('Team size').placeholder('12').behavior({
+        inputMode: 'numeric',
+      }),
+      launchDate: field.date('Launch date').placeholder('2026-05-10'),
+    }),
+    [],
+  );
 
   const schema = useMemo(
     () =>
@@ -58,6 +46,7 @@ export function ZodResolverExample() {
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
+    globalUi: createDemoFormUi(styles),
     resolver,
   });
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { type FormSchema, field, useFormWizardBridge } from '@runilib/react-formbridge';
+import { type FormSchema, field, useFormWizard } from '@runilib/react-formbridge';
 import { useWalkit, WalkitStep, type WalkitStepProps } from '@runilib/react-walkit';
 
 import styles from './Settings.module.css';
@@ -68,7 +68,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
     },
   ];
 
-  const wizard = useFormWizardBridge(steps, {
+  const wizard = useFormWizard(steps, {
     onSubmit: async (values) => {
       console.log('submit wizard', values);
     },
@@ -272,7 +272,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
                     desc: 'Guided onboarding tours',
                   },
                   {
-                    name: 'formura',
+                    name: 'react-formbridge',
                     version: 'v1.0.0',
                     status: 'active',
                     desc: 'Cross-platform form state',

@@ -39,8 +39,11 @@
   "react-native": "./dist/index.native.mjs",
   "exports": {
     ".": {
+      "react-native": {
+        "types": "./dist/index.native.d.mts",
+        "default": "./dist/index.native.mjs"
+      },
       "types": "./dist/index.d.mts",
-      "react-native": "./dist/index.native.mjs",
       "import": "./dist/index.mjs",
       "default": "./dist/index.mjs"
     }
@@ -67,6 +70,8 @@
     "tsc:build": "tsc -b tsconfig-build.json",
     "tsc:check": "tsc --noEmit",
     "tsc:watch": "tsc --noEmit --watch",
+    "prepack": "node ../../scripts/package-pack-sourcemaps.mjs hide",
+    "postpack": "node ../../scripts/package-pack-sourcemaps.mjs restore",
     "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "peerDependencies": {
