@@ -19,7 +19,7 @@ export const LogoIcon = ({ size = 36, animated = false }: LogoIconProps) => {
       height={size}
       viewBox="0 0 72 72"
       fill="none"
-      aria-label="Logo image"
+      aria-label="RUNILIB logo"
     >
       <circle
         cx="36"
@@ -120,12 +120,15 @@ export const LogoIcon = ({ size = 36, animated = false }: LogoIconProps) => {
       />
       <text
         x="36"
-        y="43"
-        textAnchor="middle"
-        fontFamily="Sora, sans-serif"
-        fontWeight="800"
-        fontSize="18"
+        y="36"
+        dy="-0.04em"
         fill="#f4f6fa"
+        fontFamily="Sora, Arial, sans-serif"
+        fontSize="11"
+        fontWeight="800"
+        letterSpacing="-0.03em"
+        textAnchor="middle"
+        dominantBaseline="middle"
       >
         R
       </text>

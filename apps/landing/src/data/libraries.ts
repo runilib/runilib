@@ -13,7 +13,7 @@ export const LIBRARIES: LibraryInfo[] = [
     highlights: [
       'WalkitProvider + WalkitStep for web & React Native',
       'SVG / react-native-svg spotlight with padding & radius overrides',
-      '6 animation presets (fade, slide, zoom, bounce, flip, glow)',
+      '6 popover presets on web/iOS, with stability-first native Android rendering',
       'Custom popover via renderPopover or themed defaults',
       'Programmatic control with useWalkit (start/stop/next/goTo)',
       'Analytics hooks with useWalkitEvent (enter/exit/complete/abandon)',

@@ -1,10 +1,5 @@
 import { Tooltip, useWalkit, WalkitStep } from '@runilib/react-walkit';
 
-import { CustomerCheckoutExample } from '../components/form-examples/CustomerCheckoutExample';
-import { CustomMaskExamplesShowcase } from '../components/form-examples/CustomMaskExamplesShowcase';
-import { FieldVariantsShowcase } from '../components/form-examples/FieldVariantsShowcase';
-import { ResolverExamplesShowcase } from '../components/form-examples/ResolverExamplesShowcase';
-import { StylingExamplesShowcase } from '../components/form-examples/StylingExamplesShowcase';
 import { TooltipAnchorWeb } from '../components/walkit-examples/TooltipAnchorWeb';
 import { TooltipPlacementsWeb } from '../components/walkit-examples/TooltipPlacementsWeb';
 import { STEPS } from '../tourConfig';
@@ -12,8 +7,7 @@ import styles from './Dashboard.module.css';
 
 interface Props {
   onGoToSettings: () => void;
-  onGoToWizard: () => void;
-  onRestartTour: () => void;
+  onGoToFormbridge: () => void;
 }
 
 const PROJECTS = [
@@ -105,7 +99,7 @@ const priorityDot: Record<string, string> = {
   Low: '#5bbf7a',
 };
 
-export function Dashboard({ onGoToSettings, onGoToWizard }: Props) {
+export function Dashboard({ onGoToSettings, onGoToFormbridge }: Props) {
   const { start, isRunning } = useWalkit();
 
   return (
@@ -124,10 +118,10 @@ export function Dashboard({ onGoToSettings, onGoToWizard }: Props) {
               { icon: '◻', label: 'My Tasks', active: false, action: undefined },
               { icon: '◻', label: 'Calendar', active: false, action: undefined },
               {
-                icon: '⇄',
-                label: 'Cross-page Wizard',
+                icon: '◫',
+                label: 'Formbridge demos',
                 active: false,
-                action: onGoToWizard,
+                action: onGoToFormbridge,
               },
               { icon: '⚙', label: 'Settings', active: false, action: onGoToSettings },
             ].map((item) => (
@@ -207,9 +201,9 @@ export function Dashboard({ onGoToSettings, onGoToWizard }: Props) {
                 type="button"
                 className="btn btn-ghost"
                 style={{ fontSize: 12 }}
-                onClick={onGoToWizard}
+                onClick={onGoToFormbridge}
               >
-                ⇄ Wizard
+                ◫ Form demos
               </button>
               <button
                 type="button"
@@ -404,11 +398,6 @@ export function Dashboard({ onGoToSettings, onGoToWizard }: Props) {
             </div>
             <TooltipPlacementsWeb />
             <TooltipAnchorWeb />
-            <CustomerCheckoutExample />
-            <FieldVariantsShowcase />
-            <CustomMaskExamplesShowcase />
-            <StylingExamplesShowcase />
-            <ResolverExamplesShowcase />
           </div>
         </div>
       </main>

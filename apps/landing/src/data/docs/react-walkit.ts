@@ -288,6 +288,7 @@ function Dashboard() {
 
 - Visual props: \`animationType\` (default 'slide'),\`overlayColor\` (default rgba(15,15,25,0.72)), \`spotlightPadding\` (default 8), \`spotlightBorderRadius\` (default 8), \`walkitStyle\`, \`theme\`, \`labels\` (next/prev/finish/close, fallback to built-ins).
 - Behavior: \`stopOnOutsideClick\` (default false), \`renderPopover\` to define a global custom renderer for this provider subtree.
+- Native note: on React Native Android, the built-in popover favors stability over motion and enters without a visible popover animation to avoid jitter during step transitions.
 - Flow orchestration: \`steps\`, \`onFlowStepChange\`, and \`stepMountTimeoutMs\` let one tour continue across routes/screens where all target steps are not mounted at once.
 - Resolution rule: provider \`renderPopover\` applies to every step by default, but a step-level \`renderPopover\` can override it for one specific step.
 - If neither the provider nor the active step defines \`renderPopover\`, Walkit uses the built-in popover UI.
@@ -297,7 +298,7 @@ function Dashboard() {
           id: 'rw-provider-props',
           title: 'Props',
           content: `- \`children\` (ReactNode, required): subtree allowed to register steps.
-- \`animationType\` ('fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glow', default 'slide'): popover entrance preset.
+- \`animationType\` ('fade' | 'slide' | 'zoom' | 'bounce' | 'flip' | 'glow', default 'slide'): popover entrance preset on web and iOS; on React Native Android the built-in popover uses a stability-first immediate entrance.
 - \`overlayColor\` (string, default rgba(15,15,25,0.72)): backdrop tint.
 - \`spotlightPadding\` (number, default 8): extra px around target cutout.
 - \`spotlightBorderRadius\` (number, default 8): radius of spotlight cutout.
@@ -775,7 +776,7 @@ export function TooltipPlacementsNative() {
 
 - Declarative hover: use \`openOnHover\` for pointer-first desktop UI.
 - Declarative press: use \`openOnPress\` when the trigger itself is passive and the wrapper should toggle the tooltip.
-- Manual trigger: use a render-function trigger and call \`start\`, \`stop\`, or \`toggle\` yourself when the trigger needs to react to tooltip state.
+- Manual trigger: use a render-function trigger and call \`toggle\` yourself when the trigger needs to react to tooltip state.
 
 Important: if your trigger render function already calls \`toggle\`, do not also set \`openOnPress\`, otherwise you duplicate the interaction handler.`,
           codeTabs: [
@@ -1578,7 +1579,8 @@ export function TourAnalyticsNative() {
       content: `Six presets for the built-in popover: \`fade\`, \`slide\`, \`zoom\`, \`bounce\`, \`flip\`, \`glow\`.
 
 - Set globally on \`WalkitProvider\` with \`animationType\`.
-- The library auto-picks direction for \`slide\` based on placement.`,
+- The library auto-picks direction for \`slide\` based on placement.
+- On React Native Android, the built-in popover uses a stability-first immediate entrance instead of animated motion; the overlay still fades in.`,
       subsections: [
         {
           id: 'rw-animations-list',
@@ -1588,7 +1590,8 @@ export function TourAnalyticsNative() {
 - \`zoom\`: scale 0.85 → 1 (duration ~300ms).
 - \`bounce\`: springy scale overshoot (duration ~500ms, spring curve).
 - \`flip\`: perspective rotateX (duration ~320ms).
-- \`glow\`: subtle scale + glow shadow (duration ~350ms).`,
+- \`glow\`: subtle scale + glow shadow (duration ~350ms).
+- Platform nuance: on web and iOS these presets animate the built-in popover; on React Native Android they remain valid API values but the built-in popover intentionally skips motion to keep step-to-step rendering stable.`,
         },
       ],
       code: {

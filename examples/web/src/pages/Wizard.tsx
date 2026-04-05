@@ -56,7 +56,7 @@ export function Wizard({ onBack }: { onBack: () => void }) {
       storage: 'local',
     },
     onStepChange: ({ step }) => {
-      navigate(`/wizard/${step.id}`);
+      navigate(`/formbridge/wizard/${step.id}`);
     },
     onSubmit: async (values) => {
       console.log('[@examples/web] cross-page wizard submit', values);
@@ -70,7 +70,7 @@ export function Wizard({ onBack }: { onBack: () => void }) {
     }
 
     if (routeStepId !== wizard.currentStepId) {
-      navigate(`/wizard/${wizard.currentStepId}`, { replace: true });
+      navigate(`/formbridge/wizard/${wizard.currentStepId}`, { replace: true });
     }
   }, [navigate, routeStepId, wizard.currentStepId, wizard.isHydrating]);
 

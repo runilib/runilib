@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="49 17 453 172" fill="none">
+  <defs>
+    <radialGradient id="runilib-logo-dark-glow" cx="0" cy="0" r="1" gradientTransform="translate(48 48) rotate(90) scale(44)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123245" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#123245" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="runilib-logo-dark-core" x1="37" y1="34" x2="60" y2="63" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00E5C8"/>
+      <stop offset="1" stop-color="#4F8EF7"/>
+    </linearGradient>
+    <g id="runilib-logo-dark-icon">
+      <circle cx="48" cy="48" r="44" fill="url(#runilib-logo-dark-glow)"/>
+      <circle cx="48" cy="48" r="40" stroke="#00E5C8" stroke-opacity=".34" stroke-width="1.5" stroke-dasharray="6 7"/>
+      <ellipse cx="48" cy="48" rx="31" ry="12" stroke="#00E5C8" stroke-opacity=".24" stroke-width="1.6" transform="rotate(-32 48 48)"/>
+      <ellipse cx="48" cy="48" rx="31" ry="12" stroke="#4F8EF7" stroke-opacity=".22" stroke-width="1.6" transform="rotate(35 48 48)"/>
+      <circle cx="48" cy="48" r="18.5" fill="#081018" stroke="#00E5C8" stroke-width="1.75"/>
+      <circle cx="48" cy="48" r="10.5" fill="url(#runilib-logo-dark-core)" fill-opacity=".16"/>
+      <circle cx="77.5" cy="39" r="3.75" fill="#00E5C8"/>
+      <circle cx="31" cy="17.5" r="3" fill="#F0A500"/>
+      <circle cx="18.5" cy="61.5" r="3" fill="#4F8EF7"/>
+      <text
+        x="48"
+        y="50"
+        dy="-0.04em"
+        fill="#F4F6FA"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="13"
+        font-weight="700"
+        letter-spacing="-.03em"
+        text-anchor="middle"
+        dominant-baseline="middle"
+        text-rendering="geometricPrecision"
+      >
+        R
+      </text>
+    </g>
+  </defs>
+  <use href="#runilib-logo-dark-icon" x="92" y="57" width="148" height="148"/>
+  <text x="202" y="94" fill="#081018" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="700" letter-spacing="-.045em" text-rendering="geometricPrecision">
+    RUNI<tspan fill="#00E5C8">LIB</tspan>
+  </text>
+  <text x="204" y="131" fill="#5B6778" font-family="Menlo, Monaco, Consolas, monospace" font-size="15.5" font-weight="600" letter-spacing=".33em" text-rendering="geometricPrecision">
+    REACT UNIVERSAL <tspan fill="#00E5C8">LIBS</tspan>
+  </text>
+  <path d="M204 152H464" stroke="#00E5C8" stroke-opacity=".32" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="485" cy="152" r="4" fill="#4F8EF7"/>
+</svg>

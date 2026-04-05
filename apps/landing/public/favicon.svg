@@ -1,4 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" fill="none">
-  <circle cx="36" cy="36" r="36" fill="#00e5c8"/>
-  <text x="36" y="50" text-anchor="middle" font-family="Sora,sans-serif" font-weight="800" font-size="36" fill="#0a0c10">R</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <radialGradient id="runilib-favicon-glow" cx="0" cy="0" r="1" gradientTransform="translate(32 32) rotate(90) scale(28)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15394E" stop-opacity=".62"/>
+      <stop offset="1" stop-color="#15394E" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="runilib-favicon-core" x1="24" y1="22" x2="40" y2="43" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00E5C8"/>
+      <stop offset="1" stop-color="#4F8EF7"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="#081018"/>
+  <rect x="4.75" y="4.75" width="54.5" height="54.5" rx="17.25" stroke="#00E5C8" stroke-opacity=".16" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="26" fill="url(#runilib-favicon-glow)"/>
+  <ellipse cx="32" cy="32" rx="18.5" ry="8.5" stroke="#00E5C8" stroke-opacity=".3" stroke-width="1.7" transform="rotate(-28 32 32)"/>
+  <ellipse cx="32" cy="32" rx="18.5" ry="8.5" stroke="#4F8EF7" stroke-opacity=".24" stroke-width="1.7" transform="rotate(35 32 32)"/>
+  <circle cx="32" cy="32" r="13.5" fill="#081018" stroke="#00E5C8" stroke-width="2"/>
+  <circle cx="32" cy="32" r="7.5" fill="url(#runilib-favicon-core)" fill-opacity=".18"/>
+  <circle cx="49" cy="22.5" r="2.8" fill="#00E5C8"/>
+  <circle cx="18" cy="43" r="2.3" fill="#F0A500"/>
+  <text
+    x="32"
+    y="33"
+    dy="-0.04em"
+    fill="#F4F6FA"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="10"
+    font-weight="700"
+    letter-spacing="-.03em"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    text-rendering="geometricPrecision"
+  >
+    R
+  </text>
 </svg>

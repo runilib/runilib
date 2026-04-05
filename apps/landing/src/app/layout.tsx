@@ -83,9 +83,9 @@ export const metadata: Metadata = {
     canonical: 'https://runilib.dev',
   },
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: '/favicon.svg?v=runilib-2',
+    shortcut: '/favicon.svg?v=runilib-2',
+    apple: '/favicon.svg?v=runilib-2',
   },
   other: {
     'google-site-verification': '',
@@ -98,7 +98,7 @@ function JsonLd() {
     '@type': 'Organization',
     name: 'RUNILIB',
     url: 'https://runilib.dev',
-    logo: 'https://runilib.dev/favicon.svg',
+    logo: 'https://runilib.dev/brand/runilib-icon.svg',
     sameAs: ['https://github.com/runilib', 'https://www.npmjs.com/org/runilib'],
     description:
       'Open-source cross-platform React & React Native libraries. Forms, onboarding tours, tooltips and more.',

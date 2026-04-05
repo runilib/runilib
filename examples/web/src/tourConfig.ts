@@ -25,7 +25,7 @@ export const STEPS: { [key in string]: WalkitStepProps } = {
   HEADER: {
     id: 'header',
     sequence: 1,
-    route: '/',
+    route: '/walkit',
     title: 'Welcome to Taskflow 👋',
     content: 'Your personal productivity command center. Let us show you around.',
     // autoStart: {
@@ -36,7 +36,7 @@ export const STEPS: { [key in string]: WalkitStepProps } = {
   NEW_TASK: {
     id: 'new-task',
     sequence: 2,
-    route: '/',
+    route: '/walkit',
     title: '➕ Create a task',
     content:
       'Click here to add a new task. You can set priority, due date, and assignees.',
@@ -44,7 +44,7 @@ export const STEPS: { [key in string]: WalkitStepProps } = {
   FILTERS: {
     id: 'filters',
     sequence: 3,
-    route: '/',
+    route: '/walkit',
     title: '🔍 Filter & search',
     content:
       'Filter tasks by status, priority or assignee. Find what you need instantly.',
@@ -52,28 +52,28 @@ export const STEPS: { [key in string]: WalkitStepProps } = {
   STATS: {
     id: 'stats',
     sequence: 4,
-    route: '/',
+    route: '/walkit',
     title: '📊 Your progress',
     content: 'Track completed tasks, deadlines and team velocity at a glance.',
   },
   TASK_CARD: {
     id: 'task-card',
     sequence: 5,
-    route: '/',
+    route: '/walkit',
     title: '✅ Task cards',
     content: 'Each card shows priority, due date, and progress. Click to expand details.',
   },
   SIDEBAR: {
     id: 'sidebar',
     sequence: 6,
-    route: '/',
+    route: '/walkit',
     title: '🗂️ Projects',
     content: 'Switch between projects here. All your work is organized by project.',
   },
   NOTIFICATIONS: {
     id: 'notifs',
     sequence: 7,
-    route: '/',
+    route: '/walkit',
     title: '🔔 Notifications',
     content: 'Stay on top of mentions, deadlines and team updates.',
   },

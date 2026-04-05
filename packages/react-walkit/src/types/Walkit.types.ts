@@ -453,6 +453,29 @@ export interface WalkitConfig {
   onStepChange?: (step: WalkitStepData, index: number) => void;
 }
 
+/**
+ * Minimal native scroll container contract used by `<WalkitStep />`
+ * when it needs to reveal an off-screen target before measurement.
+ *
+ * This stays intentionally structural so consumers can pass refs coming
+ * from `ScrollView`, `FlatList`, or compatible wrappers without importing
+ * React Native types into the shared public API.
+ */
+export interface WalkitNativeScrollHandle {
+  measureInWindow?: (
+    callback: (x: number, y: number, width: number, height: number) => void,
+  ) => void;
+  scrollTo?: (options: { x?: number; y?: number; animated?: boolean }) => void;
+  getInnerViewNode?: () => unknown;
+}
+
+/**
+ * Ref shape accepted by the native auto-scroll support on `<WalkitStep />`.
+ */
+export interface WalkitNativeScrollRef {
+  current: WalkitNativeScrollHandle | null;
+}
+
 // ─── Provider props ───────────────────────────────────────────────────────────
 
 /**
@@ -646,6 +669,14 @@ interface WalkitStepPropsBase {
    * to scroll a `ScrollView` manually before the step is shown.
    */
   onBeforeShow?: () => void | Promise<void>;
+
+  /**
+   * React Native only.
+   *
+   * Optional scroll container ref used by the built-in native auto-scroll
+   * logic to reveal the target before measuring it.
+   */
+  scrollViewRef?: WalkitNativeScrollRef;
 
   /**
    * Optional auto-start behavior for this step.
@@ -1010,4 +1041,10 @@ export interface WalkitPopoverProps {
    * the positioning engine.
    */
   onMeasure?: (layout: { width: number; height: number }) => void;
+
+  /**
+   * Internal native-only flag used to keep the popover off-screen while
+   * measuring its final size before showing it.
+   */
+  hidden?: boolean;
 }

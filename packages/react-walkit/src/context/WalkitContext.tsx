@@ -301,7 +301,9 @@ export const WalkitContextProvider = ({
         return false;
       }
 
-      setVisible(false);
+      if (visibleRef.current) {
+        setCurrentRect(null);
+      }
 
       try {
         await step.ensureVisible?.();
@@ -387,8 +389,9 @@ export const WalkitContextProvider = ({
       const fromStep = flowSteps.find((step) => step.id === activeFlowStepId) ?? null;
 
       activeStepIdRef.current = null;
-      setVisible(false);
-      setCurrentRect(null);
+      if (visibleRef.current) {
+        setCurrentRect(null);
+      }
 
       await onFlowStepChange({
         action,

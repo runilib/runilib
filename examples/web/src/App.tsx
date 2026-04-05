@@ -2,7 +2,11 @@ import { type RenderWalkitStepProps, WalkitProvider } from '@runilib/react-walki
 
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { AnalyticsLayer } from './AnalyticsLayer';
+import './App.css';
+
 import { Dashboard } from './pages/Dashboard';
+import { FormbridgeExamplesPage } from './pages/FormbridgeExamplesPage';
+import { LibraryHubPage } from './pages/LibraryHubPage';
 import { SETTINGS_STEPS, Settings } from './pages/Settings';
 import { Wizard } from './pages/Wizard';
 import { STEPS, TOUR_LABELS, TOUR_THEME } from './tourConfig';
@@ -50,21 +54,32 @@ export default function App() {
       <Routes>
         <Route
           path="/"
+          element={<LibraryHubPage />}
+        />
+        <Route
+          path="/walkit"
           element={
             <Dashboard
-              onGoToSettings={() => navigate('/settings')}
-              onGoToWizard={() => navigate('/wizard/personal')}
-              onRestartTour={() => navigate('/')}
+              onGoToSettings={() => navigate('/walkit/settings')}
+              onGoToFormbridge={() => navigate('/formbridge')}
             />
           }
         />
         <Route
-          path="/wizard/:stepId"
-          element={<Wizard onBack={() => navigate('/')} />}
+          path="/walkit/settings"
+          element={<Settings onBack={() => navigate('/walkit')} />}
         />
         <Route
-          path="/settings"
-          element={<Settings onBack={() => navigate('/')} />}
+          path="/formbridge"
+          element={
+            <FormbridgeExamplesPage
+              onOpenWizard={() => navigate('/formbridge/wizard/personal')}
+            />
+          }
+        />
+        <Route
+          path="/formbridge/wizard/:stepId"
+          element={<Wizard onBack={() => navigate('/formbridge')} />}
         />
         <Route
           path="*"

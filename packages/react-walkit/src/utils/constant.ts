@@ -18,7 +18,7 @@ const DEFAULT_THEME: Required<WalkitTheme> = {
   subTitleColor: '#6b7280',
   border: '#e5e7eb',
   shadow: '',
-  borderRadius: '14px',
+  borderRadius: '5px',
 };
 
 export {

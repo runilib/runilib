@@ -2,6 +2,7 @@ import { type FC, useEffect, useRef } from 'react';
 import {
   Animated,
   type LayoutChangeEvent,
+  PixelRatio,
   Platform,
   StyleSheet,
   Text,
@@ -27,11 +28,34 @@ export const NativeWalkitContent = ({
   onPrev,
   onStop,
   onMeasure,
+  hidden = false,
 }: WalkitPopoverProps) => {
   const theme = { ...DEFAULT_THEME, ...themeProp };
   const progress = useRef(new Animated.Value(0)).current;
+  const resolvedTop =
+    Platform.OS === 'android'
+      ? PixelRatio.roundToNearestPixel(walkitStepPosition.top)
+      : walkitStepPosition.top;
+  const resolvedLeft =
+    Platform.OS === 'android'
+      ? PixelRatio.roundToNearestPixel(walkitStepPosition.left)
+      : walkitStepPosition.left;
+  const resolvedArrowOffset =
+    Platform.OS === 'android'
+      ? PixelRatio.roundToNearestPixel(walkitStepPosition.arrowOffset)
+      : walkitStepPosition.arrowOffset;
 
   useEffect(() => {
+    if (hidden) {
+      progress.setValue(0);
+      return;
+    }
+
+    if (Platform.OS === 'android') {
+      progress.setValue(1);
+      return;
+    }
+
     progress.setValue(0);
     const animationConfig = NATIVE_ANIMATIONS[animationType] ?? NATIVE_ANIMATIONS.fade;
 
@@ -48,7 +72,7 @@ export const NativeWalkitContent = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [animationType, progress]);
+  }, [animationType, hidden, progress]);
 
   const isFirst = walkitStepIndex === 0;
   const isLast = walkitStepIndex === totalWalkitSteps - 1;
@@ -58,12 +82,13 @@ export const NativeWalkitContent = ({
   const containerStyle = [
     styles.container,
     {
-      top: walkitStepPosition.top,
-      left: walkitStepPosition.left,
+      top: resolvedTop,
+      left: resolvedLeft,
       backgroundColor: theme.background,
       borderColor: theme.border,
     },
     walkitStyle,
+    hidden && styles.hiddenMeasure,
   ];
 
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -74,6 +99,7 @@ export const NativeWalkitContent = ({
     return (
       <Animated.View
         onLayout={handleLayout}
+        pointerEvents={hidden ? 'none' : 'auto'}
         style={[containerStyle, animationStyle]}
       >
         {renderPopover({
@@ -87,7 +113,7 @@ export const NativeWalkitContent = ({
         <Arrow
           placement={walkitStepPosition.placement}
           color={theme.background}
-          offset={walkitStepPosition.arrowOffset}
+          offset={resolvedArrowOffset}
         />
       </Animated.View>
     );
@@ -96,6 +122,7 @@ export const NativeWalkitContent = ({
   return (
     <Animated.View
       onLayout={handleLayout}
+      pointerEvents={hidden ? 'none' : 'auto'}
       style={[containerStyle, animationStyle]}
     >
       <View style={styles.header}>
@@ -168,7 +195,7 @@ export const NativeWalkitContent = ({
       <Arrow
         placement={walkitStepPosition.placement}
         color={theme.background}
-        offset={walkitStepPosition.arrowOffset}
+        offset={resolvedArrowOffset}
       />
     </Animated.View>
   );
@@ -310,7 +337,7 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     width: 290,
-    borderRadius: 14,
+    borderRadius: 5,
     padding: 18,
     borderWidth: 1,
     ...Platform.select({
@@ -322,6 +349,11 @@ const styles = StyleSheet.create({
       },
       android: { elevation: 12 },
     }),
+  },
+  hiddenMeasure: {
+    top: -10000,
+    left: 0,
+    opacity: 0,
   },
   header: {
     flexDirection: 'row',

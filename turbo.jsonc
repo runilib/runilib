@@ -37,10 +37,6 @@
     "check": {
       "outputs": []
     },
-    "check:fix": {
-      "cache": false,
-      "outputs": []
-    },
 
     // Typecheck
     "typecheck": {

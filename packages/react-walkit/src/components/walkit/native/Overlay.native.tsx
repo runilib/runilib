@@ -1,12 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Animated,
-  Dimensions,
-  Modal,
   Platform,
-  StatusBar,
   StyleSheet,
   TouchableWithoutFeedback,
+  useWindowDimensions,
 } from 'react-native';
 
 import Svg, { Defs, Mask, Rect } from 'react-native-svg';
@@ -15,8 +20,6 @@ import { easeOut, lerp } from '../../../utils/helpers';
 import { getSpotlightRect } from '../../../utils/positioning.shared';
 import { computeWalkitStepPosition } from '../../../utils/Walkit.positioning';
 import { NativeWalkitContent } from './Walkit.native';
-
-const { width: SW, height: SH } = Dimensions.get('window');
 
 export const NativeOverlay = ({
   visible,
@@ -37,9 +40,15 @@ export const NativeOverlay = ({
   onPrev,
   onStop,
 }: OverlayProps) => {
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const overlayOpacity = useRef(new Animated.Value(0)).current;
   const [spot, setSpot] = useState<SpotlightRect | null>(null);
-  const [walkitStepSize, setWalkitStepSize] = useState({ width: 290, height: 180 });
+  const [measuredWalkitStep, setMeasuredWalkitStep] = useState<{
+    stepId: string;
+    width: number;
+    height: number;
+  } | null>(null);
+  const sizeCacheRef = useRef<Record<string, { width: number; height: number }>>({});
   const prevRef = useRef<SpotlightRect | null>(null);
   const rafRef = useRef<number>(0);
 
@@ -48,46 +57,80 @@ export const NativeOverlay = ({
 
   const effectiveSpotlightBorderRadius =
     currentWalkitStep?.spotlightBorderRadiusOverride ?? spotlightBorderRadius;
+  const currentStepId = currentWalkitStep?.id ?? null;
+  const cachedWalkitStepSize = currentStepId ? sizeCacheRef.current[currentStepId] : null;
+  const activeWalkitStepSize =
+    measuredWalkitStep?.stepId === currentStepId
+      ? {
+          width: measuredWalkitStep.width,
+          height: measuredWalkitStep.height,
+        }
+      : cachedWalkitStepSize;
+  const hasMeasuredWalkitStep = activeWalkitStepSize != null;
+  const positioningSize = activeWalkitStepSize ?? { width: 290, height: 180 };
+
+  const spotlightTarget = useMemo(() => {
+    if (!currentRect) {
+      return null;
+    }
+
+    return getSpotlightRect(
+      currentRect,
+      effectiveSpotlightPadding,
+      effectiveSpotlightBorderRadius,
+    );
+  }, [currentRect, effectiveSpotlightPadding, effectiveSpotlightBorderRadius]);
 
   const walkitStepPosition = useMemo(() => {
-    if (!currentRect || !currentWalkitStep) {
+    if (!visible || !spot || !currentWalkitStep) {
       return null;
     }
 
     return computeWalkitStepPosition({
-      target: getSpotlightRect(
-        currentRect,
-        effectiveSpotlightPadding,
-        effectiveSpotlightBorderRadius,
-      ),
-      walkitStepSize,
+      target: spot,
+      walkitStepSize: positioningSize,
       preferredPlacement: currentWalkitStep.placement ?? 'auto',
-      screenWidth: SW,
-      screenHeight: SH,
+      screenWidth: screenWidth,
+      screenHeight: screenHeight,
     });
-  }, [
-    currentRect,
-    currentWalkitStep,
-    walkitStepSize,
-    effectiveSpotlightPadding,
-    effectiveSpotlightBorderRadius,
-  ]);
+  }, [visible, spot, currentWalkitStep, positioningSize, screenWidth, screenHeight]);
 
-  const onMesure = useCallback((layout: { width: number; height: number }) => {
-    const nextWidth = Math.ceil(layout?.width);
-    const nextHeight = Math.ceil(layout.height);
+  const onMesure = useCallback(
+    (layout: { width: number; height: number }) => {
+      const nextWidth = Math.ceil(layout?.width);
+      const nextHeight = Math.ceil(layout.height);
 
-    setWalkitStepSize((previousSize) => {
-      if (previousSize.width === nextWidth && previousSize.height === nextHeight) {
-        return previousSize;
+      if (nextWidth <= 0 || nextHeight <= 0) {
+        return;
       }
 
-      return {
-        width: nextWidth,
-        height: nextHeight,
-      };
-    });
-  }, []);
+      const activeStepId = currentWalkitStep?.id;
+
+      if (activeStepId) {
+        sizeCacheRef.current[activeStepId] = {
+          width: nextWidth,
+          height: nextHeight,
+        };
+        setMeasuredWalkitStep((previousSize) => {
+          if (
+            previousSize &&
+            previousSize.stepId === activeStepId &&
+            previousSize.width === nextWidth &&
+            previousSize.height === nextHeight
+          ) {
+            return previousSize;
+          }
+
+          return {
+            stepId: activeStepId,
+            width: nextWidth,
+            height: nextHeight,
+          };
+        });
+      }
+    },
+    [currentWalkitStep?.id],
+  );
 
   useEffect(() => {
     Animated.timing(overlayOpacity, {
@@ -97,22 +140,22 @@ export const NativeOverlay = ({
     }).start();
   }, [visible, overlayOpacity]);
 
-  useEffect(() => {
-    if (!visible || !currentRect) {
+  useLayoutEffect(() => {
+    if (!visible || !spotlightTarget) {
+      setSpot(null);
+      prevRef.current = null;
       return;
     }
-
-    const target = getSpotlightRect(currentRect, spotlightPadding, spotlightBorderRadius);
 
     cancelAnimationFrame(rafRef.current);
 
-    if (Platform.OS === 'android') {
-      setSpot(target);
-      prevRef.current = target;
+    if (Platform.OS === 'android' || !prevRef.current) {
+      setSpot(spotlightTarget);
+      prevRef.current = spotlightTarget;
       return;
     }
 
-    const from = prevRef.current ?? target;
+    const from = prevRef.current ?? spotlightTarget;
     const startTime = Date.now();
     const duration = 280;
     const tick = (): void => {
@@ -120,11 +163,11 @@ export const NativeOverlay = ({
       const eased = easeOut(t);
 
       setSpot({
-        x: lerp(from.x, target.x, eased),
-        y: lerp(from.y, target.y, eased),
-        width: lerp(from.width, target.width, eased),
-        height: lerp(from.height, target.height, eased),
-        borderRadius: target.borderRadius,
+        x: lerp(from.x, spotlightTarget.x, eased),
+        y: lerp(from.y, spotlightTarget.y, eased),
+        width: lerp(from.width, spotlightTarget.width, eased),
+        height: lerp(from.height, spotlightTarget.height, eased),
+        borderRadius: spotlightTarget.borderRadius,
       });
 
       if (t < 1) {
@@ -133,10 +176,10 @@ export const NativeOverlay = ({
     };
 
     rafRef.current = requestAnimationFrame(tick);
-    prevRef.current = target;
+    prevRef.current = spotlightTarget;
 
     return () => cancelAnimationFrame(rafRef.current);
-  }, [visible, currentRect, spotlightPadding, spotlightBorderRadius]);
+  }, [visible, spotlightTarget]);
 
   if (!visible) {
     return null;
@@ -145,89 +188,88 @@ export const NativeOverlay = ({
   const fill = overlayColor ?? 'rgba(15,15,25,0.75)';
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      statusBarTranslucent
-      onRequestClose={onStop}
+    <Animated.View
+      pointerEvents="box-none"
+      style={[StyleSheet.absoluteFill, styles.overlayRoot, { opacity: overlayOpacity }]}
     >
-      <StatusBar
-        translucent
-        backgroundColor="transparent"
-      />
-
-      <Animated.View style={[StyleSheet.absoluteFill, { opacity: overlayOpacity }]}>
-        <TouchableWithoutFeedback onPress={stopOnOutsideClick ? onStop : undefined}>
-          <Svg
-            width={SW}
-            height={SH}
-            style={StyleSheet.absoluteFill}
-          >
-            <Defs>
-              <Mask id="uc-native-mask">
-                <Rect
-                  x={0}
-                  y={0}
-                  width={SW}
-                  height={SH}
-                  fill="white"
-                />
-                {spot && (
-                  <Rect
-                    x={spot.x}
-                    y={spot.y}
-                    width={spot.width}
-                    height={spot.height}
-                    rx={spot.borderRadius}
-                    fill="black"
-                  />
-                )}
-              </Mask>
-            </Defs>
-
-            <Rect
-              x={0}
-              y={0}
-              width={SW}
-              height={SH}
-              fill={fill}
-              mask="url(#uc-native-mask)"
-            />
-
-            {spot && (
+      <TouchableWithoutFeedback onPress={stopOnOutsideClick ? onStop : undefined}>
+        <Svg
+          width={screenWidth}
+          height={screenHeight}
+          style={StyleSheet.absoluteFill}
+        >
+          <Defs>
+            <Mask id="uc-native-mask">
               <Rect
-                x={spot.x - 1}
-                y={spot.y - 1}
-                width={spot.width + 2}
-                height={spot.height + 2}
-                rx={(spot.borderRadius ?? 8) + 1}
-                fill="none"
-                stroke="rgba(99,102,241,0.7)"
-                strokeWidth={2}
+                x={0}
+                y={0}
+                width={screenWidth}
+                height={screenHeight}
+                fill="white"
               />
-            )}
-          </Svg>
-        </TouchableWithoutFeedback>
+              {spot && (
+                <Rect
+                  x={spot.x}
+                  y={spot.y}
+                  width={spot.width}
+                  height={spot.height}
+                  rx={spot.borderRadius}
+                  fill="black"
+                />
+              )}
+            </Mask>
+          </Defs>
 
-        {walkitStepPosition && currentWalkitStep && (
-          <NativeWalkitContent
-            walkitStep={currentWalkitStep}
-            walkitStepIndex={walkitStepIndex}
-            totalWalkitSteps={totalWalkitSteps}
-            walkitStepPosition={walkitStepPosition}
-            animationType={animationType}
-            theme={theme}
-            walkitStyle={walkitStyle}
-            renderPopover={renderPopover}
-            labels={labels}
-            onNext={onNext}
-            onPrev={onPrev}
-            onStop={onStop}
-            onMeasure={onMesure}
+          <Rect
+            x={0}
+            y={0}
+            width={screenWidth}
+            height={screenHeight}
+            fill={fill}
+            mask="url(#uc-native-mask)"
           />
-        )}
-      </Animated.View>
-    </Modal>
+
+          {spot && (
+            <Rect
+              x={spot.x - 1}
+              y={spot.y - 1}
+              width={spot.width + 2}
+              height={spot.height + 2}
+              rx={(spot.borderRadius ?? 8) + 1}
+              fill="none"
+              stroke="rgba(99,102,241,0.7)"
+              strokeWidth={2}
+            />
+          )}
+        </Svg>
+      </TouchableWithoutFeedback>
+
+      {walkitStepPosition && currentWalkitStep && (
+        <NativeWalkitContent
+          key={`${currentStepId ?? 'unknown'}:${hasMeasuredWalkitStep ? 'ready' : 'measure'}`}
+          walkitStep={currentWalkitStep}
+          walkitStepIndex={walkitStepIndex}
+          totalWalkitSteps={totalWalkitSteps}
+          walkitStepPosition={walkitStepPosition}
+          animationType={animationType}
+          theme={theme}
+          walkitStyle={walkitStyle}
+          renderPopover={renderPopover}
+          labels={labels}
+          onNext={onNext}
+          onPrev={onPrev}
+          onStop={onStop}
+          onMeasure={onMesure}
+          hidden={!hasMeasuredWalkitStep}
+        />
+      )}
+    </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  overlayRoot: {
+    zIndex: 9999,
+    elevation: 9999,
+  },
+});

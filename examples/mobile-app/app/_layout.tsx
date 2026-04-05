@@ -11,10 +11,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar
-        style="dark"
-        backgroundColor="#f9f5ee"
-      />
+      <StatusBar style="auto" />
       <WalkitProvider
         animationType="bounce"
         overlayColor="rgba(20,16,10,0.80)"
