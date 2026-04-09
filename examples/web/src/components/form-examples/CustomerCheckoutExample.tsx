@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import { field, MASKS, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import {
@@ -19,24 +19,27 @@ export function CustomerCheckoutExample() {
   const checkoutSchema = useMemo(() => {
     return {
       firstName: field
-        .text('First name')
+        .text()
         .required('First name is required')
+        .label('First name')
         .trim()
         .placeholder('Ava')
         .behavior({
           autoComplete: 'given-name',
         }),
       lastName: field
-        .text('Last name')
+        .text()
         .required('Last name is required')
+        .label('Last name')
         .trim()
         .placeholder('Stone')
         .behavior({
           autoComplete: 'family-name',
         }),
       email: field
-        .email('Email')
+        .email()
         .required('Email is required')
+        .label('Email')
         .trim()
         .lowercase()
         .placeholder('ava@runilib.dev')
@@ -49,8 +52,9 @@ export function CustomerCheckoutExample() {
           'Please use a professional email address.',
         ),
       entrepriseEmail: field
-        .email('Entreprise Email')
+        .email()
         .required('Email is required')
+        .label('Work email')
         .trim()
         .lowercase()
         .placeholder('ava@runilib.dev')
@@ -63,27 +67,31 @@ export function CustomerCheckoutExample() {
           'Please use a professional email address.',
         ),
       phone: field
-        .tel('Phone')
+        .tel()
         .required('Phone is required')
+        .label('Phone')
         .placeholder('+33 6 12 34 56 78')
         .behavior({
           autoComplete: 'tel',
           inputMode: 'tel',
         }),
       department: field
-        .select('Department')
+        .select()
+        .label('Department')
         .options(CUSTOMER_DEPARTMENTS)
         .required('Department is required'),
       city: field
-        .text('City')
+        .text()
         .required('City is required')
+        .label('City')
         .trim()
         .placeholder('Paris')
         .behavior({
           autoComplete: 'address-level2',
         }),
       customerCode: field
-        .masked('Customer code', 'LL-9999')
+        .masked('LL-9999')
+        .label('Customer code')
         .tokens({
           L: /[A-Z]/,
         })
@@ -96,7 +104,8 @@ export function CustomerCheckoutExample() {
           autoComplete: 'off',
         }),
       cardNumber: field
-        .masked('Card number', 'CARD_16')
+        .masked(MASKS.CARD_16)
+        .label('Card number')
         .required('Card number is required')
         .showMaskInPlaceholder()
         .validateComplete('Complete the card number.')
@@ -104,7 +113,8 @@ export function CustomerCheckoutExample() {
           autoComplete: 'cc-number',
         }),
       expiry: field
-        .masked('Expiry', 'EXPIRY')
+        .masked(MASKS.EXPIRY)
+        .label('Expiry')
         .required('Expiry date is required')
         .showMaskInPlaceholder()
         .validateComplete('Complete the expiry date.')
@@ -112,7 +122,8 @@ export function CustomerCheckoutExample() {
           autoComplete: 'cc-exp',
         }),
       cvv: field
-        .masked('CVV', 'CVV')
+        .masked(MASKS.CVV)
+        .label('CVV')
         .required('CVV is required')
         .showMaskInPlaceholder()
         .validateComplete('Complete the CVV.')
@@ -125,14 +136,14 @@ export function CustomerCheckoutExample() {
   const checkoutForm = useFormBridge(checkoutSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
     persist: {
       key: 'dashboard-customer-checkout',
       storage: 'local',
     },
   });
 
-  const { Form, fields, state, watchAll } = checkoutForm;
+  const { Form, fields, state, watchAll, FieldError, FieldLabel } = checkoutForm;
 
   const checkoutFieldCount = Object.keys(checkoutSchema).length;
   const liveCheckout = watchAll();
@@ -211,7 +222,20 @@ export function CustomerCheckoutExample() {
             }}
           >
             <div className={styles.formRow}>
-              <fields.firstName ui={{ inputProps: { 'aria-checked': 'false' } }} />
+              <fields.firstName
+                inputProps={{ 'aria-checked': 'false' }}
+                styles={{
+                  error: { borderColor: 'red' },
+                  input: { borderColor: state.errors.firstName ? 'red' : '' },
+                }}
+                renderLabel={(props) => {
+                  return <label htmlFor={props.name}>{props.label} *</label>;
+                }}
+                renderError={(props) => {
+                  return <p style={{ color: 'red' }}>{props.error}</p>;
+                }}
+                renderRequiredMark={() => <p>DDDD</p>}
+              />
               <fields.lastName />
             </div>
 
@@ -224,8 +248,15 @@ export function CustomerCheckoutExample() {
             </div>
 
             <div className={styles.formRow}>
-              <fields.city />
-              <fields.customerCode ui={compactFieldUi} />
+              <div>
+                <FieldLabel name="city" />
+                <fields.city hideLabel />
+                <FieldError
+                  style={{ color: 'red' }}
+                  name="city"
+                />
+              </div>
+              <fields.customerCode {...compactFieldUi} />
             </div>
 
             <div className={styles.paymentSection}>
@@ -242,20 +273,8 @@ export function CustomerCheckoutExample() {
               <fields.cardNumber />
 
               <div className={styles.formRow}>
-                <fields.expiry ui={compactFieldUi} />
-                <fields.cvv
-                  ui={{
-                    ...compactFieldUi,
-                    styles: {
-                      ...compactFieldUi.styles,
-                      input: {
-                        ...compactFieldUi.styles?.input,
-                        letterSpacing: '0.18em',
-                        textAlign: 'center',
-                      },
-                    },
-                  }}
-                />
+                <fields.expiry {...compactFieldUi} />
+                <fields.cvv />
               </div>
             </div>
 

@@ -1,5 +1,5 @@
 /**
- * Formbridge — Reactive Conditional Fields
+ * React Formbridge — Reactive Conditional Fields
  * ──────────────────────────────────────────
  * Declarative, reactive show/hide and required/not-required rules
  * that update automatically whenever form values change.
@@ -14,8 +14,9 @@
  *   - disabledWhen:       same API as visibleWhen
  */
 
-// ─── Condition types ──────────────────────────────────────────────────────────
+import type { FormSchema } from '../../types/schema';
 
+// ─── Condition types ──────────────────────────────────────────────────────────
 export type ConditionPredicate = (values: Record<string, unknown>) => boolean;
 
 type SimpleCondition =
@@ -86,7 +87,6 @@ function evaluateCondition(
 }
 
 // ─── FieldConditions — stored per field ──────────────────────────────────────
-
 export interface FieldConditions {
   /** Field is visible only when ALL visibleWhen conditions pass */
   visible: Condition[];
@@ -111,7 +111,6 @@ export const DEFAULT_FIELD_CONDITIONS: FieldConditions = {
 };
 
 // ─── Evaluate all conditions for all fields ───────────────────────────────────
-
 export interface FieldVisibilityState {
   visible: boolean;
   required: boolean;
@@ -124,7 +123,7 @@ export type VisibilityMap = Record<string, FieldVisibilityState>;
  * Evaluate all field conditions given the current form values.
  * Returns a map of { fieldName → { visible, required, disabled } }.
  */
-export function evaluateAllConditions(
+export function evaluateAllConditions<_K extends keyof FormSchema>(
   conditionsMap: Record<string, FieldConditions>,
   values: Record<string, unknown>,
 ): VisibilityMap {

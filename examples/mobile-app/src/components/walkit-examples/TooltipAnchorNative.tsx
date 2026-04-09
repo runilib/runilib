@@ -8,6 +8,8 @@ export function TooltipAnchorNative() {
       <Tooltip
         openOnPress
         content="This example uses the anchor prop."
+        anchorColor="#1d4ed8"
+        tooltipStyle={{ backgroundColor: '#1d4ed8' }}
         anchor={
           <View
             style={{
@@ -25,14 +27,15 @@ export function TooltipAnchorNative() {
       />
 
       <Tooltip
+        anchorColor="#1d4ed8"
         renderContent={({ hide }) => (
           <Pressable
             onPress={hide}
             style={{
-              backgroundColor: '#0f172a',
+              backgroundColor: '#1d4ed8',
               paddingHorizontal: 16,
               paddingVertical: 14,
-              borderRadius: 16,
+              borderRadius: 4,
             }}
           >
             <Text style={{ color: '#fff', fontWeight: '700' }}>Tap to close</Text>
@@ -45,11 +48,11 @@ export function TooltipAnchorNative() {
             style={{
               paddingHorizontal: 14,
               paddingVertical: 10,
-              borderRadius: 12,
-              backgroundColor: visible ? '#0f172a' : '#e2e8f0',
+              borderRadius: 4,
+              backgroundColor: visible ? '#dbeafe' : '#eff6ff',
             }}
           >
-            <Text style={{ color: visible ? '#fff' : '#0f172a', fontWeight: '700' }}>
+            <Text style={{ color: '#1d4ed8', fontWeight: '700' }}>
               {visible ? 'Hide details' : 'Open details'}
             </Text>
           </Pressable>

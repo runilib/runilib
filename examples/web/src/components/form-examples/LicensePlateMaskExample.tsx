@@ -13,11 +13,11 @@ export function LicensePlateMaskExample() {
   const formSchema = useMemo(
     () => ({
       vehicleName: field
-        .text('Vehicle label')
+        .text()
         .required('Vehicle label is required')
         .placeholder('North district van'),
       licensePlate: field
-        .masked('License plate', 'LL-999-LL')
+        .masked('LL-999-LL')
         .tokens({
           L: /[A-Z]/,
         })
@@ -32,7 +32,7 @@ export function LicensePlateMaskExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -78,7 +78,7 @@ export function LicensePlateMaskExample() {
       >
         <div className={styles.formRow}>
           <fields.vehicleName />
-          <fields.licensePlate ui={compactFieldUi} />
+          <fields.licensePlate {...compactFieldUi} />
         </div>
 
         <div className={styles.footerRow}>

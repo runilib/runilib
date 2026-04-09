@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack --port 3000",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 3000",
     "lint": "biome lint src .",
     "lint:fix": "biome lint --write src .",
     "check": "biome check src .",
@@ -17,6 +17,7 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
+    "@runilib/react-formbridge": "workspace:*",
     "@runilib/react-walkit": "workspace:*",
     "lucide-react": "^0.577.0",
     "next": "^15.3.2",

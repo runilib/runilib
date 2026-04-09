@@ -1,15 +1,15 @@
-import type { ColorValue, ImageStyle, StyleProp } from 'react-native';
+import type {
+  ColorValue,
+  ImageStyle,
+  StyleProp,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
 
-import type { ExtraFieldProps, NativeFieldUiOverrides } from '../../types';
-
-export type NativeExtraProps<TNative = NativeFieldUiOverrides> = Omit<
-  ExtraFieldProps,
-  'ui'
-> & {
-  ui?: TNative;
-};
+import type { NativeFieldUiOverrides } from '../../types/ui-native';
 
 export type NativeBaseUiOverrides = NativeFieldUiOverrides;
+export const NATIVE_ERROR_COLOR = '#ef4444';
 
 export type ResolvedNativeFieldUi = Pick<
   NativeFieldUiOverrides,
@@ -51,9 +51,39 @@ export function defaultBorderColor(
   hasError: boolean,
   highlightOnError = true,
   defaultColor: ColorValue = '#e5e7eb',
-  errorColor: ColorValue = '#ef4444',
+  errorColor: ColorValue = NATIVE_ERROR_COLOR,
 ): ColorValue {
   return hasError && highlightOnError ? errorColor : defaultColor;
+}
+
+export function defaultErrorChromeStyle(
+  hasError: boolean,
+  highlightOnError: boolean,
+): ViewStyle | undefined {
+  if (!hasError || !highlightOnError) {
+    return undefined;
+  }
+
+  return {
+    borderColor: NATIVE_ERROR_COLOR,
+    borderWidth: 1,
+  };
+}
+
+export function defaultErrorTextStyle(hasError: boolean): TextStyle | undefined {
+  if (!hasError) {
+    return undefined;
+  }
+
+  return {
+    color: NATIVE_ERROR_COLOR,
+  };
+}
+
+export function defaultRequiredMarkStyle(): TextStyle {
+  return {
+    color: NATIVE_ERROR_COLOR,
+  };
 }
 
 export type NativeTextFieldDescriptorWebLike = {

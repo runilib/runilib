@@ -1,8 +1,5 @@
 import React, {
   type CSSProperties,
-  type HTMLAttributes,
-  type InputHTMLAttributes,
-  type LabelHTMLAttributes,
   type ReactNode,
   useCallback,
   useEffect,
@@ -14,76 +11,20 @@ import React, {
 
 import type { BuiltFileDescriptor } from '../../core/field-builders/file/FileField';
 import type { FileValue } from '../../core/field-builders/file/types';
-import type { FieldRenderProps } from '../../types';
+import type { FieldRenderProps, WebFileFieldUiOverrides } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
+import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
-  defaultBorderColor,
+  defaultErrorChromeStyle,
   type ResolvedWebFieldUi,
   shouldHighlightOnError,
 } from './shared';
-
-type FileSlot =
-  | 'root'
-  | 'label'
-  | 'dropZone'
-  | 'dropZoneIcon'
-  | 'dropZoneText'
-  | 'browseButton'
-  | 'list'
-  | 'listItem'
-  | 'previewImage'
-  | 'fileIcon'
-  | 'fileName'
-  | 'fileMeta'
-  | 'removeButton'
-  | 'addMoreButton'
-  | 'error'
-  | 'hint';
-
-interface FileUiOverrides {
-  id?: string;
-  hideLabel?: boolean;
-  highlightOnError?: boolean;
-  classNames?: Partial<Record<FileSlot, string>>;
-  styles?: Partial<Record<FileSlot, CSSProperties>>;
-  rootProps?: HTMLAttributes<HTMLDivElement>;
-  labelProps?: LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    | 'type'
-    | 'value'
-    | 'defaultValue'
-    | 'name'
-    | 'id'
-    | 'accept'
-    | 'multiple'
-    | 'disabled'
-    | 'onChange'
-  >;
-  hintProps?: HTMLAttributes<HTMLParagraphElement>;
-  errorProps?: HTMLAttributes<HTMLParagraphElement>;
-  renderLabel?: (ctx: { id: string; label: ReactNode; required: boolean }) => ReactNode;
-  renderError?: (ctx: { id: string; error: ReactNode }) => ReactNode;
-  renderHint?: (ctx: { id: string; hint: ReactNode }) => ReactNode;
-  renderRequiredMark?: () => ReactNode;
-  renderFileIcon?: (file: FileValue) => ReactNode;
-}
 
 interface Props extends FieldRenderProps<FileValue | FileValue[] | null> {
   descriptor: BuiltFileDescriptor & {
     _ui?: ResolvedWebFieldUi;
   };
-  extra?: ExtraFieldProps<FileUiOverrides>;
-}
-
-function cx(...values: Array<string | undefined | false | null>) {
-  return values.filter(Boolean).join(' ');
-}
-
-function mergeStyles(
-  ...styles: Array<CSSProperties | Record<string, unknown> | undefined>
-): CSSProperties | undefined {
-  return Object.assign({}, ...styles.filter(Boolean));
+  extra?: ExtraFieldProps<WebFileFieldUiOverrides>;
 }
 
 async function fileToValue(file: File, withBase64: boolean): Promise<FileValue> {
@@ -142,6 +83,24 @@ function getDefaultFileIcon(file: FileValue): ReactNode {
   return '📎';
 }
 
+function getDefaultDropZoneIcon(accept: string[]): ReactNode {
+  if (accept.some((type) => type.includes('image'))) return '🖼';
+  if (accept.some((type) => type.includes('pdf'))) return '📄';
+  return '📁';
+}
+
+function resolveText<TContext>(
+  override: string | ((ctx: TContext) => string) | undefined,
+  fallback: string,
+  context: TContext,
+): string {
+  if (typeof override === 'function') {
+    return override(context);
+  }
+
+  return override ?? fallback;
+}
+
 export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
   const reactId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -151,38 +110,51 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const web = d._ui ?? {};
-  const ui = extra?.ui as FileUiOverrides | undefined;
-  const { rootProps, labelProps, hintProps, errorProps } = ui ?? {};
+  const {
+    classNames,
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+    loadingText,
+    dropZoneText,
+    dragActiveText,
+    acceptedText,
+    maxSizeText,
+    browseButtonText,
+    addMoreButtonText,
+    removeButtonText,
+    renderFileIcon,
+    renderDropZoneIcon,
+    renderDropZoneContent,
+    renderBrowseButtonContent,
+    renderAddMoreButtonContent,
+    renderRemoveButtonContent,
+    renderFileMeta,
+  } = extra ?? {};
+
   const {
     className: rootPropsClassName,
     style: rootPropsStyle,
     ...rootPropsRest
   } = rootProps ?? {};
-  const {
-    className: labelPropsClassName,
-    style: labelPropsStyle,
-    ...labelPropsRest
-  } = labelProps ?? {};
-  const {
-    className: hintPropsClassName,
-    style: hintPropsStyle,
-    ...hintPropsRest
-  } = hintProps ?? {};
-  const {
-    className: errorPropsClassName,
-    style: errorPropsStyle,
-    ...errorPropsRest
-  } = errorProps ?? {};
 
-  const id = ui?.id ?? web.id ?? `${props.name}-${reactId}`;
+  const id = extra?.id ?? web.id ?? `${props.name}-${reactId}`;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const describedBy = props.error ? errorId : props.hint ? hintId : undefined;
   const hasError = Boolean(props.error);
   const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
+    extra?.highlightOnError,
     web.highlightOnError,
   );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
 
   const currentFiles: FileValue[] = useMemo(() => {
     if (!props.value) return [];
@@ -286,50 +258,132 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
   );
 
   const accept = d._fileAccept.join(',');
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <span style={{ color: '#ef4444', marginLeft: 3 }}>*</span>
-  );
 
-  const rootClassName = cx(extra?.className, ui?.classNames?.root, rootPropsClassName);
-  const labelClassName = cx(ui?.classNames?.label, labelPropsClassName);
+  const rootClassName = cx(
+    extra?.className,
+    classNames?.root,
+    rootPropsClassName as string,
+  );
+  const renderContext = {
+    accept: d._fileAccept,
+    disabled: d._disabled,
+    dragging,
+    fileCount: currentFiles.length,
+    loading,
+    maxFiles: d._fileMaxFiles,
+    maxSize: d._fileMaxSize,
+    multiple: d._fileMultiple,
+    preview: d._filePreview,
+    previewHeight: d._filePreviewHeight,
+  };
+  const defaultDropZoneIcon = getDefaultDropZoneIcon(d._fileAccept);
+  const resolvedDropZoneIcon = renderDropZoneIcon?.(renderContext) ?? defaultDropZoneIcon;
+  const formattedAccept = d._fileAccept.join(', ');
+  const formattedMaxSize = d._fileMaxSize ? formatBytes(d._fileMaxSize) : '';
+  const resolvedLoadingText = resolveText(loadingText, 'Processing...', renderContext);
+  const resolvedDropZoneText = resolveText(
+    dropZoneText,
+    d._fileDragDropLabel,
+    renderContext,
+  );
+  const resolvedBrowseButtonText = resolveText(
+    browseButtonText,
+    '📂 Browse files',
+    renderContext,
+  );
+  const resolvedDragActiveText = resolveText(
+    dragActiveText,
+    'Drop it here!',
+    renderContext,
+  );
+  const resolvedAcceptedText =
+    d._fileAccept.length > 0
+      ? resolveText(acceptedText, `Accepted: ${formattedAccept}`, {
+          ...renderContext,
+          formattedAccept,
+        })
+      : null;
+  const resolvedMaxSizeText = d._fileMaxSize
+    ? resolveText(maxSizeText, `Max size: ${formattedMaxSize}`, {
+        ...renderContext,
+        formattedMaxSize,
+      })
+    : null;
+  const defaultDropZoneContent = loading ? (
+    <div data-fb-slot="drop-zone-text">⟳ {resolvedLoadingText}</div>
+  ) : (
+    <>
+      <div
+        data-fb-slot="drop-zone-icon"
+        className={classNames?.dropZoneIcon}
+        style={mergeStyles(styles?.dropZoneIcon)}
+      >
+        {resolvedDropZoneIcon}
+      </div>
+
+      <p
+        data-fb-slot="drop-zone-text"
+        className={classNames?.dropZoneText}
+        style={mergeStyles(styles?.dropZoneText)}
+      >
+        {dragging ? resolvedDragActiveText : resolvedDropZoneText}
+      </p>
+
+      {resolvedAcceptedText ? (
+        <p data-fb-slot="drop-zone-accept">{resolvedAcceptedText}</p>
+      ) : null}
+
+      {resolvedMaxSizeText ? (
+        <p data-fb-slot="drop-zone-max-size">{resolvedMaxSizeText}</p>
+      ) : null}
+    </>
+  );
+  const defaultBrowseButtonContent = (
+    <>{loading ? `⟳ ${resolvedLoadingText}` : resolvedBrowseButtonText}</>
+  );
+  const defaultAddMoreButtonContent = (
+    <>
+      {resolveText(
+        addMoreButtonText,
+        `+ Add more (${currentFiles.length}/${d._fileMaxFiles})`,
+        renderContext,
+      )}
+    </>
+  );
 
   return (
     <div
+      data-fb-field="file"
+      data-fb-name={props.name}
+      {...(hasError ? { 'data-fb-error': '' } : {})}
+      {...(d._disabled ? { 'data-fb-disabled': '' } : {})}
       className={rootClassName}
-      style={mergeStyles(
-        { display: 'flex', flexDirection: 'column', gap: 5 },
-        extra?.style,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      style={mergeStyles(extra?.style, styles?.root, rootPropsStyle as CSSProperties)}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel &&
-        (ui?.renderLabel ? (
-          ui.renderLabel({
-            id,
-            label: props.label,
-            required: Boolean(d._required),
-          })
-        ) : (
-          <label
-            htmlFor={id}
-            className={labelClassName}
-            style={mergeStyles(ui?.styles?.label, labelPropsStyle)}
-            {...labelPropsRest}
-          >
-            {props.label}
-            {d._required && requiredMark}
-          </label>
-        ))}
+      {renderLabelSlot({
+        id,
+        label: props.label,
+        name: props.name,
+        required: Boolean(d._required),
+        hideLabel,
+        classNames,
+        styles,
+        labelProps: labelProps as Record<string, unknown>,
+        renderLabel,
+        renderRequiredMark,
+      })}
 
       {d._fileDragDrop ? (
         <button
           type="button"
           aria-disabled={d._disabled || undefined}
-          // aria-invalid={hasError || undefined}
           aria-describedby={describedBy}
-          className={ui?.classNames?.dropZone}
+          data-fb-slot="drop-zone"
+          {...(dragging ? { 'data-fb-dragging': '' } : {})}
+          {...(loading ? { 'data-fb-loading': '' } : {})}
+          className={classNames?.dropZone}
+          style={mergeStyles(controlErrorStyle, styles?.dropZone)}
           onClick={() => !d._disabled && inputRef.current?.click()}
           onKeyDown={(e) => {
             if (d._disabled) return;
@@ -344,110 +398,26 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
-          style={mergeStyles(
-            {
-              border: `2px dashed ${defaultBorderColor(
-                hasError,
-                highlightOnError,
-                dragging ? '#6366f1' : '#d1d5db',
-              )}`,
-              borderRadius: 12,
-              padding: '28px 20px',
-              textAlign: 'center',
-              cursor: d._disabled ? 'not-allowed' : 'pointer',
-              background: dragging ? 'rgba(99,102,241,0.04)' : '#fafafa',
-              transition: 'all 0.2s',
-              opacity: d._disabled ? 0.5 : 1,
-              outline: 'none',
-              appearance: 'none',
-              width: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            },
-            ui?.styles?.dropZone,
-          )}
         >
-          {loading ? (
-            <div
-              className={ui?.classNames?.dropZoneText}
-              style={mergeStyles(
-                { textAlign: 'center', color: '#6b7280', fontSize: 14 },
-                ui?.styles?.dropZoneText,
-              )}
-            >
-              ⟳ Processing…
-            </div>
-          ) : (
-            <>
-              <div
-                className={ui?.classNames?.dropZoneIcon}
-                style={mergeStyles(
-                  { fontSize: 28, marginBottom: 10 },
-                  ui?.styles?.dropZoneIcon,
-                )}
-              >
-                {d._fileAccept.some((t) => t.includes('image'))
-                  ? '🖼'
-                  : d._fileAccept.some((t) => t.includes('pdf'))
-                    ? '📄'
-                    : '📁'}
-              </div>
-
-              <p
-                className={ui?.classNames?.dropZoneText}
-                style={mergeStyles(
-                  {
-                    fontSize: 14,
-                    color: dragging ? '#6366f1' : '#6b7280',
-                    fontWeight: dragging ? 600 : 400,
-                    margin: 0,
-                  },
-                  ui?.styles?.dropZoneText,
-                )}
-              >
-                {dragging ? 'Drop it here!' : d._fileDragDropLabel}
-              </p>
-
-              {d._fileAccept.length > 0 && (
-                <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 4 }}>
-                  Accepted: {d._fileAccept.join(', ')}
-                </p>
-              )}
-
-              {d._fileMaxSize && (
-                <p style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 2 }}>
-                  Max size: {formatBytes(d._fileMaxSize)}
-                </p>
-              )}
-            </>
-          )}
+          {renderDropZoneContent?.({
+            ...renderContext,
+            defaultContent: defaultDropZoneContent,
+            defaultIcon: defaultDropZoneIcon,
+          }) ?? defaultDropZoneContent}
         </button>
       ) : (
         <button
           type="button"
-          className={ui?.classNames?.browseButton}
+          data-fb-slot="browse-button"
+          className={classNames?.browseButton}
+          style={mergeStyles(controlErrorStyle, styles?.browseButton)}
           onClick={() => !d._disabled && inputRef.current?.click()}
           disabled={d._disabled}
-          style={mergeStyles(
-            {
-              padding: '10px 20px',
-              borderRadius: 8,
-              border: `1.5px solid ${defaultBorderColor(
-                hasError,
-                highlightOnError,
-                '#d1d5db',
-              )}`,
-              background: '#fff',
-              cursor: d._disabled ? 'not-allowed' : 'pointer',
-              fontSize: 14,
-              color: '#374151',
-              fontWeight: 500,
-            },
-            ui?.styles?.browseButton,
-          )}
         >
-          📂 Browse files
+          {renderBrowseButtonContent?.({
+            ...renderContext,
+            defaultContent: defaultBrowseButtonContent,
+          }) ?? defaultBrowseButtonContent}
         </button>
       )}
 
@@ -465,132 +435,95 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
         aria-invalid={hasError || undefined}
         aria-describedby={describedBy}
         style={{ display: 'none' }}
-        {...ui?.inputProps}
+        {...extra?.inputProps}
       />
 
       {currentFiles.length > 0 && (
         <ul
-          className={ui?.classNames?.list}
-          style={mergeStyles(
-            {
-              margin: '10px 0 0',
-              padding: 0,
-              listStyle: 'none',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-            },
-            ui?.styles?.list,
-          )}
+          data-fb-slot="file-list"
+          className={classNames?.list}
+          style={mergeStyles(styles?.list)}
         >
-          {currentFiles.map((file, index) => (
-            <li
-              key={`${file.uri}-${file.name}-${index.toString()}`}
-              className={ui?.classNames?.listItem}
-              style={mergeStyles(
-                {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '10px 12px',
-                  background: '#f9fafb',
-                  borderRadius: 9,
-                  border: '1px solid #e5e7eb',
-                },
-                ui?.styles?.listItem,
-              )}
-            >
-              {d._filePreview && file.type.startsWith('image/') ? (
-                <img
-                  src={file.uri}
-                  alt={file.name}
-                  className={ui?.classNames?.previewImage}
-                  style={mergeStyles(
-                    {
-                      width: d._filePreviewHeight,
-                      height: d._filePreviewHeight,
-                      objectFit: 'cover',
-                      borderRadius: 8,
-                      flexShrink: 0,
-                    },
-                    ui?.styles?.previewImage,
-                  )}
-                />
-              ) : (
-                <div
-                  className={ui?.classNames?.fileIcon}
-                  style={mergeStyles(
-                    {
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      background: '#f3f4f6',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 20,
-                      flexShrink: 0,
-                    },
-                    ui?.styles?.fileIcon,
-                  )}
-                >
-                  {ui?.renderFileIcon?.(file) ?? getDefaultFileIcon(file)}
-                </div>
-              )}
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p
-                  className={ui?.classNames?.fileName}
-                  style={mergeStyles(
-                    {
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: '#111',
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    },
-                    ui?.styles?.fileName,
-                  )}
-                >
-                  {file.name}
-                </p>
-
-                <p
-                  className={ui?.classNames?.fileMeta}
-                  style={mergeStyles(
-                    { fontSize: 11.5, color: '#9ca3af', margin: '2px 0 0' },
-                    ui?.styles?.fileMeta,
-                  )}
-                >
-                  {formatBytes(file.size)}
-                  {file.width ? ` · ${file.width}×${file.height}px` : ''}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className={ui?.classNames?.removeButton}
-                onClick={() => removeFile(index)}
-                style={mergeStyles(
-                  {
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#9ca3af',
-                    fontSize: 18,
-                    padding: '2px 4px',
-                    flexShrink: 0,
-                  },
-                  ui?.styles?.removeButton,
-                )}
-                aria-label={`Remove ${file.name}`}
+          {currentFiles.map((file, index) => {
+            const rawDefaultIcon = getDefaultFileIcon(file);
+            const dimensionsLabel =
+              file.width && file.height ? `${file.width}×${file.height}px` : undefined;
+            const itemRenderContext = {
+              ...renderContext,
+              defaultIcon: rawDefaultIcon,
+              dimensionsLabel,
+              file,
+              formattedSize: formatBytes(file.size),
+              index,
+            };
+            const resolvedFileIcon =
+              renderFileIcon?.(file, itemRenderContext) ?? rawDefaultIcon;
+            const defaultFileMetaContent = (
+              <p
+                data-fb-slot="file-meta"
+                className={classNames?.fileMeta}
+                style={mergeStyles(styles?.fileMeta)}
               >
-                ✕
-              </button>
-            </li>
-          ))}
+                {formatBytes(file.size)}
+                {dimensionsLabel ? ` · ${dimensionsLabel}` : ''}
+              </p>
+            );
+
+            return (
+              <li
+                key={`${file.uri}-${file.name}-${index.toString()}`}
+                data-fb-slot="file-item"
+                className={classNames?.listItem}
+                style={mergeStyles(styles?.listItem)}
+              >
+                {d._filePreview && file.type.startsWith('image/') ? (
+                  <img
+                    src={file.uri}
+                    alt={file.name}
+                    data-fb-slot="preview-image"
+                    className={classNames?.previewImage}
+                    style={mergeStyles(styles?.previewImage)}
+                  />
+                ) : (
+                  <div
+                    data-fb-slot="file-icon"
+                    className={classNames?.fileIcon}
+                    style={mergeStyles(styles?.fileIcon)}
+                  >
+                    {resolvedFileIcon}
+                  </div>
+                )}
+
+                <div data-fb-slot="file-info">
+                  <p
+                    data-fb-slot="file-name"
+                    className={classNames?.fileName}
+                    style={mergeStyles(styles?.fileName)}
+                  >
+                    {file.name}
+                  </p>
+                  {renderFileMeta?.({
+                    ...itemRenderContext,
+                    defaultContent: defaultFileMetaContent,
+                  }) ?? defaultFileMetaContent}
+                </div>
+
+                <button
+                  type="button"
+                  data-fb-slot="remove-button"
+                  className={classNames?.removeButton}
+                  style={mergeStyles(styles?.removeButton)}
+                  onClick={() => removeFile(index)}
+                  aria-label={`Remove ${file.name}`}
+                >
+                  {renderRemoveButtonContent?.({
+                    ...itemRenderContext,
+                    defaultContent: resolveText(removeButtonText, '✕', itemRenderContext),
+                  }) ?? resolveText(removeButtonText, '✕', itemRenderContext)}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
 
@@ -599,58 +532,31 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
         currentFiles.length < d._fileMaxFiles && (
           <button
             type="button"
-            className={ui?.classNames?.addMoreButton}
+            data-fb-slot="add-more-button"
+            className={classNames?.addMoreButton}
+            style={mergeStyles(controlErrorStyle, styles?.addMoreButton)}
             onClick={() => inputRef.current?.click()}
-            style={mergeStyles(
-              {
-                marginTop: 8,
-                background: 'none',
-                border: '1.5px dashed #d1d5db',
-                borderRadius: 8,
-                padding: '8px 16px',
-                cursor: 'pointer',
-                color: '#6b7280',
-                fontSize: 13,
-              },
-              ui?.styles?.addMoreButton,
-            )}
           >
-            + Add more ({currentFiles.length}/{d._fileMaxFiles})
+            {renderAddMoreButtonContent?.({
+              ...renderContext,
+              defaultContent: defaultAddMoreButtonContent,
+            }) ?? defaultAddMoreButtonContent}
           </button>
         )}
 
-      {props.error
-        ? (ui?.renderError?.({ id: errorId, error: props.error }) ?? (
-            <p
-              id={errorId}
-              role="alert"
-              className={cx(ui?.classNames?.error, errorPropsClassName)}
-              style={mergeStyles(
-                { color: '#ef4444', margin: 0 },
-                ui?.styles?.error,
-                errorPropsStyle,
-              )}
-              {...errorPropsRest}
-            >
-              {props.error}
-            </p>
-          ))
-        : props.hint
-          ? (ui?.renderHint?.({ id: hintId, hint: props.hint }) ?? (
-              <p
-                id={hintId}
-                className={cx(ui?.classNames?.hint, hintPropsClassName)}
-                style={mergeStyles(
-                  { color: '#9ca3af', margin: 0 },
-                  ui?.styles?.hint,
-                  hintPropsStyle,
-                )}
-                {...hintPropsRest}
-              >
-                {props.hint}
-              </p>
-            ))
-          : null}
+      {renderHelperSlot({
+        error: props.error,
+        hint: props.hint,
+        errorId,
+        name: props.name,
+        hintId,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, CSSProperties | undefined>,
+        errorProps: errorProps as Record<string, unknown>,
+        hintProps: hintProps as Record<string, unknown>,
+        renderError,
+        renderHint,
+      })}
     </div>
   );
 };

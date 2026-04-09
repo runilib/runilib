@@ -6,12 +6,13 @@ export function TooltipCustomContentNative() {
   return (
     <Tooltip
       placement="top"
+      anchorColor="#1d4ed8"
       renderContent={({ hide, visible }) => (
         <View
           style={{
             width: 280,
-            borderRadius: 18,
-            backgroundColor: '#111827',
+            borderRadius: 5,
+            backgroundColor: '#1d4ed8',
             paddingHorizontal: 16,
             paddingVertical: 16,
             gap: 10,

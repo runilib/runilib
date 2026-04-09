@@ -86,19 +86,19 @@ describe('validateField — pattern', () => {
 describe('field.email', () => {
   it('rejects invalid email', async () =>
     expect(
-      await validateField((field.email('x') as any)._build(), 'notanemail', {}),
+      await validateField(field.email('x')._build(), 'notanemail', {}),
     ).not.toBeNull());
   it('accepts valid email', async () =>
     expect(
-      await validateField((field.email('x') as any)._build(), 'aks@unikit.dev', {}),
+      await validateField(field.email('x')._build(), 'aks@unikit.dev', {}),
     ).toBeNull());
   it('skips validation if empty and not required', async () =>
-    expect(await validateField((field.email('x') as any)._build(), '', {})).toBeNull());
+    expect(await validateField(field.email('x')._build(), '', {})).toBeNull());
 });
 
 // ─── password strength ────────────────────────────────────────────────────────
 describe('field.password.strong()', () => {
-  const d = (field.password('x').required().strong() as any)._build();
+  const d = field.password('x').required().strong()._build();
   it('rejects short password', async () =>
     expect(await validateField(d, 'Ab1!', {})).not.toBeNull());
   it('rejects no uppercase', async () =>
@@ -111,11 +111,56 @@ describe('field.password.strong()', () => {
     expect(await validateField(d, 'Abcdef1!', {})).toBeNull());
 });
 
+describe('field.password.withStrengthIndicator({ blockWeak: true })', () => {
+  const d = field
+    .password('Password')
+    .withStrengthIndicator({
+      blockWeak: true,
+      blockMsg: 'Need a stronger password.',
+    })
+    ._build();
+
+  it('rejects weak passwords when blockWeak is enabled', async () => {
+    expect(await validateField(d, 'abc', {})).toBe('Need a stronger password.');
+  });
+
+  it('allows strong enough passwords when blockWeak is enabled', async () => {
+    expect(await validateField(d, 'Abcdef1!', {})).toBeNull();
+  });
+
+  it('does not turn an optional empty field into an error', async () => {
+    expect(await validateField(d, '', {})).toBeNull();
+  });
+
+  it('can remember that rules should hide once the password becomes valid', () => {
+    const configured = field
+      .password('Password')
+      .withStrengthIndicator({
+        showRules: true,
+        hideRulesWhenValid: true,
+      })
+      ._build();
+
+    const fluent = field
+      .password('Password')
+      .hideRulesWhenValid()
+      .withStrengthIndicator({
+        showRules: true,
+      })
+      ._build();
+
+    expect(configured._strengthHideRulesWhenValid).toBe(true);
+    expect(fluent._strengthHideRulesWhenValid).toBe(true);
+  });
+});
+
 // ─── matches ──────────────────────────────────────────────────────────────────
 describe('field.text.matches()', () => {
-  const d = (
-    field.text('Confirm').required().matches('password', 'Does not match.') as any
-  )._build();
+  const d = field
+    .text('Confirm')
+    .required()
+    .matches('password', 'Does not match.')
+    ._build();
   it('fails when values differ', async () => {
     const err = await validateField(d, 'abc', { password: 'xyz' });
     expect(err).toBe('Does not match.');
@@ -129,15 +174,14 @@ describe('field.text.matches()', () => {
 // ─── custom async validator ───────────────────────────────────────────────────
 describe('custom async validator', () => {
   it('returns error from async validator', async () => {
-    const d = (
-      field
-        .text('x')
-        .required()
-        .validate(async (v) => {
-          await new Promise((r) => setTimeout(r, 10));
-          return v === 'taken' ? 'Already taken.' : null;
-        }) as any
-    )._build();
+    const d = field
+      .text('x')
+      .required()
+      .validate(async (v) => {
+        await new Promise((r) => setTimeout(r, 10));
+        return v === 'taken' ? 'Already taken.' : null;
+      })
+      ._build();
     expect(await validateField(d, 'taken', {})).toBe('Already taken.');
     expect(await validateField(d, 'free', {})).toBeNull();
   });
@@ -146,17 +190,16 @@ describe('custom async validator', () => {
 // ─── transform + trim ────────────────────────────────────────────────────────
 describe('trim & transform', () => {
   it('trims whitespace before required check', async () => {
-    const d = (field.text('x').required().trim() as any)._build();
+    const d = field.text('x').required().trim()._build();
     expect(await validateField(d, '   ', {})).not.toBeNull();
   });
   it('applies transform before validation', async () => {
-    const d = (
-      field
-        .text('x')
-        .required()
-        .transform((v) => v.toUpperCase())
-        .min(3) as any
-    )._build();
+    const d = field
+      .text('x')
+      .required()
+      .transform((v) => v.toUpperCase())
+      .min(3)
+      ._build();
     expect(await validateField(d, 'ab', {})).not.toBeNull();
     expect(await validateField(d, 'abc', {})).toBeNull();
   });

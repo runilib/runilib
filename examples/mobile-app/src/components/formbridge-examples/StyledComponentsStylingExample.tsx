@@ -21,13 +21,13 @@ const PreviewValue = styled.Text`
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  color: #f8fafc;
+  color: #10203a;
 `;
 
 const PreviewCopy = styled.Text`
   font-size: 13px;
   line-height: 20px;
-  color: #cbd5e1;
+  color: #5f6f88;
 `;
 
 const PreviewPill = styled.View`
@@ -51,7 +51,7 @@ const SectionCard = styled.View`
   gap: 14px;
   padding: 16px;
   border-radius: 22px;
-  background-color: rgba(15, 23, 42, 0.46);
+  background-color: #ffffff;
   border-width: 1px;
   border-color: rgba(125, 211, 252, 0.12);
 `;
@@ -66,7 +66,7 @@ const SectionTitle = styled.Text`
 
 const FooterText = styled.Text`
   flex: 1;
-  color: #94a3b8;
+  color: #5f6f88;
   font-size: 12px;
   line-height: 18px;
 `;
@@ -76,127 +76,121 @@ const StudioFormComp = styled(FormHost)`
 `;
 
 const StudioNameFieldShell = styled(FieldHost).attrs({
-  ui: {
-    styles: {
-      root: {
-        marginBottom: 0,
-        gap: 8,
-      },
-      label: {
-        color: '#f8fafc',
-        fontSize: 12,
-        fontWeight: '800',
-        letterSpacing: 0.7,
-        textTransform: 'uppercase',
-      },
-      input: {
-        minHeight: 52,
-        borderWidth: 1.5,
-        borderColor: 'rgba(125, 211, 252, 0.18)',
-        borderRadius: 16,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        fontSize: 15,
-        color: '#f8fafc',
-        backgroundColor: 'rgba(15, 23, 42, 0.62)',
-      },
-      hint: {
-        color: '#cbd5e1',
-        fontSize: 12,
-        lineHeight: 18,
-      },
-      error: {
-        color: '#fda4af',
-        fontSize: 12,
-        fontWeight: '700',
-      },
+  styles: {
+    root: {
+      marginBottom: 0,
+      gap: 8,
     },
-    inputProps: {
-      autoComplete: 'organization',
+    label: {
+      color: '#30415d',
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.7,
+      textTransform: 'uppercase',
     },
+    input: {
+      minHeight: 52,
+      borderWidth: 1.5,
+      borderColor: 'rgba(125, 211, 252, 0.18)',
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      color: '#10203a',
+      backgroundColor: '#ffffff',
+    },
+    hint: {
+      color: '#5f6f88',
+      fontSize: 12,
+      lineHeight: 18,
+    },
+    error: {
+      color: '#fda4af',
+      fontSize: 12,
+      fontWeight: '700',
+    },
+  },
+  inputProps: {
+    autoComplete: 'organization',
   },
 })`
   margin-bottom: 0px;
 `;
 
 const ContactEmailFieldShell = styled(FieldHost).attrs({
-  ui: {
-    styles: {
-      root: {
-        marginBottom: 0,
-        gap: 8,
-      },
-      label: {
-        color: '#dbeafe',
-        fontSize: 12,
-        fontWeight: '800',
-        letterSpacing: 0.7,
-        textTransform: 'uppercase',
-      },
-      input: {
-        minHeight: 52,
-        borderWidth: 1.5,
-        borderColor: 'rgba(56, 189, 248, 0.28)',
-        borderRadius: 16,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        fontSize: 15,
-        color: '#f8fafc',
-        backgroundColor: 'rgba(15, 23, 42, 0.74)',
-      },
-      hint: {
-        color: '#94a3b8',
-        fontSize: 12,
-      },
-      error: {
-        color: '#fda4af',
-        fontSize: 12,
-        fontWeight: '700',
-      },
+  styles: {
+    root: {
+      marginBottom: 0,
+      gap: 8,
     },
-    inputProps: {
-      autoComplete: 'email',
-      keyboardType: 'email-address',
+    label: {
+      color: '#dbeafe',
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.7,
+      textTransform: 'uppercase',
     },
+    input: {
+      minHeight: 52,
+      borderWidth: 1.5,
+      borderColor: 'rgba(56, 189, 248, 0.28)',
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      color: '#10203a',
+      backgroundColor: '#ffffff',
+    },
+    hint: {
+      color: '#64748b',
+      fontSize: 12,
+    },
+    error: {
+      color: '#fda4af',
+      fontSize: 12,
+      fontWeight: '700',
+    },
+  },
+  inputProps: {
+    autoComplete: 'email',
+    keyboardType: 'email-address',
   },
 })`
   margin-bottom: 0px;
 `;
 
 const CityFieldShell = styled(FieldHost).attrs({
-  ui: {
-    styles: {
-      root: {
-        marginBottom: 0,
-        gap: 8,
-      },
-      label: {
-        color: '#dcfce7',
-        fontSize: 12,
-        fontWeight: '800',
-        letterSpacing: 0.7,
-        textTransform: 'uppercase',
-      },
-      input: {
-        minHeight: 52,
-        borderWidth: 1.5,
-        borderColor: 'rgba(74, 222, 128, 0.24)',
-        borderRadius: 16,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        fontSize: 15,
-        color: '#ecfdf5',
-        backgroundColor: 'rgba(2, 44, 34, 0.44)',
-      },
-      hint: {
-        color: '#bbf7d0',
-        fontSize: 12,
-      },
-      error: {
-        color: '#fda4af',
-        fontSize: 12,
-        fontWeight: '700',
-      },
+  styles: {
+    root: {
+      marginBottom: 0,
+      gap: 8,
+    },
+    label: {
+      color: '#dcfce7',
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.7,
+      textTransform: 'uppercase',
+    },
+    input: {
+      minHeight: 52,
+      borderWidth: 1.5,
+      borderColor: 'rgba(74, 222, 128, 0.24)',
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      color: '#ecfdf5',
+      backgroundColor: 'rgba(2, 44, 34, 0.44)',
+    },
+    hint: {
+      color: '#bbf7d0',
+      fontSize: 12,
+    },
+    error: {
+      color: '#fda4af',
+      fontSize: 12,
+      fontWeight: '700',
     },
   },
 })`
@@ -204,39 +198,37 @@ const CityFieldShell = styled(FieldHost).attrs({
 `;
 
 const LaunchNotesFieldShell = styled(FieldHost).attrs({
-  ui: {
-    styles: {
-      root: {
-        marginBottom: 0,
-        gap: 8,
-      },
-      label: {
-        color: '#f8fafc',
-        fontSize: 12,
-        fontWeight: '800',
-        letterSpacing: 0.7,
-        textTransform: 'uppercase',
-      },
-      input: {
-        minHeight: 112,
-        borderWidth: 1.5,
-        borderColor: 'rgba(125, 211, 252, 0.18)',
-        borderRadius: 16,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        fontSize: 15,
-        color: '#f8fafc',
-        backgroundColor: 'rgba(15, 23, 42, 0.62)',
-      },
-      hint: {
-        color: '#94a3b8',
-        fontSize: 12,
-      },
-      error: {
-        color: '#fda4af',
-        fontSize: 12,
-        fontWeight: '700',
-      },
+  styles: {
+    root: {
+      marginBottom: 0,
+      gap: 8,
+    },
+    label: {
+      color: '#30415d',
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.7,
+      textTransform: 'uppercase',
+    },
+    input: {
+      minHeight: 112,
+      borderWidth: 1.5,
+      borderColor: 'rgba(125, 211, 252, 0.18)',
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+      color: '#10203a',
+      backgroundColor: '#ffffff',
+    },
+    hint: {
+      color: '#64748b',
+      fontSize: 12,
+    },
+    error: {
+      color: '#fda4af',
+      fontSize: 12,
+      fontWeight: '700',
     },
   },
 })`
@@ -262,23 +254,23 @@ export function StyledComponentsStylingExample() {
   const schema = useMemo(
     () => ({
       studioName: field
-        .text('Studio name')
+        .text()
         .required('Studio name is required')
         .trim()
         .placeholder('Northwind Labs')
         .hint('Name shown on invoices and payment confirmations.'),
       contactEmail: field
-        .email('Billing email')
+        .email()
         .required('Billing email is required')
         .trim()
         .placeholder('finance@northwind.dev'),
       city: field
-        .text('City')
+        .text()
         .required('City is required')
         .placeholder('Lyon')
         .hint('Used to localize VAT and invoice copy.'),
       launchNotes: field
-        .textarea('Launch notes')
+        .textarea()
         .required('Add a short handoff note')
         .placeholder('Team prefers invoice reminders every Monday.'),
     }),

@@ -6,7 +6,7 @@ import type {
   FieldRenderProps,
   FieldType,
   Validator,
-} from '../../../types';
+} from '../../../types/field';
 import type { ConditionPredicate, FieldConditions } from '../../conditions/conditions';
 import { DEFAULT_FIELD_CONDITIONS } from '../../conditions/conditions';
 
@@ -48,8 +48,11 @@ function cloneDescriptor<V, TType extends FieldType>(
  * };
  * ```
  */
-export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType> {
-  protected _desc: FieldDescriptor<FD, TType>;
+export class BaseFieldBuilder<
+  FDefaultValue = unknown,
+  TType extends FieldType = FieldType,
+> {
+  protected _desc: FieldDescriptor<FDefaultValue, TType>;
   protected _conditions: FieldConditions = {
     ...DEFAULT_FIELD_CONDITIONS,
     visible: [],
@@ -64,10 +67,9 @@ export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType>
    * @param label - The human-readable label displayed alongside the field.
    * @param defaultValue - The initial value of the field when the form is first rendered.
    */
-  constructor(type: TType, label: string, defaultValue: FD) {
+  constructor(type: TType, defaultValue: FDefaultValue) {
     this._desc = {
       _type: type,
-      _label: label,
       _defaultValue: defaultValue,
       _required: false,
       _requiredMsg: 'This field is required.',
@@ -114,7 +116,7 @@ export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType>
    * field.text('Country', '').defaultValue('France');
    * ```
    */
-  defaultValue(value: FD): this {
+  defaultValue(value: FDefaultValue): this {
     this._desc._defaultValue = value;
     return this;
   }
@@ -248,7 +250,7 @@ export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType>
    *   .validate((v) => Number(v) < 150 ? null : 'Invalid age');
    * ```
    */
-  validate(fn: Validator<FD>): this {
+  validate(fn: Validator<FDefaultValue>): this {
     this._desc._validators.push(fn);
     return this;
   }
@@ -266,7 +268,7 @@ export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType>
    *   .transform((v) => v.toLowerCase().trim());
    * ```
    */
-  transform(fn: (value: FD) => FD): this {
+  transform(fn: (value: FDefaultValue) => FDefaultValue): this {
     this._desc._transform = fn;
     return this;
   }
@@ -287,7 +289,7 @@ export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType>
    *   ));
    * ```
    */
-  render(fn: (props: FieldRenderProps<FD>) => ReactNode): this {
+  render(fn: (props: FieldRenderProps<FDefaultValue>) => ReactNode): this {
     this._desc._customRender = fn;
     return this;
   }
@@ -551,7 +553,7 @@ export class BaseFieldBuilder<FD = unknown, TType extends FieldType = FieldType>
    *
    * @internal
    */
-  _build(): FieldDescriptor<FD, TType> & { _conditions?: FieldConditions } {
+  _build(): FieldDescriptor<FDefaultValue, TType> & { _conditions?: FieldConditions } {
     const desc = cloneDescriptor(this._desc);
 
     return {

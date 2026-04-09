@@ -1,11 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Modal,
   Pressable,
   type StyleProp,
-  StyleSheet,
   Text,
   TextInput,
   type TextInputProps,
@@ -16,13 +15,17 @@ import {
 
 import { useAsyncOptions } from '../../hooks/shared/useAsyncOptions';
 import type {
+  ExtraFieldProps,
   FieldDescriptor,
+  FocusableFieldHandle,
+  NativeAsyncAutocompleteFieldUiOverrides,
   SelectOption,
   SelectPickerRenderContext,
 } from '../../types';
 import {
-  type NativeBaseUiOverrides,
-  type NativeExtraProps,
+  defaultErrorChromeStyle,
+  defaultErrorTextStyle,
+  defaultRequiredMarkStyle,
   type ResolvedNativeFieldUi,
   shouldHighlightOnError,
   sx,
@@ -40,27 +43,11 @@ type AsyncAutocompleteDescriptor = {
   _ui?: ResolvedNativeFieldUi;
 };
 
-type NativeAsyncAutocompleteUiOverrides = NativeBaseUiOverrides & {
-  styles?: NativeBaseUiOverrides['styles'] &
-    Partial<{
-      trigger: StyleProp<ViewStyle>;
-      triggerValue: StyleProp<TextStyle>;
-      triggerPlaceholder: StyleProp<TextStyle>;
-      modalBackdrop: StyleProp<ViewStyle>;
-      modalCard: StyleProp<ViewStyle>;
-      searchInput: StyleProp<TextStyle>;
-      loadingRow: StyleProp<ViewStyle>;
-      loadingText: StyleProp<TextStyle>;
-      optionRow: StyleProp<ViewStyle>;
-      optionLabel: StyleProp<TextStyle>;
-      emptyText: StyleProp<TextStyle>;
-    }>;
-};
-
 interface Props {
   descriptor: AsyncAutocompleteDescriptor;
   name: string;
   value: string;
+  label: string;
   error: string | null;
   touched: boolean;
   dirty: boolean;
@@ -71,46 +58,68 @@ interface Props {
   onBlur: () => void;
   onFocus: () => void;
   dependencyValues: Record<string, unknown>;
-  extra?: NativeExtraProps<NativeAsyncAutocompleteUiOverrides>;
+  extra?: ExtraFieldProps<NativeAsyncAutocompleteFieldUiOverrides, 'native'>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
 function ensureOptionsArray(value: unknown): SelectOption[] {
   return Array.isArray(value) ? value : [];
 }
 
-export const NativeAsyncAutocompleteField: React.FC<Props> = ({
+export const AsyncAutocompleteField: React.FC<Props> = ({
   descriptor: d,
+  name,
   value,
+  label,
   error,
+  hint,
   onChange,
   onBlur,
   onFocus,
   dependencyValues,
   extra,
+  registerFocusable,
 }) => {
   const [open, setOpen] = useState(false);
-  const ui = extra?.ui;
-  const renderPicker = ui?.renderPicker ?? d._ui?.renderPicker;
-  const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
-    d._ui?.highlightOnError,
-  );
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
+
+  const {
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+    renderPicker,
+  } = extra ?? {};
+
+  const nativeRenderPicker = renderPicker ?? d._ui?.renderPicker;
+
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
+
   const { style: labelPropsStyle, ...labelPropsRest } = (labelProps ?? {}) as {
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
+
   const { style: inputPropsStyle, ...inputPropsRest } = (inputProps ?? {}) as {
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
+
   const { style: hintPropsStyle, ...hintPropsRest } = (hintProps ?? {}) as {
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
+
   const { style: errorPropsStyle, ...errorPropsRest } = (errorProps ?? {}) as {
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
+
+  const id = extra?.id ?? d._ui?.id ?? name;
 
   const asyncConfig = d._asyncOptions;
   const {
@@ -135,34 +144,37 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
     [resolvedOptions, value],
   );
 
-  const closePicker = () => {
+  const closePicker = useCallback(() => {
     clearSearch();
     setOpen(false);
-  };
+  }, [clearSearch]);
 
-  const openPicker = () => {
+  const openPicker = useCallback(() => {
     if (d._disabled) {
       return;
     }
 
     setOpen(true);
     onFocus();
-  };
+  }, [d._disabled, onFocus]);
 
-  const selectOption = (next: SelectOption | SelectOption['value']) => {
-    const optionValue =
-      typeof next === 'object' && next !== null && 'value' in next ? next.value : next;
+  const selectOption = useCallback(
+    (next: SelectOption | SelectOption['value']) => {
+      const optionValue =
+        typeof next === 'object' && next !== null && 'value' in next ? next.value : next;
 
-    onChange(String(optionValue));
-    closePicker();
-    onBlur();
-  };
+      onChange(String(optionValue));
+      closePicker();
+      onBlur();
+    },
+    [closePicker, onBlur, onChange],
+  );
 
   const pickerContext: SelectPickerRenderContext = {
     platform: 'native',
     fieldType: 'select',
     open,
-    label: d._label,
+    label,
     placeholder: d._placeholder,
     required: Boolean(d._required),
     disabled: Boolean(d._disabled),
@@ -173,7 +185,7 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
     options: resolvedOptions,
     selectedOption,
     selectedValue: value ? (selectedOption?.value ?? value) : null,
-    triggerLabel: selectedOption?.label ?? d._placeholder ?? `Select ${String(d._label)}`,
+    triggerLabel: selectedOption?.label ?? d._placeholder ?? `Select ${String(label)}`,
     openPicker,
     closePicker,
     setSearch,
@@ -181,62 +193,86 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
     selectOption,
   };
 
+  useEffect(() => {
+    if (!registerFocusable) {
+      return;
+    }
+
+    registerFocusable({
+      focus: openPicker,
+      blur: closePicker,
+    });
+
+    return () => {
+      registerFocusable(null);
+    };
+  }, [closePicker, openPicker, registerFocusable]);
+
+  const hasError = Boolean(error ?? asyncError);
+  const highlightOnError = shouldHighlightOnError(
+    extra?.highlightOnError,
+    d._ui?.highlightOnError,
+  );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
+  const requiredMark = renderRequiredMark?.() ?? (
+    <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
+  );
+
   return (
     <View
-      style={sx(
-        styles.root,
-        extra?.style as StyleProp<ViewStyle>,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
       {...rootPropsRest}
     >
-      <Text
-        style={sx(styles.label, ui?.styles?.label, labelPropsStyle)}
-        {...labelPropsRest}
-      >
-        {d._label}
-        {d._required && <Text style={styles.required}>*</Text>}
-      </Text>
+      {!hideLabel &&
+        (renderLabel?.({
+          id,
+          label,
+          required: Boolean(d._required),
+          name,
+        }) ?? (
+          <Text
+            style={sx(styles?.label, labelPropsStyle)}
+            {...labelPropsRest}
+          >
+            {label}
+            {d._required && requiredMark}
+          </Text>
+        ))}
 
       <Pressable
         onPress={openPicker}
-        style={sx(
-          styles.trigger,
-          error && highlightOnError && styles.triggerError,
-          d._disabled && styles.triggerDisabled,
-          ui?.styles?.trigger,
-        )}
+        disabled={d._disabled}
+        style={sx(controlErrorStyle, styles?.trigger)}
       >
         <Text
-          style={sx(
-            selectedOption ? styles.triggerValue : styles.triggerPlaceholder,
-            selectedOption ? ui?.styles?.triggerValue : ui?.styles?.triggerPlaceholder,
-          )}
+          style={sx(selectedOption ? styles?.triggerValue : styles?.triggerPlaceholder)}
         >
-          {selectedOption?.label || d._placeholder || `Select ${d._label}`}
+          {selectedOption?.label || d._placeholder || `Select ${label}`}
         </Text>
       </Pressable>
 
-      {error ? (
-        <Text
-          style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
-          {...errorPropsRest}
-        >
-          {error}
-        </Text>
-      ) : null}
-      {!error && d._hint ? (
-        <Text
-          style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
-          {...hintPropsRest}
-        >
-          {d._hint}
-        </Text>
-      ) : null}
+      {error
+        ? (renderError?.({ id, name, error }) ?? (
+            <Text
+              style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
+              {...errorPropsRest}
+            >
+              {error}
+            </Text>
+          ))
+        : hint
+          ? (renderHint?.({ id, name, hint }) ?? (
+              <Text
+                style={sx(styles?.hint, hintPropsStyle)}
+                {...hintPropsRest}
+              >
+                {hint}
+              </Text>
+            ))
+          : null}
 
-      {renderPicker ? (
-        renderPicker(pickerContext)
+      {nativeRenderPicker ? (
+        nativeRenderPicker(pickerContext)
       ) : (
         <Modal
           visible={open}
@@ -245,34 +281,32 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
           onRequestClose={closePicker}
         >
           <Pressable
-            style={sx(styles.modalBackdrop, ui?.styles?.modalBackdrop)}
+            style={sx(styles?.modalBackdrop)}
             onPress={closePicker}
           >
             <Pressable
-              style={sx(styles.modalCard, ui?.styles?.modalCard)}
+              style={sx(styles?.modalCard)}
               onPress={(event) => event.stopPropagation()}
             >
               <TextInput
                 value={search}
                 onChangeText={setSearch}
-                placeholder={`Search ${d._label}...`}
+                placeholder={`Search ${label}...`}
                 autoFocus
-                style={sx(styles.searchInput, ui?.styles?.searchInput, inputPropsStyle)}
+                style={sx(styles?.searchInput, inputPropsStyle)}
                 {...(inputPropsRest as Partial<TextInputProps>)}
               />
 
               {loading ? (
-                <View style={sx(styles.loadingRow, ui?.styles?.loadingRow)}>
+                <View style={sx(styles?.loadingRow)}>
                   <ActivityIndicator size="small" />
-                  <Text style={sx(styles.loadingText, ui?.styles?.loadingText)}>
-                    Loading…
-                  </Text>
+                  <Text style={sx(styles?.loadingText)}>Loading...</Text>
                 </View>
               ) : null}
 
               {asyncError ? (
                 <Text
-                  style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
+                  style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
                   {...errorPropsRest}
                 >
                   {asyncError}
@@ -285,11 +319,7 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
                 keyboardShouldPersistTaps="handled"
                 renderItem={({ item }) => (
                   <Pressable
-                    style={sx(
-                      styles.optionRow,
-                      item.value === value && styles.optionRowSelected,
-                      ui?.styles?.optionRow,
-                    )}
+                    style={sx(styles?.optionRow)}
                     onPress={() => {
                       onChange(String(item.value));
                       clearSearch();
@@ -297,16 +327,12 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
                       onBlur();
                     }}
                   >
-                    <Text style={sx(styles.optionLabel, ui?.styles?.optionLabel)}>
-                      {item.label}
-                    </Text>
+                    <Text style={sx(styles?.optionLabel)}>{item.label}</Text>
                   </Pressable>
                 )}
                 ListEmptyComponent={
                   loading === false ? (
-                    <Text style={sx(styles.emptyText, ui?.styles?.emptyText)}>
-                      No results.
-                    </Text>
+                    <Text style={sx(styles?.emptyText)}>No results.</Text>
                   ) : null
                 }
               />
@@ -317,95 +343,3 @@ export const NativeAsyncAutocompleteField: React.FC<Props> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  root: {
-    gap: 6,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  required: {
-    color: '#ef4444',
-  },
-  trigger: {
-    minHeight: 44,
-    borderWidth: 1.5,
-    borderColor: '#e5e7eb',
-    borderRadius: 8,
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    backgroundColor: '#fff',
-  },
-  triggerError: {
-    borderColor: '#ef4444',
-  },
-  triggerDisabled: {
-    opacity: 0.6,
-  },
-  triggerValue: {
-    fontSize: 14,
-    color: '#111827',
-  },
-  triggerPlaceholder: {
-    fontSize: 14,
-    color: '#9ca3af',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-  error: {
-    fontSize: 12,
-    color: '#ef4444',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.28)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    maxHeight: '70%',
-    borderRadius: 14,
-    backgroundColor: '#fff',
-    padding: 12,
-    gap: 8,
-  },
-  searchInput: {
-    minHeight: 44,
-    borderWidth: 1.5,
-    borderColor: '#e5e7eb',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-  },
-  loadingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-  },
-  loadingText: {
-    color: '#6b7280',
-  },
-  optionRow: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  optionRowSelected: {
-    backgroundColor: '#eff6ff',
-  },
-  optionLabel: {
-    fontSize: 14,
-    color: '#374151',
-  },
-  emptyText: {
-    paddingVertical: 16,
-    color: '#9ca3af',
-    textAlign: 'center',
-  },
-});

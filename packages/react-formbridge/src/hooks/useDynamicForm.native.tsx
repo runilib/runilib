@@ -1,4 +1,4 @@
-import type { FormSchema } from '../types';
+import type { FormSchema } from '../types/schema';
 import type {
   UseDynamicFormOptions as SharedUseDynamicFormOptions,
   UseDynamicFormReturn as SharedUseDynamicFormReturn,

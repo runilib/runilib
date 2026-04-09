@@ -4,7 +4,6 @@ import {
   Pressable,
   ScrollView,
   type StyleProp,
-  StyleSheet,
   Text,
   type TextStyle,
   View,
@@ -12,11 +11,14 @@ import {
 } from 'react-native';
 
 import type { FileValue } from '../../core/field-builders/file/types';
+import type { ExtraFieldProps, NativeFileFieldUiOverrides } from '../../types';
 import {
+  defaultErrorChromeStyle,
+  defaultErrorTextStyle,
+  defaultRequiredMarkStyle,
   formatBytes,
   isImageLike,
-  type NativeBaseUiOverrides,
-  type NativeExtraProps,
+  shouldHighlightOnError,
   sx,
 } from './shared';
 
@@ -35,48 +37,74 @@ type NativeFileDescriptor = {
   _fileDragDropLabel: string;
 };
 
-type FilePickerAdapter = (ctx: {
-  descriptor: NativeFileDescriptor;
-  multiple: boolean;
-}) => Promise<FileValue[] | FileValue | null>;
-
-type NativeFileUiOverrides = NativeBaseUiOverrides & {
-  styles?: NativeBaseUiOverrides['styles'] &
-    Partial<{
-      pickButton: StyleProp<ViewStyle>;
-      pickButtonText: StyleProp<TextStyle>;
-      fileList: StyleProp<ViewStyle>;
-      fileItem: StyleProp<ViewStyle>;
-      fileIcon: StyleProp<ViewStyle>;
-      fileIconText: StyleProp<TextStyle>;
-      fileName: StyleProp<TextStyle>;
-      fileMeta: StyleProp<TextStyle>;
-      removeButton: StyleProp<ViewStyle>;
-      removeText: StyleProp<TextStyle>;
-    }>;
-  pickFiles?: FilePickerAdapter;
-};
-
 interface Props {
   descriptor: NativeFileDescriptor;
   value: FileValue | FileValue[] | null;
   error: string | null;
+  label: string;
+  hint?: string;
+  name: string;
   onChange: (value: FileValue | FileValue[] | null) => void;
   onBlur: () => void;
-  extra?: NativeExtraProps<NativeFileUiOverrides>;
+  extra?: ExtraFieldProps<NativeFileFieldUiOverrides, 'native'>;
+}
+
+function getDefaultFileIcon(file: FileValue): React.ReactNode {
+  if (file.type.includes('pdf')) return '📄';
+  if (file.type.includes('image')) return '🖼';
+  if (file.type.includes('video')) return '🎬';
+  if (file.type.includes('sheet') || file.type.includes('csv')) return '📊';
+  return '📎';
+}
+
+function resolveText<TContext>(
+  override: string | ((ctx: TContext) => string) | undefined,
+  fallback: string,
+  context: TContext,
+): string {
+  if (typeof override === 'function') {
+    return override(context);
+  }
+
+  return override ?? fallback;
 }
 
 export const NativeFileField: React.FC<Props> = ({
   descriptor: d,
   value,
   error,
+  label,
+  hint,
+  name,
   onChange,
   onBlur,
   extra,
 }) => {
   const [loading, setLoading] = useState(false);
-  const ui = extra?.ui;
-  const { rootProps, labelProps, hintProps, errorProps } = ui ?? {};
+
+  const {
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+    pickFiles,
+    loadingText,
+    pickButtonText,
+    removeButtonText,
+    missingPickerNoticeText,
+    renderFileIcon,
+    renderPickButtonContent,
+    renderRemoveButtonContent,
+    renderFileMeta,
+    renderMissingPickerNotice,
+  } = extra ?? {};
+
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
@@ -90,12 +118,50 @@ export const NativeFileField: React.FC<Props> = ({
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
 
+  const id = extra?.id ?? name;
+  const hasError = Boolean(error);
+  const highlightOnError = shouldHighlightOnError(extra?.highlightOnError);
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
+
   const currentFiles = useMemo<FileValue[]>(
     () => (value ? (Array.isArray(value) ? value : [value]) : []),
     [value],
   );
-
-  const pickFiles = ui?.pickFiles;
+  const renderContext = {
+    accept: d._fileAccept,
+    disabled: d._disabled,
+    fileCount: currentFiles.length,
+    loading,
+    maxFiles: d._fileMaxFiles,
+    maxSize: d._fileMaxSize,
+    multiple: d._fileMultiple,
+    preview: d._filePreview,
+    previewHeight: d._filePreviewHeight,
+  };
+  const resolvedLoadingText = resolveText(loadingText, 'Processing...', renderContext);
+  const resolvedPickButtonText = resolveText(
+    pickButtonText,
+    d._fileDragDropLabel || 'Choose file',
+    renderContext,
+  );
+  const resolvedMissingPickerNotice = resolveText(
+    missingPickerNoticeText,
+    'No native picker adapter provided.',
+    renderContext,
+  );
+  const defaultPickButtonContent = (
+    <Text style={sx(styles?.pickButtonText)}>
+      {loading ? resolvedLoadingText : resolvedPickButtonText}
+    </Text>
+  );
+  const defaultMissingPickerNotice = (
+    <Text
+      style={sx(styles?.hint, hintPropsStyle)}
+      {...hintPropsRest}
+    >
+      {resolvedMissingPickerNotice}
+    </Text>
+  );
 
   const handlePick = async () => {
     if (d._disabled || !pickFiles) return;
@@ -133,194 +199,143 @@ export const NativeFileField: React.FC<Props> = ({
     onChange(null);
   };
 
+  const requiredMark = renderRequiredMark?.() ?? (
+    <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
+  );
+
   return (
     <View
-      style={sx(
-        styles.root,
-        extra?.style as StyleProp<ViewStyle>,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
       {...rootPropsRest}
     >
-      <Text
-        style={sx(styles.label, ui?.styles?.label, labelPropsStyle)}
-        {...labelPropsRest}
-      >
-        {d._label}
-        {d._required && <Text style={styles.required}>*</Text>}
-      </Text>
+      {!hideLabel &&
+        (renderLabel?.({
+          id,
+          label,
+          required: Boolean(d._required),
+          name,
+        }) ?? (
+          <Text
+            style={sx(styles?.label, labelPropsStyle)}
+            {...labelPropsRest}
+          >
+            {label}
+            {d._required && requiredMark}
+          </Text>
+        ))}
 
       <Pressable
         onPress={handlePick}
-        style={sx(
-          styles.pickButton,
-          d._disabled && styles.pickButtonDisabled,
-          ui?.styles?.pickButton,
-        )}
+        disabled={d._disabled}
+        style={sx(controlErrorStyle, styles?.pickButton)}
       >
-        <Text style={sx(styles.pickButtonText, ui?.styles?.pickButtonText)}>
-          {loading ? 'Processing…' : d._fileDragDropLabel || 'Choose file'}
-        </Text>
+        {renderPickButtonContent?.({
+          ...renderContext,
+          defaultContent: defaultPickButtonContent,
+        }) ?? defaultPickButtonContent}
       </Pressable>
 
       {currentFiles.length > 0 && (
-        <ScrollView contentContainerStyle={sx(styles.fileList, ui?.styles?.fileList)}>
-          {currentFiles.map((file, index) => (
-            <View
-              key={`${file.uri}-${index.toString()}`}
-              style={sx(styles.fileItem, ui?.styles?.fileItem)}
-            >
-              {d._filePreview && isImageLike(file.type || file.uri) ? (
-                <Image
-                  source={{ uri: file.uri }}
-                  style={{
-                    width: d._filePreviewHeight,
-                    height: d._filePreviewHeight,
-                    borderRadius: 8,
-                  }}
-                />
-              ) : (
-                <View style={sx(styles.fileIcon, ui?.styles?.fileIcon)}>
-                  <Text style={sx(styles.fileIconText, ui?.styles?.fileIconText)}>
-                    📎
-                  </Text>
-                </View>
-              )}
+        <ScrollView contentContainerStyle={sx(styles?.fileList)}>
+          {currentFiles.map((file, index) => {
+            const rawDefaultIcon = getDefaultFileIcon(file);
+            const dimensionsLabel =
+              file.width && file.height ? `${file.width}×${file.height}` : undefined;
+            const itemRenderContext = {
+              ...renderContext,
+              defaultIcon: rawDefaultIcon,
+              dimensionsLabel,
+              file,
+              formattedSize: formatBytes(file.size),
+              index,
+            };
+            const resolvedFileIcon =
+              renderFileIcon?.(file, itemRenderContext) ?? rawDefaultIcon;
+            const defaultFileMetaContent = (
+              <Text style={sx(styles?.fileMeta)}>
+                {formatBytes(file.size)}
+                {dimensionsLabel ? ` · ${dimensionsLabel}` : ''}
+              </Text>
+            );
+            const defaultRemoveButtonContent = (
+              <Text style={sx(styles?.removeText)}>
+                {resolveText(removeButtonText, '✕', itemRenderContext)}
+              </Text>
+            );
 
-              <View style={styles.fileContent}>
-                <Text
-                  numberOfLines={1}
-                  style={sx(styles.fileName, ui?.styles?.fileName)}
-                >
-                  {file.name}
-                </Text>
-                <Text style={sx(styles.fileMeta, ui?.styles?.fileMeta)}>
-                  {formatBytes(file.size)}
-                  {file.width && file.height ? ` · ${file.width}×${file.height}` : ''}
-                </Text>
-              </View>
-
-              <Pressable
-                onPress={() => removeFile(index)}
-                style={sx(styles.removeButton, ui?.styles?.removeButton)}
+            return (
+              <View
+                key={`${file.uri}-${index.toString()}`}
+                style={sx(styles?.fileItem)}
               >
-                <Text style={sx(styles.removeText, ui?.styles?.removeText)}>✕</Text>
-              </Pressable>
-            </View>
-          ))}
+                {d._filePreview && isImageLike(file.type || file.uri) ? (
+                  <Image
+                    source={{ uri: file.uri }}
+                    style={{
+                      width: d._filePreviewHeight,
+                      height: d._filePreviewHeight,
+                    }}
+                  />
+                ) : (
+                  <View style={sx(styles?.fileIcon)}>
+                    <Text style={sx(styles?.fileIconText)}>{resolvedFileIcon}</Text>
+                  </View>
+                )}
+
+                <View style={sx(styles?.fileName)}>
+                  <Text
+                    numberOfLines={1}
+                    style={sx(styles?.fileName)}
+                  >
+                    {file.name}
+                  </Text>
+                  {renderFileMeta?.({
+                    ...itemRenderContext,
+                    defaultContent: defaultFileMetaContent,
+                  }) ?? defaultFileMetaContent}
+                </View>
+
+                <Pressable
+                  onPress={() => removeFile(index)}
+                  style={sx(styles?.removeButton)}
+                >
+                  {renderRemoveButtonContent?.({
+                    ...itemRenderContext,
+                    defaultContent: defaultRemoveButtonContent,
+                  }) ?? defaultRemoveButtonContent}
+                </Pressable>
+              </View>
+            );
+          })}
         </ScrollView>
       )}
 
-      {error ? (
-        <Text
-          style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
-          {...errorPropsRest}
-        >
-          {error}
-        </Text>
-      ) : null}
-      {!error && d._hint ? (
-        <Text
-          style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
-          {...hintPropsRest}
-        >
-          {d._hint}
-        </Text>
-      ) : null}
-      {!pickFiles ? (
-        <Text
-          style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
-          {...hintPropsRest}
-        >
-          No native picker adapter provided.
-        </Text>
-      ) : null}
+      {error
+        ? (renderError?.({ id, name, error }) ?? (
+            <Text
+              style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
+              {...errorPropsRest}
+            >
+              {error}
+            </Text>
+          ))
+        : hint
+          ? (renderHint?.({ id, name, hint }) ?? (
+              <Text
+                style={sx(styles?.hint, hintPropsStyle)}
+                {...hintPropsRest}
+              >
+                {hint}
+              </Text>
+            ))
+          : null}
+
+      {!pickFiles
+        ? (renderMissingPickerNotice?.({
+            ...renderContext,
+            defaultContent: defaultMissingPickerNotice,
+          }) ?? defaultMissingPickerNotice)
+        : null}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  root: {
-    gap: 6,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  required: {
-    color: '#ef4444',
-  },
-  pickButton: {
-    minHeight: 48,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: '#d1d5db',
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-  },
-  pickButtonDisabled: {
-    opacity: 0.6,
-  },
-  pickButtonText: {
-    fontSize: 14,
-    color: '#374151',
-    fontWeight: '600',
-  },
-  fileList: {
-    gap: 10,
-  },
-  fileItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#f9fafb',
-  },
-  fileIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 8,
-    backgroundColor: '#f3f4f6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fileIconText: {
-    fontSize: 20,
-  },
-  fileContent: {
-    flex: 1,
-  },
-  fileName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  fileMeta: {
-    fontSize: 11.5,
-    color: '#9ca3af',
-    marginTop: 2,
-  },
-  removeButton: {
-    padding: 6,
-  },
-  removeText: {
-    color: '#9ca3af',
-    fontSize: 16,
-  },
-  error: {
-    fontSize: 12,
-    color: '#ef4444',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-});

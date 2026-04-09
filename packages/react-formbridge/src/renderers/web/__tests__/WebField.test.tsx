@@ -10,6 +10,7 @@ function renderTextField(
   builder: ReturnType<typeof field.text>,
   overrides?: Partial<React.ComponentProps<typeof Field>>,
 ) {
+  const { required: requiredOverride, ...restOverrides } = overrides ?? {};
   const descriptor = builder._build();
   const resolvedDescriptor = {
     ...descriptor,
@@ -21,7 +22,7 @@ function renderTextField(
       descriptor={resolvedDescriptor}
       name="value"
       value=""
-      label={descriptor._label}
+      label={descriptor._label ?? ''}
       placeholder={descriptor._placeholder}
       allValues={{}}
       error={null}
@@ -29,18 +30,21 @@ function renderTextField(
       dirty={false}
       validating={false}
       disabled={false}
+      required={requiredOverride ?? Boolean(descriptor._required)}
       hint={descriptor._hint}
       onChange={() => {}}
       onBlur={() => {}}
       onFocus={() => {}}
-      {...overrides}
+      {...restOverrides}
     />,
   );
 }
 
 describe('WebField ui', () => {
   it('keeps text inputs minimally styled by default', () => {
-    const { getByRole, getByText } = renderTextField(field.text('Name').required());
+    const { getByRole, getByText } = renderTextField(
+      field.text().label('Name').required(),
+    );
 
     const input = getByRole('textbox') as HTMLInputElement;
     const label = getByText('Name');
@@ -52,14 +56,12 @@ describe('WebField ui', () => {
   });
 
   it('supports styling through runtime ui overrides', () => {
-    const { getByRole, getByText } = renderTextField(field.text('Email'), {
+    const { getByRole, getByText } = renderTextField(field.text().label('Email'), {
       extra: {
-        ui: {
-          styles: {
-            root: { marginTop: '9px' },
-            label: { fontWeight: 700 },
-            input: { padding: '24px', borderRadius: 12 },
-          },
+        styles: {
+          root: { marginTop: '9px' },
+          label: { fontWeight: 700 },
+          input: { padding: '24px', borderRadius: 12 },
         },
       },
     });
@@ -74,13 +76,26 @@ describe('WebField ui', () => {
     expect(root?.style.marginTop).toBe('9px');
   });
 
-  it('only adds inline chrome when highlighting validation errors', () => {
-    const { getByRole } = renderTextField(field.text('Username').required(), {
+  it('adds red error chrome by default when a field is invalid', () => {
+    const { getByRole } = renderTextField(field.text().required(), {
       error: 'Required field',
     });
 
     const input = getByRole('textbox') as HTMLInputElement;
 
     expect(input.style.borderColor).toBe('rgb(239, 68, 68)');
+  });
+
+  it('can suppress the default red error chrome', () => {
+    const { getByRole } = renderTextField(field.text().required(), {
+      error: 'Required field',
+      extra: {
+        highlightOnError: false,
+      },
+    });
+
+    const input = getByRole('textbox') as HTMLInputElement;
+
+    expect(input.style.borderColor).toBe('');
   });
 });

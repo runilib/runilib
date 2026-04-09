@@ -1,4 +1,4 @@
-import type { ResolverResult } from '../../types';
+import type { ResolverResult } from '../../types/options';
 import {
   FORM_ROOT_ERROR_KEY,
   type ResolverAdapterOptions,

@@ -1,4 +1,4 @@
-import type { FieldDescriptor } from '../../types';
+import type { FieldDescriptor } from '../../types/field';
 
 function matchesPattern(pattern: RegExp, value: string): boolean {
   return new RegExp(pattern.source, pattern.flags).test(value);

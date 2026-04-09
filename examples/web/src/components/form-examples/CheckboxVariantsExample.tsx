@@ -14,15 +14,18 @@ export function CheckboxVariantsExample() {
   const schema = useMemo(
     () => ({
       acceptTerms: field
-        .checkbox('Accept launch terms')
+        .checkbox()
+        .label('Accept launch terms')
         .mustBeTrue('The launch terms must be accepted')
         .hint('Required legal consent.'),
       weeklyDigest: field
-        .checkbox('Receive weekly digest')
+        .checkbox()
+        .label('Weekly digest')
         .defaultValue(true)
         .hint('Pre-selected communication preference.'),
       betaInvites: field
-        .checkbox('Join beta invite list')
+        .checkbox()
+        .label('Beta invites')
         .hint('Optional opt-in for early product previews.'),
     }),
     [],
@@ -31,7 +34,7 @@ export function CheckboxVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, watchAll } = form;

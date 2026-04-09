@@ -12,15 +12,16 @@ export function ValibotResolverExample() {
 
   const formSchema = useMemo(
     () => ({
-      plan: field.select('Plan').options(DEMO_PLANS),
-      cardholder: field.text('Cardholder').placeholder('Ava Stone'),
+      plan: field.select().label('Plan').options(DEMO_PLANS),
+      cardholder: field.text().label('Cardholder').placeholder('Ava Stone'),
       receiptEmail: field
-        .email('Receipt email')
+        .email()
+        .label('Receipt email')
         .placeholder('billing@runilib.dev')
         .behavior({
           inputMode: 'email',
         }),
-      cardLast4: field.text('Card last 4').placeholder('1842').behavior({
+      cardLast4: field.text().label('Card last 4').placeholder('1842').behavior({
         inputMode: 'numeric',
       }),
     }),
@@ -61,7 +62,7 @@ export function ValibotResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
     resolver,
   });
 

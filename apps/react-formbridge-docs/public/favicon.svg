@@ -1,0 +1,110 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 96 96"
+  fill="none"
+>
+  <title>FormBridge favicon</title>
+  <desc>
+    The FormBridge symbol on a dark rounded badge, showing one schema runtime
+    connected to web and native interfaces.
+  </desc>
+
+  <defs>
+    <linearGradient
+      id="favicon-badge"
+      x1="12"
+      y1="10"
+      x2="84"
+      y2="86"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#08111A" />
+      <stop offset="1" stop-color="#18354D" />
+    </linearGradient>
+    <linearGradient
+      id="favicon-core"
+      x1="37"
+      y1="24"
+      x2="60"
+      y2="47"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#12B4A8" />
+      <stop offset="1" stop-color="#0F6FDC" />
+    </linearGradient>
+    <linearGradient
+      id="favicon-bridge"
+      x1="24"
+      y1="58"
+      x2="72"
+      y2="58"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#B9CBDB" />
+      <stop offset="0.55" stop-color="#0F6FDC" />
+      <stop offset="1" stop-color="#B9CBDB" />
+    </linearGradient>
+  </defs>
+
+  <rect
+    x="10"
+    y="10"
+    width="76"
+    height="76"
+    rx="22"
+    fill="url(#favicon-badge)"
+  />
+
+  <path
+    d="M24 58C28.5 43.5 38.5 35 48 35C57.5 35 67.5 43.5 72 58"
+    stroke="url(#favicon-bridge)"
+    stroke-linecap="round"
+    stroke-width="7"
+  />
+
+  <rect
+    x="15"
+    y="49.5"
+    width="24"
+    height="18"
+    rx="5"
+    fill="#F8FBFF"
+    stroke="#D8E5F0"
+    stroke-width="2"
+  />
+  <path
+    d="M18.5 54H35"
+    stroke="#D8E5F0"
+    stroke-linecap="round"
+    stroke-width="1.8"
+  />
+  <rect x="19" y="58" width="8.5" height="3" rx="1.5" fill="#0F6FDC" />
+  <rect x="19" y="63" width="12.5" height="3" rx="1.5" fill="#B9CBDB" />
+
+  <rect
+    x="58"
+    y="39"
+    width="17"
+    height="32"
+    rx="8"
+    fill="#F8FBFF"
+    stroke="#D8E5F0"
+    stroke-width="2"
+  />
+  <rect x="64" y="44" width="5" height="1.5" rx="0.75" fill="#D8E5F0" />
+  <rect x="62.5" y="53" width="8.5" height="3" rx="1.5" fill="#12B4A8" />
+  <rect x="61.5" y="63" width="10.5" height="3.5" rx="1.75" fill="#0F6FDC" />
+
+  <circle cx="48" cy="33" r="14" fill="url(#favicon-core)" />
+  <path
+    d="M48 26.5L42 32.5M48 26.5L54 32.5M42 32.5L48 38.5M54 32.5L48 38.5M42 32.5H54"
+    stroke="#FFF"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="1.8"
+  />
+  <circle cx="48" cy="26.5" r="2.4" fill="#FFF" />
+  <circle cx="42" cy="32.5" r="2.4" fill="#FFF" />
+  <circle cx="54" cy="32.5" r="2.4" fill="#FFF" />
+  <circle cx="48" cy="38.5" r="2.4" fill="#FFF" />
+</svg>

@@ -1,7 +1,6 @@
-import type { FieldDescriptor } from '../../../types';
+import type { FieldDescriptor } from '../../../types/field';
 
 export type BuiltinMaskChar = '9' | 'a' | '*';
-export type MaskChar = BuiltinMaskChar;
 export type MaskTokenMap = Record<string, RegExp>;
 
 export interface MaskToken {

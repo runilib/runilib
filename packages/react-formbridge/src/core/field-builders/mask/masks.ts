@@ -16,7 +16,7 @@ export type MaskPatternInput = string | MaskPreset | MaskPatternConfig;
 function getMaskTokenMap(tokens?: MaskTokenMap): MaskTokenMap {
   return {
     ...MASK_REGEX,
-    ...(tokens ?? {}),
+    ...tokens,
   };
 }
 
@@ -76,6 +76,46 @@ export function parsePattern(pattern: string, customTokens?: MaskTokenMap): Mask
   }
 
   return tokens;
+}
+
+function createRegexProbe(regex: RegExp): RegExp {
+  const safeFlags = regex.flags.replace(/[gy]/g, '');
+  return new RegExp(regex.source, safeFlags);
+}
+
+function acceptsAnySample(regex: RegExp, samples: string[]): boolean {
+  return samples.some((sample) => createRegexProbe(regex).test(sample));
+}
+
+export interface MaskCharacterProfile {
+  acceptsLetters: boolean;
+  acceptsDigits: boolean;
+}
+
+export function getMaskCharacterProfile(
+  pattern: string,
+  tokenMap?: MaskTokenMap,
+): MaskCharacterProfile {
+  const tokens = parsePattern(pattern, tokenMap);
+
+  return tokens.reduce<MaskCharacterProfile>(
+    (profile, token) => {
+      if (!token.isInput) {
+        return profile;
+      }
+
+      return {
+        acceptsLetters:
+          profile.acceptsLetters || acceptsAnySample(token.regex, ['A', 'a', 'Z', 'z']),
+        acceptsDigits:
+          profile.acceptsDigits || acceptsAnySample(token.regex, ['0', '5', '9']),
+      };
+    },
+    {
+      acceptsLetters: false,
+      acceptsDigits: false,
+    },
+  );
 }
 
 export function getFirstInputPosition(pattern: string, tokenMap?: MaskTokenMap): number {
@@ -295,14 +335,15 @@ export function getMaskAutoLayout(
   const compact = visualLength <= 10;
 
   // Web: largeur en "ch" fonctionne très bien pour les masques
-  const webWidthCh = compact
-    ? Math.max(visualLength + 5, 10)
-    : Math.max(visualLength + 2, 12);
+  const webWidthCh = Math.min(
+    Math.max(visualLength + (compact ? 5 : 2), compact ? 10 : 12),
+    30,
+  );
 
   // Native: estimation simple en px
   const nativeWidthPx = compact
-    ? Math.max(128, Math.min(webWidthCh * 12 + 28, 240))
-    : Math.max(180, Math.min(webWidthCh * 12 + 28, 260));
+    ? Math.max(128, Math.min(webWidthCh * 12 + 24, 220))
+    : Math.max(176, Math.min(webWidthCh * 12 + 24, 320));
 
   return {
     visualLength,

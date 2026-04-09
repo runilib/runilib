@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   type StyleProp,
-  StyleSheet,
   Text,
   TextInput,
   type TextInputProps,
@@ -23,11 +22,17 @@ import {
 } from '../../core/field-builders/phone/countries';
 import type { PhoneDescriptor } from '../../core/field-builders/phone/PhoneFieldBuilder';
 import type { CountryInfo } from '../../core/field-builders/phone/types';
-import type { FieldRenderProps } from '../../types';
+import type {
+  ExtraFieldProps,
+  FieldRenderProps,
+  FocusableFieldHandle,
+  NativePhoneFieldUiOverrides,
+} from '../../types';
 import {
   defaultBorderColor,
-  type NativeBaseUiOverrides,
-  type NativeExtraProps,
+  defaultErrorChromeStyle,
+  defaultErrorTextStyle,
+  defaultRequiredMarkStyle,
   type ResolvedNativeFieldUi,
   shouldHighlightOnError,
   sx,
@@ -40,39 +45,113 @@ type CountryListItem =
       key: string;
     };
 
-type NativePhoneUiOverrides = NativeBaseUiOverrides & {
-  styles?: NativeBaseUiOverrides['styles'] &
-    Partial<{
-      row: StyleProp<ViewStyle>;
-      countryButton: StyleProp<ViewStyle>;
-      countryFlag: StyleProp<TextStyle>;
-      countryDial: StyleProp<TextStyle>;
-      chevron: StyleProp<TextStyle>;
-      input: StyleProp<TextStyle>;
-      e164: StyleProp<TextStyle>;
-      modalBackdrop: StyleProp<ViewStyle>;
-      modalCard: StyleProp<ViewStyle>;
-      searchInput: StyleProp<TextStyle>;
-      separator: StyleProp<ViewStyle>;
-      countryRow: StyleProp<ViewStyle>;
-      countryName: StyleProp<TextStyle>;
-    }>;
-};
+function resolveText<TContext>(
+  override: string | ((ctx: TContext) => string) | undefined,
+  fallback: string,
+  context: TContext,
+): string {
+  if (typeof override === 'function') {
+    return override(context);
+  }
+
+  return override ?? fallback;
+}
 
 interface Props extends FieldRenderProps<PhoneValue | string | null> {
   descriptor: PhoneDescriptor & {
     _ui?: ResolvedNativeFieldUi;
   };
-  extra?: NativeExtraProps<NativePhoneUiOverrides>;
+  extra?: ExtraFieldProps<NativePhoneFieldUiOverrides, 'native'>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
-export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...props }) => {
-  const ui = extra?.ui;
-  const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
-    d._ui?.highlightOnError,
-  );
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
+const defaultDetachedRowStyle: ViewStyle = {
+  flexDirection: 'row',
+  alignItems: 'stretch',
+  gap: 12,
+};
+
+const defaultIntegratedRowStyle: ViewStyle = {
+  minHeight: 52,
+  flexDirection: 'row',
+  alignItems: 'stretch',
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  borderRadius: 14,
+  backgroundColor: '#ffffff',
+};
+
+const defaultCountryButtonStyle: ViewStyle = {
+  minHeight: 52,
+  minWidth: 88,
+  paddingHorizontal: 12,
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  borderRadius: 14,
+  backgroundColor: '#ffffff',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+};
+
+const defaultIntegratedCountryButtonStyle: ViewStyle = {
+  minHeight: 52,
+  minWidth: 92,
+  borderWidth: 0,
+  borderRadius: 0,
+  backgroundColor: 'transparent',
+};
+
+const defaultCountryDividerStyle: ViewStyle = {
+  width: 1,
+  alignSelf: 'stretch',
+  backgroundColor: '#e5e7eb',
+};
+
+const defaultIntegratedInputStyle: TextStyle = {
+  flex: 1,
+  minHeight: 52,
+  paddingHorizontal: 14,
+  paddingVertical: 12,
+  borderWidth: 0,
+  borderRadius: 0,
+  borderTopLeftRadius: 0,
+  borderBottomLeftRadius: 0,
+  backgroundColor: 'transparent',
+  color: '#111827',
+  fontSize: 15,
+};
+
+export const NativePhoneInput: React.FC<Props> = ({
+  descriptor: d,
+  extra,
+  registerFocusable,
+  ...props
+}) => {
+  const {
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    searchInputProps,
+    hintProps,
+    errorProps,
+    countryButtonAriaLabel,
+    searchPlaceholderText,
+    emptySearchText,
+    e164Text,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+    renderCountryButtonContent,
+    renderCountryItemContent,
+    renderEmptySearchContent,
+    renderE164,
+  } = extra ?? {};
+
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
@@ -80,6 +159,10 @@ export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...pro
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
   const { style: inputPropsStyle, ...inputPropsRest } = (inputProps ?? {}) as {
+    style?: StyleProp<TextStyle>;
+  } & Record<string, unknown>;
+  const { style: searchInputPropsStyle, ...searchInputPropsRest } = (searchInputProps ??
+    {}) as {
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
   const { style: hintPropsStyle, ...hintPropsRest } = (hintProps ?? {}) as {
@@ -172,36 +255,124 @@ export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...pro
     [emitValue],
   );
 
-  const id = ui?.id ?? d._ui?.id ?? props.name;
+  const id = extra?.id ?? d._ui?.id ?? props.name;
   const displayValue = normalizedValue?.national ?? '';
-  const hasError = Boolean(props.error);
   const placeholder =
     currentCountry.exampleNational ||
     props.placeholder ||
     d._placeholder ||
     'Enter phone number';
+  const hasError = Boolean(props.error);
+  const countryLayout = extra?.countryLayout ?? d._phoneCountryLayout;
+  const integrated = countryLayout === 'integrated';
+  const highlightOnError = shouldHighlightOnError(
+    extra?.highlightOnError,
+    d._ui?.highlightOnError,
+  );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
+  const renderContext = useMemo(
+    () => ({
+      currentCountry,
+      disabled: props.disabled,
+      e164Value: normalizedValue?.e164 ?? null,
+      filteredCount: filteredCountries.length,
+      hasValue: Boolean(displayValue),
+      layout: countryLayout,
+      nationalValue: displayValue,
+      open,
+      preferredCountries: d._phonePreferred,
+      search,
+      searchable: d._phoneSearchable,
+      showDialCode: d._phoneShowDialCode,
+      showFlag: d._phoneShowFlag,
+      storeE164: d._phoneStoreE164,
+      value: props.value,
+    }),
+    [
+      currentCountry,
+      d._phonePreferred,
+      d._phoneSearchable,
+      d._phoneShowDialCode,
+      d._phoneShowFlag,
+      d._phoneStoreE164,
+      countryLayout,
+      displayValue,
+      filteredCountries.length,
+      normalizedValue?.e164,
+      open,
+      props.disabled,
+      props.value,
+      search,
+    ],
+  );
+  const resolvedCountryButtonAriaLabel = resolveText(
+    countryButtonAriaLabel,
+    'Select country',
+    renderContext,
+  );
+  const resolvedSearchPlaceholder = resolveText(
+    searchPlaceholderText,
+    'Search country…',
+    renderContext,
+  );
+  const resolvedEmptySearchText = resolveText(
+    emptySearchText,
+    search.trim() ? `No countries match "${search.trim()}".` : 'No countries available.',
+    renderContext,
+  );
+  const defaultCountryButtonContent = (
+    <>
+      {d._phoneShowFlag && (
+        <Text style={sx(styles?.countryFlag)}>{currentCountry.flag}</Text>
+      )}
+      {d._phoneShowDialCode && (
+        <Text style={sx(styles?.countryDial)}>+{currentCountry.dial}</Text>
+      )}
+      <Text style={sx(styles?.chevron)}>▾</Text>
+    </>
+  );
+  const resolvedCountryButtonContent =
+    renderCountryButtonContent?.({
+      ...renderContext,
+      defaultContent: defaultCountryButtonContent,
+    }) ?? defaultCountryButtonContent;
+
+  const requiredMark = renderRequiredMark?.() ?? (
+    <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
+  );
 
   return (
     <View
-      style={sx(
-        styles.root,
-        extra?.style as StyleProp<ViewStyle>,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel && (
-        <Text
-          style={sx(styles.label, ui?.styles?.label, labelPropsStyle)}
-          {...labelPropsRest}
-        >
-          {props.label}
-          {d._required && <Text style={styles.requiredMark}>*</Text>}
-        </Text>
-      )}
-
-      <View style={sx(styles.row, ui?.styles?.row)}>
+      {!hideLabel &&
+        (renderLabel?.({
+          id,
+          label: props.label,
+          required: Boolean(d._required),
+          name: props.name,
+        }) ?? (
+          <Text
+            style={sx(styles?.label, labelPropsStyle)}
+            {...labelPropsRest}
+          >
+            {props.label}
+            {d._required && requiredMark}
+          </Text>
+        ))}
+      <View
+        style={sx(
+          integrated
+            ? {
+                ...defaultIntegratedRowStyle,
+                borderColor: defaultBorderColor(hasError, highlightOnError, '#d1d5db'),
+              }
+            : defaultDetachedRowStyle,
+          integrated ? controlErrorStyle : undefined,
+          styles?.row,
+        )}
+      >
         <Pressable
           onPress={() => {
             if (!props.disabled) {
@@ -210,29 +381,23 @@ export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...pro
             }
           }}
           style={sx(
-            styles.countryButton,
-            {
-              borderColor: defaultBorderColor(hasError, highlightOnError),
-              opacity: props.disabled ? 0.6 : 1,
-            },
-            ui?.styles?.countryButton,
+            defaultCountryButtonStyle,
+            integrated ? defaultIntegratedCountryButtonStyle : undefined,
+            styles?.countryButton,
           )}
+          accessibilityRole="button"
+          accessibilityLabel={resolvedCountryButtonAriaLabel}
         >
-          {d._phoneShowFlag && (
-            <Text style={sx(styles.flag, ui?.styles?.countryFlag)}>
-              {currentCountry.flag}
-            </Text>
-          )}
-          {d._phoneShowDialCode && (
-            <Text style={sx(styles.dial, ui?.styles?.countryDial)}>
-              +{currentCountry.dial}
-            </Text>
-          )}
-          <Text style={sx(styles.chevron, ui?.styles?.chevron)}>▾</Text>
+          {resolvedCountryButtonContent}
         </Pressable>
+
+        {integrated ? (
+          <View style={sx(defaultCountryDividerStyle, styles?.countryDivider)} />
+        ) : null}
 
         <TextInput
           nativeID={id}
+          ref={registerFocusable}
           testID={d._ui?.testID}
           value={displayValue}
           placeholder={placeholder}
@@ -243,37 +408,55 @@ export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...pro
           onBlur={props.onBlur}
           onFocus={props.onFocus}
           style={sx(
-            styles.input,
-            {
-              borderColor: defaultBorderColor(hasError, highlightOnError),
-              backgroundColor: props.disabled ? '#f9fafb' : '#fff',
-            },
-            ui?.styles?.input,
+            styles?.input,
+            integrated ? defaultIntegratedInputStyle : controlErrorStyle,
             inputPropsStyle,
           )}
           {...(inputPropsRest as Partial<TextInputProps>)}
         />
       </View>
 
-      {props.error ? (
-        <Text
-          style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
-          {...errorPropsRest}
-        >
-          {props.error}
-        </Text>
-      ) : null}
-      {!props.error && props.hint ? (
-        <Text
-          style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
-          {...hintPropsRest}
-        >
-          {props.hint}
-        </Text>
-      ) : null}
-      {normalizedValue?.e164 ? (
-        <Text style={sx(styles.e164, ui?.styles?.e164)}>{normalizedValue.e164}</Text>
-      ) : null}
+      {normalizedValue?.e164
+        ? (renderE164?.({
+            ...renderContext,
+            defaultContent: (
+              <Text style={sx(styles?.e164)}>
+                {resolveText(e164Text, normalizedValue.e164, {
+                  ...renderContext,
+                  e164: normalizedValue.e164,
+                })}
+              </Text>
+            ),
+            e164: normalizedValue.e164,
+          }) ?? (
+            <Text style={sx(styles?.e164)}>
+              {resolveText(e164Text, normalizedValue.e164, {
+                ...renderContext,
+                e164: normalizedValue.e164,
+              })}
+            </Text>
+          ))
+        : null}
+
+      {props.error
+        ? (renderError?.({ id, name: props.name, error: props.error }) ?? (
+            <Text
+              style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
+              {...errorPropsRest}
+            >
+              {props.error}
+            </Text>
+          ))
+        : props.hint
+          ? (renderHint?.({ id, name: props.name, hint: props.hint }) ?? (
+              <Text
+                style={sx(styles?.hint, hintPropsStyle)}
+                {...hintPropsRest}
+              >
+                {props.hint}
+              </Text>
+            ))
+          : null}
 
       <Modal
         visible={open}
@@ -282,52 +465,71 @@ export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...pro
         onRequestClose={() => setOpen(false)}
       >
         <Pressable
-          style={sx(styles.modalBackdrop, ui?.styles?.modalBackdrop)}
+          style={sx(styles?.modalBackdrop)}
           onPress={() => setOpen(false)}
         >
           <Pressable
-            style={sx(styles.modalCard, ui?.styles?.modalCard)}
+            style={sx(styles?.modalCard)}
             onPress={(event) => event.stopPropagation()}
           >
             {d._phoneSearchable && (
               <TextInput
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Search country…"
-                style={sx(styles.searchInput, ui?.styles?.searchInput)}
+                placeholder={resolvedSearchPlaceholder}
+                style={sx(styles?.searchInput, searchInputPropsStyle)}
+                {...searchInputPropsRest}
               />
             )}
 
             <FlatList
               data={filteredCountries}
               keyExtractor={(item) => ('separator' in item ? item.key : item.code)}
+              ListEmptyComponent={() => (
+                <>
+                  {renderEmptySearchContent?.({
+                    ...renderContext,
+                    defaultContent: (
+                      <Text style={sx(styles?.emptyText)}>{resolvedEmptySearchText}</Text>
+                    ),
+                  }) ?? (
+                    <Text style={sx(styles?.emptyText)}>{resolvedEmptySearchText}</Text>
+                  )}
+                </>
+              )}
               renderItem={({ item }) => {
                 if ('separator' in item) {
-                  return <View style={sx(styles.separator, ui?.styles?.separator)} />;
+                  return <View style={sx(styles?.separator)} />;
                 }
 
-                const selected = item.code === currentCountry.code;
+                const index = filteredCountries.findIndex(
+                  (country) => !('separator' in country) && country.code === item.code,
+                );
+                const isSelected = item.code === currentCountry.code;
+                const defaultCountryItemContent = (
+                  <>
+                    {d._phoneShowFlag && (
+                      <Text style={sx(styles?.countryFlag)}>{item.flag}</Text>
+                    )}
+                    <Text style={sx(styles?.countryName)}>{item.name}</Text>
+                    <Text style={sx(styles?.countryDial)}>+{item.dial}</Text>
+                  </>
+                );
+                const resolvedCountryItemContent =
+                  renderCountryItemContent?.({
+                    ...renderContext,
+                    country: item,
+                    defaultContent: defaultCountryItemContent,
+                    index,
+                    selected: isSelected,
+                  }) ?? defaultCountryItemContent;
 
                 return (
                   <Pressable
                     onPress={() => selectCountry(item)}
-                    style={sx(
-                      styles.countryRow,
-                      selected && styles.countryRowSelected,
-                      ui?.styles?.countryRow,
-                    )}
+                    style={sx(styles?.countryRow)}
                   >
-                    {d._phoneShowFlag && (
-                      <Text style={sx(styles.countryFlag, ui?.styles?.countryFlag)}>
-                        {item.flag}
-                      </Text>
-                    )}
-                    <Text style={sx(styles.countryName, ui?.styles?.countryName)}>
-                      {item.name}
-                    </Text>
-                    <Text style={sx(styles.countryDial, ui?.styles?.countryDial)}>
-                      +{item.dial}
-                    </Text>
+                    {resolvedCountryItemContent}
                   </Pressable>
                 );
               }}
@@ -338,117 +540,3 @@ export const NativePhoneInput: React.FC<Props> = ({ descriptor: d, extra, ...pro
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  root: {
-    gap: 6,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  requiredMark: {
-    color: '#ef4444',
-  },
-  row: {
-    flexDirection: 'row',
-  },
-  countryButton: {
-    minWidth: 92,
-    paddingHorizontal: 12,
-    borderWidth: 1.5,
-    borderRightWidth: 0,
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  flag: {
-    fontSize: 18,
-  },
-  dial: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  chevron: {
-    fontSize: 10,
-    color: '#9ca3af',
-  },
-  input: {
-    flex: 1,
-    minHeight: 44,
-    borderWidth: 1.5,
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 14,
-    color: '#111827',
-  },
-  error: {
-    fontSize: 12,
-    color: '#ef4444',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-  e164: {
-    fontSize: 11,
-    color: '#9ca3af',
-    fontVariant: ['tabular-nums'],
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.28)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    maxHeight: '70%',
-    borderRadius: 14,
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-  },
-  searchInput: {
-    minHeight: 42,
-    borderWidth: 1.5,
-    borderColor: '#e5e7eb',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginHorizontal: 12,
-    marginBottom: 8,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f3f4f6',
-    marginVertical: 4,
-  },
-  countryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  countryRowSelected: {
-    backgroundColor: '#eff6ff',
-  },
-  countryFlag: {
-    fontSize: 16,
-  },
-  countryName: {
-    flex: 1,
-    fontSize: 13,
-    color: '#374151',
-  },
-  countryDial: {
-    fontSize: 12,
-    color: '#9ca3af',
-    fontVariant: ['tabular-nums'],
-  },
-});

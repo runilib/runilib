@@ -32,6 +32,9 @@ export function TooltipPlacementsNative() {
           placement="top"
           openOnPress
           content="Placement: top"
+          tooltipStyle={{
+            backgroundColor: '#1d4ed8',
+          }}
         >
           <Text style={chipStyle}>Top</Text>
         </Tooltip>
@@ -42,6 +45,9 @@ export function TooltipPlacementsNative() {
           placement="left"
           openOnPress
           content="Placement: left"
+          tooltipStyle={{
+            backgroundColor: '#1d4ed8',
+          }}
         >
           <View>
             <Text style={chipStyle}>Left</Text>
@@ -54,6 +60,9 @@ export function TooltipPlacementsNative() {
           placement="auto"
           content="Placement: auto"
           openOnPress
+          tooltipStyle={{
+            backgroundColor: '#1d4ed8',
+          }}
         >
           <Text style={chipStyle}>Auto</Text>
         </Tooltip>
@@ -63,6 +72,9 @@ export function TooltipPlacementsNative() {
           placement="right"
           openOnPress
           content="Placement: right"
+          tooltipStyle={{
+            backgroundColor: '#1d4ed8',
+          }}
         >
           <Text style={chipStyle}>Right</Text>
         </Tooltip>
@@ -73,6 +85,9 @@ export function TooltipPlacementsNative() {
           placement="bottom"
           openOnPress
           content="Placement: bottom"
+          tooltipStyle={{
+            backgroundColor: '#1d4ed8',
+          }}
         >
           <Text style={chipStyle}>Bottom</Text>
         </Tooltip>
@@ -81,12 +96,12 @@ export function TooltipPlacementsNative() {
       <View>
         <Tooltip
           openOnPress
-          anchorColor="#111827"
           placement="top"
+          anchorColor="#1d4ed8"
           renderContent={({ toggle }) => (
             <View
               style={{
-                backgroundColor: '#111827',
+                backgroundColor: '#1d4ed8',
                 paddingHorizontal: 16,
                 paddingVertical: 14,
                 borderRadius: 5,

@@ -1,8 +1,5 @@
 import React, {
   type CSSProperties,
-  type HTMLAttributes,
-  type InputHTMLAttributes,
-  type LabelHTMLAttributes,
   useCallback,
   useEffect,
   useMemo,
@@ -20,9 +17,13 @@ import {
 } from '../../core/field-builders/phone/countries';
 import type { PhoneDescriptor } from '../../core/field-builders/phone/PhoneFieldBuilder';
 import type { CountryInfo } from '../../core/field-builders/phone/types';
+import type { FocusableFieldHandle } from '../../types';
+import type { WebPhoneFieldUiOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
+import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultBorderColor,
+  defaultErrorChromeStyle,
   type ResolvedWebFieldUi,
   shouldHighlightOnError,
 } from './shared';
@@ -34,148 +35,139 @@ type CountryListItem =
       key: string;
     };
 
-type PhoneSlot =
-  | 'root'
-  | 'label'
-  | 'row'
-  | 'countryButton'
-  | 'countrySearchInput'
-  | 'countryList'
-  | 'countryItem'
-  | 'countryName'
-  | 'countryDial'
-  | 'input'
-  | 'error'
-  | 'hint'
-  | 'e164'
-  | 'requiredMark';
+function resolveText<TContext>(
+  override: string | ((ctx: TContext) => string) | undefined,
+  fallback: string,
+  context: TContext,
+): string {
+  if (typeof override === 'function') {
+    return override(context);
+  }
 
-interface PhoneUiOverrides {
-  id?: string;
-  hideLabel?: boolean;
-  highlightOnError?: boolean;
-  classNames?: Partial<Record<PhoneSlot, string>> & Record<string, string | undefined>;
-  styles?: Partial<Record<PhoneSlot, CSSProperties>> &
-    Record<string, CSSProperties | undefined>;
-  rootProps?: HTMLAttributes<HTMLDivElement>;
-  labelProps?: LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    | 'type'
-    | 'value'
-    | 'defaultValue'
-    | 'onChange'
-    | 'onBlur'
-    | 'onFocus'
-    | 'disabled'
-    | 'name'
-    | 'id'
-  >;
-  searchInputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'value' | 'defaultValue' | 'onChange'
-  >;
-  hintProps?: HTMLAttributes<HTMLSpanElement>;
-  errorProps?: HTMLAttributes<HTMLSpanElement>;
-  renderLabel?: (ctx: {
-    id: string;
-    label: React.ReactNode;
-    required: boolean;
-  }) => React.ReactNode;
-  renderHint?: (ctx: { id: string; hint: React.ReactNode }) => React.ReactNode;
-  renderError?: (ctx: { id: string; error: React.ReactNode }) => React.ReactNode;
-  renderRequiredMark?: () => React.ReactNode;
+  return override ?? fallback;
 }
 
 interface Props extends FieldRenderProps<PhoneValue | string | null> {
   descriptor: PhoneDescriptor & {
     _ui?: ResolvedWebFieldUi;
   };
-  extra?: ExtraFieldProps<PhoneUiOverrides>;
+  extra?: ExtraFieldProps<WebPhoneFieldUiOverrides>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
-function cx(...values: Array<string | undefined | false | null>) {
-  return values.filter(Boolean).join(' ');
-}
+const defaultDetachedRowStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'auto minmax(0, 1fr)',
+  gap: 12,
+  alignItems: 'stretch',
+};
 
-function mergeStyles(
-  ...styles: Array<CSSProperties | Record<string, unknown> | undefined>
-): CSSProperties | undefined {
-  return Object.assign({}, ...styles.filter(Boolean));
-}
+const defaultIntegratedRowStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'auto minmax(0, 1fr)',
+  alignItems: 'stretch',
+  minHeight: 52,
+  boxSizing: 'border-box',
+  border: '1px solid #d1d5db',
+  borderRadius: 14,
+  background: '#ffffff',
+};
 
-function selectorBtnStyle(
-  error: boolean,
-  disabled: boolean,
-  highlightOnError: boolean,
-): CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '10px 12px',
-    borderRadius: '8px 0 0 8px',
-    border: `1.5px solid ${defaultBorderColor(error, highlightOnError, '#e5e7eb')}`,
-    borderRight: '1px solid #e5e7eb',
-    background: disabled ? '#f9fafb' : '#fff',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    minWidth: 88,
-    whiteSpace: 'nowrap',
-    transition: 'border-color 0.15s',
-  };
-}
+const defaultCountryButtonStyle: CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  minHeight: 52,
+  minWidth: 88,
+  padding: '0 12px',
+  boxSizing: 'border-box',
+  border: '1px solid #d1d5db',
+  borderRadius: 14,
+  background: '#ffffff',
+  color: '#111827',
+  fontSize: 14,
+  fontWeight: 600,
+  whiteSpace: 'nowrap',
+  cursor: 'pointer',
+};
 
-function phoneInputStyle(
-  error: boolean,
-  disabled: boolean,
-  highlightOnError: boolean,
-): CSSProperties {
-  return {
-    flex: 1,
-    padding: '10px 13px',
-    borderRadius: '0 8px 8px 0',
-    border: `1.5px solid ${defaultBorderColor(error, highlightOnError, '#e5e7eb')}`,
-    borderLeft: 'none',
-    fontSize: 14,
-    outline: 'none',
-    background: disabled ? '#f9fafb' : '#fff',
-    color: '#111',
-    fontFamily: 'monospace',
-    letterSpacing: '0.04em',
-  };
-}
+const defaultIntegratedCountryButtonStyle: CSSProperties = {
+  minHeight: '100%',
+  minWidth: 92,
+  padding: '0 14px',
+  border: 'none',
+  borderRadius: 0,
+  background: 'transparent',
+  color: 'inherit',
+};
 
-function countryItemStyle(selected: boolean): CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    width: '100%',
-    padding: '9px 14px',
-    background: selected ? '#eff6ff' : 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    textAlign: 'left',
-    transition: 'background 0.1s',
-  };
-}
+const defaultCountryDividerStyle: CSSProperties = {
+  position: 'absolute',
+  top: 8,
+  bottom: 8,
+  right: 0,
+  width: 1,
+  background: '#e5e7eb',
+  pointerEvents: 'none',
+};
 
-export const PhoneInput = ({ descriptor: d, extra, ...props }: Props) => {
+const defaultIntegratedInputStyle: CSSProperties = {
+  minWidth: 0,
+  width: '100%',
+  minHeight: '100%',
+  padding: '0 14px',
+  boxSizing: 'border-box',
+  border: 'none',
+  borderRadius: 0,
+  borderTopLeftRadius: 0,
+  borderBottomLeftRadius: 0,
+  outline: 'none',
+  background: 'transparent',
+  boxShadow: 'none',
+  color: 'inherit',
+  font: 'inherit',
+  lineHeight: 1.35,
+};
+
+export const PhoneInput = ({
+  descriptor: d,
+  extra,
+  registerFocusable,
+  ...props
+}: Props) => {
   const defaultCountry = getCountry(d._phoneDefaultCountry) ?? COUNTRIES_SORTED[0];
   const web = d._ui ?? {};
-  const ui = extra?.ui;
-  const { rootProps, labelProps, inputProps, searchInputProps, hintProps, errorProps } =
-    ui ?? {};
+
+  const {
+    classNames,
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    searchInputProps,
+    hintProps,
+    errorProps,
+    countryButtonAriaLabel,
+    searchPlaceholderText,
+    emptySearchText,
+    e164Text,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+    renderCountryButtonContent,
+    renderCountryItemContent,
+    renderEmptySearchContent,
+    renderE164,
+  } = extra ?? {};
+
   const {
     className: rootPropsClassName,
     style: rootPropsStyle,
     ...rootPropsRest
   } = rootProps ?? {};
-  const {
-    className: labelPropsClassName,
-    style: labelPropsStyle,
-    ...labelPropsRest
-  } = labelProps ?? {};
   const {
     className: inputPropsClassName,
     style: inputPropsStyle,
@@ -186,34 +178,19 @@ export const PhoneInput = ({ descriptor: d, extra, ...props }: Props) => {
     style: searchInputPropsStyle,
     ...searchInputPropsRest
   } = searchInputProps ?? {};
-  const {
-    className: hintPropsClassName,
-    style: hintPropsStyle,
-    ...hintPropsRest
-  } = hintProps ?? {};
-  const {
-    className: errorPropsClassName,
-    style: errorPropsStyle,
-    ...errorPropsRest
-  } = errorProps ?? {};
 
   const normalizedValue = useMemo(
     () => parseStoredPhoneValue(props.value, defaultCountry.code),
     [defaultCountry.code, props.value],
   );
-  const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
-    web.highlightOnError,
-  );
-
   const [selectedCountryCode, setSelectedCountryCode] = useState(
     normalizedValue?.country ?? defaultCountry.code,
   );
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
 
-  const dropRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const dropRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (normalizedValue?.country && normalizedValue.country !== selectedCountryCode) {
@@ -306,217 +283,309 @@ export const PhoneInput = ({ descriptor: d, extra, ...props }: Props) => {
     [props.onChange],
   );
 
-  const id = ui?.id ?? web.id ?? props.name;
+  const id = extra?.id ?? web.id ?? props.name;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const describedBy = props.error ? errorId : props.hint ? hintId : undefined;
   const displayValue = normalizedValue?.national ?? '';
   const hasError = Boolean(props.error);
+  const countryLayout = extra?.countryLayout ?? d._phoneCountryLayout;
+  const integrated = countryLayout === 'integrated';
+  const highlightOnError = shouldHighlightOnError(
+    extra?.highlightOnError,
+    web.highlightOnError,
+  );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
   const placeholder =
     currentCountry.exampleNational ||
     props.placeholder ||
     d._placeholder ||
     'Enter phone number';
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <span
-      className={ui?.classNames?.requiredMark}
-      style={mergeStyles({ color: '#ef4444', marginLeft: 3 }, ui?.styles?.requiredMark)}
-    >
-      *
-    </span>
+  const renderContext = useMemo(
+    () => ({
+      currentCountry,
+      disabled: props.disabled,
+      e164Value: normalizedValue?.e164 ?? null,
+      filteredCount: filteredCountries.length,
+      hasValue: Boolean(displayValue),
+      layout: countryLayout,
+      nationalValue: displayValue,
+      open,
+      preferredCountries: d._phonePreferred,
+      search,
+      searchable: d._phoneSearchable,
+      showDialCode: d._phoneShowDialCode,
+      showFlag: d._phoneShowFlag,
+      storeE164: d._phoneStoreE164,
+      value: props.value,
+    }),
+    [
+      currentCountry,
+      d._phonePreferred,
+      d._phoneSearchable,
+      d._phoneShowDialCode,
+      d._phoneShowFlag,
+      d._phoneStoreE164,
+      countryLayout,
+      displayValue,
+      filteredCountries.length,
+      normalizedValue?.e164,
+      open,
+      props.disabled,
+      props.value,
+      search,
+    ],
   );
+  const resolvedCountryButtonAriaLabel = resolveText(
+    countryButtonAriaLabel,
+    'Select country',
+    renderContext,
+  );
+  const resolvedSearchPlaceholder = resolveText(
+    searchPlaceholderText,
+    'Search country…',
+    renderContext,
+  );
+  const resolvedEmptySearchText = resolveText(
+    emptySearchText,
+    search.trim() ? `No countries match "${search.trim()}".` : 'No countries available.',
+    renderContext,
+  );
+  const defaultCountryButtonContent = (
+    <>
+      {d._phoneShowFlag && (
+        <span
+          data-fb-slot="country-flag"
+          className={classNames?.countryFlag}
+          style={mergeStyles(styles?.countryFlag)}
+        >
+          {currentCountry.flag}
+        </span>
+      )}
+
+      {d._phoneShowDialCode && (
+        <span
+          data-fb-slot="country-dial"
+          className={classNames?.countryDial}
+          style={mergeStyles(styles?.countryDial)}
+        >
+          +{currentCountry.dial}
+        </span>
+      )}
+
+      <span
+        data-fb-slot="chevron"
+        aria-hidden="true"
+        className={classNames?.chevron}
+        style={mergeStyles(styles?.chevron)}
+      >
+        ▾
+      </span>
+    </>
+  );
+  const resolvedCountryButtonContent =
+    renderCountryButtonContent?.({
+      ...renderContext,
+      defaultContent: defaultCountryButtonContent,
+    }) ?? defaultCountryButtonContent;
+  const defaultEmptySearchContent = (
+    <p
+      data-fb-slot="empty-text"
+      className={classNames?.emptyText}
+      style={mergeStyles(styles?.emptyText)}
+    >
+      {resolvedEmptySearchText}
+    </p>
+  );
+  const resolvedEmptySearchContent =
+    renderEmptySearchContent?.({
+      ...renderContext,
+      defaultContent: defaultEmptySearchContent,
+    }) ?? defaultEmptySearchContent;
 
   return (
     <div
-      className={cx(extra?.className, ui?.classNames?.root, rootPropsClassName)}
-      style={mergeStyles(
-        { display: 'flex', flexDirection: 'column', gap: 5 },
-        extra?.style,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      data-fb-field="phone"
+      data-fb-name={props.name}
+      data-fb-layout={countryLayout}
+      {...(hasError ? { 'data-fb-error': '' } : {})}
+      {...(props.disabled ? { 'data-fb-disabled': '' } : {})}
+      className={cx(extra?.className, classNames?.root, rootPropsClassName as string)}
+      style={mergeStyles(extra?.style, styles?.root, rootPropsStyle as CSSProperties)}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel &&
-        (ui?.renderLabel ? (
-          ui.renderLabel({
-            id,
-            label: props.label,
-            required: Boolean(d._required),
-          })
-        ) : (
-          <label
-            htmlFor={id}
-            className={cx(ui?.classNames?.label, labelPropsClassName)}
-            style={mergeStyles(ui?.styles?.label, labelPropsStyle)}
-            {...labelPropsRest}
-          >
-            {props.label}
-            {d._required && requiredMark}
-          </label>
-        ))}
+      {renderLabelSlot({
+        id,
+        label: props.label,
+        name: props.name,
+        required: Boolean(d._required),
+        hideLabel,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, CSSProperties | undefined>,
+        labelProps: labelProps as Record<string, unknown>,
+        renderLabel,
+        renderRequiredMark,
+      })}
 
       <div
-        className={ui?.classNames?.row}
+        data-fb-slot="row"
+        data-fb-layout={countryLayout}
+        className={classNames?.row}
         style={mergeStyles(
-          { display: 'flex', gap: 0, position: 'relative' },
-          ui?.styles?.row,
+          integrated
+            ? {
+                ...defaultIntegratedRowStyle,
+                borderColor: defaultBorderColor(hasError, highlightOnError, '#d1d5db'),
+              }
+            : {
+                ...defaultDetachedRowStyle,
+              },
+          integrated ? defaultErrorChromeStyle(hasError, highlightOnError) : undefined,
+          styles?.row,
         )}
       >
         <div
           ref={dropRef}
-          style={{ position: 'relative' }}
+          style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
         >
           <button
             type="button"
             onClick={() => !props.disabled && setOpen((prev) => !prev)}
             disabled={props.disabled}
-            className={ui?.classNames?.countryButton}
+            data-fb-slot="country-button"
+            {...(open ? { 'data-fb-open': '' } : {})}
+            className={classNames?.countryButton}
             style={mergeStyles(
-              selectorBtnStyle(hasError, Boolean(props.disabled), highlightOnError),
-              ui?.styles?.countryButton,
+              defaultCountryButtonStyle,
+              integrated ? defaultIntegratedCountryButtonStyle : undefined,
+              styles?.countryButton,
             )}
-            aria-label="Select country"
+            aria-label={resolvedCountryButtonAriaLabel}
             aria-expanded={open}
           >
-            {d._phoneShowFlag && (
-              <span style={{ fontSize: 18, lineHeight: 1 }}>{currentCountry.flag}</span>
-            )}
-
-            {d._phoneShowDialCode && (
-              <span
-                className={ui?.classNames?.countryDial}
-                style={mergeStyles(
-                  { fontSize: 13, fontWeight: 600, color: '#374151' },
-                  ui?.styles?.countryDial,
-                )}
-              >
-                +{currentCountry.dial}
-              </span>
-            )}
-
-            <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 2 }}>▾</span>
+            {resolvedCountryButtonContent}
           </button>
+
+          {integrated ? (
+            <div
+              data-fb-slot="country-divider"
+              className={classNames?.countryDivider}
+              style={mergeStyles(defaultCountryDividerStyle, styles?.countryDivider)}
+            />
+          ) : null}
 
           {open && (
             <div
-              className={ui?.classNames?.countryList}
+              data-fb-slot="country-list"
+              className={classNames?.countryList}
               style={mergeStyles(
-                {
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  zIndex: 999,
-                  background: '#fff',
-                  border: '1.5px solid #e5e7eb',
-                  borderRadius: 10,
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                  minWidth: 280,
-                  marginTop: 4,
-                },
-                ui?.styles?.countryList,
+                { position: 'absolute', top: '100%', left: 0, zIndex: 50 },
+                styles?.countryList,
               )}
             >
               {d._phoneSearchable && (
-                <div style={{ padding: '8px 10px', borderBottom: '1px solid #f3f4f6' }}>
+                <div
+                  data-fb-slot="country-search-wrapper"
+                  className={classNames?.countrySearchWrapper}
+                  style={mergeStyles(styles?.countrySearchWrapper)}
+                >
                   <input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search country…"
+                    placeholder={resolvedSearchPlaceholder}
+                    data-fb-slot="country-search-input"
                     className={cx(
-                      ui?.classNames?.countrySearchInput,
+                      classNames?.countrySearchInput,
                       searchInputPropsClassName,
                     )}
-                    style={mergeStyles(
-                      {
-                        width: '100%',
-                        padding: '7px 10px',
-                        border: '1.5px solid #e5e7eb',
-                        borderRadius: 7,
-                        fontSize: 13,
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                      },
-                      ui?.styles?.countrySearchInput,
-                      searchInputPropsStyle,
-                    )}
+                    style={mergeStyles(styles?.countrySearchInput, searchInputPropsStyle)}
                     {...searchInputPropsRest}
                   />
                 </div>
               )}
 
-              <div style={{ maxHeight: 220, overflowY: 'auto' }}>
-                {filteredCountries.map((item) => {
+              <div
+                data-fb-slot="country-scroll"
+                className={classNames?.countryScroll}
+                style={mergeStyles(styles?.countryScroll)}
+              >
+                {filteredCountries.map((item, index) => {
                   if ('separator' in item) {
                     return (
                       <div
                         key={item.key}
-                        style={{ height: 1, background: '#f3f4f6', margin: '4px 0' }}
+                        data-fb-slot="separator"
+                        className={classNames?.separator}
+                        style={mergeStyles(styles?.separator)}
                       />
                     );
                   }
 
                   const isSelected = item.code === currentCountry.code;
+                  const defaultCountryItemContent = (
+                    <>
+                      {d._phoneShowFlag && (
+                        <span
+                          data-fb-slot="country-flag"
+                          className={classNames?.countryFlag}
+                          style={mergeStyles(styles?.countryFlag)}
+                        >
+                          {item.flag}
+                        </span>
+                      )}
+
+                      <span
+                        data-fb-slot="country-name"
+                        className={classNames?.countryName}
+                        style={mergeStyles(styles?.countryName)}
+                      >
+                        {item.name}
+                      </span>
+
+                      <span
+                        data-fb-slot="country-dial"
+                        className={classNames?.countryDial}
+                        style={mergeStyles(styles?.countryDial)}
+                      >
+                        +{item.dial}
+                      </span>
+                    </>
+                  );
+                  const resolvedCountryItemContent =
+                    renderCountryItemContent?.({
+                      ...renderContext,
+                      country: item,
+                      defaultContent: defaultCountryItemContent,
+                      index,
+                      selected: isSelected,
+                    }) ?? defaultCountryItemContent;
 
                   return (
                     <button
                       key={item.code}
                       type="button"
                       onClick={() => selectCountry(item)}
-                      className={ui?.classNames?.countryItem}
-                      style={mergeStyles(
-                        countryItemStyle(isSelected),
-                        ui?.styles?.countryItem,
-                      )}
+                      data-fb-slot="country-item"
+                      {...(isSelected ? { 'data-fb-selected': '' } : {})}
+                      className={classNames?.countryItem}
+                      style={mergeStyles(styles?.countryItem)}
                     >
-                      {d._phoneShowFlag && (
-                        <span style={{ fontSize: 16 }}>{item.flag}</span>
-                      )}
-
-                      <span
-                        className={ui?.classNames?.countryName}
-                        style={mergeStyles(
-                          {
-                            flex: 1,
-                            fontSize: 13,
-                            color: '#374151',
-                            textAlign: 'left',
-                          },
-                          ui?.styles?.countryName,
-                        )}
-                      >
-                        {item.name}
-                      </span>
-
-                      <span
-                        className={ui?.classNames?.countryDial}
-                        style={mergeStyles(
-                          {
-                            fontSize: 12,
-                            color: '#9ca3af',
-                            fontFamily: 'monospace',
-                          },
-                          ui?.styles?.countryDial,
-                        )}
-                      >
-                        +{item.dial}
-                      </span>
+                      {resolvedCountryItemContent}
                     </button>
                   );
                 })}
 
-                {filteredCountries.length === 0 && (
-                  <p style={{ padding: '12px 14px', fontSize: 13, color: '#9ca3af' }}>
-                    No results for "{search}"
-                  </p>
-                )}
+                {filteredCountries.length === 0 && resolvedEmptySearchContent}
               </div>
             </div>
           )}
         </div>
 
         <input
-          ref={inputRef}
+          ref={(node) => {
+            inputRef.current = node;
+            registerFocusable?.(node);
+          }}
           id={id}
           name={props.name}
           type="tel"
@@ -533,10 +602,11 @@ export const PhoneInput = ({ descriptor: d, extra, ...props }: Props) => {
           onFocus={props.onFocus}
           aria-invalid={hasError || undefined}
           aria-describedby={describedBy}
-          className={cx(ui?.classNames?.input, inputPropsClassName)}
+          data-fb-slot="input"
+          className={cx(classNames?.input, inputPropsClassName)}
           style={mergeStyles(
-            phoneInputStyle(hasError, Boolean(props.disabled), highlightOnError),
-            ui?.styles?.input,
+            styles?.input,
+            integrated ? defaultIntegratedInputStyle : controlErrorStyle,
             inputPropsStyle,
           )}
           inputMode="tel"
@@ -544,50 +614,48 @@ export const PhoneInput = ({ descriptor: d, extra, ...props }: Props) => {
         />
       </div>
 
-      {props.error
-        ? (ui?.renderError?.({ id: errorId, error: props.error }) ?? (
-            <span
-              id={errorId}
-              role="alert"
-              className={cx(ui?.classNames?.error, errorPropsClassName)}
-              style={mergeStyles(
-                { color: '#ef4444' },
-                ui?.styles?.error,
-                errorPropsStyle,
-              )}
-              {...errorPropsRest}
-            >
-              {props.error}
-            </span>
-          ))
-        : props.hint
-          ? (ui?.renderHint?.({ id: hintId, hint: props.hint }) ?? (
-              <span
-                id={hintId}
-                className={cx(ui?.classNames?.hint, hintPropsClassName)}
-                style={mergeStyles(
-                  { color: '#9ca3af' },
-                  ui?.styles?.hint,
-                  hintPropsStyle,
-                )}
-                {...hintPropsRest}
-              >
-                {props.hint}
-              </span>
-            ))
-          : null}
+      {renderHelperSlot({
+        error: props.error,
+        hint: props.hint,
+        errorId,
+        hintId,
+        name: props.name,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, CSSProperties | undefined>,
+        errorProps: errorProps as Record<string, unknown>,
+        hintProps: hintProps as Record<string, unknown>,
+        renderError,
+        renderHint,
+      })}
 
-      {normalizedValue?.e164 && (
-        <span
-          className={ui?.classNames?.e164}
-          style={mergeStyles(
-            { fontSize: 11, color: '#9ca3af', fontFamily: 'monospace' },
-            ui?.styles?.e164,
-          )}
-        >
-          {normalizedValue.e164}
-        </span>
-      )}
+      {normalizedValue?.e164 &&
+        (renderE164?.({
+          ...renderContext,
+          defaultContent: (
+            <span
+              data-fb-slot="e164"
+              className={classNames?.e164}
+              style={mergeStyles(styles?.e164)}
+            >
+              {resolveText(e164Text, normalizedValue.e164, {
+                ...renderContext,
+                e164: normalizedValue.e164,
+              })}
+            </span>
+          ),
+          e164: normalizedValue.e164,
+        }) ?? (
+          <span
+            data-fb-slot="e164"
+            className={classNames?.e164}
+            style={mergeStyles(styles?.e164)}
+          >
+            {resolveText(e164Text, normalizedValue.e164, {
+              ...renderContext,
+              e164: normalizedValue.e164,
+            })}
+          </span>
+        ))}
     </div>
   );
 };

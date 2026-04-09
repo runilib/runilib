@@ -1,189 +1,141 @@
-import { type CSSProperties, useCallback, useId, useMemo, useState } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from 'react';
 
 import type {
   FieldDescriptor,
   FieldRenderProps,
+  FocusableFieldHandle,
   SelectOption,
   SelectPickerRenderContext,
   WebFieldUiOverrides,
 } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
 import {
-  defaultBorderColor,
+  normalizeOptionValue,
+  resolveSelectedOption,
+  toHtmlPatternSource,
+} from './Field/utils';
+import {
+  cx,
+  fieldRootAttrs,
+  mergeStyles,
+  renderHelperSlot,
+  renderLabelSlot,
+  toInputValue,
+} from './helpers';
+import {
+  defaultErrorChromeStyle,
   type ResolvedWebFieldUi,
   shouldHighlightOnError,
 } from './shared';
+
+const defaultFieldRootStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+  gap: 8,
+  minWidth: 0,
+};
+
+const defaultControlStyle: CSSProperties = {
+  minWidth: 0,
+  boxSizing: 'border-box',
+  lineHeight: 1.35,
+};
+
+const defaultTextareaStyle: CSSProperties = {
+  ...defaultControlStyle,
+  lineHeight: 1.5,
+};
 
 interface Props extends FieldRenderProps<unknown> {
   descriptor: FieldDescriptor<unknown> & {
     _ui?: ResolvedWebFieldUi;
   };
   extra?: ExtraFieldProps<WebFieldUiOverrides>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
-function cx(...values: Array<string | undefined | false | null>) {
-  return values.filter(Boolean).join(' ');
-}
-
-function toInputValue(value: unknown): string {
-  if (value === null || value === undefined) return '';
-  return String(value);
-}
-
-function mergeStyles(
-  ...styles: Array<CSSProperties | undefined>
-): CSSProperties | undefined {
-  return Object.assign({}, ...styles.filter(Boolean));
-}
-
-function toHtmlPatternSource(descriptor: Props['descriptor']): string | undefined {
-  const patterns = descriptor._patterns?.length
-    ? descriptor._patterns
-    : descriptor._pattern
-      ? [descriptor._pattern]
-      : [];
-
-  if (!patterns.length) return undefined;
-
-  // The HTML pattern attribute does not support regex flags, so skip it when they are used.
-  if (patterns.some((pattern) => pattern.flags.length > 0)) {
-    return undefined;
-  }
-
-  if (patterns.length === 1) {
-    return patterns[0]?.source;
-  }
-
-  return patterns.map((pattern) => `(?:${pattern.source})`).join('|');
-}
-
-function normalizeOptionValue(value: unknown): string {
-  return value == null ? '' : String(value);
-}
-
-function resolveSelectedOption(
-  options: SelectOption[] | undefined,
-  value: unknown,
-): SelectOption | null {
-  if (!options?.length) return null;
-
-  return (
-    options.find(
-      (option) => normalizeOptionValue(option.value) === normalizeOptionValue(value),
-    ) ?? null
-  );
-}
-
-export const Field: React.FC<Props> = ({ descriptor, extra, ...restProps }) => {
+export const Field: React.FC<Props> = ({
+  descriptor,
+  extra,
+  registerFocusable,
+  ...restProps
+}) => {
   const reactId = useId();
   const fieldUi = descriptor._ui ?? {};
-  const ui = extra?.ui as WebFieldUiOverrides | undefined;
-  const { rootProps, labelProps, hintProps, errorProps } = ui ?? {};
+  const {
+    rootProps,
+    labelProps,
+    hintProps,
+    errorProps,
+    classNames,
+    styles,
+    hideLabel,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+  } = extra ?? {};
+
   const {
     className: rootPropsClassName,
     style: rootPropsStyle,
     ...rootPropsRest
   } = rootProps ?? {};
-  const {
-    className: labelPropsClassName,
-    style: labelPropsStyle,
-    ...labelPropsRest
-  } = labelProps ?? {};
-  const {
-    className: hintPropsClassName,
-    style: hintPropsStyle,
-    ...hintPropsRest
-  } = hintProps ?? {};
-  const {
-    className: errorPropsClassName,
-    style: errorPropsStyle,
-    ...errorPropsRest
-  } = errorProps ?? {};
 
-  const id = ui?.id ?? fieldUi.id ?? `${restProps.name}-${reactId}`;
+  const id = extra?.id ?? fieldUi.id ?? `${restProps.name}-${reactId}`;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const describedBy = restProps.error ? errorId : restProps.hint ? hintId : undefined;
   const required = Boolean(descriptor._required);
   const hasError = Boolean(restProps.error);
   const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
+    extra?.highlightOnError,
     fieldUi.highlightOnError,
   );
 
-  const rootClassName = cx(extra?.className, ui?.classNames?.root, rootPropsClassName);
-  const labelClassName = cx(ui?.classNames?.label, labelPropsClassName);
-
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <span style={{ color: '#ef4444', marginLeft: 3 }}>*</span>
-  );
-
-  const labelNode = ui?.renderLabel ? (
-    ui.renderLabel({
-      id,
-      label: restProps.label,
-      required,
-    })
-  ) : (
-    <label
-      htmlFor={id}
-      className={labelClassName}
-      style={mergeStyles(ui?.styles?.label, labelPropsStyle)}
-      {...labelPropsRest}
-    >
-      {restProps.label}
-      {required && requiredMark}
-    </label>
-  );
-
-  const helperNode = restProps.error
-    ? (ui?.renderError?.({
-        id: errorId,
-        error: restProps.error,
-      }) ?? (
-        <span
-          id={errorId}
-          role="alert"
-          className={cx(ui?.classNames?.error, errorPropsClassName)}
-          style={mergeStyles(errorStyle, ui?.styles?.error, errorPropsStyle)}
-          {...errorPropsRest}
-        >
-          {restProps.error}
-        </span>
-      ))
-    : restProps.hint
-      ? (ui?.renderHint?.({
-          id: hintId,
-          hint: restProps.hint,
-        }) ?? (
-          <span
-            id={hintId}
-            className={cx(ui?.classNames?.hint, hintPropsClassName)}
-            style={mergeStyles(hintStyle, ui?.styles?.hint, hintPropsStyle)}
-            {...hintPropsRest}
-          >
-            {restProps.hint}
-          </span>
-        ))
-      : null;
+  const rootClassName = cx(extra?.className, classNames?.root, rootPropsClassName);
 
   return (
     <div
+      {...fieldRootAttrs({
+        type: descriptor._type,
+        name: restProps.name,
+        error: hasError,
+        touched: restProps.touched,
+        dirty: restProps.dirty,
+        disabled: restProps.disabled,
+        required,
+      })}
       className={rootClassName}
       style={mergeStyles(
-        {
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 5,
-        },
+        defaultFieldRootStyle,
         extra?.style,
-        ui?.styles?.root,
+        styles?.root,
         rootPropsStyle,
       )}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel && descriptor._type !== 'checkbox' && descriptor._type !== 'switch'
-        ? labelNode
+      {descriptor._type !== 'checkbox' && descriptor._type !== 'switch'
+        ? renderLabelSlot({
+            id,
+            label: restProps.label,
+            name: restProps.name,
+            required,
+            hideLabel,
+            classNames: classNames as Record<string, string | undefined>,
+            styles: styles as Record<string, CSSProperties | undefined>,
+            labelProps: labelProps as Record<string, unknown>,
+            renderLabel,
+            renderRequiredMark,
+          })
         : null}
 
       {renderInput(descriptor, id, restProps, {
@@ -191,14 +143,27 @@ export const Field: React.FC<Props> = ({ descriptor, extra, ...restProps }) => {
         hasError,
         highlightOnError,
         extra,
+        registerFocusable,
       })}
 
-      {helperNode}
+      {renderHelperSlot({
+        error: restProps.error,
+        hint: restProps.hint,
+        errorId,
+        name: restProps.name,
+        hintId,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, CSSProperties | undefined>,
+        errorProps: errorProps as Record<string, unknown>,
+        hintProps: hintProps as Record<string, unknown>,
+        renderError,
+        renderHint,
+      })}
     </div>
   );
 };
 
-function renderInput(
+const renderInput = (
   d: Props['descriptor'],
   id: string,
   restProps: FieldRenderProps<unknown>,
@@ -207,21 +172,24 @@ function renderInput(
     hasError: boolean;
     highlightOnError: boolean;
     extra?: ExtraFieldProps<WebFieldUiOverrides>;
+    registerFocusable?: (target: FocusableFieldHandle | null) => void;
   },
-) {
-  const ui = ctx.extra?.ui as WebFieldUiOverrides | undefined;
+) => {
+  const { inputProps, textareaProps, selectProps, classNames, styles } = ctx.extra ?? {};
   const fieldUi = d._ui ?? {};
-  const { inputProps, textareaProps, selectProps } = ui ?? {};
+
   const {
     className: inputPropsClassName,
     style: inputPropsStyle,
     ...inputPropsRest
   } = inputProps ?? {};
+
   const {
     className: textareaPropsClassName,
     style: textareaPropsStyle,
     ...textareaPropsRest
   } = textareaProps ?? {};
+
   const {
     className: selectPropsClassName,
     style: selectPropsStyle,
@@ -247,25 +215,25 @@ function renderInput(
     onFocus: restProps.onFocus,
   };
 
-  const baseInput: CSSProperties | undefined =
-    ctx.hasError && ctx.highlightOnError ? { borderColor: '#ef4444' } : undefined;
-
-  const inputClassName = cx(ui?.classNames?.input, inputPropsClassName);
-  const renderPicker = ui?.renderPicker ?? fieldUi.renderPicker;
+  const inputClassName = cx(classNames?.input, inputPropsClassName);
+  const renderPicker = ctx.extra?.renderPicker ?? fieldUi.renderPicker;
+  const controlErrorStyle = defaultErrorChromeStyle(ctx.hasError, ctx.highlightOnError);
 
   switch (d._type) {
     case 'textarea':
       return (
         <textarea
           {...commonInputProps}
+          data-fb-slot="textarea"
           value={toInputValue(restProps.value)}
           placeholder={restProps.placeholder}
           rows={4}
-          className={cx(ui?.classNames?.textarea, textareaPropsClassName)}
+          ref={ctx.registerFocusable}
+          className={cx(classNames?.textarea, textareaPropsClassName)}
           style={mergeStyles(
-            baseInput,
-            { resize: 'vertical' },
-            ui?.styles?.textarea,
+            defaultTextareaStyle,
+            controlErrorStyle,
+            styles?.textarea,
             textareaPropsStyle,
           )}
           onChange={(e) => restProps.onChange(e.target.value)}
@@ -276,36 +244,24 @@ function renderInput(
     case 'checkbox':
       return (
         <label
-          className={ui?.classNames?.checkboxRow}
-          style={mergeStyles(
-            {
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              cursor: restProps.disabled ? 'not-allowed' : 'pointer',
-            },
-            ui?.styles?.checkboxRow,
-          )}
+          data-fb-slot="checkbox-row"
+          className={classNames?.checkboxRow}
+          style={mergeStyles(styles?.checkboxRow)}
         >
           <input
             {...commonInputProps}
+            data-fb-slot="checkbox-input"
             type="checkbox"
             checked={Boolean(restProps.value)}
-            className={ui?.classNames?.checkboxInput}
-            style={mergeStyles(
-              {
-                width: 18,
-                height: 18,
-                cursor: 'inherit',
-              },
-              ui?.styles?.checkboxInput,
-            )}
+            className={classNames?.checkboxInput}
+            style={mergeStyles(controlErrorStyle, styles?.checkboxInput)}
             onChange={(e) => restProps.onChange(e.target.checked)}
             {...inputPropsRest}
           />
           <span
-            className={ui?.classNames?.checkboxLabel}
-            style={mergeStyles(ui?.styles?.checkboxLabel)}
+            data-fb-slot="checkbox-label"
+            className={classNames?.checkboxLabel}
+            style={mergeStyles(styles?.checkboxLabel)}
           >
             {restProps.label}
           </span>
@@ -315,15 +271,16 @@ function renderInput(
     case 'switch':
       return (
         <div
-          className={ui?.classNames?.switchRoot}
+          data-fb-slot="switch-root"
+          className={classNames?.switchRoot}
           style={mergeStyles(
             {
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
-              cursor: restProps.disabled ? 'not-allowed' : 'pointer',
+              gap: 12,
+              minWidth: 0,
             },
-            ui?.styles?.switchRoot,
+            styles?.switchRoot,
           )}
         >
           <button
@@ -335,44 +292,53 @@ function renderInput(
             onBlur={restProps.onBlur}
             onFocus={restProps.onFocus}
             disabled={restProps.disabled}
+            data-fb-slot="switch-button"
             style={{
+              appearance: 'none',
+              border: 0,
               background: 'transparent',
-              border: 'none',
               padding: 0,
               margin: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
               cursor: restProps.disabled ? 'not-allowed' : 'pointer',
+              flexShrink: 0,
             }}
           >
             <div
-              className={ui?.classNames?.switchTrack}
+              data-fb-slot="switch-track"
+              data-fb-checked={restProps.value ? '' : undefined}
+              className={classNames?.switchTrack}
               style={mergeStyles(
                 {
+                  position: 'relative',
                   width: 44,
                   height: 24,
-                  borderRadius: 12,
-                  background: restProps.value ? '#6366f1' : '#e5e7eb',
-                  position: 'relative',
-                  transition: 'background 0.2s',
-                  opacity: restProps.disabled ? 0.5 : 1,
+                  borderRadius: 999,
+                  background: restProps.value ? '#22c55e' : 'rgba(148, 163, 184, 0.4)',
+                  transition: 'background-color 160ms ease',
+                  opacity: restProps.disabled ? 0.6 : 1,
                 },
-                ui?.styles?.switchTrack,
+                styles?.switchTrack,
+                controlErrorStyle,
               )}
             >
               <div
-                className={ui?.classNames?.switchThumb}
+                data-fb-slot="switch-thumb"
+                className={classNames?.switchThumb}
                 style={mergeStyles(
                   {
                     position: 'absolute',
-                    top: 3,
-                    left: restProps.value ? 22 : 3,
-                    width: 18,
-                    height: 18,
-                    borderRadius: 9,
-                    background: '#fff',
-                    transition: 'left 0.2s',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    top: 2,
+                    left: restProps.value ? 22 : 2,
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    boxShadow: '0 1px 4px rgba(15, 23, 42, 0.28)',
+                    transition: 'left 160ms ease',
                   },
-                  ui?.styles?.switchThumb,
+                  styles?.switchThumb,
                 )}
               />
             </div>
@@ -383,35 +349,67 @@ function renderInput(
             name={restProps.name}
             value={String(Boolean(restProps.value))}
           />
-          <span>{restProps.label}</span>
+          <span
+            data-fb-slot="switch-label"
+            className={classNames?.switchLabel}
+            style={mergeStyles(
+              {
+                color: 'inherit',
+                fontSize: 14,
+                lineHeight: 1.4,
+              },
+              styles?.switchLabel,
+            )}
+          >
+            {restProps.label}
+          </span>
         </div>
       );
 
-    case 'select':
-      return renderPicker ? (
-        <WebPickerSelectField
-          descriptor={d}
-          id={id}
-          fieldProps={restProps}
-          web={fieldUi}
-          ui={ui}
-          baseInput={baseInput}
-          inputClassName={inputClassName}
-          selectPropsStyle={selectPropsStyle}
-          hasError={ctx.hasError}
-          highlightOnError={ctx.highlightOnError}
-          describedBy={ctx.describedBy}
-        />
-      ) : (
+    case 'select': {
+      if (renderPicker) {
+        return (
+          <PickerSelectField
+            descriptor={d}
+            id={id}
+            fieldProps={restProps}
+            web={fieldUi}
+            extra={ctx.extra}
+            describedBy={ctx.describedBy}
+            registerFocusable={ctx.registerFocusable}
+          />
+        );
+      }
+
+      const selectedOption = resolveSelectedOption(d._options, restProps.value);
+      const hasSelectedValue = Boolean(selectedOption);
+      const selectValue = hasSelectedValue
+        ? normalizeOptionValue(selectedOption?.value)
+        : '';
+      const placeholderLabel = restProps.placeholder ?? `Select ${restProps.label}`;
+
+      return (
         <select
           {...commonInputProps}
-          value={toInputValue(restProps.value)}
-          className={cx(inputClassName, ui?.classNames?.select)}
-          style={mergeStyles(baseInput, ui?.styles?.select, selectPropsStyle)}
-          onChange={(e) => restProps.onChange(e.target.value)}
+          data-fb-slot="select"
+          ref={ctx.registerFocusable}
+          value={selectValue}
+          className={cx(inputClassName, classNames?.select)}
+          style={mergeStyles(
+            defaultControlStyle,
+            controlErrorStyle,
+            styles?.select,
+            selectPropsStyle,
+          )}
+          onChange={(e) => {
+            const matchedOption = resolveSelectedOption(d._options, e.target.value);
+            restProps.onChange(matchedOption?.value ?? e.target.value);
+          }}
           {...selectPropsRest}
         >
-          <option value="">{restProps.placeholder ?? `Select ${restProps.label}`}</option>
+          {hasSelectedValue === false ? (
+            <option value="">{placeholderLabel}</option>
+          ) : null}
           {d._options?.map((o) => (
             <option
               key={String(o.value)}
@@ -422,44 +420,37 @@ function renderInput(
           ))}
         </select>
       );
+    }
 
     case 'radio':
       return renderPicker ? (
-        <WebPickerSelectField
+        <PickerSelectField
           descriptor={d}
           id={id}
           fieldProps={restProps}
           web={fieldUi}
-          ui={ui}
-          baseInput={baseInput}
-          inputClassName={inputClassName}
-          selectPropsStyle={selectPropsStyle}
-          hasError={ctx.hasError}
-          highlightOnError={ctx.highlightOnError}
+          extra={ctx.extra}
           describedBy={ctx.describedBy}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div data-fb-slot="radio-group">
           {d._options?.map((o) => (
             <label
               key={String(o.value)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                cursor: restProps.disabled ? 'not-allowed' : 'pointer',
-              }}
+              data-fb-slot="radio-option"
             >
               <input
                 {...commonInputProps}
+                data-fb-slot="radio-input"
                 type="radio"
                 name={restProps.name}
                 value={String(o.value)}
                 checked={String(restProps.value ?? '') === String(o.value)}
+                style={mergeStyles(controlErrorStyle, inputPropsStyle)}
                 onChange={() => restProps.onChange(o.value)}
                 {...inputPropsRest}
               />
-              <span>{o.label}</span>
+              <span data-fb-slot="radio-label">{o.label}</span>
             </label>
           ))}
         </div>
@@ -471,8 +462,9 @@ function renderInput(
 
       return (
         <div
-          className={ui?.classNames?.otpContainer}
-          style={mergeStyles({ display: 'flex', gap: 8 }, ui?.styles?.otpContainer)}
+          data-fb-slot="otp-container"
+          className={classNames?.otpContainer}
+          style={mergeStyles(styles?.otpContainer)}
         >
           {Array.from({ length: len }, (_, index) => ({
             key: `${id}-otp-${index}`,
@@ -481,6 +473,7 @@ function renderInput(
             <input
               key={key}
               id={i === 0 ? id : undefined}
+              ref={i === 0 ? ctx.registerFocusable : undefined}
               type="text"
               inputMode="numeric"
               maxLength={1}
@@ -489,7 +482,8 @@ function renderInput(
               aria-label={`${restProps.label} ${i + 1}`}
               aria-invalid={ctx.hasError || undefined}
               aria-describedby={ctx.describedBy}
-              className={ui?.classNames?.otpInput}
+              data-fb-slot="otp-input"
+              className={classNames?.otpInput}
               onChange={(e) => {
                 const next = [...chars];
                 next[i] = e.target.value.slice(-1);
@@ -507,17 +501,7 @@ function renderInput(
               }}
               onBlur={restProps.onBlur}
               onFocus={restProps.onFocus}
-              style={mergeStyles(
-                baseInput,
-                {
-                  width: 44,
-                  height: 52,
-                  textAlign: 'center',
-                  fontSize: 20,
-                  fontWeight: 700,
-                },
-                ui?.styles?.otpInput,
-              )}
+              style={mergeStyles(controlErrorStyle, styles?.otpInput)}
             />
           ))}
           <input
@@ -533,7 +517,9 @@ function renderInput(
       return (
         <input
           {...commonInputProps}
+          data-fb-slot="input"
           type="number"
+          ref={ctx.registerFocusable}
           name={restProps.name}
           value={
             restProps.value === null || restProps.value === undefined
@@ -545,7 +531,12 @@ function renderInput(
           max={typeof d._max === 'number' ? d._max : undefined}
           step={(d as Props['descriptor'] & { _step?: number })._step}
           className={inputClassName}
-          style={mergeStyles(baseInput, ui?.styles?.input, inputPropsStyle)}
+          style={mergeStyles(
+            defaultControlStyle,
+            controlErrorStyle,
+            styles?.input,
+            inputPropsStyle,
+          )}
           onChange={(e) => {
             const raw = e.target.value;
             restProps.onChange(raw === '' ? '' : Number(raw));
@@ -558,11 +549,18 @@ function renderInput(
       return (
         <input
           {...commonInputProps}
+          data-fb-slot="input"
           type="date"
+          ref={ctx.registerFocusable}
           name={restProps.name}
           value={toInputValue(restProps.value)}
           className={inputClassName}
-          style={mergeStyles(baseInput, ui?.styles?.input, inputPropsStyle)}
+          style={mergeStyles(
+            defaultControlStyle,
+            controlErrorStyle,
+            styles?.input,
+            inputPropsStyle,
+          )}
           onChange={(e) => restProps.onChange(e.target.value)}
           {...inputPropsRest}
         />
@@ -570,69 +568,62 @@ function renderInput(
 
     default:
       return (
-        <div style={{ position: 'relative' }}>
-          <input
-            {...commonInputProps}
-            type={d._type}
-            name={restProps.name}
-            value={toInputValue(restProps.value)}
-            placeholder={restProps.placeholder}
-            minLength={typeof d._min === 'number' ? d._min : undefined}
-            maxLength={typeof d._max === 'number' ? d._max : undefined}
-            pattern={toHtmlPatternSource(d)}
-            className={inputClassName}
-            style={mergeStyles(baseInput, ui?.styles?.input, inputPropsStyle)}
-            onChange={(e) => restProps.onChange(e.target.value)}
-            {...inputPropsRest}
-          />
-
-          {restProps.validating && (
-            <span
-              style={{
-                position: 'absolute',
-                right: 12,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                fontSize: 12,
-                color: '#9ca3af',
-              }}
-            >
-              ⟳
-            </span>
+        <input
+          {...commonInputProps}
+          data-fb-slot="input"
+          type={d._type}
+          ref={ctx.registerFocusable}
+          name={restProps.name}
+          value={toInputValue(restProps.value)}
+          placeholder={restProps.placeholder}
+          minLength={typeof d._min === 'number' ? d._min : undefined}
+          maxLength={typeof d._max === 'number' ? d._max : undefined}
+          pattern={toHtmlPatternSource(d)}
+          className={inputClassName}
+          style={mergeStyles(
+            defaultControlStyle,
+            controlErrorStyle,
+            styles?.input,
+            inputPropsStyle,
           )}
-        </div>
+          onChange={(e) => restProps.onChange(e.target.value)}
+          {...inputPropsRest}
+        />
       );
   }
-}
+};
 
-const WebPickerSelectField = ({
-  descriptor,
-  id,
-  fieldProps,
-  web,
-  ui,
-  baseInput,
-  inputClassName,
-  selectPropsStyle,
-  hasError,
-  highlightOnError,
-  describedBy,
-}: {
+type PickerSelectFieldType = {
   descriptor: Props['descriptor'];
   id: string;
   fieldProps: FieldRenderProps<unknown>;
   web: ResolvedWebFieldUi;
-  ui: WebFieldUiOverrides | undefined;
-  baseInput?: CSSProperties;
-  inputClassName?: string;
-  selectPropsStyle?: CSSProperties;
-  hasError: boolean;
-  highlightOnError: boolean;
+  extra: ExtraFieldProps<WebFieldUiOverrides> | undefined;
   describedBy?: string;
-}) => {
-  const renderPicker = ui?.renderPicker ?? web.renderPicker;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
+};
+
+const PickerSelectField = ({
+  descriptor,
+  id,
+  fieldProps,
+  web,
+  extra,
+  describedBy,
+  registerFocusable,
+}: PickerSelectFieldType) => {
+  const renderPicker = extra?.renderPicker ?? web.renderPicker;
+  const { classNames, styles } = extra ?? {};
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const highlightOnError = shouldHighlightOnError(
+    extra?.highlightOnError,
+    web.highlightOnError,
+  );
+  const controlErrorStyle = defaultErrorChromeStyle(
+    Boolean(fieldProps.error),
+    highlightOnError,
+  );
 
   const allOptions = descriptor._options ?? [];
   const selectedOption = useMemo(
@@ -727,6 +718,21 @@ const WebPickerSelectField = ({
     ],
   );
 
+  useEffect(() => {
+    if (!registerFocusable) {
+      return;
+    }
+
+    registerFocusable({
+      focus: openPicker,
+      blur: closePicker,
+    });
+
+    return () => {
+      registerFocusable(null);
+    };
+  }, [closePicker, openPicker, registerFocusable]);
+
   if (!renderPicker) {
     return null;
   }
@@ -740,35 +746,16 @@ const WebPickerSelectField = ({
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-describedby={describedBy}
-        className={cx(inputClassName, ui?.classNames?.select)}
+        data-fb-slot="select-trigger"
+        data-fb-selected={selectedOption ? '' : undefined}
         onClick={openPicker}
-        style={mergeStyles(
-          baseInput,
-          {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            textAlign: 'left',
-            cursor: fieldProps.disabled ? 'not-allowed' : 'pointer',
-          },
-          ui?.styles?.select,
-          selectPropsStyle,
-        )}
+        className={cx(classNames?.input, classNames?.select)}
+        style={mergeStyles(controlErrorStyle, styles?.select)}
       >
-        <span
-          style={{
-            color: selectedOption ? '#111827' : '#9ca3af',
-          }}
-        >
-          {pickerContext.triggerLabel}
-        </span>
+        <span data-fb-slot="select-value">{pickerContext.triggerLabel}</span>
         <span
           aria-hidden="true"
-          style={{
-            marginLeft: 12,
-            color: defaultBorderColor(hasError, highlightOnError, '#6b7280'),
-            fontSize: 12,
-          }}
+          data-fb-slot="select-arrow"
         >
           ▼
         </span>
@@ -783,12 +770,4 @@ const WebPickerSelectField = ({
       {renderPicker(pickerContext)}
     </>
   );
-};
-
-const errorStyle: CSSProperties = {
-  color: '#ef4444',
-};
-
-const hintStyle: CSSProperties = {
-  color: '#9ca3af',
 };

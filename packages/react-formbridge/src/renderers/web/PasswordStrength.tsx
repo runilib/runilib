@@ -1,126 +1,93 @@
-import React, {
-  type CSSProperties,
-  type HTMLAttributes,
-  type InputHTMLAttributes,
-  type LabelHTMLAttributes,
-  useMemo,
-  useState,
-} from 'react';
+import type { CSSProperties } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 
 import type { PasswordStrengthMeta } from '../../core/field-builders/password/PasswordWithStrength';
 import { scorePassword } from '../../core/field-builders/password/strength';
+import type { StrengthResult } from '../../core/field-builders/password/types';
+import type { FocusableFieldHandle } from '../../types';
+import type { WebPasswordFieldUiOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
-import { type ResolvedWebFieldUi, shouldHighlightOnError } from './shared';
-
-type PasswordStrengthSlot =
-  | 'root'
-  | 'label'
-  | 'input'
-  | 'hint'
-  | 'error'
-  | 'toggle'
-  | 'strengthRow'
-  | 'strengthBar'
-  | 'strengthFill'
-  | 'strengthLabel'
-  | 'strengthEntropy'
-  | 'rulesList'
-  | 'ruleItem'
-  | 'ruleBullet'
-  | 'ruleText'
-  | 'requiredMark';
-
-interface PasswordStrengthUiOverrides {
-  id?: string;
-  hideLabel?: boolean;
-  highlightOnError?: boolean;
-  classNames?: Partial<Record<PasswordStrengthSlot, string>> &
-    Record<string, string | undefined>;
-  styles?: Partial<Record<PasswordStrengthSlot, CSSProperties>> &
-    Record<string, CSSProperties | undefined>;
-  rootProps?: HTMLAttributes<HTMLDivElement>;
-  labelProps?: LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    | 'type'
-    | 'value'
-    | 'defaultValue'
-    | 'onChange'
-    | 'onBlur'
-    | 'onFocus'
-    | 'disabled'
-    | 'name'
-    | 'id'
-  >;
-  hintProps?: HTMLAttributes<HTMLSpanElement>;
-  errorProps?: HTMLAttributes<HTMLSpanElement>;
-  renderLabel?: (ctx: {
-    id: string;
-    label: React.ReactNode;
-    required: boolean;
-  }) => React.ReactNode;
-  renderHint?: (ctx: { id: string; hint: React.ReactNode }) => React.ReactNode;
-  renderError?: (ctx: { id: string; error: React.ReactNode }) => React.ReactNode;
-  renderRequiredMark?: () => React.ReactNode;
-}
+import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
+import {
+  defaultErrorChromeStyle,
+  type ResolvedWebFieldUi,
+  shouldHighlightOnError,
+} from './shared';
 
 interface Props extends FieldRenderProps<string> {
   strengthMeta: PasswordStrengthMeta & {
     _ui?: ResolvedWebFieldUi;
   };
-  extra?: ExtraFieldProps<PasswordStrengthUiOverrides>;
+  extra?: ExtraFieldProps<WebPasswordFieldUiOverrides>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
-function cx(...values: Array<string | undefined | false | null>) {
-  return values.filter(Boolean).join(' ');
+function resolveText<TContext>(
+  override: string | ((ctx: TContext) => string) | undefined,
+  fallback: string,
+  context: TContext,
+): string {
+  if (typeof override === 'function') {
+    return override(context);
+  }
+
+  return override ?? fallback;
 }
 
-function mergeStyles(
-  ...styles: Array<CSSProperties | Record<string, unknown> | undefined>
-): CSSProperties | undefined {
-  return Object.assign({}, ...styles.filter(Boolean));
-}
-
-export const PasswordStrength = ({ strengthMeta: meta, extra, ...props }: Props) => {
+export const PasswordStrength = ({
+  strengthMeta: meta,
+  extra,
+  registerFocusable,
+  ...props
+}: Props) => {
   const required = Boolean(
     (meta as PasswordStrengthMeta & { _required?: boolean })._required,
   );
   const [show, setShow] = useState(false);
   const hasError = Boolean(props.error);
   const web = meta._ui ?? {};
-  const ui = extra?.ui;
+
+  const {
+    classNames,
+    styles,
+    hideLabel,
+    renderLabel,
+    renderError,
+    renderHint,
+    renderRequiredMark,
+    highlightOnError: highlightOnErrorProp,
+    rootProps,
+    labelProps,
+    inputProps,
+    hintProps,
+    errorProps,
+    showPasswordText,
+    hidePasswordText,
+    renderToggleContent,
+    renderStrengthLabel,
+    renderStrengthEntropy,
+    renderStrengthRowContent,
+    renderStrengthRule,
+  } = extra ?? {};
+
   const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
+    highlightOnErrorProp,
     web.highlightOnError,
   );
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
+
   const {
     className: rootPropsClassName,
     style: rootPropsStyle,
     ...rootPropsRest
   } = rootProps ?? {};
   const {
-    className: labelPropsClassName,
-    style: labelPropsStyle,
-    ...labelPropsRest
-  } = labelProps ?? {};
-  const {
     className: inputPropsClassName,
     style: inputPropsStyle,
     ...inputPropsRest
   } = inputProps ?? {};
-  const {
-    className: hintPropsClassName,
-    style: hintPropsStyle,
-    ...hintPropsRest
-  } = hintProps ?? {};
-  const {
-    className: errorPropsClassName,
-    style: errorPropsStyle,
-    ...errorPropsRest
-  } = errorProps ?? {};
 
-  const result = useMemo(() => {
+  const result = useMemo<StrengthResult | null>(() => {
     if (!props.value) return null;
     const config = {
       ...meta._strengthConfig,
@@ -128,49 +95,163 @@ export const PasswordStrength = ({ strengthMeta: meta, extra, ...props }: Props)
       minAcceptableScore: meta._strengthMinAccept,
     };
     return scorePassword(props.value, config);
-  }, [props.value, meta]);
+  }, [
+    meta._strengthConfig,
+    meta._strengthCustomLevels,
+    meta._strengthMinAccept,
+    props.value,
+  ]);
 
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <span
-      className={ui?.classNames?.requiredMark}
-      style={mergeStyles({ color: '#ef4444', marginLeft: 3 }, ui?.styles?.requiredMark)}
-    >
-      *
-    </span>
+  const renderContext = useMemo(
+    () => ({
+      disabled: props.disabled,
+      hasValue: Boolean(props.value),
+      revealed: show,
+      result,
+      valueLength: props.value?.length ?? 0,
+    }),
+    [props.disabled, props.value, result, show],
   );
+  const resolvedShowPasswordText = resolveText(showPasswordText, '👁', renderContext);
+  const resolvedHidePasswordText = resolveText(hidePasswordText, '🙈', renderContext);
+  const defaultToggleContent = show ? resolvedHidePasswordText : resolvedShowPasswordText;
+  const resolvedToggleContent =
+    renderToggleContent?.({
+      ...renderContext,
+      defaultContent: defaultToggleContent,
+    }) ?? defaultToggleContent;
+  const defaultStrengthBarContent = result ? (
+    <div
+      className={classNames?.strengthBar}
+      style={mergeStyles(
+        {
+          minHeight: meta._strengthBarHeight,
+        },
+        styles?.strengthBar,
+      )}
+    >
+      {[1, 2, 3, 4].map((level) => {
+        const active = result.score >= level;
+
+        return (
+          <div
+            key={level}
+            data-fb-slot="strength-segment"
+            {...(active ? { 'data-fb-active': '' } : {})}
+            className={classNames?.strengthFill}
+            style={mergeStyles(
+              {
+                borderRadius: meta._strengthBarRadius,
+                minHeight: meta._strengthBarHeight,
+                ...(active ? { backgroundColor: result.color } : null),
+              },
+              styles?.strengthFill,
+            )}
+          />
+        );
+      })}
+    </div>
+  ) : null;
+  const defaultStrengthLabelContent =
+    meta._strengthShowLabel && result ? (
+      <span
+        data-fb-slot="strength-label"
+        data-fb-strength-level={result.label}
+        className={classNames?.strengthLabel}
+        style={mergeStyles({ color: result.color }, styles?.strengthLabel)}
+      >
+        {result.label}
+      </span>
+    ) : null;
+  const resolvedStrengthLabelContent =
+    result && defaultStrengthLabelContent
+      ? (renderStrengthLabel?.({
+          ...renderContext,
+          defaultContent: defaultStrengthLabelContent,
+          result,
+        }) ?? defaultStrengthLabelContent)
+      : null;
+  const defaultStrengthEntropyContent =
+    meta._strengthShowEntropy && result ? (
+      <span
+        data-fb-slot="strength-entropy"
+        className={classNames?.strengthEntropy}
+        style={mergeStyles(styles?.strengthEntropy)}
+      >
+        {result.entropy} bits
+      </span>
+    ) : null;
+  const resolvedStrengthEntropyContent =
+    result && defaultStrengthEntropyContent
+      ? (renderStrengthEntropy?.({
+          ...renderContext,
+          defaultContent: defaultStrengthEntropyContent,
+          result,
+        }) ?? defaultStrengthEntropyContent)
+      : null;
+  const defaultStrengthMetaContent =
+    resolvedStrengthLabelContent || resolvedStrengthEntropyContent ? (
+      <div
+        data-fb-slot="strength-meta"
+        className={classNames?.strengthMeta}
+        style={mergeStyles(styles?.strengthMeta)}
+      >
+        {resolvedStrengthLabelContent}
+        {resolvedStrengthEntropyContent}
+      </div>
+    ) : null;
+  const defaultStrengthRowContent =
+    result && (defaultStrengthBarContent || defaultStrengthMetaContent) ? (
+      <div
+        data-fb-slot="strength-row"
+        data-fb-strength-score={result.score}
+        className={classNames?.strengthRow}
+        style={mergeStyles(styles?.strengthRow)}
+      >
+        {meta._strengthShowBar ? defaultStrengthBarContent : null}
+        {defaultStrengthMetaContent}
+      </div>
+    ) : null;
+  const resolvedStrengthRowContent =
+    result && defaultStrengthRowContent
+      ? (renderStrengthRowContent?.({
+          ...renderContext,
+          defaultBarContent: defaultStrengthBarContent,
+          defaultContent: defaultStrengthRowContent,
+          defaultEntropyContent: resolvedStrengthEntropyContent,
+          defaultLabelContent: resolvedStrengthLabelContent,
+          defaultMetaContent: defaultStrengthMetaContent,
+          result,
+        }) ?? defaultStrengthRowContent)
+      : null;
+  const shouldRenderRules =
+    meta._strengthShowRules &&
+    result &&
+    props.value &&
+    !(meta._strengthHideRulesWhenValid && result.acceptable && !props.error);
 
   return (
     <div
-      className={cx(extra?.className, ui?.classNames?.root, rootPropsClassName)}
-      style={mergeStyles(
-        { display: 'flex', flexDirection: 'column', gap: 5 },
-        extra?.style,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      className={cx(extra?.className, classNames?.root, rootPropsClassName as string)}
+      style={mergeStyles(extra?.style, styles?.root, rootPropsStyle as CSSProperties)}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel &&
-        (ui?.renderLabel ? (
-          ui.renderLabel({
-            id: props.name,
-            label: props.label,
-            required,
-          })
-        ) : (
-          <label
-            htmlFor={props.name}
-            className={cx(ui?.classNames?.label, labelPropsClassName)}
-            style={mergeStyles(ui?.styles?.label, labelPropsStyle)}
-            {...labelPropsRest}
-          >
-            {props.label}
-            {required && requiredMark}
-          </label>
-        ))}
+      {renderLabelSlot({
+        id: props.name,
+        label: props.label,
+        required,
+        hideLabel,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, React.CSSProperties | undefined>,
+        labelProps: labelProps as Record<string, unknown>,
+        renderLabel,
+        name: props.name,
+        renderRequiredMark,
+      })}
 
       <div style={{ position: 'relative' }}>
         <input
+          ref={registerFocusable}
           id={props.name}
           name={props.name}
           type={show ? 'text' : 'password'}
@@ -185,195 +266,94 @@ export const PasswordStrength = ({ strengthMeta: meta, extra, ...props }: Props)
           onChange={(event) => props.onChange(event.target.value)}
           onBlur={props.onBlur}
           onFocus={props.onFocus}
-          className={cx(ui?.classNames?.input, inputPropsClassName)}
-          style={mergeStyles(
-            {
-              paddingRight: '44px',
-              boxSizing: 'border-box',
-              ...(hasError && highlightOnError
-                ? { borderColor: '#ef4444' }
-                : result?.acceptable === false && props.value
-                  ? { borderColor: '#f97316' }
-                  : {}),
-            },
-            ui?.styles?.input,
-            inputPropsStyle,
-          )}
+          data-fb-slot="input"
+          {...(hasError && highlightOnError ? { 'data-fb-error': '' } : {})}
+          {...(result?.acceptable === false && props.value
+            ? { 'data-fb-unacceptable': '' }
+            : {})}
+          className={cx(classNames?.input, inputPropsClassName)}
+          style={mergeStyles(controlErrorStyle, styles?.input, inputPropsStyle)}
           {...inputPropsRest}
         />
 
         <button
           type="button"
           onClick={() => setShow((prev) => !prev)}
-          className={ui?.classNames?.toggle}
-          style={mergeStyles(
-            {
-              position: 'absolute',
-              right: 12,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 16,
-              color: '#9ca3af',
-              padding: 2,
-            },
-            ui?.styles?.toggle,
-          )}
+          data-fb-slot="toggle"
+          className={classNames?.toggle}
+          style={mergeStyles(styles?.toggle)}
           aria-label={show ? 'Hide password' : 'Show password'}
         >
-          {show ? '🙈' : '👁'}
+          {resolvedToggleContent}
         </button>
       </div>
 
-      {meta._strengthShowBar && result && (
-        <div
-          className={ui?.classNames?.strengthRow}
-          style={mergeStyles({ marginTop: 4 }, ui?.styles?.strengthRow)}
-        >
-          <div
-            className={ui?.classNames?.strengthBar}
-            style={mergeStyles({ display: 'flex', gap: 3 }, ui?.styles?.strengthBar)}
-          >
-            {[1, 2, 3, 4].map((level) => (
-              <div
-                key={level}
-                style={{
-                  flex: 1,
-                  height: meta._strengthBarHeight,
-                  borderRadius: meta._strengthBarRadius,
-                  background: result.score >= level ? result.color : '#e5e7eb',
-                  transition: 'background 0.3s',
-                }}
-              />
-            ))}
-          </div>
+      {resolvedStrengthRowContent}
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-            {meta._strengthShowLabel && (
-              <span
-                className={ui?.classNames?.strengthLabel}
-                style={mergeStyles(
-                  {
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: result.color,
-                    transition: 'color 0.3s',
-                  },
-                  ui?.styles?.strengthLabel,
-                )}
-              >
-                {result.label}
-              </span>
-            )}
-            {meta._strengthShowEntropy && (
-              <span
-                className={ui?.classNames?.strengthEntropy}
-                style={mergeStyles(
-                  { fontSize: 11, color: '#9ca3af' },
-                  ui?.styles?.strengthEntropy,
-                )}
-              >
-                {result.entropy} bits
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {meta._strengthShowRules && result && props.value && (
+      {shouldRenderRules && (
         <ul
-          className={ui?.classNames?.rulesList}
-          style={mergeStyles(
-            {
-              margin: '4px 0 0',
-              padding: 0,
-              listStyle: 'none',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 3,
-            },
-            ui?.styles?.rulesList,
-          )}
+          data-fb-slot="rules-list"
+          className={classNames?.rulesList}
+          style={mergeStyles(styles?.rulesList)}
         >
-          {result.rules.map((rule) => (
-            <li
-              key={rule.id}
-              className={ui?.classNames?.ruleItem}
-              style={mergeStyles(
-                { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12 },
-                ui?.styles?.ruleItem,
-              )}
-            >
-              <span
-                className={ui?.classNames?.ruleBullet}
-                style={mergeStyles(
-                  {
-                    width: 16,
-                    height: 16,
-                    borderRadius: '50%',
-                    background: rule.passed ? '#22c55e' : '#e5e7eb',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 9,
-                    flexShrink: 0,
-                    transition: 'background 0.2s',
-                    color: '#fff',
-                  },
-                  ui?.styles?.ruleBullet,
-                )}
+          {result.rules.map((rule, index) => {
+            const defaultRuleContent = (
+              <>
+                <span
+                  data-fb-slot="rule-bullet"
+                  {...(rule.passed ? { 'data-fb-passed': '' } : {})}
+                  className={classNames?.ruleBullet}
+                  style={mergeStyles(styles?.ruleBullet)}
+                >
+                  {rule.passed ? '✓' : ''}
+                </span>
+                <span
+                  data-fb-slot="rule-text"
+                  {...(rule.passed ? { 'data-fb-passed': '' } : {})}
+                  className={classNames?.ruleText}
+                  style={mergeStyles(styles?.ruleText)}
+                >
+                  {rule.label}
+                </span>
+              </>
+            );
+            const customRule = renderStrengthRule?.({
+              ...renderContext,
+              defaultContent: defaultRuleContent,
+              index,
+              rule,
+            });
+
+            return customRule ? (
+              <Fragment key={rule.id}>{customRule}</Fragment>
+            ) : (
+              <li
+                key={rule.id}
+                data-fb-slot="rule-item"
+                {...(rule.passed ? { 'data-fb-passed': '' } : {})}
+                className={classNames?.ruleItem}
+                style={mergeStyles(styles?.ruleItem)}
               >
-                {rule.passed ? '✓' : ''}
-              </span>
-              <span
-                className={ui?.classNames?.ruleText}
-                style={mergeStyles(
-                  {
-                    color: rule.passed ? '#374151' : '#9ca3af',
-                    transition: 'color 0.2s',
-                  },
-                  ui?.styles?.ruleText,
-                )}
-              >
-                {rule.label}
-              </span>
-            </li>
-          ))}
+                {defaultRuleContent}
+              </li>
+            );
+          })}
         </ul>
       )}
 
-      {props.error
-        ? (ui?.renderError?.({ id: `${props.name}-error`, error: props.error }) ?? (
-            <span
-              role="alert"
-              className={cx(ui?.classNames?.error, errorPropsClassName)}
-              style={mergeStyles(
-                { color: '#ef4444' },
-                ui?.styles?.error,
-                errorPropsStyle,
-              )}
-              {...errorPropsRest}
-            >
-              {props.error}
-            </span>
-          ))
-        : props.hint
-          ? (ui?.renderHint?.({ id: `${props.name}-hint`, hint: props.hint }) ?? (
-              <span
-                className={cx(ui?.classNames?.hint, hintPropsClassName)}
-                style={mergeStyles(
-                  { color: '#9ca3af' },
-                  ui?.styles?.hint,
-                  hintPropsStyle,
-                )}
-                {...hintPropsRest}
-              >
-                {props.hint}
-              </span>
-            ))
-          : null}
+      {renderHelperSlot({
+        error: props.error,
+        hint: props.hint,
+        name: props.name,
+        errorId: `${props.name}-error`,
+        hintId: `${props.name}-hint`,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, React.CSSProperties | undefined>,
+        errorProps: errorProps as Record<string, unknown>,
+        hintProps: hintProps as Record<string, unknown>,
+        renderError,
+        renderHint,
+      })}
     </div>
   );
 };

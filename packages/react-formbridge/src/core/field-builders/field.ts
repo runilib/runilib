@@ -14,6 +14,13 @@ import { EmailFieldBuilder } from './string/EmailFieldBuilder';
 import { StringFieldBuilder } from './string/StringFieldBuilder';
 import type { FieldNamespace } from './types';
 
+function withLabel<T extends { label: (label: string) => T }>(
+  builder: T,
+  label?: string,
+): T {
+  return label ? builder.label(label) : builder;
+}
+
 /**
  * `field` — schema builder namespace.
  *
@@ -32,36 +39,44 @@ import type { FieldNamespace } from './types';
  * };
  */
 export const field: FieldNamespace = {
-  text: (label) => new StringFieldBuilder('text', label),
-
+  text: (label) => withLabel(new StringFieldBuilder('text'), label),
   email: (label) =>
-    new EmailFieldBuilder('email', label).format(
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-      'Please enter a valid email address.',
+    withLabel(
+      new EmailFieldBuilder('email').format(
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        'Please enter a valid email address.',
+      ),
+      label,
     ),
-  password: (label) => new PasswordFieldBuilder(label),
-  number: (label) => new NumberFieldBuilder(label),
+  password: (label) => withLabel(new PasswordFieldBuilder(), label),
+  number: (label) => withLabel(new NumberFieldBuilder(), label),
   tel: (label) =>
-    new StringFieldBuilder('tel', label).format(
-      /^[+\d\s()-]{6,20}$/,
-      'Please enter a valid phone number.',
+    withLabel(
+      new StringFieldBuilder('tel').format(
+        /^[+\d\s()-]{6,20}$/,
+        'Please enter a valid phone number.',
+      ),
+      label,
     ),
   url: (label) =>
-    new StringFieldBuilder('url', label).format(
-      /^https?:\/\/.+/i,
-      'Please enter a valid URL (starting with http:// or https://).',
+    withLabel(
+      new StringFieldBuilder('url').format(
+        /^https?:\/\/.+/i,
+        'Please enter a valid URL (starting with http:// or https://).',
+      ),
+      label,
     ),
-  textarea: (label) => new StringFieldBuilder('textarea', label),
-  checkbox: (label) => new BooleanFieldBuilder('checkbox', label),
-  switch: (label) => new BooleanFieldBuilder('switch', label),
-  select: (label) => new SelectFieldBuilder('select', label),
-  radio: (label) => new SelectFieldBuilder('radio', label),
-  date: (label) => new DateFieldBuilder(label),
-  otp: (label) => new OtpFieldBuilder(label),
-  masked: (label, pattern: MaskPatternInput) => new MaskedFieldBuilder(label, pattern),
-  file: (label) => new FileFieldBuilder(label),
-  phone: (label) => new PhoneFieldBuilder(label),
-  custom: (label, defaultValue) => new BaseFieldBuilder('custom', label, defaultValue),
+  textarea: (label) => withLabel(new StringFieldBuilder('textarea'), label),
+  checkbox: (label) => withLabel(new BooleanFieldBuilder('checkbox'), label),
+  switch: (label) => withLabel(new BooleanFieldBuilder('switch'), label),
+  select: (label) => withLabel(new SelectFieldBuilder('select'), label),
+  radio: (label) => withLabel(new SelectFieldBuilder('radio'), label),
+  date: (label) => withLabel(new DateFieldBuilder(), label),
+  otp: (label) => withLabel(new OtpFieldBuilder(), label),
+  masked: (pattern: MaskPatternInput) => new MaskedFieldBuilder(pattern),
+  file: (label) => withLabel(new FileFieldBuilder(), label),
+  phone: (label) => withLabel(new PhoneFieldBuilder(), label),
+  custom: (defaultValue) => new BaseFieldBuilder('custom', defaultValue),
   infer: inferFromObject,
   inferType: inferFromType,
 };

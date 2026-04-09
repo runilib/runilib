@@ -4,13 +4,14 @@ import {
   type PasswordStrengthMeta,
   PasswordStrengthMixin,
 } from './PasswordWithStrength';
+import { scorePassword } from './strength';
 
 // ─── Password field builder ──────────────────────────────────────────────────
 
 export class PasswordFieldBuilder extends StringFieldBuilder<'password'> {
   protected _strength: PasswordStrengthMeta = { ...DEFAULT_STRENGTH_META };
-  constructor(label: string) {
-    super('password', label);
+  constructor() {
+    super('password');
   }
 
   /** Enforce a strong password */
@@ -48,12 +49,39 @@ export class PasswordFieldBuilder extends StringFieldBuilder<'password'> {
     return this;
   }
 
-  // ── surcharger _build() pour injecter _strength dans le descriptor ──
+  hideRulesWhenValid(enabled = true): this {
+    PasswordStrengthMixin.prototype.hideRulesWhenValid.call(this, enabled);
+    return this;
+  }
+
+  /**
+   * @internal
+   */
   _build() {
     const base = super._build(); // descriptor de StringFieldBuilder
+    const validators = [...base._validators];
+
+    if (this._strength._strengthEnabled && this._strength._strengthBlockWeak) {
+      validators.push((value: string) => {
+        if (!value) {
+          return null;
+        }
+
+        const result = scorePassword(value, {
+          ...this._strength._strengthConfig,
+          levels:
+            this._strength._strengthCustomLevels ?? this._strength._strengthConfig.levels,
+          minAcceptableScore: this._strength._strengthMinAccept,
+        });
+
+        return result.acceptable ? null : this._strength._strengthBlockMsg;
+      });
+    }
+
     return {
       ...base,
       ...this._strength, // ajoute tous les _strengthXxx dans le descriptor
+      _validators: validators,
     };
   }
 }

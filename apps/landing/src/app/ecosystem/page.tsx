@@ -5,13 +5,15 @@ import styled, { keyframes } from 'styled-components';
 import { LogoIcon } from '../../components/Logo';
 import { WEBSITE_FEATURES } from '../../config/features';
 import { useApp } from '../../context/AppContext';
+import { FORM_BRIDGE_DOCS_URL, getNewTabLinkProps } from '../../data/libraries';
 import type { LibColor } from '../../types';
 
 const fadeUp = keyframes`from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}`;
 
 export default function Ecosystem() {
   const { t } = useApp();
-  const docsEntryPath = WEBSITE_FEATURES.docs ? '/docs' : '/libraries';
+  const docsEntryPath = WEBSITE_FEATURES.docs ? FORM_BRIDGE_DOCS_URL : '/libraries';
+  const docsEntryLinkProps = getNewTabLinkProps(docsEntryPath);
 
   const principles = [
     {
@@ -188,7 +190,12 @@ export default function Ecosystem() {
         <ECTATitle>Join the ecosystem</ECTATitle>
         <ECTADesc>RUNILIB is open source. Contributions welcome.</ECTADesc>
         <ECTABtns>
-          <PrimaryBtn href={docsEntryPath}>Get started</PrimaryBtn>
+          <PrimaryBtn
+            href={docsEntryPath}
+            {...docsEntryLinkProps}
+          >
+            Get started
+          </PrimaryBtn>
           <SecBtn
             href="https://github.com/runilib"
             target="_blank"

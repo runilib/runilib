@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `${lib.name} — ${lib.tagline}`;
-  const description = lib.desc;
+  const title = `${lib.name} docs — ${lib.tagline}`;
+  const description = `${lib.desc} Installation, API reference, TypeScript examples and cross-platform guidance for React web and React Native.`;
 
   return {
     title,
@@ -24,15 +24,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: [
       lib.name,
       `@runilib/${lib.name}`,
+      lib.tagline,
       ...lib.tags,
       'React',
       'React Native',
       'cross-platform',
       'TypeScript',
       'npm package',
+      'documentation',
+      'API reference',
     ],
     openGraph: {
-      title: `${lib.name} | RUNILIB`,
+      title: `${lib.name} docs | RUNILIB`,
       description,
       url: `https://runilib.dev/libraries/${lib.id}`,
     },

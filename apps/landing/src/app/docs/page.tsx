@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import styled, { keyframes } from 'styled-components';
 import { useApp } from '../../context/AppContext';
-import { LIBRARIES } from '../../data/libraries';
+import { getLibraryHref, getNewTabLinkProps, LIBRARIES } from '../../data/libraries';
 import type { LibColor } from '../../types';
 
 const fadeUp = keyframes`from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}`;
@@ -16,10 +16,10 @@ export default function Docs() {
       <Hero>
         <HeroInner>
           <Label>{t.docs.title}</Label>
-          <Title>Pick a library to get started</Title>
+          <Title>Documentation for the RUNILIB ecosystem</Title>
           <Sub>
-            Each library has its own complete documentation with installation guide, API
-            reference, and real-world examples.
+            Explore installation guides, API reference and TypeScript examples for RUNILIB
+            packages across web and mobile.
           </Sub>
         </HeroInner>
       </Hero>
@@ -29,7 +29,8 @@ export default function Docs() {
           {LIBRARIES.map((lib, i) => (
             <DocCard
               key={lib.id}
-              href={`/libraries/${lib.id}`}
+              href={getLibraryHref(lib)}
+              {...getNewTabLinkProps(getLibraryHref(lib))}
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <CardIcon $color={lib.color}>{lib.icon}</CardIcon>

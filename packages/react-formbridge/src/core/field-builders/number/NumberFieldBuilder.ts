@@ -2,8 +2,8 @@ import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 // ─── Number field builder ────────────────────────────────────────────────────
 export class NumberFieldBuilder extends BaseFieldBuilder<number, 'number'> {
-  constructor(label: string) {
-    super('number', label, 0);
+  constructor() {
+    super('number', 0);
   }
 
   min(value: number, message?: string): this {

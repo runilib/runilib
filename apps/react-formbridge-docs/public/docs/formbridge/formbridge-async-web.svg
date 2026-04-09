@@ -1,0 +1,14 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="40" fill="#F2FBFF"/>
+  <rect x="110" y="108" width="1220" height="684" rx="34" fill="#FFFFFF"/>
+  <rect x="178" y="180" width="1084" height="92" rx="24" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="220" y="236" fill="#0F172A" font-size="28" font-family="Arial, sans-serif">Search city</text>
+  <rect x="178" y="308" width="1084" height="338" rx="28" fill="#EFF6FF" stroke="#BFDBFE"/>
+  <rect x="220" y="360" width="1000" height="54" rx="18" fill="#FFFFFF"/>
+  <rect x="220" y="436" width="1000" height="54" rx="18" fill="#FFFFFF"/>
+  <rect x="220" y="512" width="1000" height="54" rx="18" fill="#FFFFFF"/>
+  <text x="252" y="396" fill="#1D4ED8" font-size="24" font-family="Arial, sans-serif">Paris, France</text>
+  <text x="252" y="472" fill="#1D4ED8" font-size="24" font-family="Arial, sans-serif">Parma, Italy</text>
+  <text x="252" y="548" fill="#1D4ED8" font-size="24" font-family="Arial, sans-serif">Paramaribo, Suriname</text>
+  <text x="216" y="704" fill="#0F766E" font-size="24" font-family="Arial, sans-serif">debounce + cache + dependsOn + refresh</text>
+</svg>

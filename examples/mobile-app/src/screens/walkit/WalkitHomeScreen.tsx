@@ -1,16 +1,7 @@
 import { useRef, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { Tooltip, useWalkit, WalkitStep } from '@runilib/react-walkit';
-import { TooltipAnchorNative } from '@/src/components/walkit-examples/TooltipAnchorNative';
-import { TooltipCustomContentNative } from '@/src/components/walkit-examples/TooltipCustomContentNative';
+import { useWalkit, WalkitStep } from '@runilib/react-walkit';
 import { TooltipPlacementsNative } from '@/src/components/walkit-examples/TooltipPlacementsNative';
 
 import * as Haptics from 'expo-haptics';
@@ -232,55 +223,6 @@ export function WalkitHomeScreen() {
         {/* ── Section header + add button ── */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>Tasks</Text>
-          <View>
-            <Tooltip
-              content="Native custom tooltip"
-              openOnPress
-              tooltipStyle={{
-                backgroundColor: '#1d4ed8',
-                borderRadius: 16,
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-              }}
-            >
-              {({ toggle }) => (
-                <Pressable onPress={toggle}>
-                  <Text>Show</Text>
-                </Pressable>
-              )}
-            </Tooltip>
-          </View>
-
-          <View>
-            <Tooltip
-              openOnPress={false}
-              anchorColor="#0f766e"
-              renderContent={({ toggle }) => (
-                <View
-                  style={{
-                    backgroundColor: '#0f766e',
-                    paddingHorizontal: 16,
-                    paddingVertical: 14,
-                    borderRadius: 16,
-                  }}
-                >
-                  <Text style={{ color: '#fff', fontWeight: '700', marginBottom: 8 }}>
-                    Custom native tooltip
-                  </Text>
-                  <Pressable onPress={toggle}>
-                    <Text style={{ color: '#ccfbf1' }}>Close</Text>
-                  </Pressable>
-                </View>
-              )}
-            >
-              {({ toggle }) => (
-                <Pressable onPress={toggle}>
-                  <Text>Open</Text>
-                </Pressable>
-              )}
-            </Tooltip>
-          </View>
-
           <WalkitStep
             {...HOME_STEPS.ADD_TASK}
             scrollViewRef={scrollViewRef}
@@ -331,8 +273,8 @@ export function WalkitHomeScreen() {
             mixes formbridge blocks into the tour playground.
           </Text>
           <TooltipPlacementsNative />
-          <TooltipAnchorNative />
-          <TooltipCustomContentNative />
+          {/* <TooltipAnchorNative />
+          <TooltipCustomContentNative /> */}
         </View>
 
         <View style={{ height: 100 + insets.bottom }} />
@@ -476,27 +418,27 @@ const s = StyleSheet.create({
   wizardBtnText: { color: '#d6c4ae', fontSize: 13, lineHeight: 18 },
   examplesCard: {
     marginTop: 20,
-    backgroundColor: '#111827',
+    backgroundColor: '#ffffff',
     borderRadius: 22,
     padding: 18,
     gap: 16,
   },
   examplesEyebrow: {
-    color: '#93c5fd',
+    color: '#2563eb',
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
   examplesTitle: {
-    color: '#eff6ff',
+    color: '#10203a',
     fontSize: 20,
     lineHeight: 24,
     fontWeight: '800',
     letterSpacing: -0.5,
   },
   examplesText: {
-    color: '#cbd5e1',
+    color: '#5f6f88',
     fontSize: 13,
     lineHeight: 20,
   },

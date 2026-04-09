@@ -77,13 +77,13 @@
     "intro.js",
     "intro"
   ],
-  "author": "GoNextStep <tech-founder@gonextstep.io>",
+  "author": "AKS <akladekouassi@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0",
     "react-native": ">=0.60.0",
-    "react-native-svg": "15.12.1"
+    "react-native-svg": ">=15.12.1"
   },
   "peerDependenciesMeta": {
     "react-dom": {

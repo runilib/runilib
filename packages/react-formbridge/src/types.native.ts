@@ -4,6 +4,7 @@ import type {
   NativeFormUiOverrides,
   NativeGlobalFieldUiOverrides,
   NativeSubmitUiOverrides,
+  FieldErrorProps as SharedErrorMessageProps,
   ExtraFieldProps as SharedExtraFieldProps,
   FieldComponent as SharedFieldComponent,
   FieldComponents as SharedFieldComponents,
@@ -12,6 +13,7 @@ import type {
   FormBridgeUiOptions as SharedFormBridgeUiOptions,
   FormComponent as SharedFormComponent,
   FormProps as SharedFormProps,
+  FieldLabelProps as SharedLabelProps,
   SubmitButtonComponent as SharedSubmitButtonComponent,
   SubmitButtonProps as SharedSubmitButtonProps,
   UseFormBridgeReturn as SharedUseFormBridgeReturn,
@@ -21,21 +23,32 @@ import type {
 export type {
   AsyncValidator,
   FieldBehaviorConfig,
+  FieldController,
   FieldDescriptor,
+  FieldRenderHandlers,
   FieldRenderProps,
+  FieldRenderState,
   FieldState,
   FieldStyleValue,
   FieldType,
+  FileValue,
+  FocusableFieldHandle,
   FormSchema,
   FormState,
   FormStatus,
   NativeAsyncAutocompleteFieldUiOverrides,
   NativeCheckboxFieldUiOverrides,
   NativeFieldSlot,
+  NativeFileFieldItemRenderContext,
+  NativeFileFieldRenderContext,
   NativeFileFieldUiOverrides,
   NativeGlobalFieldUiOverrides,
   NativeOtpFieldUiOverrides,
+  NativePasswordFieldRenderContext,
+  NativePasswordFieldRuleRenderContext,
   NativePasswordFieldUiOverrides,
+  NativePhoneFieldCountryItemRenderContext,
+  NativePhoneFieldRenderContext,
   NativePhoneFieldUiOverrides,
   NativeSelectFieldUiOverrides,
   NativeStyleValue,
@@ -43,6 +56,9 @@ export type {
   NativeTextFieldUiOverrides,
   OptionsFetcher,
   OptionsFetcherContext,
+  PasswordRule,
+  PhoneCountryLayout,
+  PhoneValue,
   Platform,
   PlatformStyleValue,
   ResolvedFieldDescriptor,
@@ -52,10 +68,15 @@ export type {
   SchemaValues,
   SelectOption,
   SelectPickerRenderContext,
+  StrengthConfig,
+  StrengthResult,
+  StrengthRuleConfig,
+  StrengthScoreLevel,
   SyncValidator,
   ValidationTrigger,
   Validator,
 } from './types';
+export type { FieldAutoComplete } from './types/autoComplete';
 
 export type FieldUiOverrides = NativeFieldUiOverrides;
 export type FieldStyleProps<TUi = NativeFieldUiOverrides> = SharedFieldStyleProps<
@@ -80,6 +101,8 @@ export type FormUiOverrides = NativeFormUiOverrides;
 export type SubmitUiOverrides = NativeSubmitUiOverrides;
 export type FormBridgeUiOptions = SharedFormBridgeUiOptions<'native'>;
 export type UseFormOptions<S extends FormSchema> = SharedUseFormOptions<S, 'native'>;
+export type FieldErrorProps<S extends FormSchema> = SharedErrorMessageProps<S, 'native'>;
+export type FieldLabelProps<S extends FormSchema> = SharedLabelProps<S, 'native'>;
 export type UseFormBridgeReturn<S extends FormSchema> = SharedUseFormBridgeReturn<
   S,
   'native'

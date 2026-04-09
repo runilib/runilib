@@ -20,6 +20,13 @@ export const DEMO_PLANS = [
   { label: 'Enterprise', value: 'enterprise' },
 ];
 
+export const SEAT_PACK_OPTIONS = [
+  { label: '3 seats', value: 3 },
+  { label: '12 seats', value: 12 },
+  { label: '30 seats', value: 30 },
+  { label: '50 seats', value: 50 },
+] satisfies SelectOption[];
+
 export const WORKSPACE_OPTIONS = [
   { label: 'Operations workspace', value: 'ops' },
   { label: 'Revenue cockpit', value: 'revenue' },
@@ -97,23 +104,34 @@ function createBaseDemoFieldUi(styles: Record<string, string>): WebFieldUiOverri
     },
     styles: {
       root: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
         gap: 8,
         marginBottom: 0,
       },
       label: {
-        color: '#e7dbc5',
+        display: 'inline-flex',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        gap: 4,
+        color: '#30415d',
         fontSize: 11.5,
         fontWeight: 700,
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
       },
       input: {
-        background: 'rgba(12, 10, 7, 0.78)',
-        border: '1.5px solid rgba(255, 240, 200, 0.08)',
-        borderRadius: 16,
-        color: '#f5efe0',
+        background: '#ffffff',
+        border: '1.5px solid rgba(37, 99, 235, 0.16)',
+        borderRadius: 6,
+        color: '#10203a',
+        display: 'block',
+        boxSizing: 'border-box',
+        lineHeight: 1.35,
+        fontVariantNumeric: 'tabular-nums',
         padding: '14px 16px',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+        boxShadow: '0 10px 20px rgba(15, 23, 42, 0.04)',
       },
     },
   };
@@ -145,42 +163,61 @@ export function createDemoFormUi(styles: Record<string, string>): FormBridgeUiOp
 
   return {
     field: {
-      ui: {
-        classNames: {
-          ...baseFieldUi.classNames,
-          select: styles.formInput,
-          textarea: styles.formInput,
-          error: styles.errorBox,
-          hint: styles.helperText,
+      classNames: {
+        ...baseFieldUi.classNames,
+        select: styles.formInput,
+        textarea: styles.formInput,
+        error: styles.errorBox,
+        hint: styles.helperText,
+      },
+      styles: {
+        ...baseFieldUi.styles,
+        input: {
+          ...baseFieldUi.styles?.input,
+          borderRadius: 5,
         },
-        styles: {
-          ...baseFieldUi.styles,
-          input: {
-            ...baseFieldUi.styles?.input,
-            borderRadius: 8,
-          },
-          select: {
-            background: 'rgba(12, 10, 7, 0.78)',
-            border: '1.5px solid rgba(255, 240, 200, 0.08)',
-            borderRadius: 16,
-            color: '#f5efe0',
-            padding: '14px 16px',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
-          },
-          textarea: {
-            background: 'rgba(12, 10, 7, 0.78)',
-            border: '1.5px solid rgba(255, 240, 200, 0.08)',
-            borderRadius: 16,
-            color: '#f5efe0',
-            padding: '14px 16px',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
-          },
-          error: {
-            marginTop: 6,
-          },
-          hint: {
-            marginTop: 4,
-          },
+        select: {
+          background: '#ffffff',
+          border: '1.5px solid rgba(37, 99, 235, 0.16)',
+          borderRadius: 5,
+          color: '#10203a',
+          padding: '14px 16px',
+          boxShadow: '0 10px 20px rgba(15, 23, 42, 0.04)',
+        },
+        textarea: {
+          background: '#ffffff',
+          border: '1.5px solid rgba(37, 99, 235, 0.16)',
+          borderRadius: 6,
+          color: '#10203a',
+          padding: '14px 16px',
+          boxShadow: '0 10px 20px rgba(15, 23, 42, 0.04)',
+        },
+        error: {
+          marginTop: 0,
+          alignSelf: 'flex-start',
+        },
+        hint: {
+          marginTop: 4,
+        },
+        switchRoot: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '14px 16px',
+          borderRadius: 6,
+          background: '#ffffff',
+          border: '1.5px solid rgba(37, 99, 235, 0.16)',
+        },
+        switchTrack: {
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+        },
+        switchThumb: {
+          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.32)',
+        },
+        switchLabel: {
+          color: '#10203a',
+          fontSize: 13.5,
+          fontWeight: 600,
         },
       },
     },

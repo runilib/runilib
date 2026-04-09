@@ -15,17 +15,40 @@ export function CustomerCheckoutExample() {
 
   const customerSchema = useMemo(
     () => ({
-      firstName: field.text('Prenom').required('Required').trim(),
-      lastName: field.text('Nom').required('Required').trim(),
-      email: field.email('Email').required('Required').trim().lowercase(),
-      phone: field.tel('Telephone').required('Required'),
+      firstName: field
+        .text()
+        .label('First name')
+        .placeholder('Ava')
+        .required('Required')
+        .trim(),
+      lastName: field
+        .text()
+        .label('Last name')
+        .placeholder('Stone')
+        .required('Required')
+        .trim(),
+      email: field
+        .email()
+        .label('Email')
+        .placeholder('ava@runilib.dev')
+        .required('Required')
+        .trim()
+        .lowercase(),
+      phone: field
+        .tel()
+        .label('Phone')
+        .placeholder('+33 6 12 34 56 78')
+        .required('Required'),
       department: field
-        .select('Departement')
+        .select()
+        .label('Department')
         .options(CUSTOMER_DEPARTMENTS)
         .required('Required'),
-      city: field.text('Ville').required('Required').trim(),
+      city: field.text().label('City').placeholder('Paris').required('Required').trim(),
       customerCode: field
-        .masked('Customer code', 'LL-9999')
+        .masked('LL-9999')
+        .label('Customer code')
+        .placeholder('AB-2048')
         .tokens({
           L: /[A-Z]/,
         })
@@ -35,17 +58,20 @@ export function CustomerCheckoutExample() {
         .validateComplete('Incomplete customer code')
         .hint('Custom mask example: two uppercase letters and four digits.'),
       cardNumber: field
-        .masked('Numero de carte', 'CARD_16')
+        .masked('CARD_16')
+        .label('Card number')
         .required('Required')
         .showMaskInPlaceholder()
         .validateComplete('Incomplete card number'),
       expiry: field
-        .masked("Date d'expiration", 'EXPIRY')
+        .masked('EXPIRY')
+        .label('Expiry')
         .required('Required')
         .showMaskInPlaceholder()
         .validateComplete('Incomplete expiry'),
       cvv: field
-        .masked('CVV', 'CVV')
+        .masked('CVV')
+        .label('CVV')
         .required('Required')
         .showMaskInPlaceholder()
         .validateComplete('Incomplete CVV'),
@@ -56,7 +82,7 @@ export function CustomerCheckoutExample() {
   const customerForm = useFormBridge(customerSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createNativeFormUi(),
+    globalStyles: () => createNativeFormUi(),
     persist: {
       key: 'mobile-customer-checkout',
       storage: 'local',
@@ -119,7 +145,7 @@ export function CustomerCheckoutExample() {
       <Form
         onSubmit={async (values) => {
           await simulateSubmitDelay(700);
-          setSubmittedCustomer(values as Record<string, unknown>);
+          setSubmittedCustomer(values);
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }}
       >
@@ -153,7 +179,7 @@ export function CustomerCheckoutExample() {
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Payment</Text>
           <fields.cardNumber
-            ui={{
+            {...{
               styles: {
                 input: {
                   letterSpacing: 1.8,

@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomerCheckoutExample } from '../../components/formbridge-examples/CustomerCheckoutExample';
 import { CustomMaskExamplesShowcase } from '../../components/formbridge-examples/CustomMaskExamplesShowcase';
 import { FieldVariantsShowcase } from '../../components/formbridge-examples/FieldVariantsShowcase';
+import { PasswordVariantsExample } from '../../components/formbridge-examples/PasswordVariantsExample';
+import { PhoneVariantsExample } from '../../components/formbridge-examples/PhoneVariantsExample';
 import { ResolverExamplesShowcase } from '../../components/formbridge-examples/ResolverExamplesShowcase';
 import { StylingExamplesShowcase } from '../../components/formbridge-examples/StylingExamplesShowcase';
 
@@ -18,8 +20,8 @@ export function FormbridgeExamplesScreen() {
       edges={['top', 'bottom', 'left', 'right']}
     >
       <StatusBar
-        style="light"
-        backgroundColor="#0b0f19"
+        style="dark"
+        backgroundColor="#f4f7fc"
       />
       <ScrollView
         contentContainerStyle={s.content}
@@ -45,7 +47,8 @@ export function FormbridgeExamplesScreen() {
           <Text style={s.title}>Everything related to forms now lives here.</Text>
           <Text style={s.subtitle}>
             This section gathers the route-based wizard, checkout flow, field variants,
-            masks, styling overrides, and resolver demos in one dedicated place.
+            password recipes, phone recipes, file upload demos, masks, styling overrides,
+            and resolver demos in one dedicated place.
           </Text>
 
           <TouchableOpacity
@@ -71,11 +74,15 @@ export function FormbridgeExamplesScreen() {
 
         <View style={s.sectionCard}>
           <Text style={s.sectionEyebrow}>Field systems</Text>
-          <Text style={s.sectionTitle}>Variants, masks, styling, and resolvers.</Text>
+          <Text style={s.sectionTitle}>
+            Passwords, phone flows, variants, uploads, masks, styling, and resolvers.
+          </Text>
           <Text style={s.sectionText}>
             The rest of the examples are grouped by concern so the package behavior is
             easier to compare at a glance.
           </Text>
+          <PasswordVariantsExample />
+          <PhoneVariantsExample />
           <FieldVariantsShowcase />
           <CustomMaskExamplesShowcase />
           <StylingExamplesShowcase />
@@ -87,13 +94,18 @@ export function FormbridgeExamplesScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0b0f19' },
+  safe: { flex: 1, backgroundColor: '#f4f7fc' },
   content: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 28, gap: 18 },
   hero: {
-    backgroundColor: '#111827',
+    backgroundColor: '#ffffff',
     borderRadius: 28,
     padding: 22,
     gap: 12,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 4,
   },
   heroTop: {
     flexDirection: 'row',
@@ -106,67 +118,72 @@ const s = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#eff4fb',
   },
   ghostButtonText: {
-    color: '#e2e8f0',
+    color: '#31507f',
     fontWeight: '700',
     fontSize: 12,
   },
   eyebrow: {
-    color: '#60a5fa',
+    color: '#2563eb',
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
   title: {
-    color: '#eff6ff',
+    color: '#10203a',
     fontSize: 33,
     lineHeight: 36,
     fontWeight: '800',
     letterSpacing: -0.8,
   },
   subtitle: {
-    color: '#cbd5e1',
+    color: '#5f6f88',
     fontSize: 14,
     lineHeight: 22,
   },
   primaryButton: {
     alignSelf: 'flex-start',
     marginTop: 8,
-    backgroundColor: '#60a5fa',
+    backgroundColor: '#2563eb',
     borderRadius: 999,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   primaryButtonText: {
-    color: '#0f172a',
+    color: '#ffffff',
     fontSize: 13,
     fontWeight: '800',
   },
   sectionCard: {
-    backgroundColor: '#111827',
+    backgroundColor: '#ffffff',
     borderRadius: 24,
     padding: 18,
     gap: 14,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.06,
+    shadowRadius: 22,
+    elevation: 3,
   },
   sectionEyebrow: {
-    color: '#93c5fd',
+    color: '#2563eb',
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1.1,
     textTransform: 'uppercase',
   },
   sectionTitle: {
-    color: '#eff6ff',
+    color: '#10203a',
     fontSize: 24,
     lineHeight: 28,
     fontWeight: '800',
     letterSpacing: -0.6,
   },
   sectionText: {
-    color: '#cbd5e1',
+    color: '#5f6f88',
     fontSize: 13,
     lineHeight: 20,
   },

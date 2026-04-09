@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { SelectOption } from '../../types';
+import type { SelectOption } from '../../types/field';
 
 export type AsyncDependencyShape = Record<string, unknown>;
 export type AsyncDependencyKey<TDeps extends AsyncDependencyShape> = Extract<

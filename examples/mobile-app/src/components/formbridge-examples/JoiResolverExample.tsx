@@ -18,10 +18,14 @@ export function JoiResolverExample() {
 
   const formSchema = useMemo(
     () => ({
-      city: field.text('City'),
-      department: field.select('Department').options(CUSTOMER_DEPARTMENTS),
-      phone: field.tel('Phone'),
-      postalCode: field.text('Postal code'),
+      city: field.text().label('City').placeholder('Lyon'),
+      department: field
+        .select()
+        .label('Department')
+        .options(CUSTOMER_DEPARTMENTS)
+        .searchable(),
+      phone: field.tel().label('Support phone').placeholder('+33 6 98 12 45 78'),
+      postalCode: field.text().label('Postal code').placeholder('69002'),
     }),
     [],
   );
@@ -56,15 +60,21 @@ export function JoiResolverExample() {
     [],
   );
 
+  const resolver = useMemo(
+    () =>
+      joiResolver(schema, {
+        stripQuotes: true,
+        validateOptions: {
+          allowUnknown: false,
+        },
+      }),
+    [schema],
+  );
+
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    resolver: joiResolver(schema, {
-      stripQuotes: true,
-      validateOptions: {
-        allowUnknown: false,
-      },
-    }),
+    resolver,
   });
 
   const { Form, fields, state, watchAll } = form;

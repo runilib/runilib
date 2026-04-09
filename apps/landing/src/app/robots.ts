@@ -6,9 +6,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/_next/'],
+        disallow: ['/api/'],
       },
     ],
+    host: 'https://runilib.dev',
     sitemap: 'https://runilib.dev/sitemap.xml',
   };
 }

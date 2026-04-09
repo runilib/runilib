@@ -13,9 +13,15 @@ export function EmployeeBadgeMaskExample() {
 
   const formSchema = useMemo(
     () => ({
-      teammateName: field.text('Teammate name').required('Required'),
+      teammateName: field
+        .text()
+        .label('Teammate name')
+        .placeholder('Ava Stone')
+        .required('Required'),
       badgeCode: field
-        .masked('Badge code', 'EMP-9999-LL')
+        .masked('EMP-9999-LL')
+        .label('Badge code')
+        .placeholder('EMP-2048-AX')
         .tokens({
           L: /[A-Z]/,
         })

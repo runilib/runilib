@@ -210,6 +210,7 @@ export interface LibraryInfo {
   status: LibStatus;
   npmUrl: string;
   githubUrl: string;
+  docsUrl?: string;
 }
 
 // ── Docs ──────────────────────────────────────────────────────
@@ -228,6 +229,17 @@ export interface DocPreview {
   caption?: string;
   maxWidth?: number;
   maxHeight?: number;
+  /** When true, `src` is rendered as a <video> instead of an <img>. */
+  video?: boolean;
+}
+
+/** Replace content/code of a section starting from a given version. */
+export interface VersionOverride {
+  /** Version from which this override applies (e.g. '1.0.1'). */
+  since: string;
+  content?: string;
+  code?: CodeSnippet;
+  codeTabs?: CodeSnippet[];
 }
 
 export interface DocSection {
@@ -237,6 +249,14 @@ export interface DocSection {
   code?: CodeSnippet;
   codeTabs?: CodeSnippet[];
   subsections?: DocSection[];
+  /** Semver from which this section is available (e.g. '1.0.0'). */
+  since?: string;
+  /**
+   * Version-specific overrides for content / code.
+   * The resolver picks the override whose `since` is the highest <= selected version.
+   * Only the fields present in the override replace the base values.
+   */
+  versionOverrides?: VersionOverride[];
 }
 
 export interface DocGroup {
@@ -247,6 +267,8 @@ export interface DocGroup {
 
 export interface LibraryDoc {
   libId: string;
+  /** Available documentation versions, newest first (e.g. ['1.0.0','0.9.0']). */
+  versions: string[];
   sections: DocSection[];
   sidebar: DocGroup[];
 }

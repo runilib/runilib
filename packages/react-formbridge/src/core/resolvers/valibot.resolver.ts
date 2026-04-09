@@ -1,4 +1,4 @@
-import type { ResolverResult, SchemaResolver } from '../../types';
+import type { ResolverResult, SchemaResolver } from '../../types/options';
 import type {
   ResolverAdapterOptions,
   ResolverMode,

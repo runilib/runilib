@@ -24,6 +24,8 @@ This document explains:
   - Changesets-based release flow
 - `workflows/deploy-landing-vercel.yml`
   - preview and production deployments for the landing app
+- `workflows/deploy-react-formbridge-docs-vercel.yml`
+  - preview and production deployments for the docs app
 - `workflows/mirror-package.yml`
   - reusable workflow that pushes one package subtree to one standalone repository
 - `workflows/mirror-packages.yml`
@@ -38,6 +40,8 @@ This document explains:
   - documents existing mirror sync behavior and the PR-visibility workflow for standalone repositories
 - `MIRROR_SETUP.md`
   - step-by-step setup and test guide for mirror repository secrets, permissions, pull request visibility, and issue synchronization
+- `REACT_FORMBRIDGE_DOCS_DEPLOYMENT.md`
+  - step-by-step setup guide for the docs Vercel project, GitHub secrets, and SMTP env vars
 
 ## Workflow overview
 
@@ -91,6 +95,24 @@ Important notes:
 - preview deployments do not run for forks
 - the workflow expects `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`
 - the production job uses the GitHub environment `landing-production`
+
+### `Deploy React FormBridge Docs to Vercel`
+
+File:
+- `.github/workflows/deploy-react-formbridge-docs-vercel.yml`
+
+What it does:
+- deploys preview builds for pull requests from branches inside the same repository
+- comments the preview URL back on the pull request
+- deploys production on pushes to `main`
+- supports manual deployment through `workflow_dispatch`
+- builds workspace packages first with `yarn build:packages`
+
+Important notes:
+- preview deployments do not run for forks
+- the workflow expects `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS`
+- the production job uses the GitHub environment `react-formbridge-docs-production`
+- the full setup guide lives in `.github/REACT_FORMBRIDGE_DOCS_DEPLOYMENT.md`
 
 ### `Mirror Packages`
 
@@ -162,12 +184,13 @@ Recommended repository-level secrets:
 - `VERCEL_TOKEN`
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
+- `VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS`
 
 Why repository-level:
 - `Release Packages` and mirror workflows run at repository scope
 - the preview Vercel deployment also needs the Vercel secrets, so environment-only secrets would not be enough
 
-You can still use the GitHub environment `landing-production` for required reviewers, wait timers, or other production protections.
+You can still use GitHub environments such as `landing-production` and `react-formbridge-docs-production` for required reviewers, wait timers, or other production protections.
 
 ## Secret reference
 
@@ -251,6 +274,7 @@ This secret is optional. If omitted, the workflow falls back to a default value.
 
 Used by:
 - `Deploy Landing to Vercel`
+- `Deploy React FormBridge Docs to Vercel`
 
 Purpose:
 - authenticate the Vercel CLI in GitHub Actions
@@ -270,6 +294,7 @@ Recommendations:
 
 Used by:
 - `Deploy Landing to Vercel`
+- `Deploy React FormBridge Docs to Vercel`
 
 Purpose:
 - tells the Vercel CLI which Vercel team or personal scope owns the project
@@ -316,10 +341,34 @@ vercel link
 cat .vercel/project.json
 ```
 
+### `VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS`
+
+Used by:
+- `Deploy React FormBridge Docs to Vercel`
+
+Purpose:
+- tells the Vercel CLI which exact docs project to build and deploy
+
+How to obtain it:
+- use the same `apps/react-formbridge-docs/.vercel/project.json` file after `vercel link`
+- copy the `projectId` value into the GitHub secret `VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS`
+
+Example:
+
+```bash
+cd apps/react-formbridge-docs
+vercel login
+vercel link
+cat .vercel/project.json
+```
+
 ## GitHub environment
 
 The production landing deployment targets:
 - `landing-production`
+
+The production docs deployment targets:
+- `react-formbridge-docs-production`
 
 Recommended environment settings:
 - required reviewers before production deployment

@@ -1,8 +1,5 @@
 import React, {
   type CSSProperties,
-  type HTMLAttributes,
-  type InputHTMLAttributes,
-  type LabelHTMLAttributes,
   useCallback,
   useEffect,
   useId,
@@ -15,68 +12,19 @@ import { useAsyncOptions } from '../../hooks/shared/useAsyncOptions';
 import type {
   FieldDescriptor,
   FieldRenderProps,
+  FocusableFieldHandle,
   SelectOption,
   SelectPickerRenderContext,
+  WebAsyncAutocompleteFieldUiOverrides,
 } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
-import { type ResolvedWebFieldUi, shouldHighlightOnError } from './shared';
-
-type AsyncAutocompleteSlot =
-  | 'root'
-  | 'label'
-  | 'input'
-  | 'select'
-  | 'listbox'
-  | 'option'
-  | 'optionActive'
-  | 'optionSelected'
-  | 'empty'
-  | 'loading'
-  | 'error'
-  | 'hint'
-  | 'requiredMark';
-
-interface AsyncAutocompleteUiOverrides {
-  id?: string;
-  hideLabel?: boolean;
-  highlightOnError?: boolean;
-  classNames?: Partial<Record<AsyncAutocompleteSlot, string>>;
-  styles?: Partial<Record<AsyncAutocompleteSlot, CSSProperties>>;
-  rootProps?: HTMLAttributes<HTMLDivElement>;
-  labelProps?: LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    | 'value'
-    | 'defaultValue'
-    | 'onChange'
-    | 'onBlur'
-    | 'onFocus'
-    | 'disabled'
-    | 'name'
-    | 'id'
-    | 'type'
-    | 'role'
-    | 'aria-autocomplete'
-    | 'aria-controls'
-    | 'aria-expanded'
-    | 'aria-activedescendant'
-  >;
-  hintProps?: HTMLAttributes<HTMLSpanElement>;
-  errorProps?: HTMLAttributes<HTMLSpanElement>;
-  renderLabel?: (ctx: {
-    id: string;
-    label: React.ReactNode;
-    required: boolean;
-  }) => React.ReactNode;
-  renderRequiredMark?: () => React.ReactNode;
-  renderOption?: (
-    option: SelectOption,
-    state: { active: boolean; selected: boolean },
-  ) => React.ReactNode;
-  renderEmpty?: () => React.ReactNode;
-  renderLoading?: () => React.ReactNode;
-  renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
-}
+import { cx, mergeStyles, renderLabelSlot } from './helpers';
+import {
+  defaultErrorChromeStyle,
+  defaultErrorTextStyle,
+  type ResolvedWebFieldUi,
+  shouldHighlightOnError,
+} from './shared';
 
 interface Props extends FieldRenderProps<string> {
   descriptor: FieldDescriptor<string> & {
@@ -84,19 +32,8 @@ interface Props extends FieldRenderProps<string> {
     _searchable?: boolean;
     _ui?: ResolvedWebFieldUi;
   };
-  extra?: ExtraFieldProps<AsyncAutocompleteUiOverrides> & {
-    ui?: AsyncAutocompleteUiOverrides;
-  };
-}
-
-function cx(...values: Array<string | undefined | false | null>) {
-  return values.filter(Boolean).join(' ');
-}
-
-function mergeStyles(
-  ...styles: Array<CSSProperties | Record<string, unknown> | undefined>
-): CSSProperties | undefined {
-  return Object.assign({}, ...styles.filter(Boolean));
+  extra?: ExtraFieldProps<WebAsyncAutocompleteFieldUiOverrides>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
 function normalize(value: unknown): string {
@@ -106,47 +43,54 @@ function normalize(value: unknown): string {
 export const AsyncAutocompleteField: React.FC<Props> = ({
   descriptor,
   extra,
+  registerFocusable,
   ...props
 }) => {
   const reactId = useId();
-  const ui = extra?.ui;
   const fieldUi = descriptor._ui ?? {};
-  const renderPicker = ui?.renderPicker ?? fieldUi.renderPicker;
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
+  const renderPicker = extra?.renderPicker ?? fieldUi.renderPicker;
+
+  const {
+    classNames,
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderRequiredMark,
+    renderOption,
+    renderEmpty,
+    renderLoading,
+  } = extra ?? {};
+
   const {
     className: rootPropsClassName,
     style: rootPropsStyle,
     ...rootPropsRest
   } = rootProps ?? {};
   const {
-    className: labelPropsClassName,
-    style: labelPropsStyle,
-    ...labelPropsRest
-  } = labelProps ?? {};
-  const {
     className: inputPropsClassName,
     style: inputPropsStyle,
     ...inputPropsRest
   } = inputProps ?? {};
   const {
-    className: hintPropsClassName,
-    style: hintPropsStyle,
-    ...hintPropsRest
-  } = hintProps ?? {};
-  const {
     className: errorPropsClassName,
     style: errorPropsStyle,
     ...errorPropsRest
   } = errorProps ?? {};
+  const {
+    className: hintPropsClassName,
+    style: hintPropsStyle,
+    ...hintPropsRest
+  } = hintProps ?? {};
 
-  const id = ui?.id ?? fieldUi.id ?? `${props.name}-${reactId}`;
+  const id = extra?.id ?? fieldUi.id ?? `${props.name}-${reactId}`;
   const listboxId = `${id}-listbox`;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
-  const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
-    fieldUi.highlightOnError,
-  );
 
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -217,6 +161,12 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   const describedBy = props.error ? errorId : props.hint ? hintId : undefined;
   const activeOptionId =
     highlightedIndex >= 0 ? `${id}-option-${highlightedIndex}` : undefined;
+  const hasError = Boolean(props.error || error);
+  const highlightOnError = shouldHighlightOnError(
+    extra?.highlightOnError,
+    fieldUi.highlightOnError,
+  );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
 
   const commitSelection = useCallback(
     (option: SelectOption) => {
@@ -243,6 +193,21 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
     setInputValue(selectedLabel);
     props.onFocus();
   }, [props.onFocus, selectedLabel]);
+
+  useEffect(() => {
+    if (!renderPicker || !registerFocusable) {
+      return;
+    }
+
+    registerFocusable({
+      focus: handleFocus,
+      blur: closePicker,
+    });
+
+    return () => {
+      registerFocusable(null);
+    };
+  }, [closePicker, handleFocus, registerFocusable, renderPicker]);
 
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -381,49 +346,41 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
     ],
   );
 
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <span
-      className={ui?.classNames?.requiredMark}
-      style={mergeStyles({ color: '#ef4444', marginLeft: 3 }, ui?.styles?.requiredMark)}
-    >
-      *
-    </span>
+  const rootClassName = cx(
+    extra?.className,
+    classNames?.root,
+    rootPropsClassName as string,
   );
-
-  const rootClassName = cx(extra?.className, ui?.classNames?.root, rootPropsClassName);
-  const labelClassName = cx(ui?.classNames?.label, labelPropsClassName);
-  const inputClassName = cx(ui?.classNames?.input, inputPropsClassName);
+  const inputClassName = cx(classNames?.input, inputPropsClassName);
 
   return (
     <div
       ref={rootRef}
+      data-fb-field="async-autocomplete"
+      data-fb-name={props.name}
+      {...(hasError ? { 'data-fb-error': '' } : {})}
+      {...(props.disabled ? { 'data-fb-disabled': '' } : {})}
       className={rootClassName}
       style={mergeStyles(
-        { display: 'flex', flexDirection: 'column', gap: 5, position: 'relative' },
+        { position: 'relative' },
         extra?.style,
-        ui?.styles?.root,
-        rootPropsStyle,
+        styles?.root,
+        rootPropsStyle as CSSProperties,
       )}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel &&
-        (ui?.renderLabel ? (
-          ui.renderLabel({
-            id,
-            label: props.label,
-            required: Boolean(descriptor._required),
-          })
-        ) : (
-          <label
-            htmlFor={id}
-            className={labelClassName}
-            style={mergeStyles(ui?.styles?.label, labelPropsStyle)}
-            {...labelPropsRest}
-          >
-            {props.label}
-            {descriptor._required && requiredMark}
-          </label>
-        ))}
+      {renderLabelSlot({
+        id,
+        label: props.label,
+        name: props.name,
+        required: Boolean(descriptor._required),
+        hideLabel,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, CSSProperties | undefined>,
+        labelProps: labelProps as Record<string, unknown>,
+        renderLabel,
+        renderRequiredMark,
+      })}
 
       {renderPicker ? (
         <>
@@ -433,29 +390,17 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             disabled={props.disabled}
             aria-expanded={isOpen}
             aria-haspopup="dialog"
-            // aria-invalid={Boolean(props.error) || undefined}
             aria-describedby={describedBy}
-            className={cx(inputClassName, ui?.classNames?.select)}
+            data-fb-slot="select-trigger"
+            data-fb-selected={selectedOptionFromOptions ? '' : undefined}
             onClick={handleFocus}
-            style={mergeStyles(
-              {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                textAlign: 'left',
-                cursor: props.disabled ? 'not-allowed' : 'pointer',
-                ...(props.error && highlightOnError ? { borderColor: '#ef4444' } : {}),
-              },
-              ui?.styles?.input,
-              inputPropsStyle,
-            )}
+            className={cx(inputClassName, classNames?.select)}
+            style={mergeStyles(controlErrorStyle, styles?.input, inputPropsStyle)}
           >
-            <span style={{ color: selectedOptionFromOptions ? '#111827' : '#9ca3af' }}>
-              {pickerContext.triggerLabel}
-            </span>
+            <span data-fb-slot="select-value">{pickerContext.triggerLabel}</span>
             <span
               aria-hidden="true"
-              style={{ marginLeft: 12, color: '#6b7280', fontSize: 12 }}
+              data-fb-slot="select-arrow"
             >
               ▼
             </span>
@@ -475,12 +420,13 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             id={id}
             name={props.name}
             type="text"
+            ref={registerFocusable}
             role="combobox"
             aria-autocomplete="list"
             aria-expanded={isOpen}
             aria-controls={listboxId}
             aria-activedescendant={activeOptionId}
-            aria-invalid={Boolean(props.error) || undefined}
+            aria-invalid={hasError || undefined}
             aria-required={descriptor._required || undefined}
             aria-describedby={describedBy}
             disabled={props.disabled}
@@ -495,14 +441,9 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             onBlur={() => {
               // closing managed by click outside / selection
             }}
+            data-fb-slot="input"
             className={inputClassName}
-            style={mergeStyles(
-              {
-                ...(props.error && highlightOnError ? { borderColor: '#ef4444' } : {}),
-              },
-              ui?.styles?.input,
-              inputPropsStyle,
-            )}
+            style={mergeStyles(controlErrorStyle, styles?.input, inputPropsStyle)}
             {...inputPropsRest}
           />
 
@@ -510,44 +451,28 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             <div
               id={listboxId}
               role="listbox"
-              className={ui?.classNames?.listbox}
+              data-fb-slot="listbox"
+              className={classNames?.listbox}
               style={mergeStyles(
-                {
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  zIndex: 50,
-                  marginTop: 6,
-                  background: '#fff',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 10,
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
-                  maxHeight: 240,
-                  overflowY: 'auto',
-                },
-                ui?.styles?.listbox,
+                { position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50 },
+                styles?.listbox,
               )}
             >
               {loading ? (
                 <div
-                  className={ui?.classNames?.loading}
-                  style={mergeStyles(
-                    { padding: 12, fontSize: 13, color: '#6b7280' },
-                    ui?.styles?.loading,
-                  )}
+                  data-fb-slot="loading"
+                  className={classNames?.loading}
+                  style={mergeStyles(styles?.loading)}
                 >
-                  {ui?.renderLoading?.() ?? 'Loading...'}
+                  {renderLoading?.() ?? 'Loading...'}
                 </div>
               ) : options.length === 0 ? (
                 <div
-                  className={ui?.classNames?.empty}
-                  style={mergeStyles(
-                    { padding: 12, fontSize: 13, color: '#6b7280' },
-                    ui?.styles?.empty,
-                  )}
+                  data-fb-slot="empty"
+                  className={classNames?.empty}
+                  style={mergeStyles(styles?.empty)}
                 >
-                  {ui?.renderEmpty?.() ?? 'No results'}
+                  {renderEmpty?.() ?? 'No results'}
                 </div>
               ) : (
                 options.map((option, index) => {
@@ -562,10 +487,13 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                       role="option"
                       tabIndex={-1}
                       aria-selected={selected}
+                      data-fb-slot="option"
+                      {...(active ? { 'data-fb-active': '' } : {})}
+                      {...(selected ? { 'data-fb-selected': '' } : {})}
                       className={cx(
-                        ui?.classNames?.option,
-                        active && ui?.classNames?.optionActive,
-                        selected && ui?.classNames?.optionSelected,
+                        classNames?.option,
+                        active && classNames?.optionActive,
+                        selected && classNames?.optionSelected,
                       )}
                       onMouseDown={(event) => {
                         event.preventDefault();
@@ -573,22 +501,12 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                       }}
                       onMouseEnter={() => setHighlightedIndex(index)}
                       style={mergeStyles(
-                        {
-                          padding: '10px 12px',
-                          cursor: 'pointer',
-                          fontSize: 14,
-                          width: '100%',
-                          border: 'none',
-                          textAlign: 'left',
-                          background: active ? '#f8fafc' : selected ? '#eef2ff' : '#fff',
-                          color: '#111',
-                        },
-                        ui?.styles?.option,
-                        active ? ui?.styles?.optionActive : undefined,
-                        selected ? ui?.styles?.optionSelected : undefined,
+                        styles?.option,
+                        active ? styles?.optionActive : undefined,
+                        selected ? styles?.optionSelected : undefined,
                       )}
                     >
-                      {ui?.renderOption?.(option, { active, selected }) ?? option.label}
+                      {renderOption?.(option, { active, selected }) ?? option.label}
                     </button>
                   );
                 })
@@ -602,8 +520,13 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
         <span
           id={errorId}
           role="alert"
-          className={cx(ui?.classNames?.error, errorPropsClassName)}
-          style={mergeStyles({ color: '#ef4444' }, ui?.styles?.error, errorPropsStyle)}
+          data-fb-slot="error"
+          className={cx(classNames?.error, errorPropsClassName as string)}
+          style={mergeStyles(
+            defaultErrorTextStyle(true),
+            styles?.error,
+            errorPropsStyle as CSSProperties,
+          )}
           {...errorPropsRest}
         >
           {props.error}
@@ -612,8 +535,13 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
         <span
           id={errorId}
           role="alert"
-          className={cx(ui?.classNames?.error, errorPropsClassName)}
-          style={mergeStyles({ color: '#ef4444' }, ui?.styles?.error, errorPropsStyle)}
+          data-fb-slot="error"
+          className={cx(classNames?.error, errorPropsClassName as string)}
+          style={mergeStyles(
+            defaultErrorTextStyle(true),
+            styles?.error,
+            errorPropsStyle as CSSProperties,
+          )}
           {...errorPropsRest}
         >
           {error}
@@ -621,8 +549,9 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
       ) : props.hint ? (
         <span
           id={hintId}
-          className={cx(ui?.classNames?.hint, hintPropsClassName)}
-          style={mergeStyles({ color: '#9ca3af' }, ui?.styles?.hint, hintPropsStyle)}
+          data-fb-slot="hint"
+          className={cx(classNames?.hint, hintPropsClassName as string)}
+          style={mergeStyles(styles?.hint, hintPropsStyle as CSSProperties)}
           {...hintPropsRest}
         >
           {props.hint}

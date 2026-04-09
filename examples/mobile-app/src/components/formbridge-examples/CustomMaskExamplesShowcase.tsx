@@ -2,11 +2,18 @@ import { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import * as Haptics from 'expo-haptics';
+import { CustomRenderedMaskExample } from './CustomRenderedMaskExample';
 import { EmployeeBadgeMaskExample } from './EmployeeBadgeMaskExample';
 import { formExampleStyles as s } from './FormExamples.styles';
 import { LicensePlateMaskExample } from './LicensePlateMaskExample';
 
 const MASK_TABS = [
+  {
+    id: 'custom',
+    label: 'Custom render',
+    note: 'field controller',
+    component: CustomRenderedMaskExample,
+  },
   {
     id: 'plate',
     label: 'License plate',
@@ -24,7 +31,7 @@ const MASK_TABS = [
 type MaskTabId = (typeof MASK_TABS)[number]['id'];
 
 export function CustomMaskExamplesShowcase() {
-  const [activeTab, setActiveTab] = useState<MaskTabId>('plate');
+  const [activeTab, setActiveTab] = useState<MaskTabId>('custom');
   const activeEntry = MASK_TABS.find((item) => item.id === activeTab) ?? MASK_TABS[0];
   const ActiveExample = activeEntry.component;
 

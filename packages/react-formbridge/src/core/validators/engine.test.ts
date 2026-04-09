@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { FieldDescriptor, FieldType } from '../../types';
+import type { FieldDescriptor, FieldType } from '../../types/field';
 import { field } from '../field-builders/field';
 import { validateField } from './engine';
 
@@ -12,7 +12,8 @@ describe('validateField patterns', () => {
     const err = await validateField(
       desc(
         field
-          .text('x')
+          .text()
+          .label('x')
           .pattern(
             [/^[^\s@]+@aks\.com$/i, /^[^\s@]+@sosthene\.dev$/i],
             'Use an allowed company email.',
@@ -29,7 +30,8 @@ describe('validateField patterns', () => {
     const err = await validateField(
       desc(
         field
-          .text('x')
+          .text()
+          .label('x')
           .pattern(/^[^\s@]+@aks\.com$/i, 'Use an allowed company email.')
           .pattern(/^[^\s@]+@sosthene\.dev$/i),
       ),
@@ -45,7 +47,8 @@ describe('field.email helpers', () => {
   it('rejects blocked personal inbox domains while accepting custom domains', async () => {
     const descriptor = desc(
       field
-        .email('x')
+        .email()
+        .label('x')
         .excludeEmailDomains(
           ['gmail.com', '@yahoo.com', 'hotmail.com'],
           'Please use a non-personal email address.',
@@ -62,7 +65,7 @@ describe('field.email helpers', () => {
   });
 
   it('keeps the built-in email validation when excludeEmailDomains() is used', async () => {
-    const descriptor = desc(field.email('x').excludeEmailDomains(['gmail.com']));
+    const descriptor = desc(field.email().label('x').excludeEmailDomains(['gmail.com']));
 
     await expect(validateField(descriptor, 'notanemail', {})).resolves.toBe(
       'Please enter a valid email address.',

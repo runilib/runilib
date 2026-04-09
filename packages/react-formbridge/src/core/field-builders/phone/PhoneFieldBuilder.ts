@@ -1,8 +1,9 @@
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
-import type { FieldDescriptor } from '../../../types';
+import type { FieldDescriptor } from '../../../types/field';
 import type { FieldConditions } from '../../conditions/conditions';
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 import { buildPhoneValue, getCountry, type PhoneValue } from './countries';
+import type { PhoneCountryLayout } from './types';
 
 export interface PhoneFieldMeta {
   _phoneEnabled: true;
@@ -11,20 +12,24 @@ export interface PhoneFieldMeta {
   _phoneSearchable: boolean;
   _phoneShowFlag: boolean;
   _phoneShowDialCode: boolean;
+  _phoneCountryLayout: PhoneCountryLayout;
   _phoneStoreE164: boolean;
   _phoneValidateFormat: boolean;
 }
 
-export type PhoneDescriptor = FieldDescriptor<PhoneValue | string | null> &
+export type PhoneDescriptor = FieldDescriptor<PhoneValue | string | null, 'phone'> &
   PhoneFieldMeta & {
     _conditions?: FieldConditions;
   };
 
-export class PhoneFieldBuilder extends BaseFieldBuilder<PhoneValue | string | null> {
+export class PhoneFieldBuilder extends BaseFieldBuilder<
+  PhoneValue | string | null,
+  'phone'
+> {
   private readonly _meta: PhoneFieldMeta;
 
-  constructor(label: string) {
-    super('phone', label, null);
+  constructor() {
+    super('phone', null);
 
     this._desc._placeholder = 'Enter phone number';
     this._desc._requiredMsg = 'Please enter a phone number.';
@@ -38,6 +43,7 @@ export class PhoneFieldBuilder extends BaseFieldBuilder<PhoneValue | string | nu
       _phoneSearchable: true,
       _phoneShowFlag: true,
       _phoneShowDialCode: true,
+      _phoneCountryLayout: 'integrated',
       _phoneStoreE164: false,
       _phoneValidateFormat: true,
     };
@@ -88,6 +94,11 @@ export class PhoneFieldBuilder extends BaseFieldBuilder<PhoneValue | string | nu
     return this;
   }
 
+  countryLayout(layout: PhoneCountryLayout): this {
+    this._meta._phoneCountryLayout = layout;
+    return this;
+  }
+
   storeE164(): this {
     this._meta._phoneStoreE164 = true;
     return this;
@@ -98,6 +109,9 @@ export class PhoneFieldBuilder extends BaseFieldBuilder<PhoneValue | string | nu
     return this;
   }
 
+  /**
+   * @internal
+   */
   override _build(): PhoneDescriptor {
     const base = super._build();
     const validators = [...base._validators];

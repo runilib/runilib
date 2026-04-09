@@ -4,21 +4,24 @@ import Link from 'next/link';
 import styled from 'styled-components';
 import { WEBSITE_FEATURES } from '../config/features';
 import { useApp } from '../context/AppContext';
+import {
+  FORM_BRIDGE_DOCS_URL,
+  getNewTabLinkProps,
+  isExternalHref,
+} from '../data/libraries';
 import { LogoFull } from './Logo';
 
 export function Footer() {
   const { t } = useApp();
-  const docsIndexPath = WEBSITE_FEATURES.docs ? '/docs' : '/libraries';
-  const formbridgeDocsPath = WEBSITE_FEATURES.docs
-    ? '/docs/formbridge'
-    : '/libraries/formbridge';
+  const docsIndexPath = WEBSITE_FEATURES.docs ? FORM_BRIDGE_DOCS_URL : '/libraries';
+  const formbridgeDocsPath = FORM_BRIDGE_DOCS_URL;
   const walkitDocsPath = WEBSITE_FEATURES.docs ? '/docs/walkit' : '/libraries/walkit';
 
   const cols = [
     {
       title: t.footer.cols.libraries,
       links: [
-        { label: 'formbridge', href: '/libraries/formbridge' },
+        { label: 'formbridge', href: formbridgeDocsPath },
         { label: 'walkit', href: '/libraries/walkit' },
         { label: '→ All libs', href: '/libraries' },
       ],
@@ -74,12 +77,12 @@ export function Footer() {
               <Col key={col.title}>
                 <ColTitle>{col.title}</ColTitle>
                 {col.links.map((l) =>
-                  'ext' in l ? (
+                  'ext' in l || ('href' in l && isExternalHref(l.href)) ? (
                     <ColExt
                       key={l.label}
-                      href={l.ext}
+                      href={'ext' in l ? l.ext : l.href}
                       target="_blank"
-                      rel="noopener"
+                      rel="noopener noreferrer"
                     >
                       {l.label}
                     </ColExt>
@@ -87,6 +90,7 @@ export function Footer() {
                     <ColInt
                       key={l.label}
                       href={l.href}
+                      {...getNewTabLinkProps(l.href)}
                     >
                       {l.label}
                     </ColInt>

@@ -13,12 +13,12 @@ export function StyleSheetStylingExample() {
   const schema = useMemo(
     () => ({
       projectName: field
-        .text('Project name')
+        .text()
         .required('Project name is required')
         .trim()
         .placeholder('Billing redesign'),
       ownerEmail: field
-        .email('Owner email')
+        .email()
         .required('Owner email is required')
         .trim()
         .placeholder('owner@runilib.dev')
@@ -27,13 +27,15 @@ export function StyleSheetStylingExample() {
           keyboardType: 'email-address',
         }),
       department: field
-        .select('Department')
+        .select()
         .options(CUSTOMER_DEPARTMENTS)
         .required('Pick a department'),
       launchNotes: field
-        .textarea('Launch notes')
+        .textarea()
         .placeholder('Describe the tone, audience, and review plan.')
-        .hint('Textarea inherits the same StyleSheet theme through the shared ui layer.'),
+        .hint(
+          'Textarea inherits the same StyleSheet theme through the shared props layer.',
+        ),
     }),
     [],
   );
@@ -41,7 +43,7 @@ export function StyleSheetStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createNativeFormUi(),
+    globalStyles: () => createNativeFormUi(),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -54,9 +56,9 @@ export function StyleSheetStylingExample() {
     <StylingExampleCard
       recipeName="StyleSheet"
       accent="#f59e0b"
-      title="Apply one ui theme to every native field"
+      title="Apply one props theme to every native field"
       description="This mirrors the main mobile checkout demo: one shared StyleSheet theme feeds text inputs, select-like pickers, textareas, and the submit button."
-      highlights={['shared StyleSheet', 'global ui theme', 'picker support']}
+      highlights={['shared StyleSheet', 'global props theme', 'picker support']}
       preview={
         <>
           <Text style={s.previewValue}>
@@ -96,7 +98,7 @@ export function StyleSheetStylingExample() {
           </View>
 
           <fields.department
-            ui={{
+            {...{
               styles: {
                 optionTrigger: {
                   borderColor: '#f5bf67',

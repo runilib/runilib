@@ -12,19 +12,16 @@ export function SlotOverridesStylingExample() {
   const schema = useMemo(
     () => ({
       receiptEmail: field
-        .email('Receipt email')
+        .email()
         .required('Receipt email is required')
         .placeholder('billing@runilib.dev'),
-      postalCode: field
-        .text('Postal code')
-        .required('Postal code is required')
-        .placeholder('75002'),
+      postalCode: field.text().required('Postal code is required').placeholder('75002'),
       cardholder: field
-        .text('Cardholder')
+        .text()
         .required('Cardholder is required')
         .placeholder('Ava Stone'),
       specialInstructions: field
-        .textarea('Special instructions')
+        .textarea()
         .hint('Great for delivery notes or internal finance context.')
         .placeholder('Leave the invoice open for 14 days.'),
     }),
@@ -33,7 +30,7 @@ export function SlotOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalUi: {
+    globalStyles: () => ({
       form: {
         style: {
           display: 'flex',
@@ -54,45 +51,43 @@ export function SlotOverridesStylingExample() {
         },
       },
       field: {
-        ui: {
-          styles: {
-            root: {
-              marginBottom: 0,
-              gap: 8,
-            },
-            label: {
-              color: '#f8fafc',
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-            },
-            input: {
-              background: 'rgba(15, 23, 42, 0.5)',
-              border: '1px solid rgba(251, 191, 36, 0.18)',
-              borderRadius: 16,
-              color: '#f8fafc',
-              padding: '14px 16px',
-            },
-            textarea: {
-              minHeight: 108,
-              background: 'rgba(15, 23, 42, 0.5)',
-              border: '1px solid rgba(251, 191, 36, 0.18)',
-              borderRadius: 16,
-              color: '#f8fafc',
-              padding: '14px 16px',
-            },
-            hint: {
-              color: '#fde68a',
-            },
-            error: {
-              color: '#fca5a5',
-            },
+        styles: {
+          root: {
+            marginBottom: 0,
+            gap: 8,
           },
-          renderRequiredMark: () => <span style={{ color: '#f59e0b' }}>•</span>,
+          label: {
+            color: '#30415d',
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+          },
+          input: {
+            background: '#ffffff',
+            border: '1px solid rgba(251, 191, 36, 0.18)',
+            borderRadius: 16,
+            color: '#10203a',
+            padding: '14px 16px',
+          },
+          textarea: {
+            minHeight: 108,
+            background: '#ffffff',
+            border: '1px solid rgba(251, 191, 36, 0.18)',
+            borderRadius: 16,
+            color: '#10203a',
+            padding: '14px 16px',
+          },
+          hint: {
+            color: '#fde68a',
+          },
+          error: {
+            color: '#fca5a5',
+          },
         },
+        renderRequiredMark: () => <span style={{ color: '#f59e0b' }}>•</span>,
       },
-    },
+    }),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -132,17 +127,17 @@ export function SlotOverridesStylingExample() {
       >
         <div className={styles.formRow}>
           <fields.receiptEmail
-            ui={{
+            {...{
               highlightOnError: false,
               renderHint: () => (
-                <span style={{ color: '#cbd5e1', fontSize: 12 }}>
+                <span style={{ color: '#5f6f88', fontSize: 12 }}>
                   We only use it for invoices and receipts.
                 </span>
               ),
             }}
           />
           <fields.postalCode
-            ui={{
+            {...{
               styles: {
                 input: {
                   textAlign: 'center',

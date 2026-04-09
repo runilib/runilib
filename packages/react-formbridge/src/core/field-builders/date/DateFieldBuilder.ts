@@ -21,8 +21,8 @@ function parseDateValue(value: unknown): Date | null {
 
 // ─── Date field builder ──────────────────────────────────────────────────────
 export class DateFieldBuilder extends StringFieldBuilder<'date'> {
-  constructor(label: string) {
-    super('date', label);
+  constructor() {
+    super('date');
   }
 
   minDate(min: Date | string, message?: string): this {

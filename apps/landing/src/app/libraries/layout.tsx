@@ -1,24 +1,24 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Libraries — React & React Native Packages',
+  title: 'Libraries — RUNILIB React & React Native Ecosystem',
   description:
-    'Browse all RUNILIB cross-platform libraries: react-formbridge for schema-driven forms, react-walkit for onboarding tours, and tooltip for accessible hints. One API, web & native.',
+    'Browse RUNILIB libraries and packages for React and React Native. Explore cross-platform modules, shared APIs, documentation and TypeScript-first building blocks for web and mobile.',
   keywords: [
+    'RUNILIB libraries',
     'React libraries',
     'React Native libraries',
     'cross-platform npm packages',
-    'react-formbridge',
-    'react-walkit',
-    'form builder React',
-    'onboarding tour React Native',
-    'tooltip component',
     'TypeScript UI libraries',
+    'open source React ecosystem',
+    'open source React Native ecosystem',
+    'shared API packages',
+    'composable packages',
   ],
   openGraph: {
-    title: 'RUNILIB Libraries — Cross-Platform React Packages',
+    title: 'RUNILIB Libraries — React & React Native Packages',
     description:
-      'Explore the full RUNILIB collection: forms, tours, tooltips. One codebase for web & native.',
+      'Explore the RUNILIB collection of cross-platform React and React Native packages for web and mobile.',
     url: 'https://runilib.dev/libraries',
   },
   alternates: {

@@ -1,20 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, type TextInputProps, View } from 'react-native';
+import {
+  type StyleProp,
+  Text,
+  TextInput,
+  type TextInputProps,
+  type TextStyle,
+  View,
+  type ViewStyle,
+} from 'react-native';
 
 import {
   applyMask,
   extractRaw,
   getFirstInputPosition,
   getMaskAutoLayout,
+  getMaskCharacterProfile,
   getMaskPlaceholder,
-  parsePattern,
 } from '../../core/field-builders/mask/masks';
 import type { MaskedDescriptor } from '../../core/field-builders/mask/types';
-import type { FieldRenderProps } from '../../types';
+import type {
+  ExtraFieldProps,
+  FieldRenderProps,
+  FocusableFieldHandle,
+  NativeTextFieldUiOverrides,
+} from '../../types';
 import {
-  defaultBorderColor,
-  type NativeBaseUiOverrides,
-  type NativeExtraProps,
+  defaultErrorChromeStyle,
+  defaultErrorTextStyle,
+  defaultRequiredMarkStyle,
   type ResolvedNativeFieldUi,
   shouldHighlightOnError,
   sx,
@@ -24,42 +37,64 @@ interface Props extends FieldRenderProps<string> {
   descriptor: MaskedDescriptor<string> & {
     _ui?: ResolvedNativeFieldUi;
   };
-  extra?: NativeExtraProps<NativeBaseUiOverrides>;
+  extra?: ExtraFieldProps<NativeTextFieldUiOverrides, 'native'>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
-function getMaskKeyboardType(pattern: string): TextInputProps['keyboardType'] {
-  const hasLetters = parsePattern(pattern).some(
-    (token) => token.isInput && String(token.regex) === String(/[a-zA-Z]/),
-  );
+function getMaskKeyboardType(
+  pattern: string,
+  tokenMap?: MaskedDescriptor<string>['_maskTokens'],
+): TextInputProps['keyboardType'] {
+  const { acceptsLetters } = getMaskCharacterProfile(pattern, tokenMap);
 
-  return hasLetters ? 'default' : 'number-pad';
+  return acceptsLetters ? 'default' : 'number-pad';
 }
 
-export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => {
+export const NativeMaskedInput = ({
+  descriptor: d,
+  extra,
+  registerFocusable,
+  ...props
+}: Props) => {
   const pendingSelectionRef = useRef<{ start: number; end: number } | null>(null);
-  const ui = extra?.ui;
-  const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
-    d._ui?.highlightOnError,
-  );
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
+
+  const {
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+  } = extra ?? {};
+
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
-    style?: object;
+    style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
   const { style: labelPropsStyle, ...labelPropsRest } = (labelProps ?? {}) as {
-    style?: object;
+    style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
   const { style: inputPropsStyle, ...inputPropsRest } = (inputProps ?? {}) as {
-    style?: object;
+    style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
   const { style: hintPropsStyle, ...hintPropsRest } = (hintProps ?? {}) as {
-    style?: object;
+    style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
   const { style: errorPropsStyle, ...errorPropsRest } = (errorProps ?? {}) as {
-    style?: object;
+    style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
-  const id = ui?.id ?? d._ui?.id ?? props.name;
+
+  const id = extra?.id ?? d._ui?.id ?? props.name;
   const hasError = Boolean(props.error);
+  const highlightOnError = shouldHighlightOnError(
+    extra?.highlightOnError,
+    d._ui?.highlightOnError,
+  );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
   const [selection, setSelection] = useState<{ start: number; end: number } | undefined>(
     undefined,
   );
@@ -81,7 +116,6 @@ export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => 
     });
 
     return {
-      // raw,
       ...result,
     };
   }, [
@@ -195,23 +229,24 @@ export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => 
     [d._maskPattern, d._maskTokens],
   );
 
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <Text style={sx(styles.requiredMark, ui?.styles?.requiredMark)}>*</Text>
+  const requiredMark = renderRequiredMark?.() ?? (
+    <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
   );
 
   return (
     <View
-      style={sx(styles.root, extra?.style as object, ui?.styles?.root, rootPropsStyle)}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel &&
-        (ui?.renderLabel?.({
+      {!hideLabel &&
+        (renderLabel?.({
           id,
           label: props.label,
           required: Boolean(d._required),
+          name: props.name,
         }) ?? (
           <Text
-            style={sx(styles.label, ui?.styles?.label, labelPropsStyle)}
+            style={sx(styles?.label, labelPropsStyle)}
             {...labelPropsRest}
           >
             {props.label}
@@ -221,11 +256,13 @@ export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => 
 
       <TextInput
         nativeID={id}
+        ref={registerFocusable}
         testID={d._ui?.testID}
         value={displayValue}
         selection={selection}
         placeholder={placeholderText}
         editable={!props.disabled}
+        maxLength={autoLayout.visualLength}
         onChangeText={handleChangeText}
         onBlur={props.onBlur}
         onFocus={() => {
@@ -239,9 +276,8 @@ export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => 
         }}
         autoCapitalize="none"
         autoCorrect={false}
-        keyboardType={getMaskKeyboardType(d._maskPattern)}
+        keyboardType={getMaskKeyboardType(d._maskPattern, d._maskTokens)}
         style={sx(
-          styles.input,
           autoLayout.compact
             ? {
                 width: autoLayout.nativeWidthPx,
@@ -252,29 +288,26 @@ export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => 
                 width: '100%',
                 alignSelf: 'stretch',
               },
-          {
-            borderColor: defaultBorderColor(hasError, highlightOnError),
-            backgroundColor: props.disabled ? '#f9fafb' : '#fff',
-          },
-          ui?.styles?.input,
+          controlErrorStyle,
+          styles?.input,
           inputPropsStyle,
         )}
         {...(inputPropsRest as Partial<TextInputProps>)}
       />
 
       {props.error
-        ? (ui?.renderError?.({ id: `${id}-error`, error: props.error }) ?? (
+        ? (renderError?.({ id, name: props.name, error: props.error }) ?? (
             <Text
-              style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
+              style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
               {...errorPropsRest}
             >
               {props.error}
             </Text>
           ))
         : props.hint
-          ? (ui?.renderHint?.({ id: `${id}-hint`, hint: props.hint }) ?? (
+          ? (renderHint?.({ id, name: props.name, hint: props.hint }) ?? (
               <Text
-                style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
+                style={sx(styles?.hint, hintPropsStyle)}
                 {...hintPropsRest}
               >
                 {props.hint}
@@ -284,36 +317,3 @@ export const NativeMaskedInput = ({ descriptor: d, extra, ...props }: Props) => 
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  root: {
-    gap: 6,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  requiredMark: {
-    color: '#ef4444',
-  },
-  input: {
-    minHeight: 44,
-    borderWidth: 1.5,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#111827',
-    fontVariant: ['tabular-nums'],
-  },
-  error: {
-    fontSize: 12,
-    color: '#ef4444',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-});

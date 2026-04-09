@@ -16,15 +16,15 @@ export function SwitchVariantsExample() {
   const schema = useMemo(
     () => ({
       publicProfile: field
-        .switch('Public profile')
+        .switch()
         .defaultValue(true)
         .hint('Starts enabled so teammates can see the profile.'),
       pushAlerts: field
-        .switch('Push alerts')
+        .switch()
         .defaultValue(true)
         .hint('Controls live mobile notifications.'),
       quietHours: field
-        .switch('Quiet hours')
+        .switch()
         .hint('Only available while push alerts are enabled.')
         .disabledWhen('pushAlerts', false),
     }),
@@ -34,7 +34,7 @@ export function SwitchVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onChange',
     revalidateOn: 'onChange',
-    globalUi: createNativeFormUi(),
+    globalStyles: () => createNativeFormUi(),
   });
 
   const { Form, fields, watchAll } = form;

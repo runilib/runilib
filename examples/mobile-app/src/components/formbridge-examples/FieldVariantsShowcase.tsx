@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import * as Haptics from 'expo-haptics';
 import { CheckboxVariantsExample } from './CheckboxVariantsExample';
+import { FileVariantsExample } from './FileVariantsExample';
 import { formExampleStyles as s } from './FormExamples.styles';
 import { SelectVariantsExample } from './SelectVariantsExample';
 import { SwitchVariantsExample } from './SwitchVariantsExample';
@@ -26,6 +27,12 @@ const FIELD_VARIANT_TABS = [
     note: 'product toggles',
     component: SwitchVariantsExample,
   },
+  {
+    id: 'file',
+    label: 'File',
+    note: 'uploads + previews',
+    component: FileVariantsExample,
+  },
 ] as const;
 
 type FieldVariantTabId = (typeof FIELD_VARIANT_TABS)[number]['id'];
@@ -44,10 +51,10 @@ export function FieldVariantsShowcase() {
         </View>
 
         <View>
-          <Text style={s.resolverTitle}>Select, checkbox, and switch patterns</Text>
+          <Text style={s.resolverTitle}>Select, checkbox, switch, and file patterns</Text>
           <Text style={s.resolverSubtitle}>
-            Compare the main choice-field families in one place. Each tab lives in its own
-            file so the home screen stays readable while still showing real use cases.
+            Compare the main generated field families in one place. Each tab lives in its
+            own file so the home screen stays readable while still showing real use cases.
           </Text>
         </View>
 

@@ -2,76 +2,42 @@ import type { LibraryDoc } from '../../types';
 
 const DOC_PREVIEWS = {
   webBasic: {
-    src: '/docs/react-walkit/web-quick-start.png',
+    src: 'https://res.cloudinary.com/dca7plrqk/video/upload/v1775404915/web-walkit-onboarding-tour-examples_p2hogt.mov',
     alt: 'Desktop walkthrough preview with spotlight and default popover.',
     caption: 'Desktop preview of the built-in Walkit spotlight and default popover.',
     maxWidth: 720,
     maxHeight: 420,
+    video: true,
   },
   nativeBasic: {
-    src: '/docs/react-walkit/native-quick-start.png',
+    src: 'https://res.cloudinary.com/dca7plrqk/video/upload/v1775404485/mobile-onboarding-tour-exemple_pxdui3.mov',
     alt: 'Mobile walkthrough preview with spotlight and default popover.',
     caption: 'Mobile preview of the same tour flow on React Native.',
     maxWidth: 340,
     maxHeight: 620,
-  },
-  autoStart: {
-    src: '/docs/react-walkit/walkit-auto-start.svg',
-    alt: 'Settings screen preview where the tour starts automatically.',
-    caption:
-      'Auto-start preview: the step opens by itself as soon as the Settings screen is mounted.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  crossPageWeb: {
-    src: '/docs/react-walkit/walkit-cross-page-web.svg',
-    alt: 'Desktop preview of a tour continuing from dashboard to settings.',
-    caption:
-      'Cross-page web flow: Walkit asks the app to navigate, waits for the next step, then resumes.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  crossPageNative: {
-    src: '/docs/react-walkit/walkit-cross-page-native.svg',
-    alt: 'Mobile preview of a tour continuing across screens.',
-    caption:
-      'Cross-screen native flow: the same tour continues after a screen change and step remount.',
-    maxWidth: 340,
-    maxHeight: 620,
-  },
-  theme: {
-    src: '/docs/react-walkit/walkit-theme.svg',
-    alt: 'Preview of a branded Walkit popover using custom colors.',
-    caption:
-      'Branded preview using the built-in popover with custom theme colors and labels.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  customPopover: {
-    src: '/docs/react-walkit/walkit-custom-popover.svg',
-    alt: 'Preview of a custom Walkit popover override.',
-    caption: 'Custom popover preview showing a richer layout and step-specific actions.',
-    maxWidth: 720,
-    maxHeight: 420,
+    video: true,
   },
   tooltip: {
-    src: '/docs/react-walkit/walkit-tooltip.svg',
+    src: 'https://res.cloudinary.com/dca7plrqk/video/upload/web-tooltip-example_q3ne1e.mp4',
     alt: 'Preview of the standalone Tooltip component.',
     caption: 'Standalone tooltip preview anchored to a single target element.',
-    maxWidth: 680,
-    maxHeight: 360,
+    // maxWidth: 680,
+    // maxHeight: 360,
+    video: true,
   },
   tooltipNative: {
-    src: '/docs/react-walkit/walkit-tooltip-native.svg',
+    src: 'https://res.cloudinary.com/dca7plrqk/video/upload/v1775404484/mobile-tooltip-exemple_wykp1s.mov',
     alt: 'Preview of the standalone Tooltip component on React Native.',
     caption: 'React Native tooltip preview using press interactions and custom content.',
     maxWidth: 340,
     maxHeight: 560,
+    video: true,
   },
 } as const;
 
 export const reactWalkitDocs: LibraryDoc = {
   libId: 'react-walkit',
+  versions: ['1.0.0'],
   sidebar: [
     {
       group: 'Getting started',
@@ -114,17 +80,18 @@ export const reactWalkitDocs: LibraryDoc = {
     {
       id: 'rw-overview',
       title: 'Overview',
-      content: `@runilib/react-walkit is a cross-platform onboarding + product tour library. One API works on React web and React Native.
+      content: `\`@runilib/react-walkit\` is a cross-platform onboarding + product tour library. One API works on React web and React Native.
 
 - Tag any UI element with \`<WalkitStep id sequence />\` to register a step.
 - Wrap the app (or a screen) in \`<WalkitProvider>\`; control the flow with \`useWalkit()\`.
 - Built-in SVG (web) / react-native-svg (native) spotlight, animated popover, labels, theming, and programmatic control.
 - Public surface: \`WalkitProvider\`, \`WalkitStep\`, \`useWalkit\`, \`useWalkitEvent\`, \`Tooltip\`, \`ANIMATION_TYPES\`.`,
-      code: {
-        filename: 'TourExample.tsx',
-        lang: 'tsx',
-        preview: DOC_PREVIEWS.webBasic,
-        code: `import { WalkitProvider, WalkitStep, useWalkit } from '@runilib/react-walkit'
+      codeTabs: [
+        {
+          filename: 'TourExample.tsx',
+          lang: 'tsx',
+          preview: DOC_PREVIEWS.webBasic,
+          code: `import { WalkitProvider, WalkitStep, useWalkit } from '@runilib/react-walkit'
 
 export function App() {
   return (
@@ -161,7 +128,52 @@ function Dashboard() {
     </div>
   )
 }`,
-      },
+        },
+        {
+          filename: 'QuickStart.native.tsx',
+          lang: 'tsx',
+          preview: DOC_PREVIEWS.nativeBasic,
+          code: `import { SafeAreaView, Text, View, Button } from 'react-native'
+import { WalkitProvider, WalkitStep, useWalkit } from '@runilib/react-walkit'
+
+export function App() {
+  return (
+    <WalkitProvider animationType="bounce">
+      <SafeAreaView style={{ flex: 1 }}>
+        <Dashboard />
+      </SafeAreaView>
+    </WalkitProvider>
+  )
+}
+
+function Dashboard() {
+  const { start, next isRunning } = useWalkit()
+
+  return (
+    <View style={{ flex: 1, padding: 16, gap: 16 }}>
+      <WalkitStep id="hero" sequence={0} title="Welcome" content="Take a quick tour.">
+        <Text style={{ fontSize: 22, fontWeight: '700' }}>Hello 👋</Text>
+      </WalkitStep>
+
+      <WalkitStep
+        id="cta"
+        sequence={1}
+        title="Welcome to Taskflow 👋"
+        content="Your portable productivity hub. We'll show you the key features."
+      >
+        <Button title="Next →" onPress={() => next()} />
+      </WalkitStep>
+
+      <Button
+        title={isRunning ? 'Tour running…' : 'Start tour'}
+        onPress={() => start()}
+        disabled={isRunning}
+      />
+    </View>
+  )
+}`,
+        },
+      ],
     },
     {
       id: 'rw-install',
@@ -329,7 +341,6 @@ function Dashboard() {
         {
           filename: 'Provider.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.webBasic,
           code: `<WalkitProvider
   animationType="zoom"
   overlayColor="rgba(0,0,0,0.72)"
@@ -357,7 +368,6 @@ function Dashboard() {
         {
           filename: 'Provider.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.nativeBasic,
           code: `<WalkitProvider
   animationType="bounce"
   overlayColor="rgba(0,0,0,0.75)"
@@ -433,7 +443,6 @@ function Dashboard() {
         {
           filename: 'Steps.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.webBasic,
           code: `import { WalkitStep } from '@runilib/react-walkit'
 
 <WalkitStep
@@ -462,7 +471,6 @@ function Dashboard() {
         {
           filename: 'Steps.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.nativeBasic,
           code: `import { Text, View, Button } from 'react-native'
 import { WalkitStep } from '@runilib/react-walkit'
 
@@ -489,6 +497,7 @@ import { WalkitStep } from '@runilib/react-walkit'
     },
     {
       id: 'rw-tooltip',
+
       title: 'Tooltip component',
       content: `Tooltip is the lightweight sibling of Walkit: no provider, no step registry, no walkthrough flow. Use it for one-off hints, inline help, status explainers, and action affordances attached to a single element.
 
@@ -1242,6 +1251,7 @@ export function TooltipStylingNative() {
     },
     {
       id: 'rw-auto-start',
+
       title: 'Auto-start',
       content: `\`autoStart\` lets a step become the entry point of a tour as soon as that step is mounted. This is useful when the page itself is already the onboarding moment and asking the user to click a separate "Start tour" button would add friction.
 
@@ -1283,7 +1293,6 @@ Typical reasons not to use it:
           code: {
             filename: 'AutoStart.tsx',
             lang: 'tsx',
-            preview: DOC_PREVIEWS.autoStart,
             code: `import { WalkitStep } from '@runilib/react-walkit'
 
 <WalkitStep
@@ -1309,6 +1318,7 @@ Typical reasons not to use it:
     },
     {
       id: 'rw-flow',
+
       title: 'Multiple pages flows',
       content: `By default, Walkit only knows about the steps currently mounted in the tree. That keeps one-screen tours simple, but it also means \`next()\` cannot continue to a step that lives on another page or screen unless the provider knows the full flow.
 
@@ -1345,7 +1355,6 @@ Use provider-level flow orchestration when a tour should start on one route and 
         {
           filename: 'CrossPageFlow.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.crossPageWeb,
           code: `import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 const TOUR_STEPS = [
@@ -1392,7 +1401,6 @@ function TourApp() {
         {
           filename: 'CrossPageFlow.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.crossPageNative,
           code: `const TOUR_STEPS = [
   { id: 'home-greeting', sequence: 1, route: '/' },
   { id: 'home-bottom-nav', sequence: 2, route: '/' },
@@ -1420,7 +1428,6 @@ export function RootLayout() {
         {
           filename: 'CrossPageStep.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.crossPageWeb,
           code: `<WalkitStep
   id="settings-profile"
   sequence={3}
@@ -1462,7 +1469,6 @@ export function RootLayout() {
         {
           filename: 'Controls.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.webBasic,
           code: `import { useWalkit } from '@runilib/react-walkit'
 
 export function TourControls() {
@@ -1483,7 +1489,6 @@ export function TourControls() {
         {
           filename: 'Controls.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.nativeBasic,
           code: `import { View, Button } from 'react-native'
 import { useWalkit } from '@runilib/react-walkit'
 
@@ -1506,6 +1511,7 @@ export function TourControlsNative() {
     },
     {
       id: 'rw-events',
+
       title: 'useWalkitEvent()',
       content: `Analytics-friendly hook that emits lifecycle events.
 
@@ -1531,7 +1537,6 @@ export function TourControlsNative() {
         {
           filename: 'Analytics.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.webBasic,
           code: `import { useWalkitEvent } from '@runilib/react-walkit'
 
 export function TourAnalytics() {
@@ -1556,7 +1561,6 @@ export function TourAnalytics() {
         {
           filename: 'Analytics.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.nativeBasic,
           code: `import { useWalkitEvent } from '@runilib/react-walkit'
 
 export function TourAnalyticsNative() {
@@ -1575,6 +1579,7 @@ export function TourAnalyticsNative() {
     },
     {
       id: 'rw-animations',
+
       title: 'Animations',
       content: `Six presets for the built-in popover: \`fade\`, \`slide\`, \`zoom\`, \`bounce\`, \`flip\`, \`glow\`.
 
@@ -1597,7 +1602,6 @@ export function TourAnalyticsNative() {
       code: {
         filename: 'Animations.tsx',
         lang: 'tsx',
-        preview: DOC_PREVIEWS.webBasic,
         code: `import { ANIMATION_TYPES, WalkitProvider } from '@runilib/react-walkit'
 
 const animations = ANIMATION_TYPES // ['fade','slide','zoom','bounce','flip','glow']
@@ -1613,6 +1617,7 @@ export function AnimatedTour() {
     },
     {
       id: 'rw-theme',
+
       title: 'Theme & labels',
       content: `Adjust the default popover without reimplementing it.
 
@@ -1622,7 +1627,6 @@ export function AnimatedTour() {
       code: {
         filename: 'Theme.tsx',
         lang: 'tsx',
-        preview: DOC_PREVIEWS.theme,
         code: `<WalkitProvider
   overlayColor="rgba(8,15,40,0.78)"
   stopOnOutsideClick
@@ -1644,6 +1648,7 @@ export function AnimatedTour() {
     },
     {
       id: 'rw-custom-popover',
+
       title: 'Custom popover',
       content: `Replace the built-in content with \`renderPopover\`. You receive step metadata and control handlers; Walkit still keeps the tour flow, spotlight, positioning, and active-step logic.
 
@@ -1653,7 +1658,6 @@ export function AnimatedTour() {
       code: {
         filename: 'CustomPopover.tsx',
         lang: 'tsx',
-        preview: DOC_PREVIEWS.customPopover,
         code: `<WalkitProvider
   renderPopover={({ walkitStep, walkitStepIndex, totalWalkitSteps, onNext, onPrev, onStop }) => (
     <div className="my-popover">
@@ -1698,7 +1702,6 @@ This makes the provider the right place for a baseline branded renderer, and the
           code: {
             filename: 'StepPopover.tsx',
             lang: 'tsx',
-            preview: DOC_PREVIEWS.customPopover,
             code: `import { WalkitStep } from '@runilib/react-walkit'
 
 <WalkitStep
@@ -1723,6 +1726,7 @@ This makes the provider the right place for a baseline branded renderer, and the
     },
     {
       id: 'rw-spotlight',
+
       title: 'Spotlight & positioning',
       content: `The overlay cuts a spotlight around the active target and positions the popover.
 
@@ -1743,6 +1747,7 @@ This makes the provider the right place for a baseline branded renderer, and the
     },
     {
       id: 'rw-platform',
+
       title: 'Platform notes',
       content: `Web
 - Overlay renders in a portal attached to \`document.body\`.

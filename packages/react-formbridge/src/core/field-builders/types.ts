@@ -1,4 +1,4 @@
-import type { FieldType, SelectOption } from '../../types';
+import type { FieldType, SelectOption } from '../../types/field';
 import type { BaseFieldBuilder } from './base/BaseFieldBuilder';
 import type { BooleanFieldBuilder } from './boolean/BooleanFieldBuilder';
 import type { DateFieldBuilder } from './date/DateFieldBuilder';
@@ -26,28 +26,28 @@ export type AnyFieldBuilder =
   | MaskedFieldBuilder
   | FileFieldBuilder
   | PhoneFieldBuilder
-  | BaseFieldBuilder<unknown>;
+  | BaseFieldBuilder<unknown, 'custom'>;
 
 // ─── field namespace ─────────────────────────────────────────────────────────
 
 export type FieldNamespace = {
-  text: (label: string) => StringFieldBuilder<'text'>;
-  email: (label: string) => EmailFieldBuilder;
-  password: (label: string) => PasswordFieldBuilder;
-  number: (label: string) => NumberFieldBuilder;
-  tel: (label: string) => StringFieldBuilder<'tel'>;
-  url: (label: string) => StringFieldBuilder<'url'>;
-  textarea: (label: string) => StringFieldBuilder<'textarea'>;
-  checkbox: (label: string) => BooleanFieldBuilder<'checkbox'>;
-  switch: (label: string) => BooleanFieldBuilder<'switch'>;
-  select: (label: string) => SelectFieldBuilder<'select'>;
-  radio: (label: string) => SelectFieldBuilder<'radio'>;
-  date: (label: string) => DateFieldBuilder;
-  otp: (label: string) => OtpFieldBuilder;
-  masked: (label: string, pattern: MaskPatternInput) => MaskedFieldBuilder;
-  file: (label: string) => FileFieldBuilder;
-  phone: (label: string) => PhoneFieldBuilder;
-  custom: <V = unknown>(label: string, defaultValue: V) => BaseFieldBuilder<V>;
+  text: (label?: string) => StringFieldBuilder<'text'>;
+  email: (label?: string) => EmailFieldBuilder;
+  password: (label?: string) => PasswordFieldBuilder;
+  number: (label?: string) => NumberFieldBuilder;
+  tel: (label?: string) => StringFieldBuilder<'tel'>;
+  url: (label?: string) => StringFieldBuilder<'url'>;
+  textarea: (label?: string) => StringFieldBuilder<'textarea'>;
+  checkbox: (label?: string) => BooleanFieldBuilder<'checkbox'>;
+  switch: (label?: string) => BooleanFieldBuilder<'switch'>;
+  select: (label?: string) => SelectFieldBuilder<'select'>;
+  radio: (label?: string) => SelectFieldBuilder<'radio'>;
+  date: (label?: string) => DateFieldBuilder;
+  otp: (label?: string) => OtpFieldBuilder;
+  masked: (pattern: MaskPatternInput) => MaskedFieldBuilder;
+  file: (label?: string) => FileFieldBuilder;
+  phone: (label?: string) => PhoneFieldBuilder;
+  custom: <V = unknown>(defaultValue: V) => BaseFieldBuilder<V, 'custom'>;
   infer: typeof inferFromObject;
   inferType: typeof inferFromType;
 };

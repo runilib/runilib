@@ -12,14 +12,17 @@ export function YupResolverExample() {
 
   const formSchema = useMemo(
     () => ({
-      companyName: field.text('Company').placeholder('Runilib Studio'),
-      website: field.url('Website').placeholder('https://runilib.dev').behavior({
+      companyName: field.text().label('Company name').placeholder('Runilib Studio'),
+      website: field.url().label('Website').placeholder('https://runilib.dev').behavior({
         inputMode: 'url',
       }),
-      monthlyBudget: field.text('Monthly budget').placeholder('2500').behavior({
+      monthlyBudget: field.text().label('Monthly budget').placeholder('2500').behavior({
         inputMode: 'numeric',
       }),
-      acceptsPilot: field.checkbox('Approve pilot terms'),
+      acceptsPilot: field
+        .checkbox()
+        .label('Approve pilot terms')
+        .hint('Required before the pilot request can move forward.'),
     }),
     [],
   );
@@ -36,8 +39,9 @@ export function YupResolverExample() {
         monthlyBudget: yup
           .number()
           .transform((value, originalValue) => {
-            return String(originalValue).trim() === '' ? Number.NaN : value;
+            return String(originalValue).trim() === '' ? undefined : value;
           })
+          .typeError('Use a numeric monthly budget.')
           .min(500, 'Budget should start at 500.')
           .required('Required'),
         acceptsPilot: yup.boolean().oneOf([true], 'You need to approve the pilot terms.'),
@@ -45,11 +49,13 @@ export function YupResolverExample() {
     [],
   );
 
+  const resolver = useMemo(() => yupResolver(schema, { mode: 'sync' }), [schema]);
+
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
-    resolver: yupResolver(schema, { mode: 'sync' }),
+    globalStyles: () => createDemoFormUi(styles),
+    resolver,
   });
 
   const { Form, fields, state, watchAll } = form;

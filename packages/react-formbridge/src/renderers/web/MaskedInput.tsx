@@ -1,8 +1,6 @@
 import React, {
   type CSSProperties,
-  type HTMLAttributes,
   type InputHTMLAttributes,
-  type LabelHTMLAttributes,
   useCallback,
   useId,
   useLayoutEffect,
@@ -15,117 +13,100 @@ import {
   extractRaw,
   getFirstInputPosition,
   getMaskAutoLayout,
+  getMaskCharacterProfile,
   getMaskPlaceholder,
-  parsePattern,
 } from '../../core/field-builders/mask/masks';
 import type { MaskedDescriptor } from '../../core/field-builders/mask/types';
+import type { FocusableFieldHandle } from '../../types';
+import type { WebTextFieldUiOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
-import { type ResolvedWebFieldUi, shouldHighlightOnError } from './shared';
+import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
+import {
+  defaultErrorChromeStyle,
+  type ResolvedWebFieldUi,
+  shouldHighlightOnError,
+} from './shared';
 
-type MaskedSlot = 'root' | 'label' | 'input' | 'error' | 'hint' | 'requiredMark';
+const defaultMaskedFieldRootStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+  gap: 8,
+  minWidth: 0,
+};
 
-interface MaskedUiOverrides {
-  id?: string;
-  hideLabel?: boolean;
-  highlightOnError?: boolean;
-  classNames?: Partial<Record<MaskedSlot, string>>;
-  styles?: Partial<Record<MaskedSlot, CSSProperties>>;
-  rootProps?: HTMLAttributes<HTMLDivElement>;
-  labelProps?: LabelHTMLAttributes<HTMLLabelElement>;
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    | 'value'
-    | 'defaultValue'
-    | 'onChange'
-    | 'onBlur'
-    | 'onFocus'
-    | 'disabled'
-    | 'name'
-    | 'id'
-    | 'type'
-  >;
-  hintProps?: HTMLAttributes<HTMLSpanElement>;
-  errorProps?: HTMLAttributes<HTMLSpanElement>;
-  renderLabel?: (ctx: {
-    id: string;
-    label: React.ReactNode;
-    required: boolean;
-  }) => React.ReactNode;
-  renderError?: (ctx: { id: string; error: React.ReactNode }) => React.ReactNode;
-  renderHint?: (ctx: { id: string; hint: React.ReactNode }) => React.ReactNode;
-  renderRequiredMark?: () => React.ReactNode;
-}
+const defaultMaskedInputStyle: CSSProperties = {
+  display: 'block',
+  boxSizing: 'border-box',
+  lineHeight: 1.35,
+  fontVariantNumeric: 'tabular-nums',
+};
 
 interface Props extends FieldRenderProps<string> {
   descriptor: MaskedDescriptor<string> & {
     _ui?: ResolvedWebFieldUi;
   };
-  extra?: ExtraFieldProps<MaskedUiOverrides>;
-}
-
-function cx(...values: Array<string | undefined | false | null>) {
-  return values.filter(Boolean).join(' ');
-}
-
-function mergeStyles(
-  ...styles: Array<CSSProperties | Record<string, unknown> | undefined>
-): CSSProperties | undefined {
-  return Object.assign({}, ...styles.filter(Boolean));
+  extra?: ExtraFieldProps<WebTextFieldUiOverrides>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
 function getMaskInputMode(
   pattern: string,
+  tokenMap?: MaskedDescriptor<string>['_maskTokens'],
 ): InputHTMLAttributes<HTMLInputElement>['inputMode'] {
-  const hasLetters = parsePattern(pattern).some(
-    (token) => token.isInput && String(token.regex) === String(/[a-zA-Z]/),
-  );
+  const { acceptsLetters } = getMaskCharacterProfile(pattern, tokenMap);
 
-  return hasLetters ? 'text' : 'numeric';
+  return acceptsLetters ? 'text' : 'numeric';
 }
 
-export const MaskedInput: React.FC<Props> = ({ descriptor: d, extra, ...props }) => {
+export const MaskedInput: React.FC<Props> = ({
+  descriptor: d,
+  extra,
+  registerFocusable,
+  ...props
+}) => {
   const reactId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const pendingCaretRef = useRef<{ start: number; end: number } | null>(null);
 
   const web = d._ui ?? {};
-  const ui = extra?.ui as MaskedUiOverrides | undefined;
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
+
+  const {
+    classNames,
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+  } = extra ?? {};
+
   const {
     className: rootPropsClassName,
     style: rootPropsStyle,
     ...rootPropsRest
   } = rootProps ?? {};
   const {
-    className: labelPropsClassName,
-    style: labelPropsStyle,
-    ...labelPropsRest
-  } = labelProps ?? {};
-  const {
     className: inputPropsClassName,
     style: inputPropsStyle,
     ...inputPropsRest
   } = inputProps ?? {};
-  const {
-    className: hintPropsClassName,
-    style: hintPropsStyle,
-    ...hintPropsRest
-  } = hintProps ?? {};
-  const {
-    className: errorPropsClassName,
-    style: errorPropsStyle,
-    ...errorPropsRest
-  } = errorProps ?? {};
 
-  const id = ui?.id ?? web.id ?? `${props.name}-${reactId}`;
+  const id = extra?.id ?? web.id ?? `${props.name}-${reactId}`;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const describedBy = props.error ? errorId : props.hint ? hintId : undefined;
   const hasError = Boolean(props.error);
   const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
+    extra?.highlightOnError,
     web.highlightOnError,
   );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
   const firstEditablePos = useMemo(
     () => getFirstInputPosition(d._maskPattern, d._maskTokens),
     [d._maskPattern, d._maskTokens],
@@ -306,18 +287,12 @@ export const MaskedInput: React.FC<Props> = ({ descriptor: d, extra, ...props })
     [firstEditablePos, resolveMaxCaretPos],
   );
 
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <span
-      className={ui?.classNames?.requiredMark}
-      style={mergeStyles({ color: '#ef4444', marginLeft: 3 }, ui?.styles?.requiredMark)}
-    >
-      *
-    </span>
+  const inputClassName = cx(classNames?.input, inputPropsClassName);
+  const rootClassName = cx(
+    extra?.className,
+    classNames?.root,
+    rootPropsClassName as string,
   );
-
-  const inputClassName = cx(ui?.classNames?.input, inputPropsClassName);
-  const labelClassName = cx(ui?.classNames?.label, labelPropsClassName);
-  const rootClassName = cx(extra?.className, ui?.classNames?.root, rootPropsClassName);
 
   const autoLayout = useMemo(
     () => getMaskAutoLayout(d._maskPattern, d._maskTokens),
@@ -326,51 +301,55 @@ export const MaskedInput: React.FC<Props> = ({ descriptor: d, extra, ...props })
 
   return (
     <div
+      data-fb-field="masked"
+      data-fb-name={props.name}
+      {...(hasError ? { 'data-fb-error': '' } : {})}
+      {...(props.disabled ? { 'data-fb-disabled': '' } : {})}
       className={rootClassName}
       style={mergeStyles(
-        { display: 'flex', flexDirection: 'column', gap: 5 },
+        defaultMaskedFieldRootStyle,
         extra?.style,
-        ui?.styles?.root,
-        rootPropsStyle,
+        styles?.root,
+        rootPropsStyle as CSSProperties,
       )}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel &&
-        (ui?.renderLabel ? (
-          ui.renderLabel({
-            id,
-            label: props.label,
-            required: Boolean(d._required),
-          })
-        ) : (
-          <label
-            htmlFor={id}
-            className={labelClassName}
-            style={mergeStyles(ui?.styles?.label, labelPropsStyle)}
-            {...labelPropsRest}
-          >
-            {props.label}
-            {d._required && requiredMark}
-          </label>
-        ))}
+      {renderLabelSlot({
+        id,
+        label: props.label,
+        name: props.name,
+        required: Boolean(d._required),
+        hideLabel,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, CSSProperties | undefined>,
+        labelProps: labelProps as Record<string, unknown>,
+        renderLabel,
+        renderRequiredMark,
+      })}
 
       <input
-        ref={inputRef}
+        ref={(node) => {
+          inputRef.current = node;
+          registerFocusable?.(node);
+        }}
         id={id}
         name={props.name}
         type="text"
-        size={autoLayout.compact ? autoLayout.webWidthCh : undefined}
+        size={autoLayout.webWidthCh}
+        maxLength={autoLayout.visualLength}
         value={displayValue}
         placeholder={placeholderText}
         disabled={props.disabled}
         readOnly={web.readOnly}
         autoComplete={web.autoComplete ?? 'off'}
         spellCheck={web.spellCheck}
-        inputMode={getMaskInputMode(d._maskPattern)}
+        inputMode={getMaskInputMode(d._maskPattern, d._maskTokens)}
         aria-invalid={hasError || undefined}
         aria-required={d._required || undefined}
         aria-describedby={describedBy}
         aria-disabled={props.disabled || undefined}
+        data-fb-slot="input"
+        {...(autoLayout.compact ? { 'data-fb-compact': '' } : {})}
         className={inputClassName}
         onChange={handleChange}
         onBlur={props.onBlur}
@@ -381,58 +360,32 @@ export const MaskedInput: React.FC<Props> = ({ descriptor: d, extra, ...props })
         onKeyDown={handleKeyDown}
         style={mergeStyles(
           {
-            fontFamily: 'monospace',
-            letterSpacing: '0.06em',
-            boxSizing: 'border-box',
-            fontVariantNumeric: 'tabular-nums',
-            ...(hasError && highlightOnError ? { borderColor: '#ef4444' } : {}),
-            ...(autoLayout.compact
-              ? {
-                  width: `min(100%, ${autoLayout.webWidthCh}ch)`,
-                  minWidth: `${autoLayout.webWidthCh}ch`,
-                  maxWidth: '100%',
-                  alignSelf: 'flex-start',
-                }
-              : {}),
+            width: `min(100%, ${autoLayout.webWidthCh}ch)`,
+            minWidth: 0,
+            maxWidth: '100%',
+            alignSelf: 'flex-start',
           },
-          ui?.styles?.input,
+          defaultMaskedInputStyle,
+          controlErrorStyle,
+          styles?.input,
           inputPropsStyle,
         )}
         {...inputPropsRest}
       />
 
-      {props.error
-        ? (ui?.renderError?.({ id: errorId, error: props.error }) ?? (
-            <span
-              id={errorId}
-              role="alert"
-              className={cx(ui?.classNames?.error, errorPropsClassName)}
-              style={mergeStyles(
-                { color: '#ef4444' },
-                ui?.styles?.error,
-                errorPropsStyle,
-              )}
-              {...errorPropsRest}
-            >
-              {props.error}
-            </span>
-          ))
-        : props.hint
-          ? (ui?.renderHint?.({ id: hintId, hint: props.hint }) ?? (
-              <span
-                id={hintId}
-                className={cx(ui?.classNames?.hint, hintPropsClassName)}
-                style={mergeStyles(
-                  { color: '#9ca3af' },
-                  ui?.styles?.hint,
-                  hintPropsStyle,
-                )}
-                {...hintPropsRest}
-              >
-                {props.hint}
-              </span>
-            ))
-          : null}
+      {renderHelperSlot({
+        error: props.error,
+        hint: props.hint,
+        name: props.name,
+        errorId,
+        hintId,
+        classNames: classNames as Record<string, string | undefined>,
+        styles: styles as Record<string, CSSProperties | undefined>,
+        errorProps: errorProps as Record<string, unknown>,
+        hintProps: hintProps as Record<string, unknown>,
+        renderError,
+        renderHint,
+      })}
     </div>
   );
 };

@@ -218,7 +218,7 @@ export function useReadonlyFormBridge<S extends FormSchema>(
 
       nextFields[name] = {
         name,
-        label: descriptor._label,
+        label: descriptor._label ?? '',
         value,
         display,
         changed,

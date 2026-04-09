@@ -60,7 +60,6 @@ function mergeWebSlotStyles(
   const merged: NonNullable<WebFieldUiOverrides['styles']> = {};
 
   for (const key of keys) {
-    //Object.assign({}, base?.[key] ?? {}, override?.[key] ?? {})
     merged[key] = { ...base?.[key], ...override?.[key] };
   }
 
@@ -180,16 +179,18 @@ export function mergeFieldStyleProps<
         : undefined;
     const mergedClassName = mergeClassNames(webTheme?.className, webLocal?.className);
     const mergedUi = mergeWebFieldUi(
-      webTheme?.ui as WebFieldUiOverrides | undefined,
-      webLocal?.ui as WebFieldUiOverrides | undefined,
+      webTheme as WebFieldUiOverrides | undefined,
+      webLocal as WebFieldUiOverrides | undefined,
     );
 
     return {
-      ...webLocal,
+      ...mergedUi,
       ...(mergedClassName ? { className: mergedClassName } : {}),
       ...(mergedStyle ? { style: mergedStyle } : {}),
-      ...(mergedUi ? { ui: mergedUi as TWebLocalUi } : {}),
-    };
+      label: webLocal?.label,
+      placeholder: webLocal?.placeholder,
+      hint: webLocal?.hint,
+    } as ExtraFieldProps<TWebLocalUi, 'web'>;
   }
 
   const nativeTheme = theme as
@@ -198,15 +199,17 @@ export function mergeFieldStyleProps<
   const nativeLocal = local as ExtraFieldProps<TNativeLocalUi, 'native'> | undefined;
   const mergedStyle = mergeNativeStyleValue(nativeTheme?.style, nativeLocal?.style);
   const mergedUi = mergeNativeFieldUi(
-    nativeTheme?.ui as NativeFieldUiOverrides | undefined,
-    nativeLocal?.ui as NativeFieldUiOverrides | undefined,
+    nativeTheme as NativeFieldUiOverrides | undefined,
+    nativeLocal as NativeFieldUiOverrides | undefined,
   );
 
   return {
-    ...nativeLocal,
+    ...mergedUi,
     ...(mergedStyle ? { style: mergedStyle } : {}),
-    ...(mergedUi ? { ui: mergedUi as TNativeLocalUi } : {}),
-  };
+    label: nativeLocal?.label,
+    placeholder: nativeLocal?.placeholder,
+    hint: nativeLocal?.hint,
+  } as ExtraFieldProps<TNativeLocalUi, 'native'>;
 }
 
 export function resolveWebFieldConfig(

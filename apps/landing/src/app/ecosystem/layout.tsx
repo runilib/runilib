@@ -1,24 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Ecosystem & Roadmap — Vision & Architecture',
+  title: 'Ecosystem & Roadmap — Cross-Platform React Architecture',
   description:
-    'Discover the RUNILIB ecosystem vision: schema-first architecture, consistent APIs across libraries, roadmap for 2026 including storex, toastly, modalkit, and motionkit.',
+    'Discover the RUNILIB ecosystem vision for React and React Native: shared APIs, consistent DX, accessible defaults and the roadmap for current and future cross-platform packages.',
   keywords: [
     'RUNILIB ecosystem',
     'RUNILIB roadmap',
     'React cross-platform architecture',
-    'schema-first',
+    'React Native architecture',
+    'shared API design',
     'TypeScript libraries roadmap',
-    'storex',
-    'toastly',
-    'modalkit',
-    'motionkit',
+    'cross-platform package architecture',
+    'React ecosystem design',
   ],
   openGraph: {
     title: 'RUNILIB Ecosystem — Vision, Architecture & Roadmap',
     description:
-      'Schema-first, accessible, tree-shakeable. See the full RUNILIB vision and upcoming libraries.',
+      'Shared APIs, composable packages and cross-platform architecture. See the full RUNILIB vision and roadmap.',
     url: 'https://runilib.dev/ecosystem',
   },
   alternates: {

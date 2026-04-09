@@ -14,10 +14,13 @@ export function ValibotResolverExample() {
 
   const formSchema = useMemo(
     () => ({
-      plan: field.select('Plan').options(DEMO_PLANS),
-      cardholder: field.text('Cardholder'),
-      receiptEmail: field.email('Receipt email'),
-      cardLast4: field.text('Card last 4'),
+      plan: field.select().label('Plan').options(DEMO_PLANS),
+      cardholder: field.text().label('Cardholder').placeholder('Ava Stone'),
+      receiptEmail: field
+        .email()
+        .label('Receipt email')
+        .placeholder('billing@runilib.dev'),
+      cardLast4: field.text().label('Card last 4').placeholder('1842'),
     }),
     [],
   );

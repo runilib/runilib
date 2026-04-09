@@ -13,7 +13,7 @@ const LIBRARIES = [
       'Tour flows, route-aware onboarding, tooltips, anchors, and custom native popovers.',
     route: '/walkit',
     accent: '#e8a020',
-    surface: '#1d140b',
+    surface: '#ffffff',
     bullets: ['Dashboard tour', 'Tooltip placements', 'Anchor API', 'Custom content'],
   },
   {
@@ -24,7 +24,7 @@ const LIBRARIES = [
       'Generated fields, route-based wizard flows, masks, styling patterns, resolvers, and async options.',
     route: '/formbridge',
     accent: '#60a5fa',
-    surface: '#0f172a',
+    surface: '#ffffff',
     bullets: ['Checkout flow', 'Cross-screen wizard', 'Masks', 'Resolvers', 'Styling'],
   },
 ] as const;
@@ -38,8 +38,8 @@ export function ExampleHubScreen() {
       edges={['top', 'bottom', 'left', 'right']}
     >
       <StatusBar
-        style="light"
-        backgroundColor="#090909"
+        style="dark"
+        backgroundColor="#f4f7fc"
       />
       <ScrollView
         contentContainerStyle={s.content}
@@ -98,13 +98,18 @@ export function ExampleHubScreen() {
 }
 
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#090909' },
+  safe: { flex: 1, backgroundColor: '#f4f7fc' },
   content: { paddingHorizontal: 18, paddingTop: 18, paddingBottom: 28, gap: 18 },
   hero: {
-    backgroundColor: '#13110d',
+    backgroundColor: '#ffffff',
     borderRadius: 28,
     padding: 22,
     gap: 12,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 4,
   },
   eyebrow: {
     color: '#e8a020',
@@ -114,14 +119,14 @@ const s = StyleSheet.create({
     textTransform: 'uppercase',
   },
   title: {
-    color: '#fff8ef',
+    color: '#10203a',
     fontSize: 34,
     lineHeight: 36,
     fontWeight: '800',
     letterSpacing: -0.9,
   },
   subtitle: {
-    color: '#cbbba6',
+    color: '#5f6f88',
     fontSize: 14,
     lineHeight: 22,
   },
@@ -132,6 +137,11 @@ const s = StyleSheet.create({
     borderRadius: 28,
     padding: 22,
     gap: 14,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.06,
+    shadowRadius: 22,
+    elevation: 3,
   },
   cardTop: {
     flexDirection: 'row',
@@ -152,19 +162,19 @@ const s = StyleSheet.create({
     paddingVertical: 6,
   },
   routeBadgeText: {
-    color: '#d1d5db',
+    color: '#64748b',
     fontSize: 11,
     fontWeight: '700',
   },
   cardTitle: {
-    color: '#fff',
+    color: '#10203a',
     fontSize: 28,
     lineHeight: 30,
     fontWeight: '800',
     letterSpacing: -0.8,
   },
   cardDescription: {
-    color: '#d7dde8',
+    color: '#5f6f88',
     fontSize: 14,
     lineHeight: 22,
   },
@@ -183,7 +193,7 @@ const s = StyleSheet.create({
     borderRadius: 999,
   },
   bulletText: {
-    color: '#f3f4f6',
+    color: '#20304b',
     fontSize: 13,
     lineHeight: 20,
     fontWeight: '600',
@@ -196,7 +206,7 @@ const s = StyleSheet.create({
     marginTop: 6,
   },
   openButtonText: {
-    color: '#111827',
+    color: '#ffffff',
     fontSize: 13,
     fontWeight: '800',
   },

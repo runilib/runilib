@@ -61,8 +61,8 @@ describe('mask helpers', () => {
   });
 
   it('stores the formatted mask by default and supports opting into raw storage', () => {
-    const formattedByDefault = field.masked('Expiry', '99/9999')._build();
-    const rawOptIn = field.masked('Expiry', '99/9999').storeRaw()._build();
+    const formattedByDefault = field.masked('99/9999')._build();
+    const rawOptIn = field.masked('99/9999').storeRaw()._build();
 
     expect(formattedByDefault._maskStoreRaw).toBe(false);
     expect(rawOptIn._maskStoreRaw).toBe(true);

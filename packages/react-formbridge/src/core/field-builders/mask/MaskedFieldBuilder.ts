@@ -9,8 +9,8 @@ import type { MaskedDescriptor, MaskedFieldMeta, MaskTokenMap } from './types';
 export class MaskedFieldBuilder extends StringFieldBuilder<'text'> {
   private readonly _meta: MaskedFieldMeta;
 
-  constructor(label: string, patternInput: MaskPatternInput) {
-    super('text', label);
+  constructor(patternInput: MaskPatternInput) {
+    super('text');
 
     const resolvedMask = resolveMaskPattern(patternInput);
 
@@ -71,6 +71,9 @@ export class MaskedFieldBuilder extends StringFieldBuilder<'text'> {
     return this;
   }
 
+  /**
+   * @internal
+   */
   override _build() {
     return {
       ...super._build(),

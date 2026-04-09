@@ -13,7 +13,7 @@ export const TOUR_THEME = {
 export const TOUR_LABELS = {
   next:   'Next →',
   prev:   '← Back',
-  finish: 'Let\'s go! 🚀',
+  finish: 'Let\'s go!',
   close:  '✕',
 };
 

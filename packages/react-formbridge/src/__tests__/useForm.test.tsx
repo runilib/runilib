@@ -178,6 +178,79 @@ describe('useForm — watch', () => {
   });
 });
 
+describe('useForm — fieldController', () => {
+  it('exposes reactive field state', async () => {
+    const { result } = setup();
+
+    act(() => {
+      result.current.fieldController('name').onChange('  Ada Lovelace  ');
+    });
+
+    expect(result.current.fieldController('name').value).toBe('  Ada Lovelace  ');
+
+    await act(async () => {
+      result.current.fieldController('name').onBlur();
+    });
+
+    expect(result.current.fieldController('name').touched).toBe(true);
+    expect(result.current.fieldController('name').value).toBe('Ada Lovelace');
+  });
+
+  it('can register and drive a focus target imperatively', () => {
+    const { result } = setup();
+    const focus = vi.fn();
+    const blur = vi.fn();
+
+    act(() => {
+      result.current.fieldController('name').registerFocusable({
+        focus,
+        blur,
+      });
+    });
+
+    act(() => {
+      result.current.fieldController('name').focus();
+      result.current.fieldController('name').blur();
+    });
+
+    expect(focus).toHaveBeenCalledTimes(1);
+    expect(blur).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useForm — file builder conditions', () => {
+  it('supports conditional visibility and required state for file fields', () => {
+    const { result } = renderHook(() =>
+      useFormBridge({
+        wantsUpload: field.checkbox('Add attachment'),
+        attachment: field
+          .file('Attachment')
+          .visibleWhen('wantsUpload')
+          .requiredWhen('wantsUpload')
+          .clearOnHide(),
+      }),
+    );
+
+    expect(result.current.visibility.attachment).toEqual({
+      visible: false,
+      required: false,
+      disabled: false,
+    });
+    expect(result.current.fieldController('attachment').visible).toBe(false);
+
+    act(() => {
+      result.current.setValue('wantsUpload', true);
+    });
+
+    expect(result.current.visibility.attachment).toEqual({
+      visible: true,
+      required: true,
+      disabled: false,
+    });
+    expect(result.current.fieldController('attachment').visible).toBe(true);
+  });
+});
+
 describe('useForm — submit lifecycle', () => {
   it('sets status to submitting then success', async () => {
     const { result } = setup();

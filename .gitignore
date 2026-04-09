@@ -17,3 +17,12 @@ examples/**/dist
 examples/mobile/.expo
 examples/mobile/web-build
 packages/*/.pack-tmp
+
+# vscode
+.vscode/*
+.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+.claude/*

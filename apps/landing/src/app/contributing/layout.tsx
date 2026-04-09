@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Contributing — How to Contribute to RUNILIB',
+  title: 'Contributing — Open Source React & React Native Libraries',
   description:
-    'Learn how to contribute to RUNILIB open-source libraries. Setup guide, coding standards, PR workflow, and community guidelines for react-formbridge, react-walkit, and more.',
+    'Learn how to contribute to RUNILIB open-source React and React Native libraries. Setup guide, coding standards, PR workflow and community guidelines for react-formbridge, react-walkit and the cross-platform ecosystem.',
   keywords: [
     'contribute RUNILIB',
     'open source contribution',
     'React open source',
+    'React Native open source',
     'RUNILIB GitHub',
     'pull request guide',
     'developer contribution',

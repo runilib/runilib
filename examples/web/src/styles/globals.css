@@ -7,21 +7,21 @@
 }
 
 :root {
-  --bg: #0f0e0b;
-  --bg2: #161410;
-  --bg3: #1c1a15;
-  --surface: #232019;
-  --surface2: #2a2720;
-  --border: rgba(255, 240, 200, 0.08);
-  --border2: rgba(255, 240, 200, 0.14);
-  --text: #f5efe0;
-  --muted: #8a7f6a;
-  --muted2: #5a5145;
-  --accent: #f0a500;
-  --accent2: #f5c842;
-  --accent3: #e05a3a;
-  --green: #5bbf7a;
-  --blue: #5ba8f0;
+  --bg: #f4f7fc;
+  --bg2: #edf2fa;
+  --bg3: #e6edf8;
+  --surface: #ffffff;
+  --surface2: #f4f7fb;
+  --border: rgba(15, 23, 42, 0.08);
+  --border2: rgba(37, 99, 235, 0.16);
+  --text: #10203a;
+  --muted: #5f6f88;
+  --muted2: #8a98ad;
+  --accent: #d48b0a;
+  --accent2: #edae2b;
+  --accent3: #d14332;
+  --green: #15803d;
+  --blue: #2563eb;
   --font-head: "Fraunces", Georgia, serif;
   --font-body: "DM Sans", system-ui, sans-serif;
   --font-mono: "DM Mono", monospace;
@@ -34,7 +34,9 @@ html {
   scroll-behavior: smooth;
 }
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 22%),
+    linear-gradient(180deg, #f9fbff 0%, var(--bg) 100%);
   color: var(--text);
   font-family: var(--font-body);
   font-weight: 400;
@@ -62,10 +64,10 @@ select {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg);
+  background: var(--bg2);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--surface2);
+  background: rgba(37, 99, 235, 0.2);
   border-radius: 3px;
 }
 
@@ -83,20 +85,20 @@ select {
   border: none;
 }
 .btn-primary {
-  background: var(--accent);
-  color: #0f0e0b;
+  background: linear-gradient(135deg, var(--blue), #60a5fa);
+  color: #fff;
 }
 .btn-primary:hover {
-  background: var(--accent2);
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
   transform: translateY(-1px);
 }
 .btn-ghost {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.82);
   color: var(--muted);
   border: 1px solid var(--border2);
 }
 .btn-ghost:hover {
-  background: var(--surface);
+  background: #fff;
   color: var(--text);
 }
 
@@ -105,6 +107,7 @@ select {
   border: 1px solid var(--border);
   border-radius: var(--r);
   padding: 20px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
 }
 
 .tag {

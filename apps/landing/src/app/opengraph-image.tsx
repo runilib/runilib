@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'RUNILIB — React Universal Libs';
+export const alt = 'RUNILIB — Cross-platform React and React Native ecosystem';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -99,7 +99,7 @@ export default function Image() {
           display: 'flex',
         }}
       >
-        React Universal Libs
+        React & React Native Libraries
       </div>
 
       {/* Description */}
@@ -109,13 +109,13 @@ export default function Image() {
           color: '#8b949e',
           marginTop: 20,
           textAlign: 'center',
-          maxWidth: 700,
+          maxWidth: 820,
           lineHeight: 1.6,
           display: 'flex',
         }}
       >
-        Cross-platform libraries for React & React Native. Forms, tours, tooltips — one
-        codebase.
+        Open-source ecosystem of React and React Native libraries with shared APIs, strong
+        TypeScript DX and packages built for web and mobile.
       </div>
 
       {/* Library pills */}
@@ -126,7 +126,7 @@ export default function Image() {
           marginTop: 40,
         }}
       >
-        {['react-formbridge', 'react-walkit', 'tooltip'].map((name) => (
+        {['Shared APIs', 'TypeScript DX', 'Composable packages'].map((name) => (
           <div
             key={name}
             style={{
@@ -140,7 +140,7 @@ export default function Image() {
               display: 'flex',
             }}
           >
-            @runilib/{name}
+            {name}
           </div>
         ))}
       </div>

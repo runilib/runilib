@@ -5,11 +5,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { useApp } from '../../context/AppContext';
-import { LIBRARIES, ROADMAP_LIBS } from '../../data/libraries';
+import {
+  getLibraryHref,
+  getNewTabLinkProps,
+  LIBRARIES,
+  ROADMAP_LIBS,
+} from '../../data/libraries';
 import type { LibColor } from '../../types';
 
 export default function Libraries() {
-  const { t } = useApp();
+  const { locale, t } = useApp();
   const [search, setSearch] = useState('');
   const filtered = LIBRARIES.filter(
     (l) =>
@@ -18,6 +23,19 @@ export default function Libraries() {
       l.tagline.toLowerCase().includes(search.toLowerCase()) ||
       l.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase())),
   );
+  const searchHints =
+    locale === 'fr'
+      ? 'Astuce : recherche par nom de package, plateforme, API ou mot-clé.'
+      : 'Tip: search by package name, platform, API or keyword.';
+  const searchPlaceholder =
+    locale === 'fr'
+      ? 'Rechercher des packages, APIs ou mots-clés...'
+      : 'Search packages, APIs, or keywords...';
+  const emptySubcopy =
+    locale === 'fr'
+      ? 'Essaie un nom de package, une plateforme ou un mot-clé.'
+      : 'Try a package name, platform, or keyword.';
+
   return (
     <Wrap>
       <PageHeader>
@@ -49,10 +67,11 @@ export default function Libraries() {
               <SearchInput
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="formbridge, walkit, forms..."
+                placeholder={searchPlaceholder}
               />
             </SearchBox>
           </SearchRow>
+          <SearchHints>{searchHints}</SearchHints>
         </HeaderInner>
       </PageHeader>
       <Body>
@@ -101,7 +120,12 @@ export default function Libraries() {
                   <InstallCode>{lib.install}</InstallCode>
                 </InstallRow>
                 <RowActions>
-                  <DocBtn href={`/libraries/${lib.id}`}>{t.libs.docs}</DocBtn>
+                  <DocBtn
+                    href={getLibraryHref(lib)}
+                    {...getNewTabLinkProps(getLibraryHref(lib))}
+                  >
+                    {t.libs.docs}
+                  </DocBtn>
                   <GhBtn
                     href={lib.githubUrl}
                     target="_blank"
@@ -117,7 +141,7 @@ export default function Libraries() {
             <Empty>
               <EmptyEmoji>🔍</EmptyEmoji>
               <EmptyText>No library found for "{search}"</EmptyText>
-              <EmptySub>Try "form", "step", or "tooltip"</EmptySub>
+              <EmptySub>{emptySubcopy}</EmptySub>
             </Empty>
           )}
         </LibList>
@@ -150,6 +174,7 @@ const SearchRow = styled.div`align-items: center; justify-content: center; margi
 const SearchBox = styled.div`display: flex; align-items: center; gap: 10px; background: ${({ theme }) => theme.bgCard}; border: 1px solid ${({ theme }) => theme.border}; border-radius: 10px; padding: 10px 16px; transition: border-color 0.2s; &:focus-within { border-color: ${({ theme }) => theme.teal}; }`;
 const SearchIco = styled.div`color: ${({ theme }) => theme.textMuted}; flex-shrink: 0;`;
 const SearchInput = styled.input`flex: 1; font-family: 'Sora', sans-serif; font-size: 14px; color: ${({ theme }) => theme.textPrimary}; background: transparent; border: none; outline: none; &::placeholder { color: ${({ theme }) => theme.textMuted}; }`;
+const SearchHints = styled.p`font-family: 'DM Mono', monospace; font-size: 10.5px; line-height: 1.7; color: ${({ theme }) => theme.textMuted}; margin-top: 12px;`;
 const Body = styled.div`max-width: 1240px; margin: 0 auto; padding: 44px 24px 80px;`;
 const SectionLabel = styled.div`font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: ${({ theme }) => theme.textMuted}; margin-bottom: 20px;`;
 const LibList = styled.div`display: flex; flex-direction: column; gap: 14px; margin-bottom: 72px;`;

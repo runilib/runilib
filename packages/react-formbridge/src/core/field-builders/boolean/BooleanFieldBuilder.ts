@@ -1,4 +1,4 @@
-import type { FieldType } from '../../../types';
+import type { FieldType } from '../../../types/field';
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 // ─── Boolean field builder ───────────────────────────────────────────────────
@@ -9,8 +9,8 @@ export class BooleanFieldBuilder<
     'checkbox' | 'switch'
   >,
 > extends BaseFieldBuilder<boolean, TType> {
-  constructor(type: TType, label: string) {
-    super(type, label, false);
+  constructor(type: TType) {
+    super(type, false);
   }
 
   /** Must be checked / true to pass */

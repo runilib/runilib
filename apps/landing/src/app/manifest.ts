@@ -5,11 +5,12 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'RUNILIB — React Universal Libs',
     short_name: 'RUNILIB',
     description:
-      'Cross-platform React & React Native libraries. Forms, onboarding tours, tooltips and more with one shared API.',
+      'Open-source ecosystem of React and React Native libraries with shared TypeScript APIs for web and mobile.',
     start_url: '/',
     display: 'standalone',
     background_color: '#080a0e',
     theme_color: '#4adec0',
+    categories: ['developer tools', 'productivity', 'utilities'],
     icons: [
       {
         src: '/favicon.svg?v=runilib-2',

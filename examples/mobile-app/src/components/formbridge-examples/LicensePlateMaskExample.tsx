@@ -13,9 +13,15 @@ export function LicensePlateMaskExample() {
 
   const formSchema = useMemo(
     () => ({
-      vehicleName: field.text('Vehicle label').required('Required'),
+      vehicleName: field
+        .text()
+        .label('Vehicle name')
+        .placeholder('North hub van')
+        .required('Required'),
       licensePlate: field
-        .masked('License plate', 'LL-999-LL')
+        .masked('LL-999-LL')
+        .label('License plate')
+        .placeholder('AB-123-CD')
         .tokens({
           L: /[A-Z]/,
         })

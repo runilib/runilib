@@ -91,7 +91,6 @@ export const DEFAULT_LEVELS: StrengthScoreLevel[] = [
 ];
 
 // ─── Common passwords list (top 100) ─────────────────────────────────────────
-
 export const COMMON_PASSWORDS = new Set([
   'password',
   'password1',

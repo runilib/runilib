@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { CheckboxVariantsExample } from './CheckboxVariantsExample';
+import { FileVariantsExample } from './FileVariantsExample';
 import styles from './FormExamples.module.css';
 import { SelectVariantsExample } from './SelectVariantsExample';
 import { SwitchVariantsExample } from './SwitchVariantsExample';
@@ -9,7 +10,7 @@ const FIELD_VARIANT_TABS = [
   {
     id: 'select',
     label: 'Select',
-    note: 'local, radio, async',
+    note: 'default, numeric, async',
     component: SelectVariantsExample,
   },
   {
@@ -23,6 +24,12 @@ const FIELD_VARIANT_TABS = [
     label: 'Switch',
     note: 'product toggles',
     component: SwitchVariantsExample,
+  },
+  {
+    id: 'file',
+    label: 'File',
+    note: 'uploads + previews',
+    component: FileVariantsExample,
   },
 ] as const;
 
@@ -39,11 +46,13 @@ export function FieldVariantsShowcase() {
       <div className={styles.resolverShowcaseHead}>
         <div>
           <span className={styles.resolverEyebrow}>field variants</span>
-          <h2 className={styles.resolverTitle}>Select, checkbox, and switch patterns</h2>
+          <h2 className={styles.resolverTitle}>
+            Select, checkbox, switch, and file patterns
+          </h2>
           <p className={styles.resolverSubtitle}>
-            Compare the main choice-field families in one place. Each tab is isolated in
-            its own file so you can inspect the schema, behavior, and UX pattern without
-            turning the dashboard into one giant example.
+            Compare the main generated field families in one place. Each tab is isolated
+            in its own file so you can inspect the schema, behavior, and UX pattern
+            without turning the dashboard into one giant example.
           </p>
         </div>
 

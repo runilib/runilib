@@ -1,22 +1,22 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Documentation — API Reference & Guides',
+  title: 'Documentation — RUNILIB API Reference & Guides',
   description:
-    'Complete documentation for RUNILIB libraries. Installation guides, API reference, code examples, and tutorials for react-formbridge, react-walkit, and tooltip.',
+    'Documentation for RUNILIB libraries and ecosystem packages. Explore installation guides, API reference, examples and tutorials for cross-platform React and React Native development.',
   keywords: [
     'RUNILIB documentation',
-    'react-formbridge docs',
-    'react-walkit docs',
-    'React form builder tutorial',
-    'onboarding tour guide',
     'API reference',
     'TypeScript examples',
+    'React package docs',
+    'React Native package docs',
+    'cross-platform library docs',
+    'developer guides',
   ],
   openGraph: {
-    title: 'RUNILIB Docs — Complete API Reference & Guides',
+    title: 'RUNILIB Docs — API Reference & Guides',
     description:
-      'Installation, API reference, and real-world examples for every RUNILIB library.',
+      'Installation guides, API reference and examples for the RUNILIB React and React Native ecosystem.',
     url: 'https://runilib.dev/docs',
   },
   alternates: {

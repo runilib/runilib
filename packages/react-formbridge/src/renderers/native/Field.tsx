@@ -1,10 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
   ScrollView,
   type StyleProp,
-  StyleSheet,
   Switch,
   Text,
   TextInput,
@@ -15,40 +14,55 @@ import {
 } from 'react-native';
 
 import type {
+  ExtraFieldProps,
   FieldDescriptor,
   FieldRenderProps,
+  FocusableFieldHandle,
+  NativeFieldUiOverrides,
   SelectOption,
   SelectPickerRenderContext,
 } from '../../types';
 import {
-  defaultBorderColor,
-  type NativeBaseUiOverrides,
-  type NativeExtraProps,
+  defaultErrorChromeStyle,
+  defaultErrorTextStyle,
+  defaultRequiredMarkStyle,
   type NativeTextFieldDescriptorWebLike,
   shouldHighlightOnError,
   sx,
 } from './shared';
 
-type NativeFieldUiOverrides = NativeBaseUiOverrides & {
-  styles?: NativeBaseUiOverrides['styles'] &
-    Partial<{
-      checkboxRow: StyleProp<ViewStyle>;
-      checkboxBox: StyleProp<ViewStyle>;
-      checkboxLabel: StyleProp<TextStyle>;
-      optionTrigger: StyleProp<ViewStyle>;
-      optionRow: StyleProp<ViewStyle>;
-      optionLabel: StyleProp<TextStyle>;
-      modalBackdrop: StyleProp<ViewStyle>;
-      modalCard: StyleProp<ViewStyle>;
-      otpContainer: StyleProp<ViewStyle>;
-      otpInput: StyleProp<TextStyle>;
-    }>;
-};
-
 interface Props extends FieldRenderProps<unknown> {
   descriptor: FieldDescriptor<unknown> & NativeTextFieldDescriptorWebLike;
-  extra?: NativeExtraProps<NativeFieldUiOverrides>;
+  extra?: ExtraFieldProps<NativeFieldUiOverrides, 'native'>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
+
+const defaultOptionModalBackdropStyle: ViewStyle = {
+  flex: 1,
+  justifyContent: 'center',
+  padding: 20,
+  backgroundColor: 'rgba(15, 23, 42, 0.42)',
+};
+
+const defaultOptionModalCardStyle: ViewStyle = {
+  width: '100%',
+  maxHeight: '72%',
+  borderRadius: 18,
+  backgroundColor: '#ffffff',
+  padding: 16,
+  gap: 10,
+};
+
+const defaultOptionRowStyle: ViewStyle = {
+  borderRadius: 12,
+  paddingHorizontal: 14,
+  paddingVertical: 12,
+};
+
+const defaultOptionLabelStyle: TextStyle = {
+  fontSize: 15,
+  color: '#0f172a',
+};
 
 function getStringValue(value: unknown): string {
   if (typeof value === 'string') return value;
@@ -87,14 +101,16 @@ const OptionPicker = ({
       onRequestClose={onClose}
     >
       <Pressable
-        style={sx(styles.modalBackdrop, ui?.styles?.modalBackdrop)}
+        style={sx(defaultOptionModalBackdropStyle, ui?.styles?.modalBackdrop)}
         onPress={onClose}
       >
         <Pressable
-          style={sx(styles.modalCard, ui?.styles?.modalCard)}
+          style={sx(defaultOptionModalCardStyle, ui?.styles?.modalCard)}
           onPress={(event) => event.stopPropagation()}
         >
-          <Text style={styles.modalTitle}>{title}</Text>
+          <Text style={{ fontSize: 16, fontWeight: '700', color: '#0f172a' }}>
+            {title}
+          </Text>
 
           <ScrollView keyboardShouldPersistTaps="handled">
             {options.map((option) => {
@@ -107,20 +123,10 @@ const OptionPicker = ({
                     onSelect(option.value);
                     onClose();
                   }}
-                  style={sx(
-                    styles.optionRow,
-                    selected && styles.optionRowSelected,
-                    ui?.styles?.optionRow,
-                  )}
+                  style={sx(defaultOptionRowStyle, ui?.styles?.optionRow)}
                 >
-                  <Text
-                    style={sx(
-                      styles.optionLabel,
-                      selected && styles.optionLabelSelected,
-                      ui?.styles?.optionLabel,
-                    )}
-                  >
-                    {option.label}
+                  <Text style={sx(defaultOptionLabelStyle, ui?.styles?.optionLabel)}>
+                    {selected ? `✓ ${option.label}` : option.label}
                   </Text>
                 </Pressable>
               );
@@ -132,10 +138,29 @@ const OptionPicker = ({
   );
 };
 
-export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => {
+export const NativeField: React.FC<Props> = ({
+  descriptor: d,
+  extra,
+  registerFocusable,
+  ...p
+}) => {
   const native = d._ui ?? {};
-  const ui = extra?.ui;
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
+
+  const {
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+    renderPicker,
+  } = extra ?? {};
+
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
@@ -152,16 +177,17 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
 
-  const id = ui?.id ?? native.id ?? p.name;
+  const id = extra?.id ?? native.id ?? p.name;
   const hasError = Boolean(p.error);
   const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
+    extra?.highlightOnError,
     native.highlightOnError,
   );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSearch, setPickerSearch] = useState('');
   const otpRefs = useRef<Array<TextInput | null>>([]);
-  const renderPicker = ui?.renderPicker ?? native.renderPicker;
+  const pickerRenderer = renderPicker ?? native.renderPicker;
 
   const selectOptions = d._options ?? [];
   const selectedOption = useMemo(
@@ -179,30 +205,33 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
     return selectOptions.filter((option) => option.label.toLowerCase().includes(query));
   }, [pickerSearch, selectOptions]);
 
-  const clearPickerSearch = () => {
+  const clearPickerSearch = useCallback(() => {
     setPickerSearch('');
-  };
+  }, []);
 
-  const closePicker = () => {
+  const closePicker = useCallback(() => {
     setPickerOpen(false);
     clearPickerSearch();
-  };
+  }, [clearPickerSearch]);
 
-  const openPicker = () => {
+  const openPicker = useCallback(() => {
     if (p.disabled) return;
 
     setPickerOpen(true);
     p.onFocus();
-  };
+  }, [p.disabled, p.onFocus]);
 
-  const selectPickerOption = (next: SelectOption | SelectOption['value']) => {
-    const value =
-      typeof next === 'object' && next !== null && 'value' in next ? next.value : next;
+  const selectPickerOption = useCallback(
+    (next: SelectOption | SelectOption['value']) => {
+      const value =
+        typeof next === 'object' && next !== null && 'value' in next ? next.value : next;
 
-    p.onChange(value);
-    closePicker();
-    p.onBlur();
-  };
+      p.onChange(value);
+      closePicker();
+      p.onBlur();
+    },
+    [closePicker, p.onBlur, p.onChange],
+  );
 
   const pickerContext: SelectPickerRenderContext = {
     platform: 'native',
@@ -230,32 +259,34 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
     selectOption: selectPickerOption,
   };
 
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <Text style={sx(styles.requiredMark, ui?.styles?.requiredMark)}>*</Text>
+  useEffect(() => {
+    if ((d._type !== 'select' && d._type !== 'radio') || !registerFocusable) {
+      return;
+    }
+
+    registerFocusable({
+      focus: openPicker,
+      blur: closePicker,
+    });
+
+    return () => {
+      registerFocusable(null);
+    };
+  }, [closePicker, d._type, openPicker, registerFocusable]);
+
+  const requiredMark = renderRequiredMark?.() ?? (
+    <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
   );
 
-  const inputBaseStyle = useMemo(
-    () =>
-      sx(
-        styles.input,
-        {
-          borderColor: defaultBorderColor(hasError, highlightOnError),
-          backgroundColor: p.disabled ? '#f9fafb' : '#fff',
-        },
-        ui?.styles?.input,
-        inputPropsStyle,
-      ),
-    [hasError, highlightOnError, inputPropsStyle, p.disabled, ui?.styles?.input],
-  );
+  const renderLabelNode = () => {
+    if (hideLabel) return null;
 
-  const renderLabel = () => {
-    if (ui?.hideLabel) return null;
-
-    if (ui?.renderLabel) {
-      return ui.renderLabel({
+    if (renderLabel) {
+      return renderLabel({
         id,
         label: p.label,
         required: Boolean(d._required),
+        name: p.name,
       });
     }
 
@@ -265,7 +296,7 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
 
     return (
       <Text
-        style={sx(styles.label, ui?.styles?.label, labelPropsStyle)}
+        style={sx(styles?.label, labelPropsStyle)}
         {...labelPropsRest}
       >
         {p.label}
@@ -277,9 +308,9 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
   const renderMeta = () => {
     if (p.error) {
       return (
-        ui?.renderError?.({ id: `${id}-error`, error: p.error }) ?? (
+        renderError?.({ id, name: p.name, error: p.error }) ?? (
           <Text
-            style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
+            style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
             {...errorPropsRest}
           >
             {p.error}
@@ -290,9 +321,9 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
 
     if (p.hint) {
       return (
-        ui?.renderHint?.({ id: `${id}-hint`, hint: p.hint }) ?? (
+        renderHint?.({ id, name: p.name, hint: p.hint }) ?? (
           <Text
-            style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
+            style={sx(styles?.hint, hintPropsStyle)}
             {...hintPropsRest}
           >
             {p.hint}
@@ -322,11 +353,12 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
         return (
           <TextInput
             nativeID={id}
+            ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder}
             multiline
             textAlignVertical="top"
-            style={sx(inputBaseStyle, styles.textarea)}
+            style={sx(styles?.input, inputPropsStyle)}
             onChangeText={(value) => p.onChange(value)}
             {...commonInputProps}
           />
@@ -338,25 +370,15 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
             onPress={() => {
               if (!p.disabled) p.onChange(!p.value);
             }}
-            style={sx(styles.checkboxRow, ui?.styles?.checkboxRow)}
+            style={sx(styles?.checkboxRow)}
             accessibilityRole="checkbox"
             accessibilityState={{
               checked: Boolean(p.value),
               disabled: Boolean(p.disabled),
             }}
           >
-            <View
-              style={sx(
-                styles.checkboxBox,
-                Boolean(p.value) && styles.checkboxBoxChecked,
-                {
-                  borderColor: defaultBorderColor(hasError, highlightOnError),
-                  opacity: p.disabled ? 0.6 : 1,
-                },
-                ui?.styles?.checkboxBox,
-              )}
-            />
-            <Text style={sx(styles.checkboxLabel, ui?.styles?.checkboxLabel)}>
+            <View style={sx(controlErrorStyle, styles?.checkboxBox)} />
+            <Text style={sx(styles?.checkboxLabel)}>
               {p.label}
               {d._required && requiredMark}
             </Text>
@@ -365,13 +387,13 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
 
       case 'switch':
         return (
-          <View style={styles.switchRow}>
+          <View>
             <Switch
               value={Boolean(p.value)}
               onValueChange={(value) => p.onChange(value)}
               disabled={p.disabled}
             />
-            <Text style={styles.switchLabel}>
+            <Text>
               {p.label}
               {d._required && requiredMark}
             </Text>
@@ -384,30 +406,17 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
           <>
             <Pressable
               onPress={openPicker}
-              style={sx(
-                styles.optionTrigger,
-                {
-                  borderColor: defaultBorderColor(hasError, highlightOnError),
-                  opacity: p.disabled ? 0.6 : 1,
-                },
-                ui?.styles?.optionTrigger,
-              )}
+              style={sx(controlErrorStyle, styles?.optionTrigger)}
             >
-              <Text
-                style={
-                  getSelectedLabel(d._options, p.value)
-                    ? styles.optionTriggerValue
-                    : styles.optionTriggerPlaceholder
-                }
-              >
+              <Text>
                 {getSelectedLabel(d._options, p.value) ||
                   p.placeholder ||
                   `Select ${p.label}`}
               </Text>
             </Pressable>
 
-            {renderPicker ? (
-              renderPicker(pickerContext)
+            {pickerRenderer ? (
+              pickerRenderer(pickerContext)
             ) : (
               <OptionPicker
                 visible={pickerOpen}
@@ -416,7 +425,7 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
                 selectedValue={p.value}
                 onClose={closePicker}
                 onSelect={(value) => p.onChange(value)}
-                ui={ui}
+                ui={extra}
               />
             )}
           </>
@@ -426,7 +435,7 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
         const chars = getStringValue(p.value).split('');
 
         return (
-          <View style={sx(styles.otpContainer, ui?.styles?.otpContainer)}>
+          <View style={sx(styles?.otpContainer)}>
             {Array.from({ length }, (_, index) => ({
               key: `${id}-otp-${index}`,
               index,
@@ -435,19 +444,15 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
                 key={key}
                 ref={(node) => {
                   otpRefs.current[index] = node;
+                  if (index === 0) {
+                    registerFocusable?.(node);
+                  }
                 }}
                 value={chars[index] ?? ''}
                 maxLength={1}
                 keyboardType="number-pad"
                 textAlign="center"
-                style={sx(
-                  styles.otpInput,
-                  {
-                    borderColor: defaultBorderColor(hasError, highlightOnError),
-                    opacity: p.disabled ? 0.6 : 1,
-                  },
-                  ui?.styles?.otpInput,
-                )}
+                style={sx(controlErrorStyle, styles?.otpInput)}
                 editable={!p.disabled}
                 onChangeText={(char) => {
                   const next = [...chars];
@@ -475,9 +480,10 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
         return (
           <TextInput
             nativeID={id}
+            ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder}
-            style={inputBaseStyle}
+            style={sx(controlErrorStyle, styles?.input, inputPropsStyle)}
             keyboardType="numeric"
             onChangeText={(value) => {
               p.onChange(value === '' ? '' : Number(value));
@@ -490,9 +496,10 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
         return (
           <TextInput
             nativeID={id}
+            ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder ?? 'YYYY-MM-DD'}
-            style={inputBaseStyle}
+            style={sx(controlErrorStyle, styles?.input, inputPropsStyle)}
             onChangeText={(value) => p.onChange(value)}
             {...commonInputProps}
           />
@@ -502,9 +509,10 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
         return (
           <TextInput
             nativeID={id}
+            ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder}
-            style={inputBaseStyle}
+            style={sx(controlErrorStyle, styles?.input, inputPropsStyle)}
             onChangeText={(value) => p.onChange(value)}
             autoCapitalize={d._type === 'email' ? 'none' : 'sentences'}
             keyboardType={
@@ -524,146 +532,12 @@ export const NativeField: React.FC<Props> = ({ descriptor: d, extra, ...p }) => 
 
   return (
     <View
-      style={sx(
-        styles.root,
-        extra?.style as StyleProp<ViewStyle>,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
       {...rootPropsRest}
     >
-      {renderLabel()}
+      {renderLabelNode()}
       {renderInput()}
       {renderMeta()}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  root: {
-    gap: 6,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  requiredMark: {
-    color: '#ef4444',
-  },
-  input: {
-    minHeight: 44,
-    borderWidth: 1.5,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#111827',
-  },
-  textarea: {
-    minHeight: 112,
-  },
-  error: {
-    fontSize: 12,
-    color: '#ef4444',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  checkboxBox: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    backgroundColor: '#fff',
-  },
-  checkboxBoxChecked: {
-    backgroundColor: '#6366f1',
-    borderColor: '#6366f1',
-  },
-  checkboxLabel: {
-    flex: 1,
-    fontSize: 14,
-    color: '#374151',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  switchLabel: {
-    fontSize: 14,
-    color: '#374151',
-  },
-  optionTrigger: {
-    minHeight: 44,
-    borderWidth: 1.5,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  optionTriggerValue: {
-    fontSize: 14,
-    color: '#111827',
-  },
-  optionTriggerPlaceholder: {
-    fontSize: 14,
-    color: '#9ca3af',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.28)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalCard: {
-    maxHeight: '70%',
-    borderRadius: 14,
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  optionRow: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  optionRowSelected: {
-    backgroundColor: '#eff6ff',
-  },
-  optionLabel: {
-    fontSize: 14,
-    color: '#374151',
-  },
-  optionLabelSelected: {
-    color: '#1d4ed8',
-    fontWeight: '600',
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  otpInput: {
-    width: 44,
-    height: 52,
-    borderWidth: 1.5,
-    borderRadius: 8,
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    backgroundColor: '#fff',
-  },
-});

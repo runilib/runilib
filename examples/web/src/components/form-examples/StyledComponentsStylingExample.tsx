@@ -51,7 +51,7 @@ const SectionCard = styled.div`
   flex-direction: column;
   gap: 14px;
   padding: 18px;
-  border-radius: 22px;
+  border-radius: 6px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
     rgba(11, 17, 33, 0.36);
@@ -89,14 +89,12 @@ const FooterCopy = styled.p`
   margin: 0;
   font-size: 12px;
   line-height: 1.65;
-  color: #94a3b8;
+  color: #5f6f88;
 `;
 
 const StudioNameFieldShell = styled(FieldHost).attrs({
-  ui: {
-    inputProps: {
-      autoComplete: 'organization',
-    },
+  inputProps: {
+    autoComplete: 'organization',
   },
 })`
   display: flex;
@@ -105,7 +103,7 @@ const StudioNameFieldShell = styled(FieldHost).attrs({
   margin-bottom: 0;
 
   & label {
-    color: #f8fafc;
+    color: #30415d;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -113,10 +111,10 @@ const StudioNameFieldShell = styled(FieldHost).attrs({
   }
 
   & input {
-    background: rgba(15, 23, 42, 0.62);
+    background: #ffffff;
     border: 1px solid rgba(125, 211, 252, 0.18);
-    border-radius: 16px;
-    color: #f8fafc;
+    border-radius: 6px;
+    color: #10203a;
     padding: 14px 16px;
   }
 
@@ -125,7 +123,7 @@ const StudioNameFieldShell = styled(FieldHost).attrs({
   }
 
   & span {
-    color: #cbd5e1;
+    color: #5f6f88;
     font-size: 12px;
     line-height: 1.6;
   }
@@ -138,11 +136,9 @@ const StudioFormComp = styled(FormHost)`
 `;
 
 const ContactEmailFieldShell = styled(FieldHost).attrs({
-  ui: {
-    inputProps: {
-      autoComplete: 'email',
-      inputMode: 'email',
-    },
+  inputProps: {
+    autoComplete: 'email',
+    inputMode: 'email',
   },
 })`
   display: flex;
@@ -159,16 +155,16 @@ const ContactEmailFieldShell = styled(FieldHost).attrs({
   }
 
   & input {
-    background: rgba(15, 23, 42, 0.74);
+    background: #ffffff;
     border: 1px solid rgba(56, 189, 248, 0.28);
-    border-radius: 16px;
-    color: #f8fafc;
+    border-radius: 6px;
+    color: #10203a;
     padding: 14px 16px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
   & span {
-    color: #94a3b8;
+    color: #64748b;
     font-size: 12px;
   }
 `;
@@ -190,7 +186,7 @@ const CityFieldShell = styled(FieldHost)`
   & input {
     background: rgba(2, 44, 34, 0.44);
     border: 1px solid rgba(74, 222, 128, 0.24);
-    border-radius: 16px;
+    border-radius: 6px;
     color: #ecfdf5;
     padding: 14px 16px;
   }
@@ -208,7 +204,7 @@ const LaunchNotesFieldShell = styled(FieldHost)`
   margin-bottom: 0;
 
   & label {
-    color: #f8fafc;
+    color: #30415d;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -217,10 +213,10 @@ const LaunchNotesFieldShell = styled(FieldHost)`
 
   & textarea {
     min-height: 112px;
-    background: rgba(15, 23, 42, 0.62);
+    background: #ffffff;
     border: 1px solid rgba(125, 211, 252, 0.18);
-    border-radius: 16px;
-    color: #f8fafc;
+    border-radius: 6px;
+    color: #10203a;
     padding: 14px 16px;
   }
 
@@ -229,7 +225,7 @@ const LaunchNotesFieldShell = styled(FieldHost)`
   }
 
   & span {
-    color: #94a3b8;
+    color: #64748b;
     font-size: 12px;
   }
 `;
@@ -253,23 +249,23 @@ export function StyledComponentsStylingExample() {
   const schema = useMemo(
     () => ({
       studioName: field
-        .text('Studio name')
+        .text()
         .required('Studio name is required')
         .trim()
         .placeholder('Northwind Labs')
         .hint('Name shown on invoices and payment confirmations.'),
       contactEmail: field
-        .email('Billing email')
+        .email()
         .required('Billing email is required')
         .trim()
         .placeholder('finance@northwind.dev'),
       city: field
-        .text('City')
+        .text()
         .required('City is required')
         .placeholder('Lyon')
         .hint('Used to localize VAT and invoice copy.'),
       launchNotes: field
-        .textarea('Launch notes')
+        .textarea()
         .required('Add a short handoff note')
         .placeholder('Team prefers invoice reminders every Monday.'),
     }),

@@ -4,8 +4,15 @@ import { isFileDescriptor } from '../core/field-builders/file/FileField';
 import { isMaskedDescriptor } from '../core/field-builders/mask/MaskedFieldBuilder';
 import { isStrengthDescriptor } from '../core/field-builders/password/PasswordWithStrength';
 import { isPhoneDescriptor } from '../core/field-builders/phone/PhoneFieldBuilder';
+import { WEB_ERROR_COLOR } from '../renderers/web/shared';
 import type {
   FieldComponents,
+  FieldController,
+  FieldErrorProps,
+  FieldLabelProps,
+  FieldRenderProps,
+  FieldRenderState,
+  FocusableFieldHandle,
   FormComponent,
   FormSchema,
   SchemaValues,
@@ -46,14 +53,56 @@ export function useFormBridge<const S extends FormSchema>(
     trackFieldFocus,
   } = core;
 
-  const globalUiRef = useRef(options.globalUi);
-  globalUiRef.current = options.globalUi;
+  const globalStylesRef = useRef(options.globalStyles);
+  globalStylesRef.current = options.globalStyles;
 
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
 
   const visibilityRef = useRef(visibility);
   visibilityRef.current = visibility;
+
+  const focusableRegistryRef = useRef<Record<string, FocusableFieldHandle | null>>({});
+
+  const registerFocusable = useCallback(
+    (name: string, target: FocusableFieldHandle | null) => {
+      if (target) {
+        focusableRegistryRef.current[name] = target;
+        return;
+      }
+
+      delete focusableRegistryRef.current[name];
+    },
+    [],
+  );
+
+  const focusField = useCallback(
+    (name: string) => {
+      const target = focusableRegistryRef.current[name];
+
+      if (target?.focus) {
+        target.focus();
+        return;
+      }
+
+      trackFieldFocus(name);
+    },
+    [trackFieldFocus],
+  );
+
+  const blurField = useCallback(
+    (name: string) => {
+      const target = focusableRegistryRef.current[name];
+
+      if (target?.blur) {
+        target.blur();
+        return;
+      }
+
+      void handleBlur(name);
+    },
+    [handleBlur],
+  );
 
   const setValue = useCallback(
     <K extends keyof S>(name: K, value: SchemaValues<S>[K]) => {
@@ -156,6 +205,107 @@ export function useFormBridge<const S extends FormSchema>(
     await handleSubmit();
   }, [handleSubmit]);
 
+  const fieldController = useCallback(
+    <K extends keyof S & string>(name: K): FieldController<S, K> => {
+      const descriptor = descriptorsRef.current[name];
+
+      if (!descriptor) {
+        throw new Error(`Unknown field controller requested for "${name}".`);
+      }
+
+      const state = stateRef.current;
+      const rawValue = (state.values as Record<string, unknown>)[name];
+      const value =
+        rawValue ??
+        descriptor._defaultValue ??
+        (descriptor._type === 'checkbox' || descriptor._type === 'switch' ? false : '');
+      const rawError = (state.errors as Record<string, string | undefined>)[name] ?? null;
+      const touched = Boolean((state.touched as Record<string, boolean>)[name]);
+      const dirty = Boolean((state.dirty as Record<string, boolean>)[name]);
+      const runtime = visibilityRef.current[name] ?? {
+        visible: true,
+        required: false,
+        disabled: false,
+      };
+      const effectiveDescriptor = {
+        ...descriptor,
+        _required: descriptor._required || runtime.required,
+        _disabled: descriptor._disabled || runtime.disabled,
+      };
+      const showError = Boolean(rawError) && (touched || state.submitCount > 0);
+
+      const onChange = (nextValue: SchemaValues<S>[K]) => {
+        void handleChange(name, nextValue);
+      };
+      const onBlur = () => {
+        void handleBlur(name);
+      };
+      const onFocus = () => {
+        trackFieldFocus(name);
+      };
+
+      const renderState: FieldRenderState<SchemaValues<S>[K]> = {
+        name,
+        value: value as SchemaValues<S>[K],
+        label: effectiveDescriptor._label ?? '',
+        placeholder: effectiveDescriptor._placeholder,
+        allValues: state.values as Record<string, unknown>,
+        error: showError ? rawError : null,
+        touched,
+        dirty,
+        validating: state.status === 'validating',
+        disabled: Boolean(effectiveDescriptor._disabled),
+        required: Boolean(effectiveDescriptor._required),
+        hint: effectiveDescriptor._hint,
+        ...(effectiveDescriptor._type === 'select' ||
+        effectiveDescriptor._type === 'radio'
+          ? { options: effectiveDescriptor._options }
+          : {}),
+        ...(effectiveDescriptor._type === 'otp'
+          ? { otpLength: effectiveDescriptor._otpLength }
+          : {}),
+      };
+
+      return {
+        ...renderState,
+        name,
+        visible: runtime.visible && !effectiveDescriptor._hidden,
+        setValue: onChange,
+        onChange,
+        onBlur,
+        onFocus,
+        focus: () => {
+          focusField(name);
+        },
+        blur: () => {
+          blurField(name);
+        },
+        validate: () => validate(name),
+        setError: (message: string) => {
+          setError(name, message);
+        },
+        clearError: () => {
+          clearErrors(name);
+        },
+        registerFocusable: (target: FocusableFieldHandle | null) => {
+          registerFocusable(name, target);
+        },
+      } as FieldController<S, K>;
+    },
+    [
+      blurField,
+      clearErrors,
+      focusField,
+      handleBlur,
+      handleChange,
+      registerFocusable,
+      setError,
+      stateRef,
+      trackFieldFocus,
+      validate,
+    ],
+  );
+
   const Form = useMemo((): FormComponent<S, 'web'> => {
     const FormInner = ({
       children,
@@ -171,7 +321,11 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedUi = mergeWebFormUi(globalUiRef.current?.form, className, style);
+      const mergedUi = mergeWebFormUi(
+        globalStylesRef.current?.(stateRef.current)?.form,
+        className,
+        style,
+      );
 
       const onPress = (event?: { preventDefault?: () => void }) => {
         event?.preventDefault?.();
@@ -203,7 +357,7 @@ export function useFormBridge<const S extends FormSchema>(
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
       const mergedUi = mergeWebSubmitUi(
-        globalUiRef.current?.submit,
+        globalStylesRef.current?.(stateRef.current)?.submit,
         className,
         style,
         loadingText,
@@ -238,7 +392,7 @@ export function useFormBridge<const S extends FormSchema>(
       type LocalFieldComponent = FieldComponents<S, 'web'>[typeof name];
       type LocalFieldProps = Parameters<LocalFieldComponent>[0];
 
-      const FieldComponent: LocalFieldComponent = (props?: LocalFieldProps) => {
+      const Field: LocalFieldComponent = (props?: LocalFieldProps) => {
         const descriptor = descriptorsRef.current[name];
 
         if (!descriptor) {
@@ -247,7 +401,7 @@ export function useFormBridge<const S extends FormSchema>(
 
         const mergedProps = mergeFieldStyleProps(
           'web',
-          globalUiRef.current?.field,
+          globalStylesRef.current?.(stateRef.current)?.field,
           props,
         ) as LocalFieldProps;
         const state = stateRef.current;
@@ -284,10 +438,10 @@ export function useFormBridge<const S extends FormSchema>(
           return null;
         }
 
-        const renderProps = {
+        const renderState: FieldRenderState<unknown> = {
           name,
           value,
-          label: effectiveDescriptor._label,
+          label: effectiveDescriptor._label ?? '',
           placeholder: effectiveDescriptor._placeholder,
           allValues: state.values as Record<string, unknown>,
           error: showError ? error : null,
@@ -297,8 +451,17 @@ export function useFormBridge<const S extends FormSchema>(
           disabled: effectiveDescriptor._disabled,
           required: effectiveDescriptor._required,
           hint: effectiveDescriptor._hint,
-          options: effectiveDescriptor._options,
-          otpLength: effectiveDescriptor._otpLength,
+          ...(effectiveDescriptor._type === 'select' ||
+          effectiveDescriptor._type === 'radio'
+            ? { options: effectiveDescriptor._options }
+            : {}),
+          ...(effectiveDescriptor._type === 'otp'
+            ? { otpLength: effectiveDescriptor._otpLength }
+            : {}),
+        };
+
+        const renderProps: FieldRenderProps<unknown> = {
+          ...renderState,
           onChange: (nextValue: unknown) => {
             void handleChange(name, nextValue);
           },
@@ -308,6 +471,9 @@ export function useFormBridge<const S extends FormSchema>(
           onFocus: () => {
             trackFieldFocus(name);
           },
+        };
+        const registerFocusableForField = (target: FocusableFieldHandle | null) => {
+          registerFocusable(name, target);
         };
 
         if (effectiveDescriptor._customRender) {
@@ -320,6 +486,7 @@ export function useFormBridge<const S extends FormSchema>(
             descriptor: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
+            registerFocusable: registerFocusableForField,
           });
         }
 
@@ -341,6 +508,7 @@ export function useFormBridge<const S extends FormSchema>(
             strengthMeta: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
+            registerFocusable: registerFocusableForField,
           });
         }
 
@@ -350,6 +518,7 @@ export function useFormBridge<const S extends FormSchema>(
             descriptor: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
+            registerFocusable: registerFocusableForField,
           });
         }
 
@@ -366,6 +535,7 @@ export function useFormBridge<const S extends FormSchema>(
             descriptor: effectiveDescriptor,
             ...renderProps,
             extra: mergedProps,
+            registerFocusable: registerFocusableForField,
           });
         }
 
@@ -374,20 +544,112 @@ export function useFormBridge<const S extends FormSchema>(
           descriptor: effectiveDescriptor,
           ...renderProps,
           extra: mergedProps,
+          registerFocusable: registerFocusableForField,
         });
       };
 
-      (FieldComponent as React.FC).displayName = `FormBridgeField(${name})`;
+      (Field as React.FC).displayName = `FormBridgeField(${name})`;
 
-      result[name] = FieldComponent;
+      result[name] = Field;
     }
 
     return result;
-  }, [descriptors, handleBlur, handleChange, stateRef, trackFieldFocus]);
+  }, [
+    descriptors,
+    handleBlur,
+    handleChange,
+    registerFocusable,
+    stateRef,
+    trackFieldFocus,
+  ]);
+
+  const FieldError = useMemo(() => {
+    const FieldErrorInner = (props: FieldErrorProps<S, 'web'>) => {
+      const { name, render, ...rest } = props;
+      const state = stateRef.current;
+      const error = (state.errors as Record<string, string | undefined>)[name] ?? null;
+      const touched = Boolean((state.touched as Record<string, boolean>)[name]);
+      const showError = Boolean(error) && (touched || state.submitCount > 0);
+
+      if (!showError || !error) return null;
+
+      if (render) {
+        return render({ name, error }) as React.ReactElement;
+      }
+
+      return React.createElement(
+        'span',
+        {
+          role: 'alert',
+          'data-fb-slot': 'error',
+          'data-fb-name': name,
+          className: (rest as { className?: string }).className,
+          style: {
+            color: WEB_ERROR_COLOR,
+            ...(rest as { style?: React.CSSProperties }).style,
+          },
+        },
+        error,
+      );
+    };
+
+    FieldErrorInner.displayName = 'FormBridgeFieldError';
+    return FieldErrorInner;
+  }, [stateRef]);
+
+  const FieldLabel = useMemo(() => {
+    const FieldLabelInner = (props: FieldLabelProps<S, 'web'>) => {
+      const { name, children, render, renderRequiredMark, ...rest } = props;
+      const descriptor = descriptorsRef.current[name];
+      const label = children ?? descriptor?._label ?? '';
+      const required = Boolean(descriptor?._required);
+      const htmlFor = (rest as { htmlFor?: string }).htmlFor ?? name;
+
+      if (render) {
+        return render({
+          name,
+          label: String(label),
+          required,
+          htmlFor,
+        }) as React.ReactElement;
+      }
+
+      const requiredMark = required
+        ? (renderRequiredMark?.() ??
+          React.createElement(
+            'span',
+            {
+              'data-fb-slot': 'required-mark',
+              style: { color: WEB_ERROR_COLOR },
+            },
+            '*',
+          ))
+        : null;
+
+      return React.createElement(
+        'label',
+        {
+          htmlFor,
+          'data-fb-slot': 'label',
+          'data-fb-name': name,
+          className: (rest as { className?: string }).className,
+          style: (rest as { style?: React.CSSProperties }).style,
+        },
+        label,
+        requiredMark,
+      );
+    };
+
+    FieldLabelInner.displayName = 'FormBridgeLabel';
+    return FieldLabelInner;
+  }, []);
 
   return {
     Form,
     fields,
+    FieldError,
+    FieldLabel,
+    fieldController,
     state: stateRef.current,
     visibility,
     isLoadingDraft,

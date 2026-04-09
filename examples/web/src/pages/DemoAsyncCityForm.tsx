@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { field, type SchemaValues, useFormBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 type CityDeps = { country?: string };
 
@@ -61,9 +61,7 @@ export function DemoAsyncCityForm() {
   const { Form, fields } = useFormBridge(schema);
 
   return (
-    <Form
-      onSubmit={(values: SchemaValues<typeof schema>) => console.log('values', values)}
-    >
+    <Form onSubmit={(values) => console.log('values', values)}>
       <fields.country />
       <fields.city />
       <Form.Submit>Submit</Form.Submit>

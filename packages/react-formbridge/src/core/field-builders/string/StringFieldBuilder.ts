@@ -1,12 +1,12 @@
-import type { FieldType } from '../../../types';
+import type { FieldType } from '../../../types/field';
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 // ─── String field builder ────────────────────────────────────────────────────
 export class StringFieldBuilder<
   TType extends FieldType = FieldType,
 > extends BaseFieldBuilder<string, TType> {
-  constructor(type: TType, label: string) {
-    super(type, label, '');
+  constructor(type: TType) {
+    super(type, '');
   }
 
   /** Minimum string length */

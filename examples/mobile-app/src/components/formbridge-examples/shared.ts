@@ -34,6 +34,12 @@ export const ACCESS_ROLE_OPTIONS = [
   { label: 'Admin', value: 'admin' },
 ] satisfies SelectOption[];
 
+export const ROUTING_MODE_OPTIONS = [
+  { label: 'Auto assign', value: 'auto' },
+  { label: 'Manual review', value: 'review' },
+  { label: 'Priority route', value: 'priority' },
+] satisfies SelectOption[];
+
 export const CITY_DIRECTORY_OPTIONS = [
   { label: 'Paris', value: 'paris' },
   { label: 'Lyon', value: 'lyon' },
@@ -91,7 +97,27 @@ export async function searchCityDirectory({
 
 export function createNativeFieldProps() {
   return {
-    ui: {
+    styles: {
+      root: s.fieldRoot,
+      label: s.fieldLabel,
+      input: s.fieldInput,
+      error: s.fieldError,
+      hint: s.fieldHint,
+      checkboxRow: s.checkboxRow,
+      checkboxBox: s.checkboxBox,
+      checkboxLabel: s.checkboxLabel,
+      optionTrigger: s.fieldInput,
+      optionRow: s.optionRow,
+      optionLabel: s.optionLabel,
+      modalBackdrop: s.optionModalBackdrop,
+      modalCard: s.optionModalCard,
+    },
+  };
+}
+
+export function createNativeFormUi(): FormBridgeUiOptions {
+  return {
+    field: {
       styles: {
         root: s.fieldRoot,
         label: s.fieldLabel,
@@ -106,30 +132,6 @@ export function createNativeFieldProps() {
         optionLabel: s.optionLabel,
         modalBackdrop: s.optionModalBackdrop,
         modalCard: s.optionModalCard,
-      },
-    },
-  };
-}
-
-export function createNativeFormUi(): FormBridgeUiOptions {
-  return {
-    field: {
-      ui: {
-        styles: {
-          root: s.fieldRoot,
-          label: s.fieldLabel,
-          input: s.fieldInput,
-          error: s.fieldError,
-          hint: s.fieldHint,
-          checkboxRow: s.checkboxRow,
-          checkboxBox: s.checkboxBox,
-          checkboxLabel: s.checkboxLabel,
-          optionTrigger: s.fieldInput,
-          optionRow: s.optionRow,
-          optionLabel: s.optionLabel,
-          modalBackdrop: s.optionModalBackdrop,
-          modalCard: s.optionModalCard,
-        },
       },
     },
     submit: {

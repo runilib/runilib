@@ -33,35 +33,35 @@ const wizardStorage = (() => {
   };
 })();
 
-const wizardUi = createNativeFormUi();
+const wizardUi = () => createNativeFormUi();
 
 const WIZARD_STEPS = [
   {
     id: 'personal',
     label: 'Personal info',
     schema: {
-      firstName: field.text('First name').required('First name is required'),
-      lastName: field.text('Last name').required('Last name is required'),
-      email: field.email('Email').required('Email is required'),
+      firstName: field.text().required('First name is required'),
+      lastName: field.text().required('Last name is required'),
+      email: field.email().required('Email is required'),
     } satisfies FormSchema,
     formOptions: {
-      globalUi: wizardUi,
+      globalStyles: wizardUi,
     },
   },
   {
     id: 'company',
     label: 'Company info',
     schema: {
-      companyName: field.text('Company name').required('Company name is required'),
-      role: field.text('Role').required('Role is required'),
-      workspace: field.select('Workspace').options([
+      companyName: field.text().required('Company name is required'),
+      role: field.text().required('Role is required'),
+      workspace: field.select().options([
         { label: 'Operations workspace', value: 'ops' },
         { label: 'Revenue cockpit', value: 'revenue' },
         { label: 'Product squad', value: 'product' },
       ]),
     } satisfies FormSchema,
     formOptions: {
-      globalUi: wizardUi,
+      globalStyles: wizardUi,
     },
   },
   {
@@ -69,7 +69,7 @@ const WIZARD_STEPS = [
     label: 'Review',
     schema: {} satisfies FormSchema,
     formOptions: {
-      globalUi: wizardUi,
+      globalStyles: wizardUi,
     },
   },
 ] as const;

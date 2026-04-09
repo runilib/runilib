@@ -1,13 +1,6 @@
-import type { MaskChar } from './types';
+import type { BuiltinMaskChar } from './types';
 
 export const MASKS = {
-  // Phones
-  // PHONE_FR: '+33 9 99 99 99 99',
-  // PHONE_FR_LOCAL: '09 99 99 99 99',
-  // PHONE_US: '+1 (999) 999-9999',
-  // PHONE_UK: '+44 99999 999999',
-  // PHONE_INTL: '+99 999 999 9999',
-
   // Cards
   CARD_16: '9999 9999 9999 9999',
   CARD_AMEX: '9999 999999 99999',
@@ -51,7 +44,7 @@ export const MASKS = {
 
 export type MaskPreset = keyof typeof MASKS;
 
-export const MASK_REGEX: Record<MaskChar, RegExp> = {
+export const MASK_REGEX: Record<BuiltinMaskChar, RegExp> = {
   '9': /\d/,
   a: /[a-zA-Z]/,
   '*': /./,

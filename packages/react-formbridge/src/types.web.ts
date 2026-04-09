@@ -1,5 +1,6 @@
 import type {
   FormSchema,
+  FieldErrorProps as SharedErrorMessageProps,
   ExtraFieldProps as SharedExtraFieldProps,
   FieldComponent as SharedFieldComponent,
   FieldComponents as SharedFieldComponents,
@@ -8,6 +9,7 @@ import type {
   FormBridgeUiOptions as SharedFormBridgeUiOptions,
   FormComponent as SharedFormComponent,
   FormProps as SharedFormProps,
+  FieldLabelProps as SharedLabelProps,
   SubmitButtonComponent as SharedSubmitButtonComponent,
   SubmitButtonProps as SharedSubmitButtonProps,
   UseFormBridgeReturn as SharedUseFormBridgeReturn,
@@ -21,16 +23,24 @@ import type {
 export type {
   AsyncValidator,
   FieldBehaviorConfig,
+  FieldController,
   FieldDescriptor,
+  FieldRenderHandlers,
   FieldRenderProps,
+  FieldRenderState,
   FieldState,
   FieldStyleValue,
   FieldType,
+  FileValue,
+  FocusableFieldHandle,
   FormSchema,
   FormState,
   FormStatus,
   OptionsFetcher,
   OptionsFetcherContext,
+  PasswordRule,
+  PhoneCountryLayout,
+  PhoneValue,
   Platform,
   PlatformStyleValue,
   ResolvedFieldDescriptor,
@@ -40,6 +50,10 @@ export type {
   SchemaValues,
   SelectOption,
   SelectPickerRenderContext,
+  StrengthConfig,
+  StrengthResult,
+  StrengthRuleConfig,
+  StrengthScoreLevel,
   SyncValidator,
   ValidationTrigger,
   Validator,
@@ -47,10 +61,16 @@ export type {
   WebCheckboxFieldUiOverrides,
   WebFieldSlot,
   WebFieldUiOverrides,
+  WebFileFieldItemRenderContext,
+  WebFileFieldRenderContext,
   WebFileFieldUiOverrides,
   WebGlobalFieldUiOverrides,
   WebOtpFieldUiOverrides,
+  WebPasswordFieldRenderContext,
+  WebPasswordFieldRuleRenderContext,
   WebPasswordFieldUiOverrides,
+  WebPhoneFieldCountryItemRenderContext,
+  WebPhoneFieldRenderContext,
   WebPhoneFieldUiOverrides,
   WebRadioFieldUiOverrides,
   WebSelectFieldUiOverrides,
@@ -58,6 +78,7 @@ export type {
   WebTextareaFieldUiOverrides,
   WebTextFieldUiOverrides,
 } from './types';
+export type { FieldAutoComplete } from './types/autoComplete';
 
 export type FieldUiOverrides = WebFieldUiOverrides;
 export type FieldStyleProps<TUi = WebFieldUiOverrides> = SharedFieldStyleProps<
@@ -79,6 +100,8 @@ export type FormUiOverrides = WebFormUiOverrides;
 export type SubmitUiOverrides = WebSubmitUiOverrides;
 export type FormBridgeUiOptions = SharedFormBridgeUiOptions<'web'>;
 export type UseFormOptions<S extends FormSchema> = SharedUseFormOptions<S, 'web'>;
+export type FieldErrorProps<S extends FormSchema> = SharedErrorMessageProps<S, 'web'>;
+export type FieldLabelProps<S extends FormSchema> = SharedLabelProps<S, 'web'>;
 export type UseFormBridgeReturn<S extends FormSchema> = SharedUseFormBridgeReturn<
   S,
   'web'

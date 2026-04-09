@@ -341,14 +341,6 @@ export default function Contributing() {
                 color: 'purple',
                 cta: 'Join Discord',
               },
-              // {
-              //   icon: <TwitterIcon />,
-              //   name: 'Twitter / X',
-              //   desc: 'Follow @runilib for releases, tips and community highlights.',
-              //   href: 'https://twitter.com/runilib',
-              //   color: 'blue',
-              //   cta: 'Follow us',
-              // },
             ].map((ch) => (
               <CommunityCard
                 key={ch.name}
@@ -536,7 +528,7 @@ const anchorBase = css`
 const PrimaryAnchor = styled.a`
   ${anchorBase}
   background: ${({ theme }) => theme.teal};
-  color: #080a0e;
+  color: #fff;
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 28px ${({ theme }) => theme.teal}55;
@@ -734,7 +726,7 @@ const StepNum = styled.div`
   width: 48px; height: 48px;
   border-radius: 50%;
   background: ${({ theme }) => theme.teal};
-  color: #080a0e;
+  color: "#fff";
   font-family: 'DM Mono', monospace;
   font-size: 13px;
   font-weight: 700;

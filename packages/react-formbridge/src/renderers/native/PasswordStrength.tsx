@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import {
   Pressable,
   type StyleProp,
-  StyleSheet,
   Text,
   TextInput,
   type TextInputProps,
@@ -11,17 +10,24 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import type { FieldRenderProps } from '../../types';
+import type { PasswordStrengthMeta } from '../../core/field-builders/password/PasswordWithStrength';
+import { scorePassword } from '../../core/field-builders/password/strength';
+import type {
+  ExtraFieldProps,
+  FieldRenderProps,
+  FocusableFieldHandle,
+  NativePasswordFieldUiOverrides,
+} from '../../types';
 import {
-  defaultBorderColor,
-  type NativeBaseUiOverrides,
-  type NativeExtraProps,
+  defaultErrorChromeStyle,
+  defaultErrorTextStyle,
+  defaultRequiredMarkStyle,
   type ResolvedNativeFieldUi,
   shouldHighlightOnError,
   sx,
 } from './shared';
 
-type PasswordStrengthDescriptor = {
+type PasswordStrengthDescriptor = PasswordStrengthMeta & {
   _label: string;
   _placeholder?: string;
   _required: boolean;
@@ -30,55 +36,82 @@ type PasswordStrengthDescriptor = {
   _ui?: ResolvedNativeFieldUi;
 };
 
-type NativePasswordStrengthUiOverrides = NativeBaseUiOverrides & {
-  styles?: NativeBaseUiOverrides['styles'] &
-    Partial<{
-      strengthRow: StyleProp<ViewStyle>;
-      strengthBar: StyleProp<ViewStyle>;
-      strengthFill: StyleProp<ViewStyle>;
-      toggle: StyleProp<ViewStyle>;
-      toggleText: StyleProp<TextStyle>;
-      strengthLabel: StyleProp<TextStyle>;
-    }>;
-};
-
 interface Props extends FieldRenderProps<string> {
   strengthMeta: PasswordStrengthDescriptor;
-  extra?: NativeExtraProps<NativePasswordStrengthUiOverrides>;
+  extra?: ExtraFieldProps<NativePasswordFieldUiOverrides, 'native'>;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
-function scorePassword(value: string): number {
-  if (!value) return 0;
+const defaultPasswordShellStyle: ViewStyle = {
+  position: 'relative',
+  justifyContent: 'center',
+};
 
-  let score = 0;
-  if (value.length >= 8) score += 1;
-  if (value.length >= 12) score += 1;
-  if (/[A-Z]/.test(value)) score += 1;
-  if (/[a-z]/.test(value)) score += 1;
-  if (/\d/.test(value)) score += 1;
-  if (/[^A-Za-z0-9]/.test(value)) score += 1;
+const defaultPasswordInputStyle: TextStyle = {
+  minHeight: 52,
+  paddingRight: 92,
+};
 
-  return Math.min(score, 5);
+const defaultToggleStyle: ViewStyle = {
+  position: 'absolute',
+  right: 10,
+  top: 9,
+  minHeight: 34,
+  minWidth: 34,
+  paddingHorizontal: 12,
+  borderRadius: 999,
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  backgroundColor: 'rgba(255,255,255,0.92)',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const defaultToggleTextStyle: TextStyle = {
+  color: '#334155',
+  fontSize: 12,
+  fontWeight: '700',
+};
+
+function resolveText<TContext>(
+  override: string | ((ctx: TContext) => string) | undefined,
+  fallback: string,
+  context: TContext,
+): string {
+  if (typeof override === 'function') {
+    return override(context);
+  }
+
+  return override ?? fallback;
 }
 
-function getStrengthMeta(score: number): {
-  label: string;
-  width: `${number}%`;
-} {
-  if (score <= 1) return { label: 'Weak', width: '20%' };
-  if (score === 2) return { label: 'Fair', width: '40%' };
-  if (score === 3) return { label: 'Good', width: '60%' };
-  if (score === 4) return { label: 'Strong', width: '80%' };
-  return { label: 'Very strong', width: '100%' };
-}
+export const NativePasswordStrength = ({
+  strengthMeta: d,
+  extra,
+  registerFocusable,
+  ...p
+}: Props) => {
+  const {
+    styles,
+    hideLabel,
+    rootProps,
+    labelProps,
+    inputProps,
+    hintProps,
+    errorProps,
+    renderLabel,
+    renderHint,
+    renderError,
+    renderRequiredMark,
+    showPasswordText,
+    hidePasswordText,
+    renderToggleContent,
+    renderStrengthLabel,
+    renderStrengthEntropy,
+    renderStrengthRowContent,
+    renderStrengthRule,
+  } = extra ?? {};
 
-export const NativePasswordStrength = ({ strengthMeta: d, extra, ...p }: Props) => {
-  const ui = extra?.ui;
-  const highlightOnError = shouldHighlightOnError(
-    ui?.highlightOnError,
-    d._ui?.highlightOnError,
-  );
-  const { rootProps, labelProps, inputProps, hintProps, errorProps } = ui ?? {};
   const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
@@ -94,35 +127,157 @@ export const NativePasswordStrength = ({ strengthMeta: d, extra, ...p }: Props) 
   const { style: errorPropsStyle, ...errorPropsRest } = (errorProps ?? {}) as {
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
+
   const id = d._ui?.id ?? p.name;
-  const hasError = Boolean(p.error);
   const [visible, setVisible] = useState(false);
+  const hasError = Boolean(p.error);
+  const highlightOnError = shouldHighlightOnError(
+    extra?.highlightOnError,
+    d._ui?.highlightOnError,
+  );
+  const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
 
-  const score = useMemo(() => scorePassword(p.value ?? ''), [p.value]);
-  const strength = useMemo(() => getStrengthMeta(score), [score]);
+  const result = useMemo(() => {
+    if (!p.value) {
+      return null;
+    }
 
-  const requiredMark = ui?.renderRequiredMark?.() ?? (
-    <Text style={sx(styles.requiredMark, ui?.styles?.requiredMark)}>*</Text>
+    return scorePassword(p.value, {
+      ...d._strengthConfig,
+      levels: d._strengthCustomLevels ?? d._strengthConfig.levels,
+      minAcceptableScore: d._strengthMinAccept,
+    });
+  }, [d._strengthConfig, d._strengthCustomLevels, d._strengthMinAccept, p.value]);
+  const renderContext = useMemo(
+    () => ({
+      disabled: p.disabled,
+      hasValue: Boolean(p.value),
+      revealed: visible,
+      result,
+      valueLength: p.value?.length ?? 0,
+    }),
+    [p.disabled, p.value, result, visible],
+  );
+  const resolvedShowPasswordText = resolveText(showPasswordText, 'Show', renderContext);
+  const resolvedHidePasswordText = resolveText(hidePasswordText, 'Hide', renderContext);
+  const defaultToggleContent = (
+    <Text style={sx(defaultToggleTextStyle, styles?.toggleText)}>
+      {visible ? resolvedHidePasswordText : resolvedShowPasswordText}
+    </Text>
+  );
+  const resolvedToggleContent =
+    renderToggleContent?.({
+      ...renderContext,
+      defaultContent: defaultToggleContent,
+    }) ?? defaultToggleContent;
+  const defaultStrengthBarContent =
+    d._strengthShowBar && result ? (
+      <View
+        style={sx(
+          {
+            borderRadius: d._strengthBarRadius,
+            minHeight: d._strengthBarHeight,
+            overflow: 'hidden',
+          },
+          styles?.strengthBar,
+        )}
+      >
+        <View
+          style={sx(
+            {
+              backgroundColor: result.color,
+              borderRadius: d._strengthBarRadius,
+              minHeight: d._strengthBarHeight,
+              width: `${result.percent}%`,
+            },
+            styles?.strengthFill,
+          )}
+        />
+      </View>
+    ) : null;
+  const defaultStrengthLabelContent =
+    d._strengthShowLabel && result ? (
+      <Text
+        style={sx(
+          {
+            color: result.color,
+          },
+          styles?.strengthLabel,
+        )}
+      >
+        {result.label}
+      </Text>
+    ) : null;
+  const resolvedStrengthLabelContent =
+    result && defaultStrengthLabelContent
+      ? (renderStrengthLabel?.({
+          ...renderContext,
+          defaultContent: defaultStrengthLabelContent,
+          result,
+        }) ?? defaultStrengthLabelContent)
+      : null;
+  const defaultStrengthEntropyContent =
+    d._strengthShowEntropy && result ? (
+      <Text style={sx(styles?.strengthEntropy)}>{result.entropy} bits</Text>
+    ) : null;
+  const resolvedStrengthEntropyContent =
+    result && defaultStrengthEntropyContent
+      ? (renderStrengthEntropy?.({
+          ...renderContext,
+          defaultContent: defaultStrengthEntropyContent,
+          result,
+        }) ?? defaultStrengthEntropyContent)
+      : null;
+  const defaultStrengthMetaContent =
+    resolvedStrengthLabelContent || resolvedStrengthEntropyContent ? (
+      <View style={sx(styles?.strengthMeta)}>
+        {resolvedStrengthLabelContent}
+        {resolvedStrengthEntropyContent}
+      </View>
+    ) : null;
+  const defaultStrengthRowContent =
+    result && (defaultStrengthBarContent || defaultStrengthMetaContent) ? (
+      <View style={sx(styles?.strengthRow)}>
+        {defaultStrengthBarContent}
+        {defaultStrengthMetaContent}
+      </View>
+    ) : null;
+  const resolvedStrengthRowContent =
+    result && defaultStrengthRowContent
+      ? (renderStrengthRowContent?.({
+          ...renderContext,
+          defaultBarContent: defaultStrengthBarContent,
+          defaultContent: defaultStrengthRowContent,
+          defaultEntropyContent: resolvedStrengthEntropyContent,
+          defaultLabelContent: resolvedStrengthLabelContent,
+          defaultMetaContent: defaultStrengthMetaContent,
+          result,
+        }) ?? defaultStrengthRowContent)
+      : null;
+  const shouldRenderRules =
+    d._strengthShowRules &&
+    result &&
+    p.value &&
+    !(d._strengthHideRulesWhenValid && result.acceptable && !p.error);
+
+  const requiredMark = renderRequiredMark?.() ?? (
+    <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
   );
 
   return (
     <View
-      style={sx(
-        styles.root,
-        extra?.style as StyleProp<ViewStyle>,
-        ui?.styles?.root,
-        rootPropsStyle,
-      )}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
       {...rootPropsRest}
     >
-      {!ui?.hideLabel &&
-        (ui?.renderLabel?.({
+      {!hideLabel &&
+        (renderLabel?.({
           id,
           label: p.label,
           required: Boolean(d._required),
+          name: p.name,
         }) ?? (
           <Text
-            style={sx(styles.label, ui?.styles?.label, labelPropsStyle)}
+            style={sx(styles?.label, labelPropsStyle)}
             {...labelPropsRest}
           >
             {p.label}
@@ -130,9 +285,10 @@ export const NativePasswordStrength = ({ strengthMeta: d, extra, ...p }: Props) 
           </Text>
         ))}
 
-      <View style={styles.inputRow}>
+      <View style={sx(defaultPasswordShellStyle)}>
         <TextInput
           nativeID={id}
+          ref={registerFocusable}
           testID={d._ui?.testID}
           value={p.value ?? ''}
           placeholder={p.placeholder ?? d._placeholder}
@@ -144,12 +300,9 @@ export const NativePasswordStrength = ({ strengthMeta: d, extra, ...p }: Props) 
           onBlur={p.onBlur}
           onFocus={p.onFocus}
           style={sx(
-            styles.input,
-            {
-              borderColor: defaultBorderColor(hasError, highlightOnError),
-              backgroundColor: p.disabled ? '#f9fafb' : '#fff',
-            },
-            ui?.styles?.input,
+            defaultPasswordInputStyle,
+            controlErrorStyle,
+            styles?.input,
             inputPropsStyle,
           )}
           {...(inputPropsRest as Partial<TextInputProps>)}
@@ -157,42 +310,63 @@ export const NativePasswordStrength = ({ strengthMeta: d, extra, ...p }: Props) 
 
         <Pressable
           onPress={() => setVisible((prev) => !prev)}
-          style={sx(styles.toggle, ui?.styles?.toggle)}
+          style={sx(defaultToggleStyle, styles?.toggle)}
         >
-          <Text style={sx(styles.toggleText, ui?.styles?.toggleText)}>
-            {visible ? 'Hide' : 'Show'}
-          </Text>
+          {resolvedToggleContent}
         </Pressable>
       </View>
 
-      <View style={sx(styles.strengthRow, ui?.styles?.strengthRow)}>
-        <View style={sx(styles.strengthBar, ui?.styles?.strengthBar)}>
-          <View
-            style={sx(
-              styles.strengthFill,
-              { width: strength.width },
-              ui?.styles?.strengthFill,
-            )}
-          />
+      {resolvedStrengthRowContent}
+
+      {shouldRenderRules ? (
+        <View style={sx(styles?.rulesList)}>
+          {result.rules.map((rule, index) => {
+            const defaultRuleContent = (
+              <>
+                <Text style={sx(styles?.ruleBullet)}>{rule.passed ? '✓' : ''}</Text>
+                <Text style={sx(styles?.ruleText)}>{rule.label}</Text>
+              </>
+            );
+            const customRule = renderStrengthRule?.({
+              ...renderContext,
+              defaultContent: defaultRuleContent,
+              index,
+              rule,
+            });
+
+            return customRule ? (
+              <View
+                key={rule.id}
+                style={sx(styles?.ruleItem)}
+              >
+                {customRule}
+              </View>
+            ) : (
+              <View
+                key={rule.id}
+                style={sx(styles?.ruleItem)}
+              >
+                <Text style={sx(styles?.ruleBullet)}>{rule.passed ? '✓' : ''}</Text>
+                <Text style={sx(styles?.ruleText)}>{rule.label}</Text>
+              </View>
+            );
+          })}
         </View>
-        <Text style={sx(styles.strengthLabel, ui?.styles?.strengthLabel)}>
-          {strength.label}
-        </Text>
-      </View>
+      ) : null}
 
       {p.error
-        ? (ui?.renderError?.({ id: `${id}-error`, error: p.error }) ?? (
+        ? (renderError?.({ id, name: p.name, error: p.error }) ?? (
             <Text
-              style={sx(styles.error, ui?.styles?.error, errorPropsStyle)}
+              style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
               {...errorPropsRest}
             >
               {p.error}
             </Text>
           ))
         : p.hint
-          ? (ui?.renderHint?.({ id: `${id}-hint`, hint: p.hint }) ?? (
+          ? (renderHint?.({ id, name: p.name, hint: p.hint }) ?? (
               <Text
-                style={sx(styles.hint, ui?.styles?.hint, hintPropsStyle)}
+                style={sx(styles?.hint, hintPropsStyle)}
                 {...hintPropsRest}
               >
                 {p.hint}
@@ -202,67 +376,3 @@ export const NativePasswordStrength = ({ strengthMeta: d, extra, ...p }: Props) 
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  root: {
-    gap: 6,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  requiredMark: {
-    color: '#ef4444',
-  },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  input: {
-    flex: 1,
-    minHeight: 44,
-    borderWidth: 1.5,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: '#111827',
-  },
-  toggle: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  toggleText: {
-    color: '#4f46e5',
-    fontWeight: '600',
-  },
-  strengthRow: {
-    gap: 6,
-  },
-  strengthBar: {
-    height: 8,
-    borderRadius: 999,
-    backgroundColor: '#e5e7eb',
-    overflow: 'hidden',
-  },
-  strengthFill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: '#6366f1',
-  },
-  strengthLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-  },
-  error: {
-    fontSize: 12,
-    color: '#ef4444',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-});

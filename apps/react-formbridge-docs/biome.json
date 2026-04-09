@@ -1,0 +1,12 @@
+{
+  "root": false,
+  "extends": "//",
+  "files": {
+    "includes": ["src/**", "vite.config.ts"]
+  },
+  "javascript": {
+    "formatter": {
+      "lineWidth": 90
+    }
+  }
+}

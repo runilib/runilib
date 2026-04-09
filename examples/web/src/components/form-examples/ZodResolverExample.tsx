@@ -12,18 +12,19 @@ export function ZodResolverExample() {
 
   const formSchema = useMemo(
     () => ({
-      workspaceName: field.text('Workspace').placeholder('Runi Commerce'),
+      workspaceName: field.text().label('Workspace name').placeholder('Runi Commerce'),
       contactEmail: field
-        .email('Contact email')
+        .email()
+        .label('Contact email')
         .placeholder('founder@runilib.dev')
         .behavior({
           inputMode: 'email',
           autoComplete: 'email',
         }),
-      teamSize: field.text('Team size').placeholder('12').behavior({
+      teamSize: field.text().label('Team size').placeholder('12').behavior({
         inputMode: 'numeric',
       }),
-      launchDate: field.date('Launch date').placeholder('2026-05-10'),
+      launchDate: field.date().label('Launch date').placeholder('2026-05-10'),
     }),
     [],
   );
@@ -46,7 +47,7 @@ export function ZodResolverExample() {
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
     resolver,
   });
 

@@ -12,12 +12,13 @@ export function CssModulesStylingExample() {
   const schema = useMemo(
     () => ({
       projectName: field
-        .text('Project name')
+        .text()
+        .label('Project name')
         .required('Project name is required')
         .trim()
         .placeholder('Billing redesign'),
       ownerEmail: field
-        .email('Owner email')
+        .email()
         .required('Owner email is required')
         .trim()
         .placeholder('owner@runilib.dev')
@@ -26,14 +27,15 @@ export function CssModulesStylingExample() {
           inputMode: 'email',
         }),
       department: field
-        .select('Department')
+        .select()
         .options(CUSTOMER_DEPARTMENTS)
         .required('Pick a department'),
       launchNotes: field
-        .textarea('Launch notes')
+        .textarea()
+        .required()
         .placeholder('Describe the tone, audience, and review plan.')
         .hint(
-          'Textarea inherits the same CSS Modules theme through the shared ui layer.',
+          'Textarea inherits the same CSS Modules theme through the shared props layer.',
         ),
     }),
     [],
@@ -42,7 +44,7 @@ export function CssModulesStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -55,9 +57,13 @@ export function CssModulesStylingExample() {
     <StylingExampleFrame
       recipeName="CSS Modules"
       accent="#f59e0b"
-      title="Apply one ui theme to every generated field"
+      title="Apply one props theme to every generated field"
       description="This mirrors the dashboard strategy: CSS Modules define the chrome once, then useFormBridge applies it to inputs, textareas, select fields, and submit buttons."
-      highlights={['global ui theme', 'shared class names', 'screen-level consistency']}
+      highlights={[
+        'global props theme',
+        'shared class names',
+        'screen-level consistency',
+      ]}
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
@@ -91,25 +97,15 @@ export function CssModulesStylingExample() {
         </div>
 
         <fields.department
-          ui={{
-            styles: {
-              select: {
-                background: 'rgba(17, 24, 39, 0.76)',
-                borderColor: 'rgba(245, 158, 11, 0.24)',
-              },
+          styles={{
+            select: {
+              background: 'rgba(17, 24, 39, 0.76)',
+              borderColor: 'rgba(245, 158, 11, 0.24)',
             },
           }}
         />
 
-        <fields.launchNotes
-          ui={{
-            styles: {
-              textarea: {
-                minHeight: 110,
-              },
-            },
-          }}
-        />
+        <fields.launchNotes />
 
         <div className={styles.footerRow}>
           <p className={styles.helperText}>

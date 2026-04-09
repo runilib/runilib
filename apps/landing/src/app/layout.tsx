@@ -1,42 +1,38 @@
 /** biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON-LD requires dangerouslySetInnerHTML — standard Next.js pattern */
 import type { Metadata } from 'next';
 import { AppShell } from '../components/AppShell';
+import { LIBRARIES } from '../data/libraries';
+
+const BASE_URL = 'https://runilib.dev';
+const GOOGLE_SITE_VERIFICATION = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://runilib.dev'),
+  metadataBase: new URL(BASE_URL),
+  applicationName: 'RUNILIB',
+  referrer: 'origin-when-cross-origin',
   title: {
-    default:
-      'RUNILIB — React Universal Libs | Cross-Platform Libraries for React & React Native',
+    default: 'RUNILIB | Cross-Platform React & React Native Ecosystem',
     template: '%s | RUNILIB',
   },
   description:
-    'RUNILIB is a cross-platform collection of open-source libraries for React and React Native. Build forms, onboarding tours, tooltips and more with one shared TypeScript API across web and mobile. Zero config, fully typed, tree-shakeable.',
+    'RUNILIB is an open-source ecosystem of React and React Native libraries built around shared APIs, strong TypeScript DX, accessible defaults and reusable building blocks for web and mobile.',
   keywords: [
-    'React',
-    'React Native',
-    'cross-platform',
-    'TypeScript',
-    'form builder',
-    'onboarding tour',
-    'tooltip',
-    'UI library',
-    'open source',
     'RUNILIB',
-    'react-formbridge',
-    'react-walkit',
-    'schema-driven forms',
-    'spotlight tour',
-    'React form validation',
-    'React Native form builder',
-    'cross-platform onboarding',
-    'accessible tooltip',
-    'WCAG',
-    'tree-shakeable',
-    'npm packages',
-    'React hooks',
-    'useFormBridge',
-    'WalkitProvider',
-    'mobile web shared code',
+    'React libraries',
+    'React Native libraries',
+    'cross-platform React ecosystem',
+    'cross-platform React Native ecosystem',
+    'TypeScript UI libraries',
+    'open source React packages',
+    'open source React Native packages',
+    'React developer tools',
+    'React Native developer tools',
+    'composable packages',
+    'web and mobile shared API',
+    'tree-shakeable npm packages',
+    'accessible React components',
+    'shared TypeScript API',
+    'cross-platform npm packages',
   ],
   authors: [{ name: 'RUNILIB', url: 'https://github.com/runilib' }],
   creator: 'RUNILIB',
@@ -45,27 +41,28 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://runilib.dev',
+    url: BASE_URL,
     siteName: 'RUNILIB',
-    title: 'RUNILIB — Cross-Platform React & React Native Libraries',
+    title: 'RUNILIB | Cross-Platform React & React Native Ecosystem',
     description:
-      'Open-source cross-platform libraries. One TypeScript API for web & native. Forms, onboarding tours, tooltips and more.',
+      'Open-source ecosystem of React and React Native libraries with shared TypeScript APIs for web and mobile.',
     images: [
       {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'RUNILIB — React Universal Libs',
+        alt: 'RUNILIB — Cross-platform React and React Native ecosystem',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RUNILIB — React Universal Libs',
+    title: 'RUNILIB | React & React Native Libraries',
     description:
-      'Cross-platform React & React Native libraries. One codebase, web & native. Forms, tours, tooltips.',
+      'Open-source ecosystem of React and React Native libraries with shared APIs for web and mobile.',
     creator: '@runilib',
+    site: '@runilib',
     images: ['/opengraph-image'],
   },
   robots: {
@@ -80,36 +77,61 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://runilib.dev',
+    canonical: BASE_URL,
   },
   icons: {
     icon: '/favicon.svg?v=runilib-2',
     shortcut: '/favicon.svg?v=runilib-2',
     apple: '/favicon.svg?v=runilib-2',
   },
-  other: {
-    'google-site-verification': '',
-  },
+  ...(GOOGLE_SITE_VERIFICATION
+    ? {
+        other: {
+          'google-site-verification': GOOGLE_SITE_VERIFICATION,
+        },
+      }
+    : {}),
 };
 
 function JsonLd() {
+  const libraryCollectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'RUNILIB libraries',
+    url: `${BASE_URL}/libraries`,
+    description:
+      'Collection of cross-platform React and React Native libraries with shared APIs and consistent TypeScript DX.',
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: LIBRARIES.map((lib, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${BASE_URL}/libraries/${lib.id}`,
+        name: lib.name,
+        description: lib.desc,
+      })),
+    },
+  };
+
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'RUNILIB',
-    url: 'https://runilib.dev',
-    logo: 'https://runilib.dev/brand/runilib-icon.svg',
+    url: BASE_URL,
+    logo: `${BASE_URL}/brand/runilib-icon.svg`,
     sameAs: ['https://github.com/runilib', 'https://www.npmjs.com/org/runilib'],
     description:
-      'Open-source cross-platform React & React Native libraries. Forms, onboarding tours, tooltips and more.',
+      'Open-source ecosystem of React and React Native libraries with shared APIs and packages built for web and mobile.',
   };
 
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'RUNILIB',
-    url: 'https://runilib.dev',
-    description: 'Cross-platform collection of libraries for React and React Native.',
+    url: BASE_URL,
+    inLanguage: ['en', 'fr'],
+    description:
+      'Cross-platform collection of React and React Native libraries with one shared TypeScript API.',
     publisher: {
       '@type': 'Organization',
       name: 'RUNILIB',
@@ -126,7 +148,7 @@ function JsonLd() {
     license: 'https://opensource.org/licenses/MIT',
     runtimePlatform: ['Node.js', 'Browser', 'React Native'],
     description:
-      'Cross-platform React & React Native libraries: react-formbridge (forms), react-walkit (onboarding tours & tooltips).',
+      'Cross-platform ecosystem of React and React Native libraries with shared TypeScript APIs and reusable building blocks.',
   };
 
   return (
@@ -147,6 +169,12 @@ function JsonLd() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(softwareSchema),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(libraryCollectionSchema),
         }}
       />
     </>

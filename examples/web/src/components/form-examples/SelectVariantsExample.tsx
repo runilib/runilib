@@ -12,6 +12,7 @@ import {
   ACCESS_ROLE_OPTIONS,
   CITY_DIRECTORY_OPTIONS,
   createDemoFormUi,
+  SEAT_PACK_OPTIONS,
   searchCityDirectory,
   simulateSubmitDelay,
   WORKSPACE_OPTIONS,
@@ -87,18 +88,26 @@ export function SelectVariantsExample() {
 
   const schema = useMemo(
     () => ({
-      workspace: field
-        .select('Workspace')
+      defaultWorkspace: field
+        .select()
         .options(WORKSPACE_OPTIONS)
+        .label('Default workspace')
+        .defaultSelected('revenue')
         .required('Select a workspace')
-        .hint('Classic select fed by local options.'),
+        .hint('Starts selected immediately. No empty option is injected on load.'),
+      seatPack: field
+        .select()
+        .options(SEAT_PACK_OPTIONS)
+        .label('Seat pack')
+        .defaultSelected(12)
+        .hint('Numeric options stay numbers in form state, even after changes.'),
       accessRole: field
-        .radio('Access role')
+        .radio()
         .options(ACCESS_ROLE_OPTIONS)
         .required('Choose an access role')
         .hint('Radio keeps every choice visible at once.'),
       cityLookup: field
-        .select('City lookup')
+        .select()
         .optionsFrom(searchCityDirectory, {
           key: 'field-variant-city-search',
           debounce: 220,
@@ -118,14 +127,18 @@ export function SelectVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, watchAll } = form;
   const values = watchAll();
   const workspaceLabel =
-    WORKSPACE_OPTIONS.find((option) => option.value === values.workspace)?.label ??
-    'No workspace yet';
+    WORKSPACE_OPTIONS.find((option) => option.value === values.defaultWorkspace)?.label ??
+    'No workspace preset';
+  const seatPackLabel =
+    SEAT_PACK_OPTIONS.find((option) => option.value === values.seatPack)?.label ??
+    'No seat pack yet';
+  const seatPackType = typeof values.seatPack;
   const roleLabel =
     ACCESS_ROLE_OPTIONS.find((option) => option.value === values.accessRole)?.label ??
     'No role chosen';
@@ -137,17 +150,24 @@ export function SelectVariantsExample() {
     <FieldVariantFrame
       familyName="Select"
       accent="#60a5fa"
-      title="Three ways to let users choose one value"
-      description="This demo combines the native select renderer, the radio-group variant, and a searchable async lookup with a fully custom picker modal."
-      highlights={['local options', 'radio group', 'optionsFrom', 'custom renderPicker']}
+      title="Preselected, numeric, radio, and remote select flows"
+      description="This demo now covers the new select behavior too: a classic select can boot with a real default-selected value, numeric option values stay typed, radio still keeps every choice visible, and async search can still own a custom picker surface."
+      highlights={[
+        'defaultSelected',
+        'numeric values preserved',
+        'radio group',
+        'custom renderPicker',
+      ]}
       preview={
         <>
-          <p className={styles.resolverPreviewValue}>{cityLabel}</p>
+          <p className={styles.resolverPreviewValue}>{workspaceLabel}</p>
           <p className={styles.resolverPreviewMuted}>
-            Current selection stack across the three select flavors.
+            Seat pack is currently stored as {seatPackLabel}, and the runtime value stays
+            a {seatPackType}.
           </p>
           <div className={styles.points}>
             <span className={styles.point}>{workspaceLabel}</span>
+            <span className={styles.point}>{seatPackLabel}</span>
             <span className={styles.point}>{roleLabel}</span>
             <span className={styles.point}>{cityLabel}</span>
           </div>
@@ -156,10 +176,10 @@ export function SelectVariantsExample() {
       snapshot={lastSubmission ?? values}
       submittedLabel={
         lastSubmission
-          ? `Saved ${String(lastSubmission.cityLookup ?? 'picker state')}`
+          ? `Saved ${String(lastSubmission.cityLookup ?? lastSubmission.defaultWorkspace ?? 'picker state')}`
           : null
       }
-      footer="Use the classic select for short lists, radio for always-visible choices, and searchable + renderPicker when the picker needs its own custom surface."
+      footer="Use defaultSelected when the form should open on a meaningful choice, keep numeric option values when downstream logic expects numbers, then reach for renderPicker only when the picker genuinely needs its own UI."
     >
       <Form
         className={styles.resolverForm}
@@ -168,7 +188,10 @@ export function SelectVariantsExample() {
           setLastSubmission(submittedValues as Record<string, unknown>);
         }}
       >
-        <fields.workspace />
+        <div className={styles.formRow}>
+          <fields.defaultWorkspace />
+          <fields.seatPack />
+        </div>
         <fields.accessRole />
         <fields.cityLookup />
 

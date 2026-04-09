@@ -14,7 +14,7 @@ import { isMaskedDescriptor } from '../core/field-builders/mask/MaskedFieldBuild
 import { isStrengthDescriptor } from '../core/field-builders/password/PasswordWithStrength';
 import type { PhoneValue } from '../core/field-builders/phone/countries';
 import { isPhoneDescriptor } from '../core/field-builders/phone/PhoneFieldBuilder';
-import { NativeAsyncAutocompleteField } from '../renderers/native/AsyncAutocompleteField';
+import { AsyncAutocompleteField } from '../renderers/native/AsyncAutocompleteField';
 import { NativeField } from '../renderers/native/Field';
 import { NativeFileField } from '../renderers/native/FileField';
 import { NativeMaskedInput } from '../renderers/native/MaskedInput';
@@ -22,6 +22,12 @@ import { NativePasswordStrength } from '../renderers/native/PasswordStrength';
 import { NativePhoneInput } from '../renderers/native/PhoneInput';
 import type {
   FieldComponents,
+  FieldController,
+  FieldErrorProps,
+  FieldLabelProps,
+  FieldRenderProps,
+  FieldRenderState,
+  FocusableFieldHandle,
   FormComponent,
   FormSchema,
   SchemaValues,
@@ -68,14 +74,56 @@ export function useFormBridge<const S extends FormSchema>(
     trackFieldFocus,
   } = core;
 
-  const globalUiRef = useRef(options.globalUi);
-  globalUiRef.current = options.globalUi;
+  const globalStylesRef = useRef(options.globalStyles);
+  globalStylesRef.current = options.globalStyles;
 
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
 
   const visibilityRef = useRef(visibility);
   visibilityRef.current = visibility;
+
+  const focusableRegistryRef = useRef<Record<string, FocusableFieldHandle | null>>({});
+
+  const registerFocusable = useCallback(
+    (name: string, target: FocusableFieldHandle | null) => {
+      if (target) {
+        focusableRegistryRef.current[name] = target;
+        return;
+      }
+
+      delete focusableRegistryRef.current[name];
+    },
+    [],
+  );
+
+  const focusField = useCallback(
+    (name: string) => {
+      const target = focusableRegistryRef.current[name];
+
+      if (target?.focus) {
+        target.focus();
+        return;
+      }
+
+      trackFieldFocus(name);
+    },
+    [trackFieldFocus],
+  );
+
+  const blurField = useCallback(
+    (name: string) => {
+      const target = focusableRegistryRef.current[name];
+
+      if (target?.blur) {
+        target.blur();
+        return;
+      }
+
+      void handleBlur(name);
+    },
+    [handleBlur],
+  );
 
   const setValue = useCallback(
     <K extends keyof S>(name: K, value: SchemaValues<S>[K]) => {
@@ -178,6 +226,107 @@ export function useFormBridge<const S extends FormSchema>(
     await handleSubmit();
   }, [handleSubmit]);
 
+  const fieldController = useCallback(
+    <K extends keyof S & string>(name: K): FieldController<S, K> => {
+      const descriptor = descriptorsRef.current[name];
+
+      if (!descriptor) {
+        throw new Error(`Unknown field controller requested for "${name}".`);
+      }
+
+      const state = stateRef.current;
+      const rawValue = (state.values as Record<string, unknown>)[name];
+      const value =
+        rawValue ??
+        descriptor._defaultValue ??
+        (descriptor._type === 'checkbox' || descriptor._type === 'switch' ? false : '');
+      const rawError = (state.errors as Record<string, string | undefined>)[name] ?? null;
+      const touched = Boolean((state.touched as Record<string, boolean>)[name]);
+      const dirty = Boolean((state.dirty as Record<string, boolean>)[name]);
+      const runtime = visibilityRef.current[name] ?? {
+        visible: true,
+        required: false,
+        disabled: false,
+      };
+      const effectiveDescriptor = {
+        ...descriptor,
+        _required: descriptor._required || runtime.required,
+        _disabled: descriptor._disabled || runtime.disabled,
+      };
+      const showError = Boolean(rawError) && (touched || state.submitCount > 0);
+
+      const onChange = (nextValue: SchemaValues<S>[K]) => {
+        void handleChange(name, nextValue);
+      };
+      const onBlur = () => {
+        void handleBlur(name);
+      };
+      const onFocus = () => {
+        trackFieldFocus(name);
+      };
+
+      const renderState: FieldRenderState<SchemaValues<S>[K]> = {
+        name,
+        value: value as SchemaValues<S>[K],
+        label: effectiveDescriptor._label ?? '',
+        placeholder: effectiveDescriptor._placeholder,
+        allValues: state.values as Record<string, unknown>,
+        error: showError ? rawError : null,
+        touched,
+        dirty,
+        validating: state.status === 'validating',
+        disabled: Boolean(effectiveDescriptor._disabled),
+        required: Boolean(effectiveDescriptor._required),
+        hint: effectiveDescriptor._hint,
+        ...(effectiveDescriptor._type === 'select' ||
+        effectiveDescriptor._type === 'radio'
+          ? { options: effectiveDescriptor._options }
+          : {}),
+        ...(effectiveDescriptor._type === 'otp'
+          ? { otpLength: effectiveDescriptor._otpLength }
+          : {}),
+      };
+
+      return {
+        ...renderState,
+        name,
+        visible: runtime.visible && !effectiveDescriptor._hidden,
+        setValue: onChange,
+        onChange,
+        onBlur,
+        onFocus,
+        focus: () => {
+          focusField(name);
+        },
+        blur: () => {
+          blurField(name);
+        },
+        validate: () => validate(name),
+        setError: (message: string) => {
+          setError(name, message);
+        },
+        clearError: () => {
+          clearErrors(name);
+        },
+        registerFocusable: (target: FocusableFieldHandle | null) => {
+          registerFocusable(name, target);
+        },
+      } as FieldController<S, K>;
+    },
+    [
+      blurField,
+      clearErrors,
+      focusField,
+      handleBlur,
+      handleChange,
+      registerFocusable,
+      setError,
+      stateRef,
+      trackFieldFocus,
+      validate,
+    ],
+  );
+
   const Form = useMemo((): FormComponent<S, 'native'> => {
     const FormInner = ({
       children,
@@ -192,7 +341,10 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedUi = mergeNativeFormUi(globalUiRef.current?.form, style);
+      const mergedUi = mergeNativeFormUi(
+        globalStylesRef.current?.(stateRef.current).form,
+        style,
+      );
 
       return React.createElement(
         View,
@@ -216,7 +368,7 @@ export function useFormBridge<const S extends FormSchema>(
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
       const mergedUi = mergeNativeSubmitUi(
-        globalUiRef.current?.submit,
+        globalStylesRef.current?.(stateRef.current)?.submit,
         style,
         loadingText,
       );
@@ -298,7 +450,7 @@ export function useFormBridge<const S extends FormSchema>(
       type LocalFieldComponent = FieldComponents<S, 'native'>[typeof name];
       type LocalFieldProps = Parameters<LocalFieldComponent>[0];
 
-      const FieldComponent: LocalFieldComponent = (props?: LocalFieldProps) => {
+      const Field: LocalFieldComponent = (props?: LocalFieldProps) => {
         const descriptor = descriptorsRef.current[name];
 
         if (!descriptor) {
@@ -307,7 +459,7 @@ export function useFormBridge<const S extends FormSchema>(
 
         const mergedProps = mergeFieldStyleProps(
           'native',
-          globalUiRef.current?.field,
+          globalStylesRef.current?.(stateRef.current)?.field,
           props,
         );
         const state = stateRef.current;
@@ -347,9 +499,10 @@ export function useFormBridge<const S extends FormSchema>(
           return null;
         }
 
-        const commonProps = {
+        const renderState: FieldRenderState<unknown> = {
           name,
-          label: effectiveDescriptor._label,
+          value,
+          label: effectiveDescriptor._label ?? '',
           placeholder: effectiveDescriptor._placeholder,
           allValues: state.values as Record<string, unknown>,
           error: showError ? error : null,
@@ -359,8 +512,17 @@ export function useFormBridge<const S extends FormSchema>(
           disabled: effectiveDescriptor._disabled,
           required: effectiveDescriptor._required,
           hint: effectiveDescriptor._hint,
-          options: effectiveDescriptor._options,
-          otpLength: effectiveDescriptor._otpLength,
+          ...(effectiveDescriptor._type === 'select' ||
+          effectiveDescriptor._type === 'radio'
+            ? { options: effectiveDescriptor._options }
+            : {}),
+          ...(effectiveDescriptor._type === 'otp'
+            ? { otpLength: effectiveDescriptor._otpLength }
+            : {}),
+        };
+
+        const commonProps: FieldRenderProps<unknown> = {
+          ...renderState,
           onChange: (nextValue: unknown) => {
             void handleChange(name, nextValue);
           },
@@ -370,6 +532,9 @@ export function useFormBridge<const S extends FormSchema>(
           onFocus: () => {
             trackFieldFocus(name);
           },
+        };
+        const registerFocusableForField = (target: FocusableFieldHandle | null) => {
+          registerFocusable(name, target);
         };
 
         if (effectiveDescriptor._customRender) {
@@ -382,16 +547,11 @@ export function useFormBridge<const S extends FormSchema>(
         if (isMaskedDescriptor(effectiveDescriptor)) {
           return (
             <NativeMaskedInput
-              descriptor={
-                effectiveDescriptor as React.ComponentProps<
-                  typeof NativeMaskedInput
-                >['descriptor']
-              }
+              descriptor={effectiveDescriptor}
               {...commonProps}
               value={typeof value === 'string' ? value : ''}
-              extra={
-                mergedProps as React.ComponentProps<typeof NativeMaskedInput>['extra']
-              }
+              extra={mergedProps}
+              registerFocusable={registerFocusableForField}
             />
           );
         }
@@ -406,13 +566,16 @@ export function useFormBridge<const S extends FormSchema>(
               }
               value={value as React.ComponentProps<typeof NativeFileField>['value']}
               error={showError ? error : null}
+              label={effectiveDescriptor._label ?? name}
+              hint={effectiveDescriptor._hint}
+              name={name}
               onChange={(nextValue) => {
                 void handleChange(name, nextValue);
               }}
               onBlur={() => {
                 void handleBlur(name);
               }}
-              extra={mergedProps as React.ComponentProps<typeof NativeFileField>['extra']}
+              extra={mergedProps}
             />
           );
         }
@@ -430,11 +593,8 @@ export function useFormBridge<const S extends FormSchema>(
               }
               {...commonProps}
               value={typeof value === 'string' ? value : ''}
-              extra={
-                mergedProps as React.ComponentProps<
-                  typeof NativePasswordStrength
-                >['extra']
-              }
+              extra={mergedProps}
+              registerFocusable={registerFocusableForField}
             />
           );
         }
@@ -442,19 +602,14 @@ export function useFormBridge<const S extends FormSchema>(
         if (isPhoneDescriptor(effectiveDescriptor)) {
           return (
             <NativePhoneInput
-              descriptor={
-                effectiveDescriptor as React.ComponentProps<
-                  typeof NativePhoneInput
-                >['descriptor']
-              }
+              descriptor={effectiveDescriptor}
               {...commonProps}
               value={value as string | PhoneValue | null}
               onChange={(nextValue) => {
                 void handleChange(name, nextValue);
               }}
-              extra={
-                mergedProps as React.ComponentProps<typeof NativePhoneInput>['extra']
-              }
+              extra={mergedProps}
+              registerFocusable={registerFocusableForField}
             />
           );
         }
@@ -465,23 +620,18 @@ export function useFormBridge<const S extends FormSchema>(
           effectiveDescriptor._searchable
         ) {
           return (
-            <NativeAsyncAutocompleteField
+            <AsyncAutocompleteField
               descriptor={
                 {
                   ...effectiveDescriptor,
                   _asyncOptions: effectiveDescriptor._asyncOptions,
-                } as React.ComponentProps<
-                  typeof NativeAsyncAutocompleteField
-                >['descriptor']
+                } as React.ComponentProps<typeof AsyncAutocompleteField>['descriptor']
               }
               {...commonProps}
               value={typeof value === 'string' ? value : ''}
               dependencyValues={state.values as Record<string, unknown>}
-              extra={
-                mergedProps as React.ComponentProps<
-                  typeof NativeAsyncAutocompleteField
-                >['extra']
-              }
+              extra={mergedProps}
+              registerFocusable={registerFocusableForField}
             />
           );
         }
@@ -491,22 +641,101 @@ export function useFormBridge<const S extends FormSchema>(
             descriptor={effectiveDescriptor}
             {...commonProps}
             value={value}
-            extra={mergedProps as React.ComponentProps<typeof NativeField>['extra']}
+            extra={mergedProps}
+            registerFocusable={registerFocusableForField}
           />
         );
       };
 
-      (FieldComponent as React.FC).displayName = `FormBridgeField(${name})`;
+      (Field as React.FC).displayName = `FormBridgeField(${name})`;
 
-      result[name] = FieldComponent;
+      result[name] = Field;
     }
 
     return result;
-  }, [descriptors, handleBlur, handleChange, stateRef, trackFieldFocus]);
+  }, [
+    descriptors,
+    handleBlur,
+    handleChange,
+    registerFocusable,
+    stateRef,
+    trackFieldFocus,
+  ]);
+
+  const FieldError = useMemo(() => {
+    const FieldErrorInner = (props: FieldErrorProps<S, 'native'>) => {
+      const { name, render, style } = props;
+      const state = stateRef.current;
+      const error = (state.errors as Record<string, string | undefined>)[name] ?? null;
+      const touched = Boolean((state.touched as Record<string, boolean>)[name]);
+      const showError = Boolean(error) && (touched || state.submitCount > 0);
+
+      if (!showError || !error) return null;
+
+      if (render) {
+        return render({ name, error }) as React.ReactElement;
+      }
+
+      return React.createElement(
+        Text,
+        {
+          style: [
+            { color: '#ef4444', fontSize: 12, marginTop: 4 },
+            style as StyleProp<TextStyle>,
+          ],
+        },
+        error,
+      );
+    };
+
+    FieldErrorInner.displayName = 'FormBridgeFieldError';
+    return FieldErrorInner;
+  }, [stateRef]);
+
+  const FieldLabel = useMemo(() => {
+    const FieldLabelInner = (props: FieldLabelProps<S, 'native'>) => {
+      const { name, children, render, renderRequiredMark, style } = props;
+      const descriptor = descriptorsRef.current[name];
+      const label = children ?? descriptor?._label ?? '';
+      const required = Boolean(descriptor?._required);
+
+      if (render) {
+        return render({
+          name,
+          label: String(label),
+          required,
+          htmlFor: name,
+        }) as React.ReactElement;
+      }
+
+      const requiredMark = required
+        ? (renderRequiredMark?.() ??
+          React.createElement(Text, { style: { color: '#ef4444' } }, ' *'))
+        : null;
+
+      return React.createElement(
+        Text,
+        {
+          style: [
+            { fontSize: 14, fontWeight: '500' as const, marginBottom: 4 },
+            style as StyleProp<TextStyle>,
+          ],
+        },
+        label,
+        requiredMark,
+      );
+    };
+
+    FieldLabelInner.displayName = 'FormBridgeLabel';
+    return FieldLabelInner;
+  }, []);
 
   return {
     Form,
     fields,
+    FieldError,
+    FieldLabel,
+    fieldController,
     state: stateRef.current,
     visibility,
     isLoadingDraft,

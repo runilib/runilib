@@ -10,10 +10,10 @@ export const fr: Translations = {
   },
   hero: {
     badge: 'React Universal Libs · Open Source · MIT',
-    title: 'Un seul code.',
-    titleAccent: 'Web et Native.',
+    title: 'Librairies React & React Native.',
+    titleAccent: 'Un seul code. Web et Native.',
     subtitle:
-      'RUNILIB est une collection de librairies cross-platform pour React et React Native, conçue pour éviter de dupliquer le travail entre le web et le mobile. Elle réunit des packages ciblés, une API cohérente et une DX TypeScript solide pour construire formulaires, app tours, tooltips et plus encore sur les deux plateformes.',
+      'RUNILIB est un écosystème open source pour React et React Native, conçu pour éviter de dupliquer le travail entre le web et le mobile grâce à des APIs partagées, des packages composables et une DX TypeScript solide.',
     cta: 'Démarrer maintenant',
     ctaSecondary: 'Voir les librairies',
     stats: {
@@ -62,7 +62,7 @@ export const fr: Translations = {
     label: 'Écosystème',
     title: 'Des libs avec une seule philosophie',
     subtitle:
-      "Chaque librairie résout un problème différent avec la même API unifiée, et s'accompagne d'une documentation complète avec installation, référence API et exemples concrets.",
+      "Explore l'écosystème open source RUNILIB pour React et React Native. Chaque package inclut installation, référence API et exemples TypeScript concrets pensés pour le web et le mobile.",
     docs: 'Documentation',
     github: 'GitHub ↗',
   },
@@ -100,7 +100,7 @@ export const fr: Translations = {
     readDocs: 'Lire la doc',
   },
   docs: {
-    title: 'Documentation',
+    title: 'Documentation & Guides',
     searchPlaceholder: 'Rechercher...',
   },
   ecosystem: {

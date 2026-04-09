@@ -3,7 +3,7 @@ import type {
   AsyncOptionsConfig,
   OptionsFetcher,
 } from '../../../hooks/shared/useAsyncOptions';
-import type { SelectOption, Validator } from '../../../types';
+import type { SelectOption, Validator } from '../../../types/field';
 import { BaseFieldBuilder } from '../base/BaseFieldBuilder';
 
 const OPTIONS_VALIDATOR_TAG = Symbol('options-validator');
@@ -26,11 +26,34 @@ function isEmptyValue(value: unknown): boolean {
   return value === null || value === undefined || value === '';
 }
 
+function normalizeSelectValue(
+  value: SelectOption | SelectOption['value'] | '' | null | undefined,
+): SelectOption['value'] | '' {
+  if (value === '' || value == null) {
+    return '';
+  }
+
+  return typeof value === 'object' ? value.value : value;
+}
+
 export class SelectFieldBuilder<
   TType extends 'select' | 'radio' = 'select' | 'radio',
-> extends BaseFieldBuilder<string, TType> {
-  constructor(type: TType, label: string) {
-    super(type, label, '');
+> extends BaseFieldBuilder<SelectOption['value'] | '', TType> {
+  constructor(type: TType) {
+    super(type, '');
+  }
+
+  defaultValue(value: SelectOption | SelectOption['value'] | ''): this {
+    this._desc._defaultValue = normalizeSelectValue(value);
+    return this;
+  }
+
+  defaultSelected(value: SelectOption | SelectOption['value']): this {
+    return this.defaultValue(value);
+  }
+
+  selected(value: SelectOption | SelectOption['value']): this {
+    return this.defaultValue(value);
   }
 
   options(options: SelectOption[] | string[]): this {
@@ -44,12 +67,14 @@ export class SelectFieldBuilder<
       (validator) => !isOptionsValidator(validator),
     );
 
-    const optionsValidator = tagOptionsValidator<string>((value: string) => {
+    const optionsValidator = tagOptionsValidator<SelectOption['value'] | ''>((value) => {
       if (isEmptyValue(value)) {
         return null;
       }
 
-      return normalizedOptions.some((option) => option.value === value)
+      return normalizedOptions.some(
+        (option) => String(option.value) === String(normalizeSelectValue(value)),
+      )
         ? null
         : 'Please select a valid option.';
     });

@@ -14,10 +14,10 @@ export function ZodResolverExample() {
 
   const formSchema = useMemo(
     () => ({
-      workspaceName: field.text('Workspace'),
-      contactEmail: field.email('Contact email'),
-      teamSize: field.text('Team size'),
-      launchDate: field.date('Launch date'),
+      workspaceName: field.text().label('Workspace name').placeholder('New workspace'),
+      contactEmail: field.email().label('Contact email').placeholder('ops@runilib.dev'),
+      teamSize: field.text().label('Team size').placeholder('12'),
+      launchDate: field.date().label('Launch date').placeholder('YYYY-MM-DD'),
     }),
     [],
   );

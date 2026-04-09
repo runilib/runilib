@@ -6,21 +6,29 @@
  * Native: expo-image-picker + expo-document-picker (optional deps).
  */
 
+import type { FieldDescriptor } from '../../../types/field';
+import type { ConditionPredicate, FieldConditions } from '../../conditions/conditions';
+import { DEFAULT_FIELD_CONDITIONS } from '../../conditions/conditions';
 import type { FileFieldMeta, FileSourceType, FileValue } from './types';
 
 // ─── Builder ──────────────────────────────────────────────────────────────────
 
 export class FileFieldBuilder {
   private readonly _meta: FileFieldMeta;
-  private readonly _label: string;
+  private _conditions: FieldConditions = {
+    ...DEFAULT_FIELD_CONDITIONS,
+    visible: [],
+    required: [],
+    disabled: [],
+  };
+  private _label!: string;
   private _required: boolean = false;
   private _requiredMsg: string = 'Please select a file.';
   private _hint?: string;
   private _disabled: boolean = false;
   private _hidden: boolean = false;
 
-  constructor(label: string) {
-    this._label = label;
+  constructor() {
     this._meta = {
       _fileEnabled: true,
       _fileAccept: [],
@@ -42,6 +50,11 @@ export class FileFieldBuilder {
 
   // ── Standard field methods ────────────────────────────────────
 
+  label(label: string): this {
+    this._label = label;
+    return this;
+  }
+
   required(message?: string): this {
     this._required = true;
     this._requiredMsg = message ?? 'Please select a file.';
@@ -60,6 +73,102 @@ export class FileFieldBuilder {
 
   hidden(value = true): this {
     this._hidden = value;
+    return this;
+  }
+
+  visibleWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+    if (typeof fieldOrFn === 'function') {
+      this._conditions.visible.push({ type: 'fn', fn: fieldOrFn });
+    } else {
+      this._conditions.visible.push({
+        type: 'eq',
+        field: fieldOrFn,
+        value: value ?? true,
+      });
+    }
+
+    return this;
+  }
+
+  visibleWhenNot(field: string, value: unknown): this {
+    this._conditions.visible.push({ type: 'neq', field, value });
+    return this;
+  }
+
+  visibleWhenTruthy(field: string): this {
+    this._conditions.visible.push({ type: 'truthy', field });
+    return this;
+  }
+
+  visibleWhenFalsy(field: string): this {
+    this._conditions.visible.push({ type: 'falsy', field });
+    return this;
+  }
+
+  visibleWhenAny(pairs: Array<[string, unknown]>): this {
+    this._conditions.visible.push({
+      op: 'OR',
+      conditions: pairs.map(([field, pairValue]) => ({
+        type: 'eq' as const,
+        field,
+        value: pairValue,
+      })),
+    });
+    return this;
+  }
+
+  requiredWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+    if (typeof fieldOrFn === 'function') {
+      this._conditions.required.push({ type: 'fn', fn: fieldOrFn });
+    } else {
+      this._conditions.required.push({
+        type: 'eq',
+        field: fieldOrFn,
+        value: value ?? true,
+      });
+    }
+
+    return this;
+  }
+
+  requiredWhenAny(pairs: Array<[string, unknown]>): this {
+    this._conditions.required.push({
+      op: 'OR',
+      conditions: pairs.map(([field, pairValue]) => ({
+        type: 'eq' as const,
+        field,
+        value: pairValue,
+      })),
+    });
+    return this;
+  }
+
+  disabledWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+    if (typeof fieldOrFn === 'function') {
+      this._conditions.disabled.push({ type: 'fn', fn: fieldOrFn });
+    } else {
+      this._conditions.disabled.push({
+        type: 'eq',
+        field: fieldOrFn,
+        value: value ?? true,
+      });
+    }
+
+    return this;
+  }
+
+  resetOnHide(): this {
+    this._conditions.onHide = 'reset';
+    return this;
+  }
+
+  keepOnHide(): this {
+    this._conditions.onHide = 'keep';
+    return this;
+  }
+
+  clearOnHide(): this {
+    this._conditions.onHide = 'clear';
     return this;
   }
 
@@ -151,10 +260,11 @@ export class FileFieldBuilder {
 
   /** Preset for profile photo upload (images only, 5MB max, preview enabled). */
   static profilePhoto(label = 'Profile photo'): FileFieldBuilder {
-    return new FileFieldBuilder(label)
+    return new FileFieldBuilder()
       .accept(['image/jpeg', 'image/png', 'image/webp'])
       .maxSize(5 * 1024 * 1024)
       .preview()
+      .label(label)
       .source('gallery')
       .resize(1024, 1024, 0.85)
       .dragLabel('Click to upload a profile photo')
@@ -163,20 +273,22 @@ export class FileFieldBuilder {
 
   /** Preset for document upload (PDF only, 10MB max). */
   static document(label = 'Document'): FileFieldBuilder {
-    return new FileFieldBuilder(label)
+    return new FileFieldBuilder()
       .accept(['application/pdf'])
       .maxSize(10 * 1024 * 1024)
       .source('documents')
+      .label(label)
       .dragLabel('Click to upload a PDF document')
       .hint('PDF only. Max 10 MB.');
   }
 
   /** Preset for a generic attachment (images + PDF, multiple). */
   static attachments(label = 'Attachments', max = 5): FileFieldBuilder {
-    return new FileFieldBuilder(label)
+    return new FileFieldBuilder()
       .accept(['image/*', 'application/pdf'])
       .maxSize(10 * 1024 * 1024)
       .multiple(max)
+      .label(label)
       .preview()
       .dragLabel(`Drag & drop up to ${max} files, or click to browse`)
       .hint(`Images or PDF. Max 10 MB each. Up to ${max} files.`);
@@ -184,12 +296,13 @@ export class FileFieldBuilder {
 
   /** Preset for CSV/Excel import. */
   static spreadsheet(label = 'Import file'): FileFieldBuilder {
-    return new FileFieldBuilder(label)
+    return new FileFieldBuilder()
       .accept([
         'text/csv',
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       ])
+      .label(label)
       .maxSize(20 * 1024 * 1024)
       .source('documents')
       .dragLabel('Drop your CSV or Excel file here')
@@ -198,6 +311,9 @@ export class FileFieldBuilder {
 
   // ─── Build descriptor ─────────────────────────────────────────
 
+  /**
+   * @internal
+   */
   _build() {
     const validators: ((v: unknown) => string | null)[] = [];
 
@@ -260,12 +376,24 @@ export class FileFieldBuilder {
       _trim: false,
       _debounce: 0,
       _validators: validators,
+      _conditions: {
+        ...this._conditions,
+        visible: [...this._conditions.visible],
+        required: [...this._conditions.required],
+        disabled: [...this._conditions.disabled],
+      },
       ...this._meta,
     };
   }
 }
 
-export type BuiltFileDescriptor = ReturnType<FileFieldBuilder['_build']>;
+export type BuiltFileDescriptor = FieldDescriptor<
+  FileValue | FileValue[] | null,
+  'file'
+> &
+  FileFieldMeta & {
+    _conditions?: FieldConditions;
+  };
 
 /** Check if a descriptor is a file field */
 export function isFileDescriptor(d: object): d is BuiltFileDescriptor {

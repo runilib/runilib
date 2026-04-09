@@ -13,11 +13,11 @@ export function EmployeeBadgeMaskExample() {
   const formSchema = useMemo(
     () => ({
       teammateName: field
-        .text('Teammate name')
+        .text()
         .required('Teammate name is required')
         .placeholder('Ava Stone'),
       badgeCode: field
-        .masked('Badge code', 'EMP-9999-LL')
+        .masked('EMP-9999-LL')
         .tokens({
           L: /[A-Z]/,
         })
@@ -32,7 +32,7 @@ export function EmployeeBadgeMaskExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalUi: createDemoFormUi(styles),
+    globalStyles: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -74,7 +74,7 @@ export function EmployeeBadgeMaskExample() {
       >
         <div className={styles.formRow}>
           <fields.teammateName />
-          <fields.badgeCode ui={compactFieldUi} />
+          <fields.badgeCode {...compactFieldUi} />
         </div>
 
         <div className={styles.footerRow}>

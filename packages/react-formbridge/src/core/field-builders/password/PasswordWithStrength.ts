@@ -8,6 +8,7 @@ export interface PasswordStrengthMeta {
   _strengthShowBar: boolean;
   _strengthShowLabel: boolean;
   _strengthShowRules: boolean;
+  _strengthHideRulesWhenValid: boolean;
   _strengthShowEntropy: boolean;
   _strengthBarHeight: number;
   _strengthBarRadius: number;
@@ -24,6 +25,7 @@ export const DEFAULT_STRENGTH_META: PasswordStrengthMeta = {
   _strengthShowBar: true,
   _strengthShowLabel: true,
   _strengthShowRules: false,
+  _strengthHideRulesWhenValid: false,
   _strengthShowEntropy: false,
   _strengthBarHeight: 5,
   _strengthBarRadius: 3,
@@ -58,6 +60,8 @@ export class PasswordStrengthMixin {
       showLabel?: boolean;
       /** Show the checklist of rules (default: false) */
       showRules?: boolean;
+      /** Hide the checklist once the password is valid/acceptable (default: false) */
+      hideRulesWhenValid?: boolean;
       /** Show entropy estimate in bits (default: false) */
       showEntropy?: boolean;
       /** Bar height in pixels (default: 5) */
@@ -85,6 +89,8 @@ export class PasswordStrengthMixin {
       _strengthShowBar: options.showBar ?? true,
       _strengthShowLabel: options.showLabel ?? true,
       _strengthShowRules: options.showRules ?? false,
+      _strengthHideRulesWhenValid:
+        options.hideRulesWhenValid ?? this._strength._strengthHideRulesWhenValid,
       _strengthShowEntropy: options.showEntropy ?? false,
       _strengthBarHeight: options.barHeight ?? 5,
       _strengthBarRadius: options.barRadius ?? 3,
@@ -93,6 +99,15 @@ export class PasswordStrengthMixin {
       _strengthBlockMsg: options.blockMsg ?? 'Password is too weak.',
       _strengthCustomLevels: options.levels ?? null,
     };
+    return this;
+  }
+
+  hideRulesWhenValid(enabled = true): this {
+    this._strength = {
+      ...this._strength,
+      _strengthHideRulesWhenValid: enabled,
+    };
+
     return this;
   }
 }

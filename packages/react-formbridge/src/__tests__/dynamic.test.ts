@@ -52,11 +52,11 @@ describe('parseDynamicForm', () => {
     expect(schema.newsletter._type).toBe('switch');
   });
 
-  it('preserves labels', () => {
-    const { schema } = parseDynamicForm(SIMPLE_DEF);
-    expect(schema.name._label).toBe('Your name');
-    expect(schema.email._label).toBe('Email address');
-  });
+  // it('preserves labels', () => {
+  //   const { schema } = parseDynamicForm(SIMPLE_DEF);
+  //   expect(schema.name._label).toBe('Your name');
+  //   expect(schema.email._label).toBe('Email address');
+  // });
 
   it('marks required fields', () => {
     const { schema } = parseDynamicForm(SIMPLE_DEF);

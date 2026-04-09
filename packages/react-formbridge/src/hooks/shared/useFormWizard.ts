@@ -304,7 +304,7 @@ export function createUseFormWizardBridge<TPlatform extends Platform>(
       resolver: stepFormOptions?.resolver,
       persist: stepPersist,
       analytics: stepFormOptions?.analytics,
-      globalUi: stepFormOptions?.globalUi,
+      globalStyles: stepFormOptions?.globalStyles,
       showErrorsOn: stepFormOptions?.showErrorsOn,
     });
 

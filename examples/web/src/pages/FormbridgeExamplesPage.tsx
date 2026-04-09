@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { CustomerCheckoutExample } from '../components/form-examples/CustomerCheckoutExample';
 import { CustomMaskExamplesShowcase } from '../components/form-examples/CustomMaskExamplesShowcase';
 import { FieldVariantsShowcase } from '../components/form-examples/FieldVariantsShowcase';
+import { PasswordVariantsExample } from '../components/form-examples/PasswordVariantsExample';
+import { PhoneVariantsExample } from '../components/form-examples/PhoneVariantsExample';
 import { ResolverExamplesShowcase } from '../components/form-examples/ResolverExamplesShowcase';
 import { StylingExamplesShowcase } from '../components/form-examples/StylingExamplesShowcase';
 import { DemoAsyncCityForm } from './DemoAsyncCityForm';
@@ -29,7 +31,8 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
         <h1>Every `react-formbridge` demo lives here now.</h1>
         <p>
           This section groups the route-based wizard, production-style forms, field
-          variants, masks, styling overrides, resolvers, and async option loading.
+          variants, password recipes, phone recipes, file upload demos, masks, styling
+          overrides, resolvers, and async option loading.
         </p>
 
         <div className="library-hero-actions">
@@ -64,7 +67,10 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
           <ul className="library-example-list">
             <li>Route-based wizard with persisted progress</li>
             <li>Checkout flow and generated field variants</li>
-            <li>Mask demos for license plates and badges</li>
+            <li>Password UX recipes for signup, admin, and recovery flows</li>
+            <li>Phone picker recipes for support, sales, and directory flows</li>
+            <li>File upload recipes for previews, bundles, and imports</li>
+            <li>Mask demos for adaptive inputs, license plates, and badges</li>
             <li>Styling patterns and resolver integrations</li>
             <li>Async remote option loading</li>
           </ul>
@@ -119,13 +125,18 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
         <div className="library-section-card fade-up">
           <div className="library-section-header">
             <span className="tag tag-blue">Generated field patterns</span>
-            <h2>Field variants, masks, styling, and resolvers.</h2>
+            <h2>
+              Passwords, phone flows, field variants, uploads, masks, styling, and
+              resolvers.
+            </h2>
             <p>
               The rest of the page is organized by concern so you can compare patterns
               without bouncing between unrelated walkit screens.
             </p>
           </div>
 
+          <PasswordVariantsExample />
+          <PhoneVariantsExample />
           <FieldVariantsShowcase />
           <CustomMaskExamplesShowcase />
           <StylingExamplesShowcase />

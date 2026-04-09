@@ -1,4 +1,4 @@
-import type { FieldDescriptor, FieldType, SelectOption } from '../../types';
+import type { FieldDescriptor, FieldType, SelectOption } from '../../types/field';
 import { field } from './field';
 import type { AnyFieldBuilder, InferFieldOptions, InferOverrides } from './types';
 
@@ -81,43 +81,43 @@ function buildFieldFromEntry(
 
   switch (type) {
     case 'email':
-      builder = field.email(label);
+      builder = field.email().label(label);
       break;
     case 'password':
-      builder = field.password(label);
+      builder = field.password().label(label);
       break;
     case 'number':
-      builder = field.number(label);
+      builder = field.number().label(label);
       break;
     case 'checkbox':
-      builder = field.checkbox(label);
+      builder = field.checkbox().label(label);
       break;
     case 'switch':
-      builder = field.switch(label);
+      builder = field.switch().label(label);
       break;
     case 'select':
-      builder = field.select(label);
+      builder = field.select().label(label);
       break;
     case 'radio':
-      builder = field.radio(label);
+      builder = field.radio().label(label);
       break;
     case 'textarea':
-      builder = field.textarea(label);
+      builder = field.textarea().label(label);
       break;
     case 'tel':
-      builder = field.tel(label);
+      builder = field.tel().label(label);
       break;
     case 'url':
-      builder = field.url(label);
+      builder = field.url().label(label);
       break;
     case 'date':
-      builder = field.date(label);
+      builder = field.date().label(label);
       break;
     case 'phone':
-      builder = field.phone(label);
+      builder = field.phone().label(label);
       break;
     default:
-      builder = field.text(label);
+      builder = field.text().label(label);
   }
 
   // Apply overrides
