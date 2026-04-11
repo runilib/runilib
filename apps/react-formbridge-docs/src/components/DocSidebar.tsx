@@ -26,7 +26,7 @@ type SidebarIconVariant = 'api' | 'component' | 'core' | 'advanced';
 
 const SIDEBAR_SCROLL_PADDING = 10;
 
-function getSidebarIconVariant(group: string): SidebarIconVariant {
+const getSidebarIconVariant = (group: string): SidebarIconVariant => {
   if (group === 'Available Field builders') {
     return 'component';
   }
@@ -40,13 +40,13 @@ function getSidebarIconVariant(group: string): SidebarIconVariant {
   }
 
   return 'core';
-}
+};
 
-function isLinkVisibleWithinSidebar(
+const isLinkVisibleWithinSidebar = (
   navElement: HTMLElement,
   activeLink: HTMLElement,
   padding = SIDEBAR_SCROLL_PADDING,
-) {
+) => {
   if (navElement.clientHeight === 0 || navElement.offsetParent === null) {
     return false;
   }
@@ -58,9 +58,9 @@ function isLinkVisibleWithinSidebar(
     activeRect.top >= navRect.top + padding &&
     activeRect.bottom <= navRect.bottom - padding
   );
-}
+};
 
-export function DocSidebar({ currentSlug }: DocSidebarProps) {
+export const DocSidebar = ({ currentSlug }: DocSidebarProps) => {
   const groups = getGroupedEntries();
   const navRef = useRef<HTMLElement | null>(null);
   const pendingNavigationRef = useRef<{ preserveScroll: boolean; slug: string } | null>(
@@ -189,4 +189,4 @@ export function DocSidebar({ currentSlug }: DocSidebarProps) {
       ))}
     </nav>
   );
-}
+};

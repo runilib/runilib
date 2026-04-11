@@ -13,14 +13,9 @@ import type {
   FocusableFieldHandle,
   SelectOption,
   SelectPickerRenderContext,
-  WebFieldUiOverrides,
+  WebFieldPropsOverrides,
 } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
-import {
-  normalizeOptionValue,
-  resolveSelectedOption,
-  toHtmlPatternSource,
-} from './Field/utils';
 import {
   cx,
   fieldRootAttrs,
@@ -31,9 +26,15 @@ import {
 } from './helpers';
 import {
   defaultErrorChromeStyle,
-  type ResolvedWebFieldUi,
+  type ResolvedWebFieldProps,
+  resolveWebInputBehavior,
   shouldHighlightOnError,
 } from './shared';
+import {
+  normalizeOptionValue,
+  resolveSelectedOption,
+  toHtmlPatternSource,
+} from './utils';
 
 const defaultFieldRootStyle: CSSProperties = {
   display: 'flex',
@@ -56,9 +57,9 @@ const defaultTextareaStyle: CSSProperties = {
 
 interface Props extends FieldRenderProps<unknown> {
   descriptor: FieldDescriptor<unknown> & {
-    _ui?: ResolvedWebFieldUi;
+    fieldPropsFromClient: ResolvedWebFieldProps;
   };
-  extra?: ExtraFieldProps<WebFieldUiOverrides>;
+  extra?: ExtraFieldProps<WebFieldPropsOverrides>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -69,7 +70,7 @@ export const Field: React.FC<Props> = ({
   ...restProps
 }) => {
   const reactId = useId();
-  const fieldUi = descriptor._ui ?? {};
+  const fieldProps = descriptor.fieldPropsFromClient ?? {};
   const {
     rootProps,
     labelProps,
@@ -90,7 +91,7 @@ export const Field: React.FC<Props> = ({
     ...rootPropsRest
   } = rootProps ?? {};
 
-  const id = extra?.id ?? fieldUi.id ?? `${restProps.name}-${reactId}`;
+  const id = extra?.id ?? fieldProps.id ?? `${restProps.name}-${reactId}`;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
   const describedBy = restProps.error ? errorId : restProps.hint ? hintId : undefined;
@@ -98,10 +99,12 @@ export const Field: React.FC<Props> = ({
   const hasError = Boolean(restProps.error);
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
-    fieldUi.highlightOnError,
+    fieldProps.highlightOnError,
   );
 
   const rootClassName = cx(extra?.className, classNames?.root, rootPropsClassName);
+
+  const EXCLUDED_INPUT_TYPE = ['checkbox', 'switch'];
 
   return (
     <div
@@ -123,7 +126,7 @@ export const Field: React.FC<Props> = ({
       )}
       {...rootPropsRest}
     >
-      {descriptor._type !== 'checkbox' && descriptor._type !== 'switch'
+      {EXCLUDED_INPUT_TYPE.includes(descriptor._type) === false
         ? renderLabelSlot({
             id,
             label: restProps.label,
@@ -164,19 +167,21 @@ export const Field: React.FC<Props> = ({
 };
 
 const renderInput = (
-  d: Props['descriptor'],
+  descriptor: Props['descriptor'],
   id: string,
   restProps: FieldRenderProps<unknown>,
   ctx: {
     describedBy?: string;
     hasError: boolean;
     highlightOnError: boolean;
-    extra?: ExtraFieldProps<WebFieldUiOverrides>;
+    extra?: ExtraFieldProps<WebFieldPropsOverrides>;
     registerFocusable?: (target: FocusableFieldHandle | null) => void;
   },
 ) => {
   const { inputProps, textareaProps, selectProps, classNames, styles } = ctx.extra ?? {};
-  const fieldUi = d._ui ?? {};
+  const fieldProps = descriptor.fieldPropsFromClient ?? {};
+  const inputBehavior = resolveWebInputBehavior(ctx.extra, fieldProps);
+  const isReadOnly = Boolean(inputBehavior.readOnly);
 
   const {
     className: inputPropsClassName,
@@ -200,15 +205,16 @@ const renderInput = (
     id,
     name: restProps.name,
     disabled: restProps.disabled,
-    readOnly: fieldUi.readOnly,
-    required: Boolean(d._required),
-    autoComplete: fieldUi.autoComplete,
-    autoFocus: fieldUi.autoFocus,
-    inputMode: fieldUi.inputMode,
-    enterKeyHint: fieldUi.enterKeyHint,
-    spellCheck: fieldUi.spellCheck,
+    readOnly: inputBehavior.readOnly,
+    required: Boolean(descriptor._required),
+    autoComplete: inputBehavior.autoComplete,
+    autoFocus: inputBehavior.autoFocus,
+    inputMode: inputBehavior.inputMode,
+    enterKeyHint: inputBehavior.enterKeyHint,
+    spellCheck: inputBehavior.spellCheck,
     'aria-invalid': ctx.hasError || undefined,
-    'aria-required': d._required || undefined,
+    'aria-required': descriptor._required || undefined,
+    'aria-readonly': isReadOnly || undefined,
     'aria-describedby': ctx.describedBy,
     'aria-disabled': restProps.disabled || undefined,
     onBlur: restProps.onBlur,
@@ -216,10 +222,10 @@ const renderInput = (
   };
 
   const inputClassName = cx(classNames?.input, inputPropsClassName);
-  const renderPicker = ctx.extra?.renderPicker ?? fieldUi.renderPicker;
+  const renderPicker = ctx.extra?.renderPicker ?? fieldProps.renderPicker;
   const controlErrorStyle = defaultErrorChromeStyle(ctx.hasError, ctx.highlightOnError);
 
-  switch (d._type) {
+  switch (descriptor._type) {
     case 'textarea':
       return (
         <textarea
@@ -253,9 +259,15 @@ const renderInput = (
             data-fb-slot="checkbox-input"
             type="checkbox"
             checked={Boolean(restProps.value)}
-            className={classNames?.checkboxInput}
-            style={mergeStyles(controlErrorStyle, styles?.checkboxInput)}
-            onChange={(e) => restProps.onChange(e.target.checked)}
+            className={cx(classNames?.checkboxInput, inputPropsClassName)}
+            style={mergeStyles(controlErrorStyle, styles?.checkboxInput, inputPropsStyle)}
+            onChange={(e) => {
+              if (restProps.disabled || isReadOnly) {
+                return;
+              }
+
+              restProps.onChange(e.target.checked);
+            }}
             {...inputPropsRest}
           />
           <span
@@ -288,7 +300,14 @@ const renderInput = (
             role="switch"
             aria-checked={Boolean(restProps.value)}
             aria-disabled={restProps.disabled || undefined}
-            onClick={() => !restProps.disabled && restProps.onChange(!restProps.value)}
+            aria-readonly={isReadOnly || undefined}
+            onClick={() => {
+              if (restProps.disabled || isReadOnly) {
+                return;
+              }
+
+              restProps.onChange(!restProps.value);
+            }}
             onBlur={restProps.onBlur}
             onFocus={restProps.onFocus}
             disabled={restProps.disabled}
@@ -346,8 +365,11 @@ const renderInput = (
 
           <input
             type="hidden"
+            id={id}
             name={restProps.name}
             value={String(Boolean(restProps.value))}
+            readOnly={isReadOnly}
+            {...inputPropsRest}
           />
           <span
             data-fb-slot="switch-label"
@@ -370,18 +392,19 @@ const renderInput = (
       if (renderPicker) {
         return (
           <PickerSelectField
-            descriptor={d}
+            descriptor={descriptor}
             id={id}
             fieldProps={restProps}
-            web={fieldUi}
+            web={fieldProps}
             extra={ctx.extra}
             describedBy={ctx.describedBy}
+            readOnly={isReadOnly}
             registerFocusable={ctx.registerFocusable}
           />
         );
       }
 
-      const selectedOption = resolveSelectedOption(d._options, restProps.value);
+      const selectedOption = resolveSelectedOption(descriptor._options, restProps.value);
       const hasSelectedValue = Boolean(selectedOption);
       const selectValue = hasSelectedValue
         ? normalizeOptionValue(selectedOption?.value)
@@ -402,7 +425,14 @@ const renderInput = (
             selectPropsStyle,
           )}
           onChange={(e) => {
-            const matchedOption = resolveSelectedOption(d._options, e.target.value);
+            if (isReadOnly) {
+              return;
+            }
+
+            const matchedOption = resolveSelectedOption(
+              descriptor._options,
+              e.target.value,
+            );
             restProps.onChange(matchedOption?.value ?? e.target.value);
           }}
           {...selectPropsRest}
@@ -410,7 +440,7 @@ const renderInput = (
           {hasSelectedValue === false ? (
             <option value="">{placeholderLabel}</option>
           ) : null}
-          {d._options?.map((o) => (
+          {descriptor._options?.map((o) => (
             <option
               key={String(o.value)}
               value={String(o.value)}
@@ -425,16 +455,17 @@ const renderInput = (
     case 'radio':
       return renderPicker ? (
         <PickerSelectField
-          descriptor={d}
+          descriptor={descriptor}
           id={id}
           fieldProps={restProps}
-          web={fieldUi}
+          web={fieldProps}
           extra={ctx.extra}
           describedBy={ctx.describedBy}
+          readOnly={isReadOnly}
         />
       ) : (
         <div data-fb-slot="radio-group">
-          {d._options?.map((o) => (
+          {descriptor._options?.map((o) => (
             <label
               key={String(o.value)}
               data-fb-slot="radio-option"
@@ -446,8 +477,19 @@ const renderInput = (
                 name={restProps.name}
                 value={String(o.value)}
                 checked={String(restProps.value ?? '') === String(o.value)}
-                style={mergeStyles(controlErrorStyle, inputPropsStyle)}
-                onChange={() => restProps.onChange(o.value)}
+                className={cx(classNames?.checkboxInput, inputPropsClassName)}
+                style={mergeStyles(
+                  controlErrorStyle,
+                  styles?.checkboxInput,
+                  inputPropsStyle,
+                )}
+                onChange={() => {
+                  if (restProps.disabled || isReadOnly) {
+                    return;
+                  }
+
+                  restProps.onChange(o.value);
+                }}
                 {...inputPropsRest}
               />
               <span data-fb-slot="radio-label">{o.label}</span>
@@ -457,7 +499,7 @@ const renderInput = (
       );
 
     case 'otp': {
-      const len = d._otpLength ?? 6;
+      const len = descriptor._otpLength ?? 6;
       const chars = String(restProps.value ?? '').split('');
 
       return (
@@ -475,16 +517,27 @@ const renderInput = (
               id={i === 0 ? id : undefined}
               ref={i === 0 ? ctx.registerFocusable : undefined}
               type="text"
-              inputMode="numeric"
+              autoComplete={inputBehavior.autoComplete}
+              // biome-ignore lint/a11y/noAutofocus: form builders expose autofocus intentionally.
+              autoFocus={i === 0 ? inputBehavior.autoFocus : undefined}
+              spellCheck={inputBehavior.spellCheck}
+              inputMode={inputBehavior.inputMode ?? 'numeric'}
+              enterKeyHint={inputBehavior.enterKeyHint}
               maxLength={1}
               value={chars[i] ?? ''}
               disabled={restProps.disabled}
+              readOnly={isReadOnly}
               aria-label={`${restProps.label} ${i + 1}`}
               aria-invalid={ctx.hasError || undefined}
               aria-describedby={ctx.describedBy}
+              aria-readonly={isReadOnly || undefined}
               data-fb-slot="otp-input"
-              className={classNames?.otpInput}
+              className={cx(classNames?.otpInput, inputPropsClassName)}
               onChange={(e) => {
+                if (isReadOnly) {
+                  return;
+                }
+
                 const next = [...chars];
                 next[i] = e.target.value.slice(-1);
                 restProps.onChange(next.join(''));
@@ -501,7 +554,8 @@ const renderInput = (
               }}
               onBlur={restProps.onBlur}
               onFocus={restProps.onFocus}
-              style={mergeStyles(controlErrorStyle, styles?.otpInput)}
+              style={mergeStyles(controlErrorStyle, styles?.otpInput, inputPropsStyle)}
+              {...inputPropsRest}
             />
           ))}
           <input
@@ -527,9 +581,9 @@ const renderInput = (
               : String(restProps.value)
           }
           placeholder={restProps.placeholder}
-          min={typeof d._min === 'number' ? d._min : undefined}
-          max={typeof d._max === 'number' ? d._max : undefined}
-          step={(d as Props['descriptor'] & { _step?: number })._step}
+          min={typeof descriptor._min === 'number' ? descriptor._min : undefined}
+          max={typeof descriptor._max === 'number' ? descriptor._max : undefined}
+          step={(descriptor as Props['descriptor'] & { _step?: number })._step}
           className={inputClassName}
           style={mergeStyles(
             defaultControlStyle,
@@ -571,14 +625,14 @@ const renderInput = (
         <input
           {...commonInputProps}
           data-fb-slot="input"
-          type={d._type}
+          type={descriptor._type}
           ref={ctx.registerFocusable}
           name={restProps.name}
           value={toInputValue(restProps.value)}
           placeholder={restProps.placeholder}
-          minLength={typeof d._min === 'number' ? d._min : undefined}
-          maxLength={typeof d._max === 'number' ? d._max : undefined}
-          pattern={toHtmlPatternSource(d)}
+          minLength={typeof descriptor._min === 'number' ? descriptor._min : undefined}
+          maxLength={typeof descriptor._max === 'number' ? descriptor._max : undefined}
+          pattern={toHtmlPatternSource(descriptor)}
           className={inputClassName}
           style={mergeStyles(
             defaultControlStyle,
@@ -597,9 +651,10 @@ type PickerSelectFieldType = {
   descriptor: Props['descriptor'];
   id: string;
   fieldProps: FieldRenderProps<unknown>;
-  web: ResolvedWebFieldUi;
-  extra: ExtraFieldProps<WebFieldUiOverrides> | undefined;
+  web: ResolvedWebFieldProps;
+  extra: ExtraFieldProps<WebFieldPropsOverrides> | undefined;
   describedBy?: string;
+  readOnly?: boolean;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 };
 
@@ -610,12 +665,19 @@ const PickerSelectField = ({
   web,
   extra,
   describedBy,
+  readOnly = false,
   registerFocusable,
 }: PickerSelectFieldType) => {
   const renderPicker = extra?.renderPicker ?? web.renderPicker;
-  const { classNames, styles } = extra ?? {};
+  const { classNames, styles, selectProps } = extra ?? {};
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const {
+    className: selectPropsClassName,
+    style: selectPropsStyle,
+    ...selectPropsRest
+  } = selectProps ?? {};
+  const selectTriggerProps = selectPropsRest as Record<string, unknown>;
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
     web.highlightOnError,
@@ -650,11 +712,11 @@ const PickerSelectField = ({
   }, [clearSearch]);
 
   const openPicker = useCallback(() => {
-    if (fieldProps.disabled) return;
+    if (fieldProps.disabled || readOnly) return;
 
     setOpen(true);
     fieldProps.onFocus();
-  }, [fieldProps]);
+  }, [fieldProps, readOnly]);
 
   const selectOption = useCallback(
     (next: SelectOption | SelectOption['value']) => {
@@ -749,8 +811,9 @@ const PickerSelectField = ({
         data-fb-slot="select-trigger"
         data-fb-selected={selectedOption ? '' : undefined}
         onClick={openPicker}
-        className={cx(classNames?.input, classNames?.select)}
-        style={mergeStyles(controlErrorStyle, styles?.select)}
+        className={cx(classNames?.input, classNames?.select, selectPropsClassName)}
+        style={mergeStyles(controlErrorStyle, styles?.select, selectPropsStyle)}
+        {...selectTriggerProps}
       >
         <span data-fb-slot="select-value">{pickerContext.triggerLabel}</span>
         <span

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { WebFieldUiOverrides } from '../../types/ui-web';
+import type { WebFieldPropsOverrides } from '../../types/ui-web';
 
 export const WEB_ERROR_COLOR = '#ef4444';
 export const WEB_ERROR_BOX_SHADOW = '0 0 0 1px rgba(239, 68, 68, 0.16) inset';
@@ -48,8 +48,8 @@ export function defaultRequiredMarkStyle(): CSSProperties {
   };
 }
 
-export type ResolvedWebFieldUi = Pick<
-  WebFieldUiOverrides,
+export type ResolvedWebFieldProps = Pick<
+  WebFieldPropsOverrides,
   | 'id'
   | 'readOnly'
   | 'autoComplete'
@@ -60,3 +60,20 @@ export type ResolvedWebFieldUi = Pick<
   | 'highlightOnError'
   | 'renderPicker'
 >;
+
+export function resolveWebInputBehavior(
+  override?: Partial<ResolvedWebFieldProps>,
+  fallback?: Partial<ResolvedWebFieldProps>,
+): Pick<
+  ResolvedWebFieldProps,
+  'readOnly' | 'autoComplete' | 'autoFocus' | 'spellCheck' | 'inputMode' | 'enterKeyHint'
+> {
+  return {
+    readOnly: override?.readOnly ?? fallback?.readOnly,
+    autoComplete: override?.autoComplete ?? fallback?.autoComplete,
+    autoFocus: override?.autoFocus ?? fallback?.autoFocus,
+    spellCheck: override?.spellCheck ?? fallback?.spellCheck,
+    inputMode: override?.inputMode ?? fallback?.inputMode,
+    enterKeyHint: override?.enterKeyHint ?? fallback?.enterKeyHint,
+  };
+}

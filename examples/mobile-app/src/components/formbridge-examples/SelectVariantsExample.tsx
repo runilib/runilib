@@ -333,28 +333,29 @@ export function SelectVariantsExample() {
     (): SelectVariantSchema => ({
       workspace: field
         .select()
+        .label('Workspace')
         .options(WORKSPACE_OPTIONS)
         .required('Required')
         .hint('Classic select with local options.'),
       accessRole: field
         .radio()
+        .label('Access role')
         .options(ACCESS_ROLE_OPTIONS)
         .required('Required')
         .hint('Radio keeps every option visible.'),
       cityLookup: field
         .select()
+        .label('City')
         .optionsFrom(searchCityDirectory, {
           key: 'mobile-field-variant-city-search',
-          debounce: 220,
+          debounce: 420,
           minChars: 1,
           initialOptions: CITY_DIRECTORY_OPTIONS.slice(0, 4),
         })
+        .required()
         .searchable()
         .placeholder('Search a city')
-        .hint('Async search with a fully custom picker modal.')
-        .behavior({
-          renderPicker: renderCityPicker,
-        }),
+        .hint('Async search with a fully custom picker modal.'),
       routingMode: field
         .select()
         .options(ROUTING_MODE_OPTIONS)
@@ -435,9 +436,9 @@ export function SelectVariantsExample() {
       >
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Select family</Text>
-          <fields.workspace />
+          <fields.workspace highlightOnError />
           <fields.accessRole />
-          <fields.cityLookup />
+          <fields.cityLookup renderPicker={renderCityPicker} />
           <CustomRoutingModeField controller={routingMode} />
         </View>
 

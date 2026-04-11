@@ -1,7 +1,7 @@
 import type { CodeSnippet, FaqItem, FeatureCard, SiteStat, UseCaseCard } from '@/types';
 
 export const libraryInfo = {
-  name: 'react-formbridge',
+  name: 'REACT FORMBRIDGE',
   packageName: '@runilib/react-formbridge',
   version: '1.0.0',
   tagline: 'Schema-driven form builder for React and React Native',
@@ -31,9 +31,9 @@ export const primaryKeywords = [
 ];
 
 export const homeStats: SiteStat[] = [
-  { value: '46', label: 'docs pages' },
+  { value: '47', label: 'docs pages' },
   { value: '17', label: 'field builders' },
-  { value: '11', label: 'advanced hooks and patterns' },
+  { value: '12', label: 'advanced hooks and patterns' },
   { value: '2', label: 'platforms covered' },
 ];
 
@@ -49,9 +49,9 @@ export const homeFeatures: FeatureCard[] = [
       'useFormBridge() returns a ready-to-render Form wrapper and field components with UI props scoped to each platform.',
   },
   {
-    title: 'Validation and resolvers',
+    title: 'Validation included',
     description:
-      'Combine fluent field validation with zod, yup, joi, or valibot adapters without duplicating the render layer.',
+      'Every field carries its own fluent validation rules. No external library required — everything ships with the package.',
   },
   {
     title: 'Production patterns included',
@@ -90,9 +90,9 @@ export const faqItems: FaqItem[] = [
       'Yes. The library is designed around one schema-first API that renders on React web and React Native with platform-specific UI surfaces where needed.',
   },
   {
-    question: 'Can I keep zod or yup as the validation source of truth?',
+    question: 'Do I need to install Zod, Yup, or any validation library?',
     answer:
-      'Yes. The documentation covers zod, yup, joi, and valibot adapters so external schemas can drive validation while formbridge handles rendering and field orchestration.',
+      'No. FormBridge ships with a complete fluent validation API built into every field builder. External adapters exist for teams that already rely on Zod or Yup, but they are entirely optional.',
   },
   {
     question: 'Is react-formbridge only for simple forms?',
@@ -116,7 +116,7 @@ export const groupDescriptions: Record<string, string> = {
   'Available Field builders':
     'Browse every built-in field builder with defaults, mini recipes, and platform-specific notes.',
   Advanced:
-    'Go beyond simple forms with adapters, persistence, styling, inference, async options, dynamic forms, wizards, and readonly views.',
+    'Go beyond simple forms with adapters, persistence, styling, context composition, inference, async options, dynamic forms, wizards, and readonly views.',
 };
 
 export const homeSnippets: CodeSnippet[] = [
@@ -148,7 +148,14 @@ export function SignupForm() {
   })
 
   return (
-    <Form onSubmit={async (values) => api.signup(values)}>
+    <Form
+      onSubmit={async (values) => {
+        console.log('Submitted values', values)
+        if (typeof window !== 'undefined') {
+          window.alert(JSON.stringify(values, null, 2))
+        }
+      }}
+    >
       <fields.email />
       <fields.password />
       <fields.role />
@@ -169,7 +176,7 @@ export function SignupForm() {
       maxWidth: 720,
       maxHeight: 1280,
     },
-    code: `import { ScrollView, View } from 'react-native'
+    code: `import { Alert, ScrollView, View } from 'react-native'
 import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
@@ -188,7 +195,12 @@ export function SignupScreen() {
 
   return (
     <ScrollView contentInsetAdjustmentBehavior="automatic">
-      <Form onSubmit={async (values) => api.signup(values)}>
+      <Form
+        onSubmit={async (values) => {
+          console.log('Submitted values', values)
+          Alert.alert('Submitted', JSON.stringify(values, null, 2))
+        }}
+      >
         <View style={{ gap: 12, padding: 16 }}>
           <fields.email />
           <fields.password />

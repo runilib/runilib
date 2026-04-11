@@ -1,7 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 
 import type { AsyncOptionsConfig } from '../hooks/shared/useAsyncOptions';
-import type { FieldAutoComplete } from './autoComplete';
 
 // ─── Field types ───────────────────────────────────────────────────────────────
 
@@ -85,31 +84,6 @@ export interface SelectPickerRenderContext {
   selectOption: (option: SelectOption | SelectOption['value']) => void;
 }
 
-// ─── Field behavior config ─────────────────────────────────────────────────────
-
-export interface FieldBehaviorConfig {
-  id?: string;
-  testID?: string;
-  readOnly?: boolean;
-  autoComplete?: FieldAutoComplete;
-  autoFocus?: boolean;
-  spellCheck?: boolean;
-  inputMode?:
-    | 'none'
-    | 'text'
-    | 'tel'
-    | 'url'
-    | 'email'
-    | 'numeric'
-    | 'decimal'
-    | 'search';
-  enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
-  keyboardType?: string;
-  secureTextEntry?: boolean;
-  highlightOnError?: boolean;
-  renderPicker?: (ctx: SelectPickerRenderContext) => ReactNode;
-}
-
 // ─── Field descriptor ──────────────────────────────────────────────────────────
 export interface FieldDescriptor<DV = unknown, FType extends FieldType = FieldType> {
   /** Internal type used to pick the right renderer */
@@ -165,9 +139,6 @@ export interface FieldDescriptor<DV = unknown, FType extends FieldType = FieldTy
   /** Accepted file types */
   _accept?: string[];
 
-  /** Cross-platform field-owned behavior defaults shared by web and native */
-  _behavior?: FieldBehaviorConfig;
-
   _asyncOptions?: AsyncOptionsConfig<Record<string, unknown>>;
 
   _searchable?: boolean;
@@ -213,7 +184,7 @@ export interface FieldRenderHandlers<V = unknown> {
 export type FieldRenderProps<V = unknown> = FieldRenderState<V> & FieldRenderHandlers<V>;
 
 // ─── Field UI renderers (shared by web & native) ───────────────────────────────
-export type FieldUiRenderers = {
+export type FieldRenderersProps = {
   renderLabel?: (ctx: {
     id: string;
     name: string;

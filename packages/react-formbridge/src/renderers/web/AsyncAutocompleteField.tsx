@@ -15,14 +15,15 @@ import type {
   FocusableFieldHandle,
   SelectOption,
   SelectPickerRenderContext,
-  WebAsyncAutocompleteFieldUiOverrides,
+  WebAsyncAutocompleteFieldPropsOverrides,
 } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
 import { cx, mergeStyles, renderLabelSlot } from './helpers';
 import {
   defaultErrorChromeStyle,
   defaultErrorTextStyle,
-  type ResolvedWebFieldUi,
+  type ResolvedWebFieldProps,
+  resolveWebInputBehavior,
   shouldHighlightOnError,
 } from './shared';
 
@@ -30,9 +31,9 @@ interface Props extends FieldRenderProps<string> {
   descriptor: FieldDescriptor<string> & {
     _asyncOptions: NonNullable<FieldDescriptor<string>['_asyncOptions']>;
     _searchable?: boolean;
-    _ui?: ResolvedWebFieldUi;
+    fieldPropsFromClient?: ResolvedWebFieldProps;
   };
-  extra?: ExtraFieldProps<WebAsyncAutocompleteFieldUiOverrides>;
+  extra?: ExtraFieldProps<WebAsyncAutocompleteFieldPropsOverrides>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -47,8 +48,10 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   ...props
 }) => {
   const reactId = useId();
-  const fieldUi = descriptor._ui ?? {};
-  const renderPicker = extra?.renderPicker ?? fieldUi.renderPicker;
+  const fieldProps = descriptor.fieldPropsFromClient ?? {};
+  const renderPicker = extra?.renderPicker ?? fieldProps.renderPicker;
+  const inputBehavior = resolveWebInputBehavior(extra, fieldProps);
+  const isReadOnly = Boolean(inputBehavior.readOnly);
 
   const {
     classNames,
@@ -87,7 +90,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
     ...hintPropsRest
   } = hintProps ?? {};
 
-  const id = extra?.id ?? fieldUi.id ?? `${props.name}-${reactId}`;
+  const id = extra?.id ?? fieldProps.id ?? `${props.name}-${reactId}`;
   const listboxId = `${id}-listbox`;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
@@ -164,7 +167,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   const hasError = Boolean(props.error || error);
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
-    fieldUi.highlightOnError,
+    fieldProps.highlightOnError,
   );
   const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
 
@@ -189,10 +192,14 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   }, [clearSearch, selectedLabel]);
 
   const handleFocus = useCallback(() => {
+    if (props.disabled || isReadOnly) {
+      return;
+    }
+
     setIsOpen(true);
     setInputValue(selectedLabel);
     props.onFocus();
-  }, [props.onFocus, selectedLabel]);
+  }, [isReadOnly, props.disabled, props.onFocus, selectedLabel]);
 
   useEffect(() => {
     if (!renderPicker || !registerFocusable) {
@@ -428,11 +435,16 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             aria-activedescendant={activeOptionId}
             aria-invalid={hasError || undefined}
             aria-required={descriptor._required || undefined}
+            aria-readonly={isReadOnly || undefined}
             aria-describedby={describedBy}
             disabled={props.disabled}
-            readOnly={fieldUi.readOnly}
-            autoComplete={fieldUi.autoComplete ?? 'off'}
-            spellCheck={fieldUi.spellCheck}
+            readOnly={inputBehavior.readOnly}
+            autoComplete={inputBehavior.autoComplete ?? 'off'}
+            // biome-ignore lint/a11y/noAutofocus: form builders expose autofocus intentionally.
+            autoFocus={inputBehavior.autoFocus}
+            spellCheck={inputBehavior.spellCheck}
+            inputMode={inputBehavior.inputMode}
+            enterKeyHint={inputBehavior.enterKeyHint}
             value={displayedInputValue}
             placeholder={props.placeholder ?? `Search ${props.label}`}
             onFocus={handleFocus}

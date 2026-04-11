@@ -35,11 +35,12 @@ import type {
   UseFormBridgeReturn,
   UseFormOptions,
 } from '../types';
+import { FormBridgeProvider } from './shared/form-context';
 import {
   mergeFieldStyleProps,
-  mergeNativeFormUi,
-  mergeNativeSubmitUi,
-  resolveNativeFieldConfig,
+  mergeNativeFieldProps,
+  mergeNativeFormProps,
+  mergeNativeSubmitProps,
 } from './shared/ui-utils';
 import { useFormBridgeCore } from './shared/useFormBridge';
 
@@ -72,6 +73,9 @@ export function useFormBridge<const S extends FormSchema>(
     defaultValues,
     validate,
     trackFieldFocus,
+    registerFocusable,
+    blurField,
+    focusField,
   } = core;
 
   const globalStylesRef = useRef(options.globalStyles);
@@ -80,50 +84,10 @@ export function useFormBridge<const S extends FormSchema>(
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
 
+  const apiRef = useRef<UseFormBridgeReturn<S, 'native'> | null>(null);
+
   const visibilityRef = useRef(visibility);
   visibilityRef.current = visibility;
-
-  const focusableRegistryRef = useRef<Record<string, FocusableFieldHandle | null>>({});
-
-  const registerFocusable = useCallback(
-    (name: string, target: FocusableFieldHandle | null) => {
-      if (target) {
-        focusableRegistryRef.current[name] = target;
-        return;
-      }
-
-      delete focusableRegistryRef.current[name];
-    },
-    [],
-  );
-
-  const focusField = useCallback(
-    (name: string) => {
-      const target = focusableRegistryRef.current[name];
-
-      if (target?.focus) {
-        target.focus();
-        return;
-      }
-
-      trackFieldFocus(name);
-    },
-    [trackFieldFocus],
-  );
-
-  const blurField = useCallback(
-    (name: string) => {
-      const target = focusableRegistryRef.current[name];
-
-      if (target?.blur) {
-        target.blur();
-        return;
-      }
-
-      void handleBlur(name);
-    },
-    [handleBlur],
-  );
 
   const setValue = useCallback(
     <K extends keyof S>(name: K, value: SchemaValues<S>[K]) => {
@@ -144,7 +108,7 @@ export function useFormBridge<const S extends FormSchema>(
     return { ...stateRef.current.values };
   }, [stateRef]);
 
-  const reset = useCallback(
+  const resetFields = useCallback(
     (values?: Partial<SchemaValues<S>>) => {
       const nextValues = values
         ? ({ ...defaultValues, ...values } as SchemaValues<S>)
@@ -341,18 +305,24 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedUi = mergeNativeFormUi(
+      const mergedProps = mergeNativeFormProps(
         globalStylesRef.current?.(stateRef.current).form,
         style,
       );
 
       return React.createElement(
-        View,
+        FormBridgeProvider,
         {
-          ...mergedUi.props,
-          style: mergedUi.style as StyleProp<ViewStyle>,
+          value: apiRef.current as UseFormBridgeReturn<S, 'native'>,
         },
-        children,
+        React.createElement(
+          View,
+          {
+            ...mergedProps.props,
+            style: mergedProps.style as StyleProp<ViewStyle>,
+          },
+          children,
+        ),
       );
     };
 
@@ -367,19 +337,19 @@ export function useFormBridge<const S extends FormSchema>(
     }: SubmitButtonProps<'native'> & NativeSubmitExtraProps) => {
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
-      const mergedUi = mergeNativeSubmitUi(
+      const mergedProps = mergeNativeSubmitProps(
         globalStylesRef.current?.(stateRef.current)?.submit,
         style,
         loadingText,
       );
       const label = loading
-        ? (mergedUi.loadingText ?? 'Please wait…')
+        ? (mergedProps.loadingText ?? 'Please wait…')
         : (children ?? 'Submit');
 
       return React.createElement(
         TouchableOpacity,
         {
-          ...mergedUi.props,
+          ...mergedProps.props,
           onPress: () => {
             void submit();
           },
@@ -395,9 +365,9 @@ export function useFormBridge<const S extends FormSchema>(
               backgroundColor: loading || disabled ? '#c7d2fe' : '#6366f1',
               opacity: loading || disabled ? 0.8 : 1,
             },
-            mergedUi.containerStyle as StyleProp<ViewStyle>,
+            mergedProps.containerStyle as StyleProp<ViewStyle>,
             rest.containerStyle,
-            mergedUi.style as StyleProp<ViewStyle>,
+            mergedProps.style as StyleProp<ViewStyle>,
           ],
         },
         React.createElement(
@@ -408,12 +378,12 @@ export function useFormBridge<const S extends FormSchema>(
               alignItems: 'center',
               gap: 8,
             },
-            ...mergedUi.contentProps,
+            ...mergedProps.contentProps,
           },
           loading
             ? React.createElement(ActivityIndicator, {
                 size: 'small',
-                color: mergedUi.indicatorColor ?? rest.indicatorColor ?? '#fff',
+                color: mergedProps.indicatorColor ?? rest.indicatorColor ?? '#fff',
               })
             : null,
           React.createElement(
@@ -425,7 +395,7 @@ export function useFormBridge<const S extends FormSchema>(
                   fontSize: 14,
                   fontWeight: '600',
                 },
-                mergedUi.textStyle as StyleProp<TextStyle>,
+                mergedProps.textStyle as StyleProp<TextStyle>,
                 rest.textStyle,
               ],
             },
@@ -443,6 +413,20 @@ export function useFormBridge<const S extends FormSchema>(
     return FormInner as unknown as FormComponent<S, 'native'>;
   }, [stateRef, submit, submitConfigRef]);
 
+  const FormProvider = useMemo(
+    () =>
+      function FormProviderInner({ children }: { children: React.ReactNode }) {
+        return React.createElement(
+          FormBridgeProvider,
+          {
+            value: apiRef.current as UseFormBridgeReturn<S, 'native'>,
+          },
+          children,
+        );
+      },
+    [],
+  );
+
   const fields = useMemo((): FieldComponents<S, 'native'> => {
     const result = {} as FieldComponents<S, 'native'>;
 
@@ -457,7 +441,7 @@ export function useFormBridge<const S extends FormSchema>(
           return null;
         }
 
-        const mergedProps = mergeFieldStyleProps(
+        const mergedFieldProps = mergeFieldStyleProps(
           'native',
           globalStylesRef.current?.(stateRef.current)?.field,
           props,
@@ -482,14 +466,15 @@ export function useFormBridge<const S extends FormSchema>(
         };
 
         const showError = Boolean(error) && (touched || state.submitCount > 0);
+        const mergedProps = mergeNativeFieldProps(undefined, mergedFieldProps);
 
         const effectiveDescriptor = {
           ...descriptor,
-          _ui: resolveNativeFieldConfig(descriptor._behavior),
-          ...(mergedProps && {
-            _label: mergedProps.label ?? descriptor._label,
-            _placeholder: mergedProps.placeholder ?? descriptor._placeholder,
-            _hint: mergedProps.hint ?? descriptor._hint,
+          fieldPropsFromClient: mergedProps,
+          ...(mergedFieldProps && {
+            _label: mergedFieldProps.label ?? descriptor._label,
+            _placeholder: mergedFieldProps.placeholder ?? descriptor._placeholder,
+            _hint: mergedFieldProps.hint ?? descriptor._hint,
           }),
           _required: descriptor._required || runtime.required,
           _disabled: descriptor._disabled || runtime.disabled,
@@ -730,7 +715,8 @@ export function useFormBridge<const S extends FormSchema>(
     return FieldLabelInner;
   }, []);
 
-  return {
+  const api: UseFormBridgeReturn<S, 'native'> = {
+    FormProvider,
     Form,
     fields,
     FieldError,
@@ -746,11 +732,15 @@ export function useFormBridge<const S extends FormSchema>(
     getValue,
     getValues,
     validate,
-    reset,
+    resetFields,
     setError,
     clearErrors,
     watch,
     watchAll,
     submit,
   };
+
+  apiRef.current = api;
+
+  return api;
 }

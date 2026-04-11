@@ -5,20 +5,21 @@ import type { PasswordStrengthMeta } from '../../core/field-builders/password/Pa
 import { scorePassword } from '../../core/field-builders/password/strength';
 import type { StrengthResult } from '../../core/field-builders/password/types';
 import type { FocusableFieldHandle } from '../../types';
-import type { WebPasswordFieldUiOverrides } from '../../types/ui-web';
+import type { WebPasswordFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultErrorChromeStyle,
-  type ResolvedWebFieldUi,
+  type ResolvedWebFieldProps,
+  resolveWebInputBehavior,
   shouldHighlightOnError,
 } from './shared';
 
 interface Props extends FieldRenderProps<string> {
   strengthMeta: PasswordStrengthMeta & {
-    _ui?: ResolvedWebFieldUi;
+    fieldPropsFromClient?: ResolvedWebFieldProps;
   };
-  extra?: ExtraFieldProps<WebPasswordFieldUiOverrides>;
+  extra?: ExtraFieldProps<WebPasswordFieldPropsOverrides>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -45,7 +46,8 @@ export const PasswordStrength = ({
   );
   const [show, setShow] = useState(false);
   const hasError = Boolean(props.error);
-  const web = meta._ui ?? {};
+  const web = meta.fieldPropsFromClient ?? {};
+  const inputBehavior = resolveWebInputBehavior(extra, web);
 
   const {
     classNames,
@@ -86,6 +88,7 @@ export const PasswordStrength = ({
     style: inputPropsStyle,
     ...inputPropsRest
   } = inputProps ?? {};
+  const id = extra?.id ?? web.id ?? props.name;
 
   const result = useMemo<StrengthResult | null>(() => {
     if (!props.value) return null;
@@ -237,7 +240,7 @@ export const PasswordStrength = ({
       {...rootPropsRest}
     >
       {renderLabelSlot({
-        id: props.name,
+        id,
         label: props.label,
         required,
         hideLabel,
@@ -258,11 +261,13 @@ export const PasswordStrength = ({
           value={props.value || ''}
           placeholder={props.placeholder}
           disabled={props.disabled}
-          readOnly={web.readOnly}
-          autoComplete={web.autoComplete ?? 'new-password'}
+          readOnly={inputBehavior.readOnly}
+          autoComplete={inputBehavior.autoComplete ?? 'new-password'}
           // biome-ignore lint/a11y/noAutofocus: form builders expose autofocus intentionally.
-          autoFocus={web.autoFocus}
-          spellCheck={web.spellCheck}
+          autoFocus={inputBehavior.autoFocus}
+          spellCheck={inputBehavior.spellCheck}
+          inputMode={inputBehavior.inputMode}
+          enterKeyHint={inputBehavior.enterKeyHint}
           onChange={(event) => props.onChange(event.target.value)}
           onBlur={props.onBlur}
           onFocus={props.onFocus}

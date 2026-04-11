@@ -1,0 +1,176 @@
+name: Release mirrored package
+
+on:
+  workflow_call:
+    inputs:
+      workspace:
+        required: true
+        type: string
+      package_path:
+        required: true
+        type: string
+      target_repo:
+        required: true
+        type: string
+      target_branch:
+        required: false
+        type: string
+        default: main
+      version:
+        required: true
+        type: string
+      mirror_git_user_name:
+        required: false
+        type: string
+        default: runilib-bot
+      mirror_git_user_email:
+        required: false
+        type: string
+        default: bot@runilib.dev
+    secrets:
+      mirror_push_token:
+        required: true
+      mirror_git_user_name_secret:
+        required: false
+      mirror_git_user_email_secret:
+        required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        env:
+          DEFAULT_GIT_USER_NAME: ${{ inputs.mirror_git_user_name }}
+          DEFAULT_GIT_USER_EMAIL: ${{ inputs.mirror_git_user_email }}
+          SECRET_GIT_USER_NAME: ${{ secrets.mirror_git_user_name_secret }}
+          SECRET_GIT_USER_EMAIL: ${{ secrets.mirror_git_user_email_secret }}
+        run: |
+          set -euo pipefail
+
+          git_user_name="${SECRET_GIT_USER_NAME:-}"
+          git_user_email="${SECRET_GIT_USER_EMAIL:-}"
+
+          if [ -z "$git_user_name" ]; then
+            git_user_name="$DEFAULT_GIT_USER_NAME"
+          fi
+
+          if [ -z "$git_user_email" ]; then
+            git_user_email="$DEFAULT_GIT_USER_EMAIL"
+          fi
+
+          git config user.name "$git_user_name"
+          git config user.email "$git_user_email"
+
+      - name: Verify package path and version
+        env:
+          PACKAGE_PATH: ${{ inputs.package_path }}
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          test -d "$PACKAGE_PATH"
+          test -f "$PACKAGE_PATH/package.json"
+          test -f "$PACKAGE_PATH/CHANGELOG.md"
+
+          package_version="$(jq -r '.version' "$PACKAGE_PATH/package.json")"
+
+          if [ "$package_version" != "$EXPECTED_VERSION" ]; then
+            echo "Package version mismatch for $PACKAGE_PATH: expected $EXPECTED_VERSION, got $package_version"
+            exit 1
+          fi
+
+      - name: Extract release notes
+        env:
+          PACKAGE_PATH: ${{ inputs.package_path }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+        run: |
+          set -euo pipefail
+
+          node ./scripts/extract-package-release-notes.mjs \
+            --package-path "$PACKAGE_PATH" \
+            --version "$PACKAGE_VERSION" \
+            --output "$RELEASE_NOTES_PATH"
+
+      - name: Create subtree branch
+        env:
+          PACKAGE_PATH: ${{ inputs.package_path }}
+        run: |
+          set -euo pipefail
+
+          git subtree split --prefix="$PACKAGE_PATH" -b mirror-release-branch
+
+      - name: Push subtree to mirror repository branch
+        env:
+          TARGET_REPO: ${{ inputs.target_repo }}
+          TARGET_BRANCH: ${{ inputs.target_branch }}
+          MIRROR_PUSH_TOKEN: ${{ secrets.mirror_push_token }}
+        run: |
+          set -euo pipefail
+
+          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git push mirror mirror-release-branch:"${TARGET_BRANCH}" --force
+
+      - name: Ensure release tag exists in mirror repository
+        env:
+          TARGET_REPO: ${{ inputs.target_repo }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          tag_name="v${PACKAGE_VERSION}"
+          local_sha="$(git rev-parse mirror-release-branch)"
+          remote_sha="$(git ls-remote mirror "refs/tags/${tag_name}^{}" | awk '{print $1}')"
+
+          if [ -z "$remote_sha" ]; then
+            remote_sha="$(git ls-remote mirror "refs/tags/${tag_name}" | awk '{print $1}')"
+          fi
+
+          if [ -n "$remote_sha" ] && [ "$remote_sha" != "$local_sha" ]; then
+            echo "Remote tag ${tag_name} already exists in ${TARGET_REPO}, but points to ${remote_sha} instead of ${local_sha}."
+            exit 1
+          fi
+
+          if [ -z "$remote_sha" ]; then
+            git tag -a "$tag_name" "$local_sha" -m "Version ${PACKAGE_VERSION}"
+            git push mirror "refs/tags/${tag_name}"
+          fi
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.mirror_push_token }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+        run: |
+          set -euo pipefail
+
+          tag_name="v${PACKAGE_VERSION}"
+          release_title="Version ${PACKAGE_VERSION}"
+
+          if gh release view "$tag_name" --repo "$TARGET_REPO" > /dev/null 2>&1; then
+            gh release edit "$tag_name" \
+              --repo "$TARGET_REPO" \
+              --title "$release_title" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          else
+            gh release create "$tag_name" \
+              --repo "$TARGET_REPO" \
+              --title "$release_title" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          fi
+
+      - name: Cleanup local refs
+        if: always()
+        run: |
+          git branch -D mirror-release-branch || true

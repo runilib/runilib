@@ -449,6 +449,8 @@ function StandardDocPage({
   entry: DocEntry;
   version: string;
 }) {
+  const isTutorialPage = entry.id.startsWith('fb-tutorial');
+
   return (
     <>
       <nav
@@ -472,7 +474,10 @@ function StandardDocPage({
       </header>
 
       <article className="doc-standard-article">
-        <RichText section={entry.section} />
+        <RichText
+          interactiveCode={isTutorialPage}
+          section={entry.section}
+        />
       </article>
     </>
   );

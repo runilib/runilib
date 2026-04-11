@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 
 import type {
-  FieldBehaviorConfig,
   FieldDescriptor,
   FieldRenderProps,
   FieldType,
@@ -24,7 +23,6 @@ function cloneDescriptor<V, TType extends FieldType>(
     _validators: [...descriptor._validators],
     _options: descriptor._options ? [...descriptor._options] : undefined,
     _patterns: descriptor._patterns ? [...descriptor._patterns] : undefined,
-    _behavior: descriptor._behavior ? { ...descriptor._behavior } : undefined,
   };
 }
 
@@ -79,30 +77,6 @@ export class BaseFieldBuilder<
       _debounce: 300,
       _validators: [],
     };
-  }
-
-  /**
-   * Configures field-level UI behavior such as ids, autocomplete, and picker rendering.
-   * Merges with any previously set behavior config.
-   *
-   * Prefer render-time styling via `className`, `style`, or field/global
-   * `ui` overrides so schema builders stay focused on business rules.
-   *
-   * @param config - A behavior configuration object.
-   * @returns The builder instance for chaining.
-   *
-   * @example
-   * ```ts
-   * field.text('Name', '')
-   *   .behavior({ autoComplete: 'name' });
-   * ```
-   */
-  behavior(config: FieldBehaviorConfig): this {
-    this._desc._behavior = {
-      ...this._desc._behavior,
-      ...config,
-    };
-    return this;
   }
 
   /**
@@ -330,6 +304,47 @@ export class BaseFieldBuilder<
         value: value ?? true,
       });
     }
+    return this;
+  }
+
+  /**
+   * Makes the field both visible **and** required when the condition is met.
+   * This is a shorthand for calling `visibleWhen()` and `requiredWhen()` with the same condition.
+   *
+   * @param fieldOrFn - The name of the field to watch, or a predicate function receiving all form values.
+   * @param value - The value to compare against (defaults to `true`). Ignored when `fieldOrFn` is a function.
+   * @returns The builder instance for chaining.
+   *
+   * @example
+   * ```ts
+   * // Visible and required when "hasCompany" is true
+   * field.text('Company name', '').visibleAndRequiredWhen('hasCompany');
+   *
+   * // Visible and required when "role" equals "admin"
+   * field.text('Admin code', '').visibleAndRequiredWhen('role', 'admin');
+   *
+   * // Visible and required based on custom logic
+   * field.text('License', '').visibleAndRequiredWhen((values) => values.age >= 18);
+   * ```
+   */
+  visibleAndRequiredWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+    if (typeof fieldOrFn === 'function') {
+      this._conditions.visible.push({ type: 'fn', fn: fieldOrFn });
+      this._conditions.required.push({ type: 'fn', fn: fieldOrFn });
+    } else {
+      this._conditions.visible.push({
+        type: 'eq',
+        field: fieldOrFn,
+        value: value ?? true,
+      });
+
+      this._conditions.required.push({
+        type: 'eq',
+        field: fieldOrFn,
+        value: value ?? true,
+      });
+    }
+
     return this;
   }
 

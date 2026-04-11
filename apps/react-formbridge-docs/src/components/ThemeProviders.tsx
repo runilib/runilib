@@ -18,7 +18,7 @@ const THEME_STORAGE_KEY = 'react-formbridge-docs-theme';
 
 const ThemeModeContext = createContext<ThemeModeContextValue | null>(null);
 
-export function ThemeProviders({ children }: { children: React.ReactNode }) {
+export const ThemeProviders = ({ children }: { children: React.ReactNode }) => {
   const [mode, setMode] = useState<ThemeMode>('light');
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function ThemeProviders({ children }: { children: React.ReactNode }) {
       </ThemeProvider>
     </ThemeModeContext.Provider>
   );
-}
+};
 
 export function useThemeMode() {
   const context = useContext(ThemeModeContext);

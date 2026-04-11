@@ -2,6 +2,8 @@ import { siteConfig } from '@/lib/site';
 
 import type { MetadataRoute } from 'next';
 
+const FAVICON_URL = '/logo-icon-black.svg?v=formbridge-20260411b';
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: siteConfig.name,
@@ -13,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#08111a',
     icons: [
       {
-        src: '/favicon.svg',
+        src: FAVICON_URL,
         sizes: 'any',
         type: 'image/svg+xml',
       },

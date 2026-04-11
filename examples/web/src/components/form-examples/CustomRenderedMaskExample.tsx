@@ -53,15 +53,11 @@ const CustomRenderedAccessCodeField = ({
     [controller],
   );
 
-  console.log('controller', controller);
-
   const meta = useMemo(
     () =>
       buildAccessCodeState(typeof controller.value === 'string' ? controller.value : ''),
     [controller.value],
   );
-
-  console.log(controller);
 
   const helperId = `${inputId}-helper`;
   const helperText =

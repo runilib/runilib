@@ -23,19 +23,13 @@ export function CustomerCheckoutExample() {
         .required('First name is required')
         .label('First name')
         .trim()
-        .placeholder('Ava')
-        .behavior({
-          autoComplete: 'given-name',
-        }),
+        .placeholder('Ava'),
       lastName: field
         .text()
         .required('Last name is required')
         .label('Last name')
         .trim()
-        .placeholder('Stone')
-        .behavior({
-          autoComplete: 'family-name',
-        }),
+        .placeholder('Stone'),
       email: field
         .email()
         .required('Email is required')
@@ -43,10 +37,6 @@ export function CustomerCheckoutExample() {
         .trim()
         .lowercase()
         .placeholder('ava@runilib.dev')
-        .behavior({
-          autoComplete: 'email',
-          inputMode: 'email',
-        })
         .excludeEmailDomains(
           ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'],
           'Please use a professional email address.',
@@ -58,10 +48,6 @@ export function CustomerCheckoutExample() {
         .trim()
         .lowercase()
         .placeholder('ava@runilib.dev')
-        .behavior({
-          autoComplete: 'email',
-          inputMode: 'email',
-        })
         .pattern(
           /^[^\s@]+@(?!gmail\.com$|yahoo\.com$|hotmail\.com$|outlook\.com$)[^\s@]+\.[^\s@]+$/i,
           'Please use a professional email address.',
@@ -70,11 +56,7 @@ export function CustomerCheckoutExample() {
         .tel()
         .required('Phone is required')
         .label('Phone')
-        .placeholder('+33 6 12 34 56 78')
-        .behavior({
-          autoComplete: 'tel',
-          inputMode: 'tel',
-        }),
+        .placeholder('+33 6 12 34 56 78'),
       department: field
         .select()
         .label('Department')
@@ -85,10 +67,7 @@ export function CustomerCheckoutExample() {
         .required('City is required')
         .label('City')
         .trim()
-        .placeholder('Paris')
-        .behavior({
-          autoComplete: 'address-level2',
-        }),
+        .placeholder('Paris'),
       customerCode: field
         .masked('LL-9999')
         .label('Customer code')
@@ -99,37 +78,25 @@ export function CustomerCheckoutExample() {
         .showMaskInPlaceholder()
         .uppercase()
         .validateComplete('Complete the customer code.')
-        .hint('Custom mask example: two uppercase letters and four digits.')
-        .behavior({
-          autoComplete: 'off',
-        }),
+        .hint('Custom mask example: two uppercase letters and four digits.'),
       cardNumber: field
         .masked(MASKS.CARD_16)
         .label('Card number')
         .required('Card number is required')
         .showMaskInPlaceholder()
-        .validateComplete('Complete the card number.')
-        .behavior({
-          autoComplete: 'cc-number',
-        }),
+        .validateComplete('Complete the card number.'),
       expiry: field
         .masked(MASKS.EXPIRY)
         .label('Expiry')
         .required('Expiry date is required')
         .showMaskInPlaceholder()
-        .validateComplete('Complete the expiry date.')
-        .behavior({
-          autoComplete: 'cc-exp',
-        }),
+        .validateComplete('Complete the expiry date.'),
       cvv: field
         .masked(MASKS.CVV)
         .label('CVV')
         .required('CVV is required')
         .showMaskInPlaceholder()
-        .validateComplete('Complete the CVV.')
-        .behavior({
-          autoComplete: 'cc-csc',
-        }),
+        .validateComplete('Complete the CVV.'),
     };
   }, []);
 
@@ -143,7 +110,7 @@ export function CustomerCheckoutExample() {
     },
   });
 
-  const { Form, fields, state, watchAll, FieldError, FieldLabel } = checkoutForm;
+  const { Form, fields, state, watchAll } = checkoutForm;
 
   const checkoutFieldCount = Object.keys(checkoutSchema).length;
   const liveCheckout = watchAll();
@@ -223,18 +190,8 @@ export function CustomerCheckoutExample() {
           >
             <div className={styles.formRow}>
               <fields.firstName
-                inputProps={{ 'aria-checked': 'false' }}
-                styles={{
-                  error: { borderColor: 'red' },
-                  input: { borderColor: state.errors.firstName ? 'red' : '' },
-                }}
-                renderLabel={(props) => {
-                  return <label htmlFor={props.name}>{props.label} *</label>;
-                }}
-                renderError={(props) => {
-                  return <p style={{ color: 'red' }}>{props.error}</p>;
-                }}
-                renderRequiredMark={() => <p>DDDD</p>}
+              // readOnly
+              // highlightOnError={false}
               />
               <fields.lastName />
             </div>
@@ -249,12 +206,7 @@ export function CustomerCheckoutExample() {
 
             <div className={styles.formRow}>
               <div>
-                <FieldLabel name="city" />
-                <fields.city hideLabel />
-                <FieldError
-                  style={{ color: 'red' }}
-                  name="city"
-                />
+                <fields.city />
               </div>
               <fields.customerCode {...compactFieldUi} />
             </div>

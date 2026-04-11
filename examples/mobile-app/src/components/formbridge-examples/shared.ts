@@ -1,5 +1,5 @@
 import type {
-  FormBridgeUiOptions,
+  FormBridgeOptions,
   OptionsFetcherContext,
   SelectOption,
 } from '@runilib/react-formbridge';
@@ -107,15 +107,19 @@ export function createNativeFieldProps() {
       checkboxBox: s.checkboxBox,
       checkboxLabel: s.checkboxLabel,
       optionTrigger: s.fieldInput,
+      trigger: s.fieldInput,
       optionRow: s.optionRow,
       optionLabel: s.optionLabel,
+      searchInput: s.fieldInput,
+      loadingText: s.fieldHint,
+      emptyText: s.fieldHint,
       modalBackdrop: s.optionModalBackdrop,
       modalCard: s.optionModalCard,
     },
   };
 }
 
-export function createNativeFormUi(): FormBridgeUiOptions {
+export function createNativeFormUi(): FormBridgeOptions {
   return {
     field: {
       styles: {
@@ -128,8 +132,12 @@ export function createNativeFormUi(): FormBridgeUiOptions {
         checkboxBox: s.checkboxBox,
         checkboxLabel: s.checkboxLabel,
         optionTrigger: s.fieldInput,
+        trigger: s.fieldInput,
         optionRow: s.optionRow,
         optionLabel: s.optionLabel,
+        searchInput: s.fieldInput,
+        loadingText: s.fieldHint,
+        emptyText: s.fieldHint,
         modalBackdrop: s.optionModalBackdrop,
         modalCard: s.optionModalCard,
       },

@@ -11,13 +11,14 @@ import {
 } from 'react-native';
 
 import type { FileValue } from '../../core/field-builders/file/types';
-import type { ExtraFieldProps, NativeFileFieldUiOverrides } from '../../types';
+import type { ExtraFieldProps, NativeFileFieldPropsOverrides } from '../../types';
 import {
   defaultErrorChromeStyle,
   defaultErrorTextStyle,
   defaultRequiredMarkStyle,
   formatBytes,
   isImageLike,
+  resolveNativeInputBehavior,
   shouldHighlightOnError,
   sx,
 } from './shared';
@@ -46,7 +47,7 @@ interface Props {
   name: string;
   onChange: (value: FileValue | FileValue[] | null) => void;
   onBlur: () => void;
-  extra?: ExtraFieldProps<NativeFileFieldUiOverrides, 'native'>;
+  extra?: ExtraFieldProps<NativeFileFieldPropsOverrides, 'native'>;
 }
 
 function getDefaultFileIcon(file: FileValue): React.ReactNode {
@@ -70,7 +71,7 @@ function resolveText<TContext>(
 }
 
 export const NativeFileField: React.FC<Props> = ({
-  descriptor: d,
+  descriptor,
   value,
   error,
   label,
@@ -81,6 +82,8 @@ export const NativeFileField: React.FC<Props> = ({
   extra,
 }) => {
   const [loading, setLoading] = useState(false);
+  const inputBehavior = resolveNativeInputBehavior(extra);
+  const isReadOnly = Boolean(inputBehavior.readOnly);
 
   const {
     styles,
@@ -128,20 +131,20 @@ export const NativeFileField: React.FC<Props> = ({
     [value],
   );
   const renderContext = {
-    accept: d._fileAccept,
-    disabled: d._disabled,
+    accept: descriptor._fileAccept,
+    disabled: descriptor._disabled,
     fileCount: currentFiles.length,
     loading,
-    maxFiles: d._fileMaxFiles,
-    maxSize: d._fileMaxSize,
-    multiple: d._fileMultiple,
-    preview: d._filePreview,
-    previewHeight: d._filePreviewHeight,
+    maxFiles: descriptor._fileMaxFiles,
+    maxSize: descriptor._fileMaxSize,
+    multiple: descriptor._fileMultiple,
+    preview: descriptor._filePreview,
+    previewHeight: descriptor._filePreviewHeight,
   };
   const resolvedLoadingText = resolveText(loadingText, 'Processing...', renderContext);
   const resolvedPickButtonText = resolveText(
     pickButtonText,
-    d._fileDragDropLabel || 'Choose file',
+    descriptor._fileDragDropLabel || 'Choose file',
     renderContext,
   );
   const resolvedMissingPickerNotice = resolveText(
@@ -164,22 +167,22 @@ export const NativeFileField: React.FC<Props> = ({
   );
 
   const handlePick = async () => {
-    if (d._disabled || !pickFiles) return;
+    if (descriptor._disabled || isReadOnly || !pickFiles) return;
 
     setLoading(true);
 
     try {
       const picked = await pickFiles({
-        descriptor: d,
-        multiple: d._fileMultiple,
+        descriptor: descriptor,
+        multiple: descriptor._fileMultiple,
       });
 
       if (!picked) return;
 
       const nextFiles = Array.isArray(picked) ? picked : [picked];
 
-      if (d._fileMultiple) {
-        onChange([...currentFiles, ...nextFiles].slice(0, d._fileMaxFiles));
+      if (descriptor._fileMultiple) {
+        onChange([...currentFiles, ...nextFiles].slice(0, descriptor._fileMaxFiles));
       } else {
         onChange(nextFiles[0] ?? null);
       }
@@ -190,7 +193,7 @@ export const NativeFileField: React.FC<Props> = ({
   };
 
   const removeFile = (index: number) => {
-    if (d._fileMultiple) {
+    if (descriptor._fileMultiple) {
       const next = currentFiles.filter((_, i) => i !== index);
       onChange(next.length ? next : null);
       return;
@@ -212,7 +215,7 @@ export const NativeFileField: React.FC<Props> = ({
         (renderLabel?.({
           id,
           label,
-          required: Boolean(d._required),
+          required: Boolean(descriptor._required),
           name,
         }) ?? (
           <Text
@@ -220,14 +223,15 @@ export const NativeFileField: React.FC<Props> = ({
             {...labelPropsRest}
           >
             {label}
-            {d._required && requiredMark}
+            {descriptor._required && requiredMark}
           </Text>
         ))}
 
       <Pressable
         onPress={handlePick}
-        disabled={d._disabled}
-        style={sx(controlErrorStyle, styles?.pickButton)}
+        disabled={descriptor._disabled || isReadOnly}
+        testID={inputBehavior.testID}
+        style={sx(styles?.pickButton, controlErrorStyle)}
       >
         {renderPickButtonContent?.({
           ...renderContext,
@@ -268,12 +272,12 @@ export const NativeFileField: React.FC<Props> = ({
                 key={`${file.uri}-${index.toString()}`}
                 style={sx(styles?.fileItem)}
               >
-                {d._filePreview && isImageLike(file.type || file.uri) ? (
+                {descriptor._filePreview && isImageLike(file.type || file.uri) ? (
                   <Image
                     source={{ uri: file.uri }}
                     style={{
-                      width: d._filePreviewHeight,
-                      height: d._filePreviewHeight,
+                      width: descriptor._filePreviewHeight,
+                      height: descriptor._filePreviewHeight,
                     }}
                   />
                 ) : (

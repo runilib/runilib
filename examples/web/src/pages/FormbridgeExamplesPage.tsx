@@ -141,6 +141,7 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
           <CustomMaskExamplesShowcase />
           <StylingExamplesShowcase />
           <ResolverExamplesShowcase />
+          {/* <SignupForm /> */}
         </div>
       </section>
     </main>

@@ -1,4 +1,4 @@
-import { formbridgeDocs } from '@/data/docs/formbridge';
+import { formbridgeDocs } from '@/data/docs';
 import { groupDescriptions } from '@/data/site';
 import type {
   DocEntry,

@@ -7,7 +7,6 @@ import {
   buildPhoneValue,
   getCountry,
 } from '../../../core/field-builders/phone/countries';
-import { resolveWebFieldConfig } from '../../../hooks/shared/ui-utils';
 import { PhoneInput } from '../PhoneInput';
 
 function renderPhoneField(
@@ -17,7 +16,7 @@ function renderPhoneField(
   const descriptor = builder._build();
   const resolvedDescriptor = {
     ...descriptor,
-    _ui: resolveWebFieldConfig(descriptor._behavior),
+    fieldPropsFromClient: {},
   } as React.ComponentProps<typeof PhoneInput>['descriptor'];
 
   return render(
@@ -54,7 +53,7 @@ describe('WebPhoneInput ui', () => {
     const descriptor = field.phone('Phone')._build();
     const resolvedDescriptor = {
       ...descriptor,
-      _ui: resolveWebFieldConfig(descriptor._behavior),
+      fieldPropsFromClient: {},
     } as React.ComponentProps<typeof PhoneInput>['descriptor'];
 
     rerender(
@@ -83,7 +82,13 @@ describe('WebPhoneInput ui', () => {
   });
 
   it('supports custom button, option, empty-search, and e164 rendering', () => {
-    const value = buildPhoneValue(getCountry('FR')!, '06 12 34 56 78');
+    const country = getCountry('FR');
+
+    if (!country) {
+      throw new Error('Expected FR to be available in the phone country list.');
+    }
+
+    const value = buildPhoneValue(country, '06 12 34 56 78');
 
     const { getByRole, getByPlaceholderText, getByTestId, getByText } = renderPhoneField(
       field.phone('Phone').preferredCountries(['FR', 'US']).searchable(),

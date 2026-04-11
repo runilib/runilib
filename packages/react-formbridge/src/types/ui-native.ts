@@ -4,7 +4,7 @@ import type { PhoneValue } from '../core/field-builders/phone/countries';
 import type { CountryInfo, PhoneCountryLayout } from '../core/field-builders/phone/types';
 import type { FieldAutoComplete } from './autoComplete';
 import type {
-  FieldUiRenderers,
+  FieldRenderersProps,
   NativeStyleValue,
   SelectPickerRenderContext,
 } from './field';
@@ -16,12 +16,17 @@ type NativeTextOverride<TContext> = string | ((ctx: TContext) => string);
 
 // ─── Base types ─────────────────────────────────────────────────────────────────
 
-type NativeFieldUiBase<TSlots extends string> = FieldUiRenderers & {
+type NativeFieldPropsBase<TSlots extends string> = FieldRenderersProps & {
   id?: string;
   testID?: string;
   hideLabel?: boolean;
   /** When false, the default red field chrome is suppressed while the error message still renders. */
   highlightOnError?: boolean;
+  readOnly?: boolean;
+  autoComplete?: FieldAutoComplete;
+  autoFocus?: boolean;
+  keyboardType?: string;
+  secureTextEntry?: boolean;
   styles?: NativeStyles<TSlots>;
   rootProps?: Record<string, unknown>;
   labelProps?: Record<string, unknown>;
@@ -29,13 +34,10 @@ type NativeFieldUiBase<TSlots extends string> = FieldUiRenderers & {
   errorProps?: Record<string, unknown>;
 };
 
-type NativeInputBehaviorUi = {
-  readOnly?: boolean;
-  autoComplete?: FieldAutoComplete;
-  autoFocus?: boolean;
-  keyboardType?: string;
-  secureTextEntry?: boolean;
-};
+type NativeInputBehaviorProps = Pick<
+  NativeFieldPropsBase<NativeFieldSlot>,
+  'readOnly' | 'autoComplete' | 'autoFocus' | 'keyboardType' | 'secureTextEntry'
+>;
 
 // ─── Slot types ─────────────────────────────────────────────────────────────────
 
@@ -188,37 +190,37 @@ export interface NativePhoneFieldCountryItemRenderContext
 
 // ─── Global overrides ───────────────────────────────────────────────────────────
 
-export interface NativeGlobalFieldUiOverrides
-  extends NativeFieldUiBase<NativeFieldSlot> {}
+export interface NativeGlobalFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeFieldSlot> {}
 
 // ─── Per-field-type overrides ───────────────────────────────────────────────────
 
-export interface NativeTextFieldUiOverrides
-  extends NativeFieldUiBase<NativeSharedFieldSlot>,
-    NativeInputBehaviorUi {
+export interface NativeTextFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeSharedFieldSlot>,
+    NativeInputBehaviorProps {
   inputProps?: Record<string, unknown>;
 }
 
-export interface NativeCheckboxFieldUiOverrides
-  extends NativeFieldUiBase<NativeCheckboxFieldSlot> {}
+export interface NativeCheckboxFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeCheckboxFieldSlot> {}
 
-export interface NativeSwitchFieldUiOverrides
-  extends NativeFieldUiBase<NativeSharedFieldSlot> {}
+export interface NativeSwitchFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeSharedFieldSlot> {}
 
-export interface NativeSelectFieldUiOverrides
-  extends NativeFieldUiBase<NativeSelectFieldSlot> {
+export interface NativeSelectFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeSelectFieldSlot> {
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
-export interface NativeOtpFieldUiOverrides
-  extends NativeFieldUiBase<NativeOtpFieldSlot>,
-    NativeInputBehaviorUi {
+export interface NativeOtpFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeOtpFieldSlot>,
+    NativeInputBehaviorProps {
   inputProps?: Record<string, unknown>;
 }
 
-export interface NativePasswordFieldUiOverrides
-  extends NativeFieldUiBase<NativePasswordFieldSlot>,
-    NativeInputBehaviorUi {
+export interface NativePasswordFieldPropsOverrides
+  extends NativeFieldPropsBase<NativePasswordFieldSlot>,
+    NativeInputBehaviorProps {
   inputProps?: Record<string, unknown>;
   showPasswordText?: NativeTextOverride<NativePasswordFieldRenderContext>;
   hidePasswordText?: NativeTextOverride<NativePasswordFieldRenderContext>;
@@ -256,9 +258,9 @@ export interface NativePasswordFieldUiOverrides
   ) => React.ReactNode;
 }
 
-export interface NativePhoneFieldUiOverrides
-  extends NativeFieldUiBase<NativePhoneFieldSlot>,
-    NativeInputBehaviorUi {
+export interface NativePhoneFieldPropsOverrides
+  extends NativeFieldPropsBase<NativePhoneFieldSlot>,
+    NativeInputBehaviorProps {
   inputProps?: Record<string, unknown>;
   searchInputProps?: Record<string, unknown>;
   countryLayout?: PhoneCountryLayout;
@@ -293,8 +295,8 @@ export interface NativePhoneFieldUiOverrides
   ) => React.ReactNode;
 }
 
-export interface NativeFileFieldUiOverrides
-  extends NativeFieldUiBase<NativeFileFieldSlot> {
+export interface NativeFileFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeFileFieldSlot> {
   pickFiles?: (ctx: {
     descriptor: {
       _label: string;
@@ -344,18 +346,18 @@ export interface NativeFileFieldUiOverrides
   ) => React.ReactNode;
 }
 
-export interface NativeAsyncAutocompleteFieldUiOverrides
-  extends NativeFieldUiBase<NativeAsyncAutocompleteFieldSlot>,
-    NativeInputBehaviorUi {
+export interface NativeAsyncAutocompleteFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeAsyncAutocompleteFieldSlot>,
+    NativeInputBehaviorProps {
   inputProps?: Record<string, unknown>;
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
 // ─── Combined field overrides (catch-all for generic usage) ─────────────────────
 
-export interface NativeFieldUiOverrides
-  extends NativeFieldUiBase<NativeFieldSlot>,
-    NativeInputBehaviorUi {
+export interface NativeFieldPropsOverrides
+  extends NativeFieldPropsBase<NativeFieldSlot>,
+    NativeInputBehaviorProps {
   inputProps?: Record<string, unknown>;
   searchInputProps?: Record<string, unknown>;
   countryLayout?: PhoneCountryLayout;
@@ -474,12 +476,12 @@ export interface NativeFieldUiOverrides
 
 // ─── Form & submit overrides ────────────────────────────────────────────────────
 
-export interface NativeFormUiOverrides {
+export interface NativeFormPropsOverrides {
   style?: NativeStyleValue;
   props?: Record<string, unknown>;
 }
 
-export interface NativeSubmitUiOverrides {
+export interface NativeSubmitPropsOverrides {
   style?: NativeStyleValue;
   containerStyle?: NativeStyleValue;
   textStyle?: NativeStyleValue;

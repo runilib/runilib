@@ -42,7 +42,7 @@ export const MASKS = {
   NUMBER_FR: '9 999 999',
 } as const;
 
-export type MaskPreset = keyof typeof MASKS;
+export type MASK_PRESET = keyof typeof MASKS;
 
 export const MASK_REGEX: Record<BuiltinMaskChar, RegExp> = {
   '9': /\d/,

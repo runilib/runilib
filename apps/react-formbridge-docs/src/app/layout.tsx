@@ -10,6 +10,8 @@ import { siteConfig } from '@/lib/site';
 import type { Metadata } from 'next';
 import './globals.css';
 
+const FAVICON_URL = '/logo-icon-black.svg?v=formbridge-20260411b';
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   applicationName: siteConfig.name,
@@ -56,9 +58,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: [{ url: FAVICON_URL, type: 'image/svg+xml' }],
+    shortcut: [{ url: FAVICON_URL, type: 'image/svg+xml' }],
+    apple: [{ url: FAVICON_URL, type: 'image/svg+xml' }],
   },
 };
 

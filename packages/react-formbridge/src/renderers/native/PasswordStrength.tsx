@@ -16,13 +16,14 @@ import type {
   ExtraFieldProps,
   FieldRenderProps,
   FocusableFieldHandle,
-  NativePasswordFieldUiOverrides,
+  NativePasswordFieldPropsOverrides,
 } from '../../types';
 import {
   defaultErrorChromeStyle,
   defaultErrorTextStyle,
   defaultRequiredMarkStyle,
-  type ResolvedNativeFieldUi,
+  type ResolvedNativeFieldProps,
+  resolveNativeInputBehavior,
   shouldHighlightOnError,
   sx,
 } from './shared';
@@ -33,12 +34,12 @@ type PasswordStrengthDescriptor = PasswordStrengthMeta & {
   _required: boolean;
   _hint?: string;
   _disabled: boolean;
-  _ui?: ResolvedNativeFieldUi;
+  fieldPropsFromClient?: ResolvedNativeFieldProps;
 };
 
 interface Props extends FieldRenderProps<string> {
   strengthMeta: PasswordStrengthDescriptor;
-  extra?: ExtraFieldProps<NativePasswordFieldUiOverrides, 'native'>;
+  extra?: ExtraFieldProps<NativePasswordFieldPropsOverrides, 'native'>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -86,11 +87,16 @@ function resolveText<TContext>(
 }
 
 export const NativePasswordStrength = ({
-  strengthMeta: d,
+  strengthMeta: descriptor,
   extra,
   registerFocusable,
   ...p
 }: Props) => {
+  const inputBehavior = resolveNativeInputBehavior(
+    extra,
+    descriptor.fieldPropsFromClient,
+  );
+  const defaultSecureTextEntry = inputBehavior.secureTextEntry ?? true;
   const {
     styles,
     hideLabel,
@@ -128,12 +134,12 @@ export const NativePasswordStrength = ({
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
 
-  const id = d._ui?.id ?? p.name;
-  const [visible, setVisible] = useState(false);
+  const id = extra?.id ?? descriptor.fieldPropsFromClient?.id ?? p.name;
+  const [visible, setVisible] = useState(!defaultSecureTextEntry);
   const hasError = Boolean(p.error);
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
-    d._ui?.highlightOnError,
+    descriptor.fieldPropsFromClient?.highlightOnError,
   );
   const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
 
@@ -143,11 +149,16 @@ export const NativePasswordStrength = ({
     }
 
     return scorePassword(p.value, {
-      ...d._strengthConfig,
-      levels: d._strengthCustomLevels ?? d._strengthConfig.levels,
-      minAcceptableScore: d._strengthMinAccept,
+      ...descriptor._strengthConfig,
+      levels: descriptor._strengthCustomLevels ?? descriptor._strengthConfig.levels,
+      minAcceptableScore: descriptor._strengthMinAccept,
     });
-  }, [d._strengthConfig, d._strengthCustomLevels, d._strengthMinAccept, p.value]);
+  }, [
+    descriptor._strengthConfig,
+    descriptor._strengthCustomLevels,
+    descriptor._strengthMinAccept,
+    p.value,
+  ]);
   const renderContext = useMemo(
     () => ({
       disabled: p.disabled,
@@ -171,12 +182,12 @@ export const NativePasswordStrength = ({
       defaultContent: defaultToggleContent,
     }) ?? defaultToggleContent;
   const defaultStrengthBarContent =
-    d._strengthShowBar && result ? (
+    descriptor._strengthShowBar && result ? (
       <View
         style={sx(
           {
-            borderRadius: d._strengthBarRadius,
-            minHeight: d._strengthBarHeight,
+            borderRadius: descriptor._strengthBarRadius,
+            minHeight: descriptor._strengthBarHeight,
             overflow: 'hidden',
           },
           styles?.strengthBar,
@@ -186,8 +197,8 @@ export const NativePasswordStrength = ({
           style={sx(
             {
               backgroundColor: result.color,
-              borderRadius: d._strengthBarRadius,
-              minHeight: d._strengthBarHeight,
+              borderRadius: descriptor._strengthBarRadius,
+              minHeight: descriptor._strengthBarHeight,
               width: `${result.percent}%`,
             },
             styles?.strengthFill,
@@ -196,7 +207,7 @@ export const NativePasswordStrength = ({
       </View>
     ) : null;
   const defaultStrengthLabelContent =
-    d._strengthShowLabel && result ? (
+    descriptor._strengthShowLabel && result ? (
       <Text
         style={sx(
           {
@@ -217,7 +228,7 @@ export const NativePasswordStrength = ({
         }) ?? defaultStrengthLabelContent)
       : null;
   const defaultStrengthEntropyContent =
-    d._strengthShowEntropy && result ? (
+    descriptor._strengthShowEntropy && result ? (
       <Text style={sx(styles?.strengthEntropy)}>{result.entropy} bits</Text>
     ) : null;
   const resolvedStrengthEntropyContent =
@@ -255,10 +266,10 @@ export const NativePasswordStrength = ({
         }) ?? defaultStrengthRowContent)
       : null;
   const shouldRenderRules =
-    d._strengthShowRules &&
+    descriptor._strengthShowRules &&
     result &&
     p.value &&
-    !(d._strengthHideRulesWhenValid && result.acceptable && !p.error);
+    !(descriptor._strengthHideRulesWhenValid && result.acceptable && !p.error);
 
   const requiredMark = renderRequiredMark?.() ?? (
     <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
@@ -273,7 +284,7 @@ export const NativePasswordStrength = ({
         (renderLabel?.({
           id,
           label: p.label,
-          required: Boolean(d._required),
+          required: Boolean(descriptor._required),
           name: p.name,
         }) ?? (
           <Text
@@ -281,7 +292,7 @@ export const NativePasswordStrength = ({
             {...labelPropsRest}
           >
             {p.label}
-            {d._required && requiredMark}
+            {descriptor._required && requiredMark}
           </Text>
         ))}
 
@@ -289,11 +300,14 @@ export const NativePasswordStrength = ({
         <TextInput
           nativeID={id}
           ref={registerFocusable}
-          testID={d._ui?.testID}
+          testID={inputBehavior.testID}
           value={p.value ?? ''}
-          placeholder={p.placeholder ?? d._placeholder}
-          editable={!p.disabled}
+          placeholder={p.placeholder ?? descriptor._placeholder}
+          editable={!(p.disabled || inputBehavior.readOnly)}
           secureTextEntry={!visible}
+          autoFocus={inputBehavior.autoFocus}
+          autoComplete={inputBehavior.autoComplete as TextInputProps['autoComplete']}
+          keyboardType={inputBehavior.keyboardType as TextInputProps['keyboardType']}
           autoCapitalize="none"
           autoCorrect={false}
           onChangeText={p.onChange}
@@ -301,9 +315,9 @@ export const NativePasswordStrength = ({
           onFocus={p.onFocus}
           style={sx(
             defaultPasswordInputStyle,
-            controlErrorStyle,
             styles?.input,
             inputPropsStyle,
+            controlErrorStyle,
           )}
           {...(inputPropsRest as Partial<TextInputProps>)}
         />

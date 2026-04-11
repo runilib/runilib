@@ -19,7 +19,139 @@ export function mergeStyles(
 ): CSSProperties | undefined {
   const filtered = styles.filter(Boolean);
   if (filtered.length === 0) return undefined;
-  return Object.assign({}, ...filtered);
+
+  const merged = Object.assign({}, ...filtered) as CSSProperties;
+
+  normalizeBorderShorthand(merged, 'border');
+  normalizeBorderShorthand(merged, 'borderTop');
+  normalizeBorderShorthand(merged, 'borderRight');
+  normalizeBorderShorthand(merged, 'borderBottom');
+  normalizeBorderShorthand(merged, 'borderLeft');
+
+  return merged;
+}
+
+type BorderSideKey =
+  | 'border'
+  | 'borderTop'
+  | 'borderRight'
+  | 'borderBottom'
+  | 'borderLeft';
+
+type BorderLonghandKey =
+  | 'borderWidth'
+  | 'borderStyle'
+  | 'borderColor'
+  | 'borderTopWidth'
+  | 'borderTopStyle'
+  | 'borderTopColor'
+  | 'borderRightWidth'
+  | 'borderRightStyle'
+  | 'borderRightColor'
+  | 'borderBottomWidth'
+  | 'borderBottomStyle'
+  | 'borderBottomColor'
+  | 'borderLeftWidth'
+  | 'borderLeftStyle'
+  | 'borderLeftColor';
+
+const BORDER_LONGHAND_MAP: Record<
+  BorderSideKey,
+  {
+    width: BorderLonghandKey;
+    style: BorderLonghandKey;
+    color: BorderLonghandKey;
+  }
+> = {
+  border: {
+    width: 'borderWidth',
+    style: 'borderStyle',
+    color: 'borderColor',
+  },
+  borderTop: {
+    width: 'borderTopWidth',
+    style: 'borderTopStyle',
+    color: 'borderTopColor',
+  },
+  borderRight: {
+    width: 'borderRightWidth',
+    style: 'borderRightStyle',
+    color: 'borderRightColor',
+  },
+  borderBottom: {
+    width: 'borderBottomWidth',
+    style: 'borderBottomStyle',
+    color: 'borderBottomColor',
+  },
+  borderLeft: {
+    width: 'borderLeftWidth',
+    style: 'borderLeftStyle',
+    color: 'borderLeftColor',
+  },
+};
+
+function parseBorderShorthand(value: string): {
+  width?: string | number;
+  style?: string;
+  color?: string;
+} | null {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (trimmed === 'none') {
+    return {
+      width: 0,
+      style: 'none',
+    };
+  }
+
+  const match = trimmed.match(/^(\S+)\s+(\S+)\s+(.+)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const [, width, style, color] = match;
+
+  return {
+    width,
+    style,
+    color,
+  };
+}
+
+function normalizeBorderShorthand(style: CSSProperties, key: BorderSideKey): void {
+  const shorthand = style[key];
+
+  if (typeof shorthand !== 'string') {
+    return;
+  }
+
+  const parsed = parseBorderShorthand(shorthand);
+
+  if (!parsed) {
+    return;
+  }
+
+  const longhands = BORDER_LONGHAND_MAP[key];
+  const styleRecord = style as Record<BorderLonghandKey, unknown>;
+
+  if (styleRecord[longhands.width] === undefined && parsed.width !== undefined) {
+    styleRecord[longhands.width] = parsed.width;
+  }
+
+  if (styleRecord[longhands.style] === undefined && parsed.style !== undefined) {
+    styleRecord[longhands.style] = parsed.style;
+  }
+
+  if (styleRecord[longhands.color] === undefined && parsed.color !== undefined) {
+    styleRecord[longhands.color] = parsed.color;
+  }
+
+  delete style[key];
 }
 
 export function toInputValue(value: unknown): string {

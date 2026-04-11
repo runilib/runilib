@@ -101,6 +101,13 @@ export interface UseFormBridgeReturn<
   TPlatform extends Platform = Platform,
 > {
   /**
+   * Optional provider for advanced composition.
+   * Useful when form consumers live outside <form.Form> but still need access
+   * to watch(), state, fieldController(), submit(), etc.
+   */
+  FormProvider: (props: { children: ReactNode }) => JSX.Element;
+
+  /**
    * The smart Form component — renders a form wrapper.
    * @example <form.Form onSubmit={handleSignUp}> ... <.Form>
    */
@@ -166,7 +173,7 @@ export interface UseFormBridgeReturn<
   /**
    * Reset to default values (or provided values).
    */
-  reset: (values?: Partial<SchemaValues<Schema>>) => void;
+  resetFields: (values?: Partial<SchemaValues<Schema>>) => void;
 
   /**
    * Set a field error manually (e.g., from an API response).

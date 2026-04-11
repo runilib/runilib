@@ -15,10 +15,7 @@ export function FieldOverridesStylingExample() {
       receiptEmail: field
         .email()
         .required('Receipt email is required')
-        .placeholder('billing@runilib.dev')
-        .behavior({
-          keyboardType: 'email-address',
-        }),
+        .placeholder('billing@runilib.dev'),
       postalCode: field.text().required('Postal code is required').placeholder('75002'),
       cardholder: field
         .text()
@@ -126,6 +123,7 @@ export function FieldOverridesStylingExample() {
 
           <fields.receiptEmail
             {...{
+              keyboardType: 'email-address',
               highlightOnError: false,
               renderHint: () => (
                 <Text style={{ color: '#5f6f88', fontSize: 12 }}>

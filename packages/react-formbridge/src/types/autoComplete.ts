@@ -52,8 +52,8 @@ type FieldAutoCompleteGroupedToken =
   | 'transaction-amount';
 
 /**
- * Cross-platform autocomplete tokens accepted by `behavior({ autoComplete })`
- * and field-level `ui.autoComplete`.
+ * Cross-platform autocomplete tokens accepted by field-level `autoComplete`
+ * overrides on web and native renderers.
  *
  * This intentionally covers the shared web / React Native surface without
  * falling back to `string`, so editors can offer real suggestions.

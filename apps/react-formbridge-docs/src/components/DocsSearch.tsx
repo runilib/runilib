@@ -27,13 +27,7 @@ const SEARCH_RESULTS_LIMIT = 8;
 const SEARCH_SCHEMA = {
   query: field
     .text('Search docs')
-    .placeholder('Search docs, hooks, builders, adapters...')
-    .behavior({
-      autoComplete: 'off',
-      enterKeyHint: 'search',
-      inputMode: 'search',
-      spellCheck: false,
-    }),
+    .placeholder('Search docs, hooks, builders, adapters...'),
 };
 
 function normalize(value: string) {
@@ -181,7 +175,7 @@ export function DocsSearch() {
   }, []);
 
   const resetSearch = useCallback(() => {
-    searchFormRef.current?.reset({ query: '' });
+    searchFormRef.current?.resetFields({ query: '' });
     setActiveIndex(0);
   }, []);
 
@@ -220,7 +214,7 @@ export function DocsSearch() {
   useEffect(() => {
     if (!isOpen) return;
 
-    const frame = window.requestAnimationFrame(() => {
+    const frame = globalThis.window.requestAnimationFrame(() => {
       searchFormRef.current?.fieldController('query').focus();
       const input = searchFieldRef.current?.querySelector<HTMLInputElement>(
         'input[data-fb-slot="input"]',
@@ -229,7 +223,7 @@ export function DocsSearch() {
       input?.select();
     });
 
-    return () => window.cancelAnimationFrame(frame);
+    return () => globalThis.window.cancelAnimationFrame(frame);
   }, [isOpen]);
 
   useEffect(() => {
@@ -372,6 +366,10 @@ export function DocsSearch() {
                   <SearchInput
                     field={searchForm.fields.query}
                     hideLabel
+                    autoComplete="off"
+                    inputMode="search"
+                    enterKeyHint="search"
+                    spellCheck={false}
                   />
                   <SearchDismiss
                     type="button"

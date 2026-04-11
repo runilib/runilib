@@ -41,7 +41,6 @@ export class PasswordFieldBuilder extends StringFieldBuilder<'password'> {
     return this;
   }
 
-  // ── NOUVEAU : brancher le mixin ──
   withStrengthIndicator(
     options: Parameters<PasswordStrengthMixin['withStrengthIndicator']>[0] = {},
   ): this {

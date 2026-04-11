@@ -4,10 +4,10 @@ import { useFormBridge as useWebFormBridge } from '../hooks/useFormBridge.web';
 
 function WebTypingHarness() {
   const form = useWebFormBridge({
-    name: field.text('Name').behavior({ autoComplete: 'name' }),
+    name: field.text('Name'),
     bio: field.textarea('Bio'),
     country: field.select('Country').options(['FR', 'US']),
-    email: field.email('Email').behavior({ autoComplete: 'email', inputMode: 'email' }),
+    email: field.email('Email'),
   });
   const nameController = form.fieldController('name');
   const countryController = form.fieldController('country');
@@ -15,9 +15,14 @@ function WebTypingHarness() {
   <form.fields.name
     inputProps={{ maxLength: 80 }}
     autoComplete="given-name"
+    inputMode="text"
   />;
   <form.fields.bio textareaProps={{ rows: 4 }} />;
-  <form.fields.country selectProps={{ size: 2 }} />;
+  <form.fields.country
+    autoFocus
+    readOnly
+    selectProps={{ size: 2 }}
+  />;
   <form.fields.email autoComplete="section-checkout email" />;
 
   // @ts-expect-error text fields should not expose selectProps
@@ -31,7 +36,7 @@ function WebTypingHarness() {
   nameController.options;
   // @ts-expect-error text controllers should not expose OTP metadata
   nameController.otpLength;
-  // @ts-expect-error autocomplete should only accept known tokens
+  // @ts-expect-error builder behavior API has been removed
   field.text('Work email').behavior({ autoComplete: 'work-email' });
   // @ts-expect-error field ui autocomplete should only accept known tokens
   <form.fields.email autoComplete="custom-email-token" />;
@@ -41,9 +46,9 @@ function WebTypingHarness() {
 
 function NativeTypingHarness() {
   const form = useNativeFormBridge({
-    name: field.text('Name').behavior({ autoComplete: 'name' }),
+    name: field.text('Name'),
     country: field.select('Country').options(['FR', 'US']),
-    otp: field.otp('Code').behavior({ autoComplete: 'one-time-code' }),
+    otp: field.otp('Code'),
   });
   const countryController = form.fieldController('country');
   const otpController = form.fieldController('otp');
@@ -52,7 +57,11 @@ function NativeTypingHarness() {
     inputProps={{ maxLength: 80 }}
     autoComplete="name"
   />;
-  <form.fields.country renderPicker={() => null} />;
+  <form.fields.country
+    autoFocus
+    readOnly
+    renderPicker={() => null}
+  />;
   <form.fields.otp autoComplete="sms-otp" />;
 
   // @ts-expect-error native field ui should not expose web-only textareaProps

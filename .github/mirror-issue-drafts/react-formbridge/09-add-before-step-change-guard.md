@@ -1,4 +1,4 @@
-# Add beforeStepChange guard support to useFormWizard()
+# Add beforeStepChange guard support to useFormBridgeWizard()
 
 Repository: `runilib/react-formbridge`  
 Suggested labels: `enhancement`, `good first issue`
@@ -7,7 +7,7 @@ Suggested labels: `enhancement`, `good first issue`
 
 ## Summary
 
-Add a `beforeStepChange` guard to `useFormWizard()` so consumers can intercept wizard navigation before the current step changes.
+Add a `beforeStepChange` guard to `useFormBridgeWizard()` so consumers can intercept wizard navigation before the current step changes.
 
 ## Why this would help
 
@@ -23,7 +23,7 @@ The wizard already exposes `onStepChange`, but that only runs after the transiti
 Possible shape:
 
 ```ts
-useFormWizard(steps, {
+useFormBridgeWizard(steps, {
   beforeStepChange: async (event) => {
     return true; // or false to block
   },
@@ -32,7 +32,7 @@ useFormWizard(steps, {
 
 ## Suggested implementation areas
 
-- `src/hooks/shared/useFormWizard.ts`
+- `src/hooks/shared/useFormBridgeWizard.ts`
 - wizard types
 - tests for blocked and allowed transitions
 

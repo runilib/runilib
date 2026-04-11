@@ -20,7 +20,7 @@ export type {
 } from './core/field-builders/dynamic/types';
 export { field } from './core/field-builders/field';
 export { inferFromObject, inferFromType } from './core/field-builders/infer';
-export type { MaskPreset } from './core/field-builders/mask/constants';
+export type { MASK_PRESET } from './core/field-builders/mask/constants';
 export { MASKS } from './core/field-builders/mask/constants';
 export type { MaskPatternInput } from './core/field-builders/mask/masks';
 export type {
@@ -49,6 +49,10 @@ export type {
   ResolverIssueMapResult,
   ResolverPathInput,
 } from './core/resolvers/types';
+export {
+  type FormBridgeProviderProps,
+  useFormBridgeContext,
+} from './hooks/shared/form-context';
 export type {
   AsyncDependencyShape,
   AsyncOptionsConfig,
@@ -69,17 +73,17 @@ export {
 export {
   type UseDynamicFormOptions,
   type UseDynamicFormReturn,
-  useDynamicForm,
-} from './hooks/useDynamicForm.native';
+  useDynamicFormBridge,
+} from './hooks/useDynamicFormBridge.native';
 export { useFormBridge } from './hooks/useFormBridge.native';
 export {
   type UseFormWizardOptions,
   type UseFormWizardReturn,
-  useFormWizard,
+  useFormBridgeWizard,
   type WizardStep,
   type WizardStepChangeEvent,
   type WizardStepChangeReason,
-} from './hooks/useFormWizard.native';
+} from './hooks/useFormBridgeWizard.native';
 // ─── FormHost ────────────────────────────────────────────────────────────────────
 export type FieldHostProps<TProps extends NativeExtraFieldProps = NativeExtraFieldProps> =
   SharedFieldHostProps<TProps>;

@@ -192,11 +192,11 @@ function getSubmitStyle(theme: DefaultTheme) {
   };
 }
 
-export function FeedbackPage({
+export const FeedbackPage = ({
   initialRelevantPage = '',
 }: {
   initialRelevantPage?: string;
-}) {
+}) => {
   const theme = useTheme();
   const normalizedInitialRelevantPage = normalizeRelevantPage(initialRelevantPage);
   const [didSendFeedback, setDidSendFeedback] = useState(false);
@@ -252,14 +252,14 @@ export function FeedbackPage({
         throw new Error(result?.error ?? 'Unable to send feedback right now.');
       }
 
-      feedbackForm.reset(initialValues);
+      feedbackForm.resetFields(initialValues);
       setDidSendFeedback(true);
     },
     [feedbackForm, initialValues],
   );
 
   const handleReset = useCallback(() => {
-    feedbackForm.reset(initialValues);
+    feedbackForm.resetFields(initialValues);
     setDidSendFeedback(false);
   }, [feedbackForm, initialValues]);
 
@@ -417,7 +417,7 @@ export function FeedbackPage({
       </Shell>
     </Main>
   );
-}
+};
 
 const Main = styled.main`
   min-height: calc(100vh - 220px);

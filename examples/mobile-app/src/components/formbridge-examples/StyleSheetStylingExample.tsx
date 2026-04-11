@@ -21,11 +21,7 @@ export function StyleSheetStylingExample() {
         .email()
         .required('Owner email is required')
         .trim()
-        .placeholder('owner@runilib.dev')
-        .behavior({
-          autoComplete: 'email',
-          keyboardType: 'email-address',
-        }),
+        .placeholder('owner@runilib.dev'),
       department: field
         .select()
         .options(CUSTOMER_DEPARTMENTS)

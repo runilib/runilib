@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { type FormSchema, field, useFormWizard } from '@runilib/react-formbridge';
+import { type FormSchema, field, useFormBridgeWizard } from '@runilib/react-formbridge';
 import { useWalkit, WalkitStep, type WalkitStepProps } from '@runilib/react-walkit';
 
 import styles from './Settings.module.css';
@@ -68,7 +68,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
     },
   ];
 
-  const wizard = useFormWizard(steps, {
+  const wizard = useFormBridgeWizard(steps, {
     onSubmit: async (values) => {
       console.log('submit wizard', values);
     },

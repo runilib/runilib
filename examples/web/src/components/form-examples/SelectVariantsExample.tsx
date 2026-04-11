@@ -103,11 +103,13 @@ export function SelectVariantsExample() {
         .hint('Numeric options stay numbers in form state, even after changes.'),
       accessRole: field
         .radio()
+        .label('Access role')
         .options(ACCESS_ROLE_OPTIONS)
         .required('Choose an access role')
         .hint('Radio keeps every choice visible at once.'),
       cityLookup: field
         .select()
+        .label('City')
         .optionsFrom(searchCityDirectory, {
           key: 'field-variant-city-search',
           debounce: 220,
@@ -116,10 +118,7 @@ export function SelectVariantsExample() {
         })
         .searchable()
         .placeholder('Search a city')
-        .hint('Custom picker modal powered by remote search.')
-        .behavior({
-          renderPicker: renderCityPicker,
-        }),
+        .hint('Custom picker modal powered by remote search.'),
     }),
     [],
   );
@@ -193,7 +192,7 @@ export function SelectVariantsExample() {
           <fields.seatPack />
         </div>
         <fields.accessRole />
-        <fields.cityLookup />
+        <fields.cityLookup renderPicker={renderCityPicker} />
 
         <Form.Submit
           className={styles.submitButton}

@@ -6,13 +6,13 @@ import type {
   ViewStyle,
 } from 'react-native';
 
-import type { NativeFieldUiOverrides } from '../../types/ui-native';
+import type { NativeFieldPropsOverrides } from '../../types/ui-native';
 
-export type NativeBaseUiOverrides = NativeFieldUiOverrides;
+export type NativeBasePropsOverrides = NativeFieldPropsOverrides;
 export const NATIVE_ERROR_COLOR = '#ef4444';
 
-export type ResolvedNativeFieldUi = Pick<
-  NativeFieldUiOverrides,
+export type ResolvedNativeFieldProps = Pick<
+  NativeFieldPropsOverrides,
   | 'id'
   | 'testID'
   | 'readOnly'
@@ -23,6 +23,28 @@ export type ResolvedNativeFieldUi = Pick<
   | 'highlightOnError'
   | 'renderPicker'
 >;
+
+export function resolveNativeInputBehavior(
+  override?: Partial<ResolvedNativeFieldProps>,
+  fallback?: Partial<ResolvedNativeFieldProps>,
+): Pick<
+  ResolvedNativeFieldProps,
+  | 'readOnly'
+  | 'autoComplete'
+  | 'autoFocus'
+  | 'keyboardType'
+  | 'secureTextEntry'
+  | 'testID'
+> {
+  return {
+    readOnly: override?.readOnly ?? fallback?.readOnly,
+    autoComplete: override?.autoComplete ?? fallback?.autoComplete,
+    autoFocus: override?.autoFocus ?? fallback?.autoFocus,
+    keyboardType: override?.keyboardType ?? fallback?.keyboardType,
+    secureTextEntry: override?.secureTextEntry ?? fallback?.secureTextEntry,
+    testID: override?.testID ?? fallback?.testID,
+  };
+}
 
 // biome-ignore lint/suspicious/noExplicitAny: React Native style props mix registered numeric styles with view/text/image objects, so this helper needs a permissive bridge type.
 export function sx(...styles: Array<StyleProp<any> | undefined | null | false>) {
@@ -87,7 +109,7 @@ export function defaultRequiredMarkStyle(): TextStyle {
 }
 
 export type NativeTextFieldDescriptorWebLike = {
-  _ui?: ResolvedNativeFieldUi;
+  fieldPropsFromClient?: ResolvedNativeFieldProps;
 };
 
 export type NativeImageStyle = StyleProp<ImageStyle>;

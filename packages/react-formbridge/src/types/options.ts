@@ -2,7 +2,7 @@ import type { PersistOptions } from '../core/persist/draft';
 import type { AnalyticsOptions } from '../hooks/shared/useFormAnalytics';
 import type { Platform, SelectOption } from './field';
 import type { FormSchema, FormState, SchemaValues } from './schema';
-import type { FormBridgeUiOptions } from './ui';
+import type { FormBridgeOptions } from './ui';
 
 // ─── Validation trigger ─────────────────────────────────────────────────────────
 
@@ -62,6 +62,13 @@ export interface UseFormOptions<
   formKey?: string;
 
   /**
+   * Rebuilds the compiled schema runtime without resetting the full form instance.
+   * Useful during local development / hot reload, or when your schema definition
+   * is intentionally replaced at runtime and you want builder changes to apply.
+   */
+  schemaKey?: string | number;
+
+  /**
    * Initial values applied when the form is created or when formKey changes.
    */
   initialValues?: Partial<SchemaValues<S>>;
@@ -72,7 +79,7 @@ export interface UseFormOptions<
    * Global UI layer applied to every rendered field, form wrapper, and submit button.
    * Local field props still win over these defaults.
    */
-  globalStyles?(state: FormState<S>): FormBridgeUiOptions<TPlatform>;
+  globalStyles?(state: FormState<S>): FormBridgeOptions<TPlatform>;
 }
 
 // ─── Resolver ───────────────────────────────────────────────────────────────────

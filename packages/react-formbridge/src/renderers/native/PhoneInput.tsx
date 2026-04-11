@@ -26,14 +26,15 @@ import type {
   ExtraFieldProps,
   FieldRenderProps,
   FocusableFieldHandle,
-  NativePhoneFieldUiOverrides,
+  NativePhoneFieldPropsOverrides,
 } from '../../types';
 import {
   defaultBorderColor,
   defaultErrorChromeStyle,
   defaultErrorTextStyle,
   defaultRequiredMarkStyle,
-  type ResolvedNativeFieldUi,
+  type ResolvedNativeFieldProps,
+  resolveNativeInputBehavior,
   shouldHighlightOnError,
   sx,
 } from './shared';
@@ -59,9 +60,9 @@ function resolveText<TContext>(
 
 interface Props extends FieldRenderProps<PhoneValue | string | null> {
   descriptor: PhoneDescriptor & {
-    _ui?: ResolvedNativeFieldUi;
+    fieldPropsFromClient?: ResolvedNativeFieldProps;
   };
-  extra?: ExtraFieldProps<NativePhoneFieldUiOverrides, 'native'>;
+  extra?: ExtraFieldProps<NativePhoneFieldPropsOverrides, 'native'>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -124,11 +125,16 @@ const defaultIntegratedInputStyle: TextStyle = {
 };
 
 export const NativePhoneInput: React.FC<Props> = ({
-  descriptor: d,
+  descriptor,
   extra,
   registerFocusable,
   ...props
 }) => {
+  const inputBehavior = resolveNativeInputBehavior(
+    extra,
+    descriptor.fieldPropsFromClient,
+  );
+  const isReadOnly = Boolean(inputBehavior.readOnly);
   const {
     styles,
     hideLabel,
@@ -172,7 +178,8 @@ export const NativePhoneInput: React.FC<Props> = ({
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
 
-  const defaultCountry = getCountry(d._phoneDefaultCountry) ?? COUNTRIES_SORTED[0];
+  const defaultCountry =
+    getCountry(descriptor._phoneDefaultCountry) ?? COUNTRIES_SORTED[0];
 
   const normalizedValue = useMemo(
     () => parseStoredPhoneValue(props.value, defaultCountry.code),
@@ -203,14 +210,14 @@ export const NativePhoneInput: React.FC<Props> = ({
         return;
       }
 
-      if (d._phoneStoreE164) {
+      if (descriptor._phoneStoreE164) {
         props.onChange(phoneValue.e164 || null);
         return;
       }
 
       props.onChange(phoneValue);
     },
-    [d._phoneStoreE164, props.onChange],
+    [descriptor._phoneStoreE164, props.onChange],
   );
 
   const filteredCountries = useMemo<CountryListItem[]>(() => {
@@ -220,7 +227,9 @@ export const NativePhoneInput: React.FC<Props> = ({
       return results;
     }
 
-    const preferredSet = new Set(d._phonePreferred.map((code) => code.toUpperCase()));
+    const preferredSet = new Set(
+      descriptor._phonePreferred.map((code) => code.toUpperCase()),
+    );
     const preferred = results.filter((country) => preferredSet.has(country.code));
     const rest = results.filter((country) => !preferredSet.has(country.code));
 
@@ -229,10 +238,14 @@ export const NativePhoneInput: React.FC<Props> = ({
     }
 
     return [...preferred, { separator: true, key: 'preferred-separator' }, ...rest];
-  }, [d._phonePreferred, search]);
+  }, [descriptor._phonePreferred, search]);
 
   const handleNationalChange = useCallback(
     (input: string) => {
+      if (isReadOnly) {
+        return;
+      }
+
       if (!input.trim()) {
         emitValue(null);
         return;
@@ -242,32 +255,36 @@ export const NativePhoneInput: React.FC<Props> = ({
       setSelectedCountryCode(nextValue.country);
       emitValue(nextValue);
     },
-    [currentCountry, emitValue],
+    [currentCountry, emitValue, isReadOnly],
   );
 
   const selectCountry = useCallback(
     (country: CountryInfo) => {
+      if (isReadOnly) {
+        return;
+      }
+
       setSelectedCountryCode(country.code);
       setOpen(false);
       setSearch('');
       emitValue(null);
     },
-    [emitValue],
+    [emitValue, isReadOnly],
   );
 
-  const id = extra?.id ?? d._ui?.id ?? props.name;
+  const id = extra?.id ?? descriptor.fieldPropsFromClient?.id ?? props.name;
   const displayValue = normalizedValue?.national ?? '';
   const placeholder =
     currentCountry.exampleNational ||
     props.placeholder ||
-    d._placeholder ||
+    descriptor._placeholder ||
     'Enter phone number';
   const hasError = Boolean(props.error);
-  const countryLayout = extra?.countryLayout ?? d._phoneCountryLayout;
+  const countryLayout = extra?.countryLayout ?? descriptor._phoneCountryLayout;
   const integrated = countryLayout === 'integrated';
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
-    d._ui?.highlightOnError,
+    descriptor.fieldPropsFromClient?.highlightOnError,
   );
   const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
   const renderContext = useMemo(
@@ -280,21 +297,21 @@ export const NativePhoneInput: React.FC<Props> = ({
       layout: countryLayout,
       nationalValue: displayValue,
       open,
-      preferredCountries: d._phonePreferred,
+      preferredCountries: descriptor._phonePreferred,
       search,
-      searchable: d._phoneSearchable,
-      showDialCode: d._phoneShowDialCode,
-      showFlag: d._phoneShowFlag,
-      storeE164: d._phoneStoreE164,
+      searchable: descriptor._phoneSearchable,
+      showDialCode: descriptor._phoneShowDialCode,
+      showFlag: descriptor._phoneShowFlag,
+      storeE164: descriptor._phoneStoreE164,
       value: props.value,
     }),
     [
       currentCountry,
-      d._phonePreferred,
-      d._phoneSearchable,
-      d._phoneShowDialCode,
-      d._phoneShowFlag,
-      d._phoneStoreE164,
+      descriptor._phonePreferred,
+      descriptor._phoneSearchable,
+      descriptor._phoneShowDialCode,
+      descriptor._phoneShowFlag,
+      descriptor._phoneStoreE164,
       countryLayout,
       displayValue,
       filteredCountries.length,
@@ -322,10 +339,10 @@ export const NativePhoneInput: React.FC<Props> = ({
   );
   const defaultCountryButtonContent = (
     <>
-      {d._phoneShowFlag && (
+      {descriptor._phoneShowFlag && (
         <Text style={sx(styles?.countryFlag)}>{currentCountry.flag}</Text>
       )}
-      {d._phoneShowDialCode && (
+      {descriptor._phoneShowDialCode && (
         <Text style={sx(styles?.countryDial)}>+{currentCountry.dial}</Text>
       )}
       <Text style={sx(styles?.chevron)}>▾</Text>
@@ -350,7 +367,7 @@ export const NativePhoneInput: React.FC<Props> = ({
         (renderLabel?.({
           id,
           label: props.label,
-          required: Boolean(d._required),
+          required: Boolean(descriptor._required),
           name: props.name,
         }) ?? (
           <Text
@@ -358,7 +375,7 @@ export const NativePhoneInput: React.FC<Props> = ({
             {...labelPropsRest}
           >
             {props.label}
-            {d._required && requiredMark}
+            {descriptor._required && requiredMark}
           </Text>
         ))}
       <View
@@ -369,13 +386,17 @@ export const NativePhoneInput: React.FC<Props> = ({
                 borderColor: defaultBorderColor(hasError, highlightOnError, '#d1d5db'),
               }
             : defaultDetachedRowStyle,
-          integrated ? controlErrorStyle : undefined,
           styles?.row,
+          integrated ? controlErrorStyle : undefined,
         )}
       >
         <Pressable
           onPress={() => {
             if (!props.disabled) {
+              if (isReadOnly) {
+                return;
+              }
+
               setOpen(true);
               props.onFocus();
             }
@@ -385,6 +406,7 @@ export const NativePhoneInput: React.FC<Props> = ({
             integrated ? defaultIntegratedCountryButtonStyle : undefined,
             styles?.countryButton,
           )}
+          testID={inputBehavior.testID}
           accessibilityRole="button"
           accessibilityLabel={resolvedCountryButtonAriaLabel}
         >
@@ -398,19 +420,25 @@ export const NativePhoneInput: React.FC<Props> = ({
         <TextInput
           nativeID={id}
           ref={registerFocusable}
-          testID={d._ui?.testID}
+          testID={inputBehavior.testID}
           value={displayValue}
           placeholder={placeholder}
-          editable={!props.disabled}
-          keyboardType="phone-pad"
-          autoComplete="tel"
+          editable={!(props.disabled || isReadOnly)}
+          keyboardType={
+            (inputBehavior.keyboardType as TextInputProps['keyboardType']) ?? 'phone-pad'
+          }
+          autoComplete={
+            (inputBehavior.autoComplete as TextInputProps['autoComplete']) ?? 'tel'
+          }
+          autoFocus={inputBehavior.autoFocus}
           onChangeText={handleNationalChange}
           onBlur={props.onBlur}
           onFocus={props.onFocus}
           style={sx(
+            integrated ? defaultIntegratedInputStyle : undefined,
             styles?.input,
-            integrated ? defaultIntegratedInputStyle : controlErrorStyle,
             inputPropsStyle,
+            integrated ? undefined : controlErrorStyle,
           )}
           {...(inputPropsRest as Partial<TextInputProps>)}
         />
@@ -472,7 +500,7 @@ export const NativePhoneInput: React.FC<Props> = ({
             style={sx(styles?.modalCard)}
             onPress={(event) => event.stopPropagation()}
           >
-            {d._phoneSearchable && (
+            {descriptor._phoneSearchable && (
               <TextInput
                 value={search}
                 onChangeText={setSearch}
@@ -508,7 +536,7 @@ export const NativePhoneInput: React.FC<Props> = ({
                 const isSelected = item.code === currentCountry.code;
                 const defaultCountryItemContent = (
                   <>
-                    {d._phoneShowFlag && (
+                    {descriptor._phoneShowFlag && (
                       <Text style={sx(styles?.countryFlag)}>{item.flag}</Text>
                     )}
                     <Text style={sx(styles?.countryName)}>{item.name}</Text>

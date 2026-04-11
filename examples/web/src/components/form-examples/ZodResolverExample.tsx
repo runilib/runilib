@@ -16,14 +16,8 @@ export function ZodResolverExample() {
       contactEmail: field
         .email()
         .label('Contact email')
-        .placeholder('founder@runilib.dev')
-        .behavior({
-          inputMode: 'email',
-          autoComplete: 'email',
-        }),
-      teamSize: field.text().label('Team size').placeholder('12').behavior({
-        inputMode: 'numeric',
-      }),
+        .placeholder('founder@runilib.dev'),
+      teamSize: field.text().label('Team size').placeholder('12'),
       launchDate: field.date().label('Launch date').placeholder('2026-05-10'),
     }),
     [],

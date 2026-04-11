@@ -3,7 +3,6 @@ import type React from 'react';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { field } from '../../../core/field-builders/field';
-import { resolveWebFieldConfig } from '../../../hooks/shared/ui-utils';
 import { Field } from '../Field';
 
 function renderTextField(
@@ -14,7 +13,7 @@ function renderTextField(
   const descriptor = builder._build();
   const resolvedDescriptor = {
     ...descriptor,
-    _ui: resolveWebFieldConfig(descriptor._behavior),
+    fieldPropsFromClient: {},
   } as React.ComponentProps<typeof Field>['descriptor'];
 
   return render(

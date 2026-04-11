@@ -1,23 +1,5 @@
+import { isEmptyValue, parseDateValue } from '../common-utils';
 import { StringFieldBuilder } from '../string/StringFieldBuilder';
-
-// ─── Internal helpers ────────────────────────────────────────────────────────
-
-function isEmptyValue(value: unknown): boolean {
-  return value === null || value === undefined || value === '';
-}
-
-function parseDateValue(value: unknown): Date | null {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-
-  if (typeof value === 'string' && value.trim() !== '') {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-
-  return null;
-}
 
 // ─── Date field builder ──────────────────────────────────────────────────────
 export class DateFieldBuilder extends StringFieldBuilder<'date'> {

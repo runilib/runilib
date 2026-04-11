@@ -20,11 +20,12 @@ import type {
   UseFormBridgeReturn,
   UseFormOptions,
 } from '../types';
+import { FormBridgeProvider } from './shared/form-context';
 import {
   mergeFieldStyleProps,
-  mergeWebFormUi,
-  mergeWebSubmitUi,
-  resolveWebFieldConfig,
+  mergeWebFieldProps,
+  mergeWebFormProps,
+  mergeWebSubmitProps,
 } from './shared/ui-utils';
 import { useFormBridgeCore } from './shared/useFormBridge';
 
@@ -51,6 +52,9 @@ export function useFormBridge<const S extends FormSchema>(
     defaultValues,
     validate,
     trackFieldFocus,
+    registerFocusable,
+    focusField,
+    blurField,
   } = core;
 
   const globalStylesRef = useRef(options.globalStyles);
@@ -59,50 +63,10 @@ export function useFormBridge<const S extends FormSchema>(
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
 
+  const apiRef = useRef<UseFormBridgeReturn<S, 'web'> | null>(null);
+
   const visibilityRef = useRef(visibility);
   visibilityRef.current = visibility;
-
-  const focusableRegistryRef = useRef<Record<string, FocusableFieldHandle | null>>({});
-
-  const registerFocusable = useCallback(
-    (name: string, target: FocusableFieldHandle | null) => {
-      if (target) {
-        focusableRegistryRef.current[name] = target;
-        return;
-      }
-
-      delete focusableRegistryRef.current[name];
-    },
-    [],
-  );
-
-  const focusField = useCallback(
-    (name: string) => {
-      const target = focusableRegistryRef.current[name];
-
-      if (target?.focus) {
-        target.focus();
-        return;
-      }
-
-      trackFieldFocus(name);
-    },
-    [trackFieldFocus],
-  );
-
-  const blurField = useCallback(
-    (name: string) => {
-      const target = focusableRegistryRef.current[name];
-
-      if (target?.blur) {
-        target.blur();
-        return;
-      }
-
-      void handleBlur(name);
-    },
-    [handleBlur],
-  );
 
   const setValue = useCallback(
     <K extends keyof S>(name: K, value: SchemaValues<S>[K]) => {
@@ -123,7 +87,7 @@ export function useFormBridge<const S extends FormSchema>(
     return { ...stateRef.current.values };
   }, [stateRef]);
 
-  const reset = useCallback(
+  const resetFields = useCallback(
     (values?: Partial<SchemaValues<S>>) => {
       const nextValues = values
         ? ({ ...defaultValues, ...values } as SchemaValues<S>)
@@ -321,7 +285,7 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedUi = mergeWebFormUi(
+      const mergedUi = mergeWebFormProps(
         globalStylesRef.current?.(stateRef.current)?.form,
         className,
         style,
@@ -333,15 +297,21 @@ export function useFormBridge<const S extends FormSchema>(
       };
 
       return React.createElement(
-        'form',
+        FormBridgeProvider,
         {
-          ...mergedUi.props,
-          onSubmit: onPress,
-          className: mergedUi.className,
-          style: mergedUi.style,
-          noValidate: true,
+          value: apiRef.current as UseFormBridgeReturn<S, 'web'>,
         },
-        children,
+        React.createElement(
+          'form',
+          {
+            ...mergedUi.props,
+            onSubmit: onPress,
+            className: mergedUi.className,
+            style: mergedUi.style,
+            noValidate: true,
+          },
+          children,
+        ),
       );
     };
 
@@ -356,7 +326,7 @@ export function useFormBridge<const S extends FormSchema>(
     }: SubmitButtonProps<'web'>) => {
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
-      const mergedUi = mergeWebSubmitUi(
+      const mergedUi = mergeWebSubmitProps(
         globalStylesRef.current?.(stateRef.current)?.submit,
         className,
         style,
@@ -385,6 +355,20 @@ export function useFormBridge<const S extends FormSchema>(
     return FormInner as unknown as FormComponent<S, 'web'>;
   }, [handleSubmit, stateRef, submitConfigRef]);
 
+  const FormProvider = useMemo(
+    () =>
+      function FormProviderInner({ children }: { children: React.ReactNode }) {
+        return React.createElement(
+          FormBridgeProvider,
+          {
+            value: apiRef.current as UseFormBridgeReturn<S, 'web'>,
+          },
+          children,
+        );
+      },
+    [],
+  );
+
   const fields = useMemo((): FieldComponents<S, 'web'> => {
     const result = {} as FieldComponents<S, 'web'>;
 
@@ -403,7 +387,7 @@ export function useFormBridge<const S extends FormSchema>(
           'web',
           globalStylesRef.current?.(stateRef.current)?.field,
           props,
-        ) as LocalFieldProps;
+        );
         const state = stateRef.current;
         const rawValue = (state.values as Record<string, unknown>)[name];
         const value =
@@ -421,10 +405,11 @@ export function useFormBridge<const S extends FormSchema>(
         };
 
         const showError = Boolean(error) && (touched || state.submitCount > 0);
+        const mergedClientProps = mergeWebFieldProps(undefined, mergedProps);
 
         const effectiveDescriptor = {
           ...descriptor,
-          _ui: resolveWebFieldConfig(descriptor._behavior),
+          fieldPropsFromClient: mergedClientProps,
           ...(mergedProps && {
             _label: mergedProps.label ?? descriptor._label,
             _placeholder: mergedProps.placeholder ?? descriptor._placeholder,
@@ -644,7 +629,8 @@ export function useFormBridge<const S extends FormSchema>(
     return FieldLabelInner;
   }, []);
 
-  return {
+  const api: UseFormBridgeReturn<S, 'web'> = {
+    FormProvider,
     Form,
     fields,
     FieldError,
@@ -660,11 +646,15 @@ export function useFormBridge<const S extends FormSchema>(
     getValue,
     getValues,
     validate,
-    reset,
+    resetFields,
     setError,
     clearErrors,
     watch,
     watchAll,
     submit,
   };
+
+  apiRef.current = api;
+
+  return api;
 }

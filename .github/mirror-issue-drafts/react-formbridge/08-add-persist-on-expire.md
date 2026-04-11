@@ -35,7 +35,7 @@ persist: {
 
 - `src/core/persist/draft.ts`
 - `src/core/persist/wizard.ts`
-- `src/hooks/shared/useFormWizard.ts`
+- `src/hooks/shared/useFormBridgeWizard.ts`
 - typings for persist options
 
 ## Acceptance Criteria

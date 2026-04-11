@@ -3,21 +3,13 @@
 
 import { useCallback, useState } from 'react';
 
-import { CodeBlock } from '@/components/CodeBlock';
-import { homeSnippets, libraryInfo } from '@/data/site';
+import { Playground } from '@/components/playground';
+import { faqItems, homeFeatures, homeSnippets, libraryInfo, useCases } from '@/data/site';
 import { getBuilderEntries, getDocsLandingHref, getFeaturedEntries } from '@/lib/docs';
 import { absoluteUrl } from '@/lib/site';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import styled, { css, keyframes } from 'styled-components';
-
-const HOME_STATS = [
-  { label: 'reference pages', value: '39' },
-  { label: 'field builders', value: '17' },
-  { label: 'advanced hooks', value: '11' },
-  { label: 'MIT licensed', value: 'MIT' },
-];
 
 const CORE_PRINCIPLES = [
   {
@@ -34,9 +26,9 @@ const CORE_PRINCIPLES = [
   },
   {
     description:
-      'Wire adapters for Zod, Yup, Joi, and Valibot so validation stays close to the schema.',
+      'Built-in fluent validation covers every common rule. No need to install Zod, Yup, or any external library.',
     icon: 'validation',
-    title: 'Validation adapters',
+    title: 'Batteries-included validation',
   },
   {
     description:
@@ -47,27 +39,26 @@ const CORE_PRINCIPLES = [
 ];
 
 const ENGINEERED_FOR = [
-  'Dynamic Form Flows',
-  'Complex Nested Objects',
-  'Dynamic Field Arrays',
-  'High-perf Async Logic',
-];
-
-const HOME_FAQS = [
   {
-    answer:
-      'FormBridge stays UI-agnostic. You can keep the built-in renderers, theme them through the ui layer, or bridge the runtime into your own components on web and native.',
-    question: 'What UI kits are supported?',
+    title: 'Dynamic Form Flows',
+    desc: 'Show, hide, or rearrange fields based on user input with reactive conditional logic.',
   },
   {
-    answer:
-      'FormBridge leans into a schema-first generated-field model. You still control state and validation timing, but the schema remains the source of truth across web and React Native.',
-    question: 'How does it differ from React Hook Form?',
+    title: 'Complex Nested Objects',
+    desc: 'Model deeply nested data structures and keep validation scoped to each level.',
+  },
+  {
+    title: 'Dynamic Field Arrays',
+    desc: 'Let users add or remove repeatable groups while the schema stays consistent.',
+  },
+  {
+    title: 'High-perf Async Logic',
+    desc: 'Debounced remote validation, async select options, and optimistic state updates.',
   },
 ];
 
 const DOC_SUMMARY_OVERRIDES: Record<string, string> = {
-  'fb-adapters': 'Implement third-party validation engines like Zod or Yup.',
+  'fb-adapters': 'Optional bridge for teams already using Zod, Yup, Joi, or Valibot.',
   'fb-persistence': 'Automatically save and restore form progress across sessions.',
   'fb-quickstart': 'Bootstrap your first schema-driven form in minutes.',
   'fb-select': 'Configure remote dropdowns with async option loading.',
@@ -79,6 +70,15 @@ function formatBuilderLabel(title: string) {
   return title.replace(/^field\./, '').replace(/\(\)$/, '');
 }
 
+function buildPlaygroundFiles(code: string, exportName: string) {
+  return {
+    '/App.tsx': {
+      active: true,
+      code: `${code}\n\nexport default ${exportName}\n`,
+    },
+  };
+}
+
 export default function HomePage() {
   const [activeSnippetIndex, setActiveSnippetIndex] = useState(0);
   const [installCopied, setInstallCopied] = useState(false);
@@ -87,11 +87,15 @@ export default function HomePage() {
   const featuredEntries = getFeaturedEntries();
   const builderEntries = getBuilderEntries();
   const activeSnippet = homeSnippets[activeSnippetIndex] ?? homeSnippets[0];
+  const activePlaygroundFiles =
+    activeSnippetIndex === 0
+      ? buildPlaygroundFiles(activeSnippet.code, 'SignupForm')
+      : buildPlaygroundFiles(activeSnippet.code, 'SignupScreen');
 
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: HOME_FAQS.map((item) => ({
+    mainEntity: faqItems.map((item) => ({
       '@type': 'Question',
       name: item.question,
       acceptedAnswer: {
@@ -144,9 +148,7 @@ export default function HomePage() {
                 <HeroBadge>{libraryInfo.packageName}</HeroBadge>
 
                 <HeroTitle>
-                  Schema-first
-                  <br />
-                  form layer for
+                  Schema-first form layer for
                   <br />
                   <HeroAccent>React</HeroAccent> and
                   <br />
@@ -159,7 +161,7 @@ export default function HomePage() {
                 </HeroLead>
 
                 <HeroActions>
-                  <PrimaryButton href={docsHref}>Open documentation</PrimaryButton>
+                  <PrimaryButton href={docsHref}>Get Started</PrimaryButton>
                   <SecondaryAnchor
                     href={libraryInfo.githubUrl}
                     rel="noreferrer"
@@ -202,37 +204,12 @@ export default function HomePage() {
                       </CodeTab>
                     ))}
                   </CodeTabs>
-
-                  <HeroSnippetSplit>
-                    <HeroCodePane>
-                      <CodeBlock
-                        code={activeSnippet.code}
-                        filename={activeSnippet.filename}
-                        lang={activeSnippet.lang}
-                        maxHeight="340px"
-                      />
-                    </HeroCodePane>
-
-                    {activeSnippet.preview ? (
-                      <HeroPreviewPane>
-                        <HeroPreviewHeader>
-                          <HeroPreviewEyebrow>Visual preview</HeroPreviewEyebrow>
-                          <HeroPreviewCaption>
-                            {activeSnippet.preview.caption}
-                          </HeroPreviewCaption>
-                        </HeroPreviewHeader>
-                        <HeroPreviewFrame>
-                          <HeroPreviewImage
-                            src={activeSnippet.preview.src}
-                            alt={activeSnippet.preview.alt}
-                            width={activeSnippet.preview.maxWidth ?? 960}
-                            height={activeSnippet.preview.maxHeight ?? 540}
-                            unoptimized
-                          />
-                        </HeroPreviewFrame>
-                      </HeroPreviewPane>
-                    ) : null}
-                  </HeroSnippetSplit>
+                  <Playground
+                    activeFile="/App.tsx"
+                    files={activePlaygroundFiles}
+                    platform={activeSnippetIndex === 0 ? 'web' : 'native'}
+                    snackName={activeSnippet.filename}
+                  />
                 </CodeCard>
 
                 <SnippetBadge>
@@ -248,14 +225,7 @@ export default function HomePage() {
             </HeroGrid>
           </HeroSection>
 
-          <StatsBar>
-            {HOME_STATS.map((item) => (
-              <StatItem key={item.label}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-              </StatItem>
-            ))}
-          </StatsBar>
+          <Divider />
         </Shell>
 
         <Section>
@@ -278,6 +248,24 @@ export default function HomePage() {
         </Section>
 
         <Section $tinted>
+          <Shell>
+            <SectionHeading>
+              <SectionTitle>What you get</SectionTitle>
+              <SectionRule />
+            </SectionHeading>
+
+            <FeaturesGrid>
+              {homeFeatures.map((item) => (
+                <FeatureCard key={item.title}>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </FeatureCard>
+              ))}
+            </FeaturesGrid>
+          </Shell>
+        </Section>
+
+        <Section>
           <Shell>
             <ArchitectureLayout>
               <div>
@@ -332,6 +320,45 @@ export default function HomePage() {
           </Shell>
         </Section>
 
+        <Section $tinted>
+          <Shell>
+            <SectionHeading>
+              <SectionTitle>Get started in 3 steps</SectionTitle>
+              <SectionRule />
+            </SectionHeading>
+
+            <QuickStartGrid>
+              <QuickStartStep>
+                <StepNumber>1</StepNumber>
+                <div>
+                  <h3>Install</h3>
+                  <QuickStartCode>{libraryInfo.installCommand}</QuickStartCode>
+                </div>
+              </QuickStartStep>
+              <QuickStartStep>
+                <StepNumber>2</StepNumber>
+                <div>
+                  <h3>Define your schema</h3>
+                  <p>
+                    Describe every field, its type, validation rules, and default value in
+                    a single TypeScript object.
+                  </p>
+                </div>
+              </QuickStartStep>
+              <QuickStartStep>
+                <StepNumber>3</StepNumber>
+                <div>
+                  <h3>Render on any platform</h3>
+                  <p>
+                    Call <code>useFormBridge(schema)</code> and get a typed Form wrapper
+                    plus ready-to-render field components for web or native.
+                  </p>
+                </div>
+              </QuickStartStep>
+            </QuickStartGrid>
+          </Shell>
+        </Section>
+
         <Section>
           <Shell>
             <UtilityGrid>
@@ -351,20 +378,41 @@ export default function HomePage() {
 
               <PanelCard>
                 <PanelTitle>Engineered for...</PanelTitle>
-                <UseCaseGrid>
+                <EngineeredList>
                   {ENGINEERED_FOR.map((item) => (
-                    <UseCaseItem key={item}>
+                    <EngineeredItem key={item.title}>
                       <UseCaseMarker aria-hidden="true" />
-                      {item}
-                    </UseCaseItem>
+                      <div>
+                        <strong>{item.title}</strong>
+                        <span>{item.desc}</span>
+                      </div>
+                    </EngineeredItem>
                   ))}
-                </UseCaseGrid>
+                </EngineeredList>
               </PanelCard>
             </UtilityGrid>
           </Shell>
         </Section>
 
         <Section $tinted>
+          <Shell>
+            <SectionHeading>
+              <SectionTitle>Built for real-world flows</SectionTitle>
+              <SectionRule />
+            </SectionHeading>
+
+            <UseCasesGrid>
+              {useCases.map((item) => (
+                <UseCaseCard key={item.title}>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                </UseCaseCard>
+              ))}
+            </UseCasesGrid>
+          </Shell>
+        </Section>
+
+        <Section>
           <Shell>
             <SectionHeading>
               <SectionTitle>Popular Documentation Paths</SectionTitle>
@@ -407,7 +455,7 @@ export default function HomePage() {
               </HeroActions>
 
               <FaqGrid>
-                {HOME_FAQS.map((item) => (
+                {faqItems.map((item) => (
                   <FaqCard key={item.question}>
                     <h3>{item.question}</h3>
                     <p>{item.answer}</p>
@@ -489,7 +537,7 @@ const HeroSection = styled.section`
 
 const HeroGrid = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(540px, 1.18fr);
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
   gap: 40px;
   align-items: center;
   min-height: min(640px, calc(100vh - 170px));
@@ -504,6 +552,10 @@ const HeroGrid = styled.div`
 
 const HeroCopy = styled.div`
   min-width: 0;
+
+  @media (max-width: 980px) {
+    text-align: center;
+  }
 `;
 
 const HeroBadge = styled.div`
@@ -550,6 +602,10 @@ const HeroActions = styled.div<{ $centered?: boolean }>`
   gap: 12px;
   justify-content: ${({ $centered }) => ($centered ? 'center' : 'flex-start')};
   margin-top: 28px;
+
+  @media (max-width: 980px) {
+    justify-content: center;
+  }
 
   @media (max-width: 640px) {
     gap: 10px;
@@ -706,87 +762,6 @@ const CodeTab = styled.button<{ $active: boolean }>`
   cursor: pointer;
 `;
 
-const HeroSnippetSplit = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-  border-top: 1px solid ${({ theme }) => theme.border};
-
-  @media (max-width: 920px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const HeroCodePane = styled.div`
-  min-width: 0;
-
-  > div {
-    margin: 0;
-    border-top: 0;
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
-    border-radius: 0;
-    box-shadow: none;
-    height: 100%;
-  }
-`;
-
-const HeroPreviewPane = styled.div`
-  display: grid;
-  align-content: start;
-  gap: 12px;
-  padding: 20px;
-  border-left: 1px solid ${({ theme }) => theme.border};
-  background: ${({ theme }) => theme.surfaceSoft};
-
-  @media (max-width: 920px) {
-    border-left: 0;
-    border-top: 1px solid ${({ theme }) => theme.border};
-  }
-`;
-
-const HeroPreviewHeader = styled.div`
-  display: grid;
-  gap: 4px;
-`;
-
-const HeroPreviewEyebrow = styled.span`
-  color: ${({ theme }) => theme.accent};
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-`;
-
-const HeroPreviewCaption = styled.span`
-  color: ${({ theme }) => theme.textSoft};
-  font-size: 13px;
-  font-weight: 600;
-`;
-
-const HeroPreviewFrame = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 290px;
-  padding: 20px;
-  border: 1px solid ${({ theme }) => theme.border};
-  border-radius: 8px;
-  background:
-    radial-gradient(circle at top, rgba(15, 111, 220, 0.08), transparent 46%),
-    ${({ theme }) => theme.surface};
-  overflow: hidden;
-`;
-
-const HeroPreviewImage = styled(Image)`
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 330px;
-  object-fit: contain;
-  border-radius: 6px;
-`;
-
 const SnippetBadge = styled.div`
   ${cardBase};
   position: absolute;
@@ -844,40 +819,8 @@ const SnippetBadgeText = styled.div`
   }
 `;
 
-const StatsBar = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  padding: 18px 0 8px;
+const Divider = styled.div`
   border-top: 1px solid ${({ theme }) => theme.border};
-
-  @media (max-width: 720px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px 12px;
-    padding-top: 22px;
-  }
-`;
-
-const StatItem = styled.div`
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  text-align: center;
-
-  strong {
-    color: ${({ theme }) => theme.accent};
-    font-size: 1.65rem;
-    font-weight: 800;
-    line-height: 1;
-  }
-
-  span {
-    color: ${({ theme }) => theme.textMuted};
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
 `;
 
 const Section = styled.section<{ $tinted?: boolean }>`
@@ -934,6 +877,60 @@ const PrincipleCard = styled.article`
 
   h3 {
     margin: 18px 0 10px;
+    color: ${({ theme }) => theme.text};
+    font-size: 1.02rem;
+  }
+
+  p {
+    margin: 0;
+    color: ${({ theme }) => theme.textSoft};
+    line-height: 1.72;
+  }
+`;
+
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const FeatureCard = styled.article`
+  ${cardBase};
+  padding: 24px 22px 22px;
+
+  h3 {
+    margin: 0 0 10px;
+    color: ${({ theme }) => theme.text};
+    font-size: 1.02rem;
+  }
+
+  p {
+    margin: 0;
+    color: ${({ theme }) => theme.textSoft};
+    line-height: 1.72;
+  }
+`;
+
+const UseCasesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const UseCaseCard = styled.article`
+  ${cardBase};
+  padding: 24px 22px 22px;
+
+  h3 {
+    margin: 0 0 10px;
     color: ${({ theme }) => theme.text};
     font-size: 1.02rem;
   }
@@ -1270,28 +1267,95 @@ const BuilderChip = styled(Link)`
   }
 `;
 
-const UseCaseGrid = styled.div`
+const EngineeredList = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
+`;
 
-  @media (max-width: 520px) {
+const EngineeredItem = styled.div`
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.border};
+  background: ${({ theme }) => theme.surfaceSoft};
+
+  strong {
+    display: block;
+    color: ${({ theme }) => theme.text};
+    font-size: 13px;
+  }
+
+  span {
+    display: block;
+    margin-top: 4px;
+    color: ${({ theme }) => theme.textSoft};
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+`;
+
+const QuickStartGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 840px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const UseCaseItem = styled.div`
-  display: inline-flex;
+const QuickStartStep = styled.article`
+  ${cardBase};
+  display: flex;
+  gap: 16px;
+  padding: 24px 22px;
+
+  h3 {
+    margin: 0 0 8px;
+    color: ${({ theme }) => theme.text};
+    font-size: 1.02rem;
+  }
+
+  p {
+    margin: 0;
+    color: ${({ theme }) => theme.textSoft};
+    line-height: 1.72;
+    font-size: 13.5px;
+  }
+
+  code {
+    font-size: 12.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: ${({ theme }) => theme.accentSoft};
+    color: ${({ theme }) => theme.accent};
+    font-weight: 700;
+  }
+`;
+
+const StepNumber = styled.div`
+  display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 14px;
-  border-radius: 8px;
-  border: 1px solid ${({ theme }) => theme.border};
-  background: ${({ theme }) => theme.surfaceSoft};
-  color: ${({ theme }) => theme.text};
-  font-size: 13px;
-  font-weight: 700;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.accent};
+  color: ${({ theme }) => (theme.mode === 'light' ? '#ffffff' : '#08111a')};
+  font-size: 14px;
+  font-weight: 800;
+`;
+
+const QuickStartCode = styled.code`
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: ${({ theme }) => theme.textSoft};
+  word-break: break-all;
 `;
 
 const UseCaseMarker = styled.span`
@@ -1448,9 +1512,14 @@ const CtaText = styled.p`
 
 const FaqGrid = styled.div`
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   max-width: 880px;
   margin: 28px auto 0;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const FaqCard = styled.article`

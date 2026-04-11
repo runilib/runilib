@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import { useEffect } from 'react';
 
 import type { FormSchema } from '@runilib/react-formbridge';
-import { field, useFormWizard } from '@runilib/react-formbridge';
+import { field, useFormBridgeWizard } from '@runilib/react-formbridge';
 
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -48,7 +48,7 @@ export function Wizard({ onBack }: { onBack: () => void }) {
   const params = useParams<{ stepId?: string }>();
   const routeStepId = isWizardStepId(params.stepId) ? params.stepId : undefined;
 
-  const wizard = useFormWizard([...WIZARD_STEPS], {
+  const wizard = useFormBridgeWizard([...WIZARD_STEPS], {
     stepId: routeStepId,
     initialStepId: 'personal',
     persist: {

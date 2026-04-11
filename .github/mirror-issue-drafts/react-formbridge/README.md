@@ -12,5 +12,5 @@ Target repository: `runilib/react-formbridge`
 - [06 - Add grouped options support to `field.select()`](./06-add-grouped-options.md)
 - [07 - Add `clearable()` support to `field.select()`](./07-add-clearable-select.md)
 - [08 - Add `onExpire` support to persisted drafts and wizard state](./08-add-persist-on-expire.md)
-- [09 - Add `beforeStepChange` support to `useFormWizard()`](./09-add-before-step-change-guard.md)
+- [09 - Add `beforeStepChange` support to `useFormBridgeWizard()`](./09-add-before-step-change-guard.md)
 - [10 - Add bulk paste support for OTP fields](./10-add-otp-bulk-paste.md)

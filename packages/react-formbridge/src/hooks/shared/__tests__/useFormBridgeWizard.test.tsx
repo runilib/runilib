@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { field } from '../../../core/field-builders/field';
 import type { StorageAdapter } from '../../../core/persist/storage';
 import type { FormSchema } from '../../../types/schema';
-import { useFormWizard } from '../../useFormWizard.web';
-import type { WizardStep } from '../useFormWizard';
+import { useFormBridgeWizard } from '../../useFormBridgeWizard.web';
+import type { WizardStep } from '../useFormBridgeWizard';
 
 function createMemoryStorage(): StorageAdapter {
   const store = new Map<string, string>();
@@ -42,14 +42,14 @@ const steps: WizardStep<FormSchema>[] = [
   },
 ];
 
-describe('useFormWizard', () => {
+describe('useFormBridgeWizard', () => {
   it('supports controlled cross-page navigation with persisted wizard state', async () => {
     const storage = createMemoryStorage();
     const onStepChange = vi.fn();
 
     const { result, rerender, unmount } = renderHook(
       ({ currentStepId }) =>
-        useFormWizard(steps, {
+        useFormBridgeWizard(steps, {
           stepId: currentStepId,
           onStepChange,
           onSubmit: vi.fn(),
@@ -98,7 +98,7 @@ describe('useFormWizard', () => {
     unmount();
 
     const resumed = renderHook(() =>
-      useFormWizard(steps, {
+      useFormBridgeWizard(steps, {
         stepId: 'review',
         onSubmit: vi.fn(),
         persist: {
@@ -121,7 +121,7 @@ describe('useFormWizard', () => {
     const storage = createMemoryStorage();
 
     const firstMount = renderHook(() =>
-      useFormWizard(steps, {
+      useFormBridgeWizard(steps, {
         onSubmit: vi.fn(),
         persist: {
           key: 'wizard-remount',
@@ -150,7 +150,7 @@ describe('useFormWizard', () => {
     firstMount.unmount();
 
     const resumed = renderHook(() =>
-      useFormWizard(steps, {
+      useFormBridgeWizard(steps, {
         onSubmit: vi.fn(),
         persist: {
           key: 'wizard-remount',

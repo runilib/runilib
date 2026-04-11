@@ -9,6 +9,7 @@ import { usePersist } from '../../core/persist/draft';
 import { extractDefaults, validateField } from '../../core/validators/engine';
 import type {
   FieldDescriptor,
+  FocusableFieldHandle,
   FormSchema,
   FormState,
   SchemaValues,
@@ -27,6 +28,51 @@ import {
 } from './helpers';
 import { useFormBridgeAnalytics } from './useFormAnalytics';
 
+function sortObjectKeys(value: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .map((key) => [key, value[key]]),
+  );
+}
+
+function stableSerializeRuntime(value: unknown): string {
+  const seen = new WeakSet<object>();
+
+  return JSON.stringify(value, (_key, currentValue) => {
+    if (typeof currentValue === 'function') {
+      return `__fn:${currentValue.toString()}`;
+    }
+
+    if (currentValue instanceof RegExp) {
+      return `__re:${currentValue.toString()}`;
+    }
+
+    if (currentValue && typeof currentValue === 'object') {
+      if (seen.has(currentValue)) {
+        return '__cycle';
+      }
+
+      seen.add(currentValue);
+
+      if (Array.isArray(currentValue)) {
+        return currentValue;
+      }
+
+      return sortObjectKeys(currentValue as Record<string, unknown>);
+    }
+
+    return currentValue;
+  });
+}
+
+function isDevelopmentRuntime(): boolean {
+  const maybeGlobalDev = (globalThis as { __DEV__?: boolean }).__DEV__;
+  const maybeNodeEnv = process ? process.env.NODE_ENV : undefined;
+
+  return Boolean(maybeGlobalDev) || maybeNodeEnv !== 'production';
+}
+
 export function useFormBridgeCore<const S extends FormSchema>(
   schema: S,
   options: UseFormOptions<S> = {},
@@ -38,14 +84,13 @@ export function useFormBridgeCore<const S extends FormSchema>(
     persist: persistOpts,
   } = options;
 
-  /**
-   * Important:
-   * schema is often passed inline, so its identity changes every render.
-   * We build descriptors only once on mount to avoid infinite loops.
-   *
-   * If later you want dynamic schemas, you can support that explicitly
-   * with a dedicated API or a reset/rebuild mechanism.
-   */
+  const focusableRegistryRef = useRef<Record<string, FocusableFieldHandle | null>>({});
+  const schemaRuntimeSignatureRef = useRef<string | null>(null);
+  const prevSchemaKeyRef = useRef(options.schemaKey);
+  const didSchemaKeyChangeRef = useRef(false);
+  const didSchemaRuntimeChangeRef = useRef(false);
+  const devMode = isDevelopmentRuntime();
+
   const schemaRuntimeRef = useRef<{
     descriptors: Record<string, FieldDescriptor<unknown>>;
     conditionsMap: Record<string, FieldConditions>;
@@ -55,12 +100,32 @@ export function useFormBridgeCore<const S extends FormSchema>(
   const didFormKeyChangeRef = useRef(false);
 
   schemaRuntimeRef.current ??= buildSchemaRuntime(schema);
+  schemaRuntimeSignatureRef.current ??= stableSerializeRuntime(schemaRuntimeRef.current);
 
   didFormKeyChangeRef.current = prevFormKeyRef.current !== options.formKey;
+  didSchemaKeyChangeRef.current = prevSchemaKeyRef.current !== options.schemaKey;
 
   if (didFormKeyChangeRef.current) {
     prevFormKeyRef.current = options.formKey;
+  }
+
+  if (didSchemaKeyChangeRef.current) {
+    prevSchemaKeyRef.current = options.schemaKey;
+  }
+
+  if (didFormKeyChangeRef.current || didSchemaKeyChangeRef.current) {
     schemaRuntimeRef.current = buildSchemaRuntime(schema);
+    schemaRuntimeSignatureRef.current = stableSerializeRuntime(schemaRuntimeRef.current);
+    didSchemaRuntimeChangeRef.current = true;
+  } else if (devMode) {
+    const nextSchemaRuntime = buildSchemaRuntime(schema);
+    const nextSignature = stableSerializeRuntime(nextSchemaRuntime);
+
+    if (schemaRuntimeSignatureRef.current !== nextSignature) {
+      schemaRuntimeRef.current = nextSchemaRuntime;
+      schemaRuntimeSignatureRef.current = nextSignature;
+      didSchemaRuntimeChangeRef.current = true;
+    }
   }
 
   const { descriptors, conditionsMap } = schemaRuntimeRef.current;
@@ -116,8 +181,56 @@ export function useFormBridgeCore<const S extends FormSchema>(
     setVisibility(nextVisibility);
 
     hasHydratedDraftRef.current = false;
+    didSchemaRuntimeChangeRef.current = false;
     rerender();
   }, [options.initialValues, defaultValues, conditionsMap, rerender]);
+
+  useEffect(() => {
+    if (didFormKeyChangeRef.current || !didSchemaRuntimeChangeRef.current) {
+      return;
+    }
+
+    const fieldNames = new Set(Object.keys(descriptors));
+    const currentState = stateRef.current;
+    const nextValues = {
+      ...defaultValues,
+      ...currentState.values,
+    };
+    const nextErrors = Object.fromEntries(
+      Object.entries(currentState.errors as Record<string, string | undefined>).filter(
+        ([name]) => fieldNames.has(name),
+      ),
+    ) as FormState<S>['errors'];
+    const nextTouched = Object.fromEntries(
+      Object.entries(currentState.touched as Record<string, boolean>).filter(([name]) =>
+        fieldNames.has(name),
+      ),
+    ) as FormState<S>['touched'];
+    const nextDirty = Object.fromEntries(
+      Object.entries(currentState.dirty as Record<string, boolean>).filter(([name]) =>
+        fieldNames.has(name),
+      ),
+    ) as FormState<S>['dirty'];
+    const nextVisibility = evaluateAllConditions(
+      conditionsMap,
+      nextValues as Record<string, unknown>,
+    );
+
+    stateRef.current = {
+      ...currentState,
+      values: nextValues,
+      errors: nextErrors,
+      touched: nextTouched,
+      dirty: nextDirty,
+      isDirty: Object.values(nextDirty).some(Boolean),
+      isValid: Object.keys(nextErrors).length === 0,
+    };
+
+    prevVisibilityRef.current = nextVisibility;
+    setVisibility(nextVisibility);
+    didSchemaRuntimeChangeRef.current = false;
+    rerender();
+  }, [conditionsMap, defaultValues, descriptors, rerender]);
 
   const getCurrentValues = useCallback(
     () => stateRef.current.values as Record<string, unknown>,
@@ -145,6 +258,18 @@ export function useFormBridgeCore<const S extends FormSchema>(
       if (shouldRerender) rerender();
     },
     [rerender],
+  );
+
+  const registerFocusable = useCallback(
+    (name: string, target: FocusableFieldHandle | null) => {
+      if (target) {
+        focusableRegistryRef.current[name] = target;
+        return;
+      }
+
+      delete focusableRegistryRef.current[name];
+    },
+    [],
   );
 
   const updateVisibility = useCallback(
@@ -570,6 +695,38 @@ export function useFormBridgeCore<const S extends FormSchema>(
     ],
   );
 
+  const trackFieldFocus = useCallback((name: string) => {
+    analyticsRef.current?.onFieldFocus(name);
+  }, []);
+
+  const focusField = useCallback(
+    (name: string) => {
+      const target = focusableRegistryRef.current[name];
+
+      if (target?.focus) {
+        target.focus();
+        return;
+      }
+
+      trackFieldFocus(name);
+    },
+    [trackFieldFocus],
+  );
+
+  const blurField = useCallback(
+    (name: string) => {
+      const target = focusableRegistryRef.current[name];
+
+      if (target?.blur) {
+        target.blur();
+        return;
+      }
+
+      void handleBlur(name);
+    },
+    [handleBlur],
+  );
+
   const handleSubmit = useCallback(async () => {
     const config = submitConfigRef.current;
     if (!config) return;
@@ -685,10 +842,6 @@ export function useFormBridgeCore<const S extends FormSchema>(
     }
   }, [conditionsMap, descriptors, runAllValidation, setRuntimeState]);
 
-  const trackFieldFocus = useCallback((name: string) => {
-    analyticsRef.current?.onFieldFocus(name);
-  }, []);
-
   return {
     descriptors,
     stateRef,
@@ -706,5 +859,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
     defaultValues,
     validate,
     trackFieldFocus,
+    registerFocusable,
+    blurField,
+    focusField,
   };
 }

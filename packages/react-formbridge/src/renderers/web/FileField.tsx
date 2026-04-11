@@ -11,20 +11,21 @@ import React, {
 
 import type { BuiltFileDescriptor } from '../../core/field-builders/file/FileField';
 import type { FileValue } from '../../core/field-builders/file/types';
-import type { FieldRenderProps, WebFileFieldUiOverrides } from '../../types';
+import type { FieldRenderProps, WebFileFieldPropsOverrides } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultErrorChromeStyle,
-  type ResolvedWebFieldUi,
+  type ResolvedWebFieldProps,
+  resolveWebInputBehavior,
   shouldHighlightOnError,
 } from './shared';
 
 interface Props extends FieldRenderProps<FileValue | FileValue[] | null> {
   descriptor: BuiltFileDescriptor & {
-    _ui?: ResolvedWebFieldUi;
+    fieldPropsFromClient?: ResolvedWebFieldProps;
   };
-  extra?: ExtraFieldProps<WebFileFieldUiOverrides>;
+  extra?: ExtraFieldProps<WebFileFieldPropsOverrides>;
 }
 
 async function fileToValue(file: File, withBase64: boolean): Promise<FileValue> {
@@ -101,7 +102,7 @@ function resolveText<TContext>(
   return override ?? fallback;
 }
 
-export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
+export const FileField = ({ descriptor, extra, ...props }: Props) => {
   const reactId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const createdUrisRef = useRef<Set<string>>(new Set());
@@ -109,7 +110,9 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const web = d._ui ?? {};
+  const web = descriptor.fieldPropsFromClient ?? {};
+  const inputBehavior = resolveWebInputBehavior(extra, web);
+  const isReadOnly = Boolean(inputBehavior.readOnly);
   const {
     classNames,
     styles,
@@ -180,21 +183,21 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
     async (files: FileList | File[]) => {
       const array = Array.from(files);
       if (!array.length) return;
-      if (!d._fileMultiple && array.length > 1) return;
+      if (!descriptor._fileMultiple && array.length > 1) return;
 
       setLoading(true);
 
       try {
         const values = await Promise.all(
           array.map(async (file) => {
-            const value = await fileToValue(file, d._fileBase64);
+            const value = await fileToValue(file, descriptor._fileBase64);
             createdUrisRef.current.add(value.uri);
             return value;
           }),
         );
 
-        if (d._fileMultiple) {
-          const merged = [...currentFiles, ...values].slice(0, d._fileMaxFiles);
+        if (descriptor._fileMultiple) {
+          const merged = [...currentFiles, ...values].slice(0, descriptor._fileMaxFiles);
           props.onChange(merged);
         } else {
           props.onChange(values[0] ?? null);
@@ -209,9 +212,9 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
     },
     [
       currentFiles,
-      d._fileBase64,
-      d._fileMaxFiles,
-      d._fileMultiple,
+      descriptor._fileBase64,
+      descriptor._fileMaxFiles,
+      descriptor._fileMultiple,
       props.onChange,
       props.onBlur,
     ],
@@ -230,12 +233,12 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
       e.preventDefault();
       setDragging(false);
 
-      if (d._disabled) return;
+      if (descriptor._disabled || isReadOnly) return;
       if (!e.dataTransfer.files.length) return;
 
       await processFiles(e.dataTransfer.files);
     },
-    [d._disabled, processFiles],
+    [descriptor._disabled, isReadOnly, processFiles],
   );
 
   const removeFile = useCallback(
@@ -245,7 +248,7 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
 
       revokeIfOwned(file.uri);
 
-      if (d._fileMultiple) {
+      if (descriptor._fileMultiple) {
         const next = currentFiles.filter((_, i) => i !== index);
         props.onChange(next.length ? next : null);
       } else {
@@ -254,10 +257,10 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
 
       props.onBlur();
     },
-    [currentFiles, d._fileMultiple, props.onBlur, props.onChange, revokeIfOwned],
+    [currentFiles, descriptor._fileMultiple, props.onBlur, props.onChange, revokeIfOwned],
   );
 
-  const accept = d._fileAccept.join(',');
+  const accept = descriptor._fileAccept.join(',');
 
   const rootClassName = cx(
     extra?.className,
@@ -265,25 +268,27 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
     rootPropsClassName as string,
   );
   const renderContext = {
-    accept: d._fileAccept,
-    disabled: d._disabled,
+    accept: descriptor._fileAccept,
+    disabled: descriptor._disabled,
     dragging,
     fileCount: currentFiles.length,
     loading,
-    maxFiles: d._fileMaxFiles,
-    maxSize: d._fileMaxSize,
-    multiple: d._fileMultiple,
-    preview: d._filePreview,
-    previewHeight: d._filePreviewHeight,
+    maxFiles: descriptor._fileMaxFiles,
+    maxSize: descriptor._fileMaxSize,
+    multiple: descriptor._fileMultiple,
+    preview: descriptor._filePreview,
+    previewHeight: descriptor._filePreviewHeight,
   };
-  const defaultDropZoneIcon = getDefaultDropZoneIcon(d._fileAccept);
+  const defaultDropZoneIcon = getDefaultDropZoneIcon(descriptor._fileAccept);
   const resolvedDropZoneIcon = renderDropZoneIcon?.(renderContext) ?? defaultDropZoneIcon;
-  const formattedAccept = d._fileAccept.join(', ');
-  const formattedMaxSize = d._fileMaxSize ? formatBytes(d._fileMaxSize) : '';
+  const formattedAccept = descriptor._fileAccept.join(', ');
+  const formattedMaxSize = descriptor._fileMaxSize
+    ? formatBytes(descriptor._fileMaxSize)
+    : '';
   const resolvedLoadingText = resolveText(loadingText, 'Processing...', renderContext);
   const resolvedDropZoneText = resolveText(
     dropZoneText,
-    d._fileDragDropLabel,
+    descriptor._fileDragDropLabel,
     renderContext,
   );
   const resolvedBrowseButtonText = resolveText(
@@ -297,13 +302,13 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
     renderContext,
   );
   const resolvedAcceptedText =
-    d._fileAccept.length > 0
+    descriptor._fileAccept.length > 0
       ? resolveText(acceptedText, `Accepted: ${formattedAccept}`, {
           ...renderContext,
           formattedAccept,
         })
       : null;
-  const resolvedMaxSizeText = d._fileMaxSize
+  const resolvedMaxSizeText = descriptor._fileMaxSize
     ? resolveText(maxSizeText, `Max size: ${formattedMaxSize}`, {
         ...renderContext,
         formattedMaxSize,
@@ -345,7 +350,7 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
     <>
       {resolveText(
         addMoreButtonText,
-        `+ Add more (${currentFiles.length}/${d._fileMaxFiles})`,
+        `+ Add more (${currentFiles.length}/${descriptor._fileMaxFiles})`,
         renderContext,
       )}
     </>
@@ -356,7 +361,7 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
       data-fb-field="file"
       data-fb-name={props.name}
       {...(hasError ? { 'data-fb-error': '' } : {})}
-      {...(d._disabled ? { 'data-fb-disabled': '' } : {})}
+      {...(descriptor._disabled ? { 'data-fb-disabled': '' } : {})}
       className={rootClassName}
       style={mergeStyles(extra?.style, styles?.root, rootPropsStyle as CSSProperties)}
       {...rootPropsRest}
@@ -365,7 +370,7 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
         id,
         label: props.label,
         name: props.name,
-        required: Boolean(d._required),
+        required: Boolean(descriptor._required),
         hideLabel,
         classNames,
         styles,
@@ -374,19 +379,21 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
         renderRequiredMark,
       })}
 
-      {d._fileDragDrop ? (
+      {descriptor._fileDragDrop ? (
         <button
           type="button"
-          aria-disabled={d._disabled || undefined}
+          aria-disabled={descriptor._disabled || isReadOnly || undefined}
           aria-describedby={describedBy}
           data-fb-slot="drop-zone"
           {...(dragging ? { 'data-fb-dragging': '' } : {})}
           {...(loading ? { 'data-fb-loading': '' } : {})}
           className={classNames?.dropZone}
           style={mergeStyles(controlErrorStyle, styles?.dropZone)}
-          onClick={() => !d._disabled && inputRef.current?.click()}
+          onClick={() =>
+            !descriptor._disabled && !isReadOnly && inputRef.current?.click()
+          }
           onKeyDown={(e) => {
-            if (d._disabled) return;
+            if (descriptor._disabled || isReadOnly) return;
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               inputRef.current?.click();
@@ -394,7 +401,7 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
           }}
           onDragOver={(e) => {
             e.preventDefault();
-            if (!d._disabled) setDragging(true);
+            if (!descriptor._disabled) setDragging(true);
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={handleDrop}
@@ -411,8 +418,10 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
           data-fb-slot="browse-button"
           className={classNames?.browseButton}
           style={mergeStyles(controlErrorStyle, styles?.browseButton)}
-          onClick={() => !d._disabled && inputRef.current?.click()}
-          disabled={d._disabled}
+          onClick={() =>
+            !descriptor._disabled && !isReadOnly && inputRef.current?.click()
+          }
+          disabled={descriptor._disabled || isReadOnly}
         >
           {renderBrowseButtonContent?.({
             ...renderContext,
@@ -427,8 +436,8 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
         name={props.name}
         type="file"
         accept={accept || undefined}
-        multiple={d._fileMultiple}
-        disabled={d._disabled}
+        multiple={descriptor._fileMultiple}
+        disabled={descriptor._disabled || isReadOnly}
         onChange={handleInput}
         onBlur={props.onBlur}
         onFocus={props.onFocus}
@@ -476,7 +485,7 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
                 className={classNames?.listItem}
                 style={mergeStyles(styles?.listItem)}
               >
-                {d._filePreview && file.type.startsWith('image/') ? (
+                {descriptor._filePreview && file.type.startsWith('image/') ? (
                   <img
                     src={file.uri}
                     alt={file.name}
@@ -527,15 +536,16 @@ export const FileField = ({ descriptor: d, extra, ...props }: Props) => {
         </ul>
       )}
 
-      {d._fileMultiple &&
+      {descriptor._fileMultiple &&
         currentFiles.length > 0 &&
-        currentFiles.length < d._fileMaxFiles && (
+        currentFiles.length < descriptor._fileMaxFiles && (
           <button
             type="button"
             data-fb-slot="add-more-button"
             className={classNames?.addMoreButton}
             style={mergeStyles(controlErrorStyle, styles?.addMoreButton)}
-            onClick={() => inputRef.current?.click()}
+            onClick={() => !isReadOnly && inputRef.current?.click()}
+            disabled={isReadOnly}
           >
             {renderAddMoreButtonContent?.({
               ...renderContext,

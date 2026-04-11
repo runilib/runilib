@@ -1,8 +1,9 @@
 import type {
-  FormBridgeUiOptions,
+  FieldPropsOverrides,
+  // FormBridgeOptions,
+  FormBridgePropsOptions,
   OptionsFetcherContext,
   SelectOption,
-  WebFieldUiOverrides,
 } from '@runilib/react-formbridge';
 
 export const CUSTOMER_DEPARTMENTS = [
@@ -95,7 +96,7 @@ export async function searchCityDirectory({
   );
 }
 
-function createBaseDemoFieldUi(styles: Record<string, string>): WebFieldUiOverrides {
+function createBaseDemoFieldUi(styles: Record<string, string>): FieldPropsOverrides {
   return {
     classNames: {
       root: styles.formField,
@@ -138,8 +139,8 @@ function createBaseDemoFieldUi(styles: Record<string, string>): WebFieldUiOverri
 }
 
 export function createDemoFieldUi(styles: Record<string, string>): {
-  baseFieldUi: WebFieldUiOverrides;
-  compactFieldUi: WebFieldUiOverrides;
+  baseFieldUi: FieldPropsOverrides;
+  compactFieldUi: FieldPropsOverrides;
 } {
   const baseFieldUi = createBaseDemoFieldUi(styles);
 
@@ -158,7 +159,7 @@ export function createDemoFieldUi(styles: Record<string, string>): {
   } as const;
 }
 
-export function createDemoFormUi(styles: Record<string, string>): FormBridgeUiOptions {
+export function createDemoFormUi(styles: Record<string, string>): FormBridgePropsOptions {
   const baseFieldUi = createBaseDemoFieldUi(styles);
 
   return {

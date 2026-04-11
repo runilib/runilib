@@ -30,8 +30,8 @@
 **Advanced flows**
 
 - draft persistence with pluggable storage adapters
-- `useFormWizard` for multi-step flows
-- `useDynamicForm` for JSON-driven forms
+- `useFormBridgeWizard` for multi-step flows
+- `useDynamicFormBridge` for JSON-driven forms
 - `useReadonlyFormBridge` for readonly and diff rendering
 - async options support for remote selects and autocomplete-style fields
 - optional analytics hooks for submit and field-level events

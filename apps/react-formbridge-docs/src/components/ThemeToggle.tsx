@@ -48,7 +48,7 @@ const ToggleButton = styled.button`
   }
 `;
 
-function MoonIcon(props: ComponentProps<'svg'>) {
+const MoonIcon = (props: ComponentProps<'svg'>) => {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -64,9 +64,9 @@ function MoonIcon(props: ComponentProps<'svg'>) {
       <path d="M20 14.2A8 8 0 1 1 9.8 4a6.6 6.6 0 0 0 10.2 10.2Z" />
     </svg>
   );
-}
+};
 
-function SunIcon(props: ComponentProps<'svg'>) {
+const SunIcon = (props: ComponentProps<'svg'>) => {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -87,4 +87,4 @@ function SunIcon(props: ComponentProps<'svg'>) {
       <path d="M12 2.75v2.5M12 18.75v2.5M21.25 12h-2.5M5.25 12h-2.5M18.54 5.46l-1.77 1.77M7.23 16.77l-1.77 1.77M18.54 18.54l-1.77-1.77M7.23 7.23 5.46 5.46" />
     </svg>
   );
-}
+};

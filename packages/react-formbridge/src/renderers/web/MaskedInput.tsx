@@ -18,12 +18,13 @@ import {
 } from '../../core/field-builders/mask/masks';
 import type { MaskedDescriptor } from '../../core/field-builders/mask/types';
 import type { FocusableFieldHandle } from '../../types';
-import type { WebTextFieldUiOverrides } from '../../types/ui-web';
+import type { WebTextFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultErrorChromeStyle,
-  type ResolvedWebFieldUi,
+  type ResolvedWebFieldProps,
+  resolveWebInputBehavior,
   shouldHighlightOnError,
 } from './shared';
 
@@ -44,9 +45,9 @@ const defaultMaskedInputStyle: CSSProperties = {
 
 interface Props extends FieldRenderProps<string> {
   descriptor: MaskedDescriptor<string> & {
-    _ui?: ResolvedWebFieldUi;
+    fieldPropsFromClient?: ResolvedWebFieldProps;
   };
-  extra?: ExtraFieldProps<WebTextFieldUiOverrides>;
+  extra?: ExtraFieldProps<WebTextFieldPropsOverrides>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -60,7 +61,7 @@ function getMaskInputMode(
 }
 
 export const MaskedInput: React.FC<Props> = ({
-  descriptor: d,
+  descriptor,
   extra,
   registerFocusable,
   ...props
@@ -69,7 +70,8 @@ export const MaskedInput: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const pendingCaretRef = useRef<{ start: number; end: number } | null>(null);
 
-  const web = d._ui ?? {};
+  const web = descriptor.fieldPropsFromClient ?? {};
+  const inputBehavior = resolveWebInputBehavior(extra, web);
 
   const {
     classNames,
@@ -108,20 +110,20 @@ export const MaskedInput: React.FC<Props> = ({
   );
   const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
   const firstEditablePos = useMemo(
-    () => getFirstInputPosition(d._maskPattern, d._maskTokens),
-    [d._maskPattern, d._maskTokens],
+    () => getFirstInputPosition(descriptor._maskPattern, descriptor._maskTokens),
+    [descriptor._maskPattern, descriptor._maskTokens],
   );
 
   const maskState = useMemo(() => {
     const incoming = props.value ?? '';
-    const raw = d._maskStoreRaw
+    const raw = descriptor._maskStoreRaw
       ? incoming
-      : extractRaw(incoming, d._maskPattern, d._maskTokens);
+      : extractRaw(incoming, descriptor._maskPattern, descriptor._maskTokens);
 
-    const result = applyMask(raw, d._maskPattern, {
-      showPlaceholder: d._maskShowPlaceholder,
-      placeholder: d._maskPlaceholder,
-      tokens: d._maskTokens,
+    const result = applyMask(raw, descriptor._maskPattern, {
+      showPlaceholder: descriptor._maskShowPlaceholder,
+      placeholder: descriptor._maskPlaceholder,
+      tokens: descriptor._maskTokens,
     });
 
     return {
@@ -129,38 +131,46 @@ export const MaskedInput: React.FC<Props> = ({
     };
   }, [
     props.value,
-    d._maskPattern,
-    d._maskPlaceholder,
-    d._maskShowPlaceholder,
-    d._maskStoreRaw,
-    d._maskTokens,
+    descriptor._maskPattern,
+    descriptor._maskPlaceholder,
+    descriptor._maskShowPlaceholder,
+    descriptor._maskStoreRaw,
+    descriptor._maskTokens,
   ]);
 
   const displayValue = maskState.display;
   const maxCaretPos = Math.max(maskState.nextCursorPos, firstEditablePos);
   const placeholderText =
     props.placeholder ??
-    d._placeholder ??
-    (d._maskShowInPlaceholder
-      ? getMaskPlaceholder(d._maskPattern, d._maskPlaceholder, d._maskTokens)
+    descriptor._placeholder ??
+    (descriptor._maskShowInPlaceholder
+      ? getMaskPlaceholder(
+          descriptor._maskPattern,
+          descriptor._maskPlaceholder,
+          descriptor._maskTokens,
+        )
       : undefined);
 
   const resolveMaxCaretPos = useCallback(
     (currentDisplay: string) => {
-      const raw = extractRaw(currentDisplay, d._maskPattern, d._maskTokens);
-      const nextState = applyMask(raw, d._maskPattern, {
-        showPlaceholder: d._maskShowPlaceholder,
-        placeholder: d._maskPlaceholder,
-        tokens: d._maskTokens,
+      const raw = extractRaw(
+        currentDisplay,
+        descriptor._maskPattern,
+        descriptor._maskTokens,
+      );
+      const nextState = applyMask(raw, descriptor._maskPattern, {
+        showPlaceholder: descriptor._maskShowPlaceholder,
+        placeholder: descriptor._maskPlaceholder,
+        tokens: descriptor._maskTokens,
       });
 
       return Math.max(nextState.nextCursorPos, firstEditablePos);
     },
     [
-      d._maskPattern,
-      d._maskPlaceholder,
-      d._maskShowPlaceholder,
-      d._maskTokens,
+      descriptor._maskPattern,
+      descriptor._maskPlaceholder,
+      descriptor._maskShowPlaceholder,
+      descriptor._maskTokens,
       firstEditablePos,
     ],
   );
@@ -211,29 +221,33 @@ export const MaskedInput: React.FC<Props> = ({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       let incoming = e.target.value;
 
-      if (d._maskUppercase) incoming = incoming.toUpperCase();
-      if (d._maskLowercase) incoming = incoming.toLowerCase();
+      if (descriptor._maskUppercase) incoming = incoming.toUpperCase();
+      if (descriptor._maskLowercase) incoming = incoming.toLowerCase();
 
-      const cleaned = extractRaw(incoming, d._maskPattern, d._maskTokens);
-      const result = applyMask(cleaned, d._maskPattern, {
-        showPlaceholder: d._maskShowPlaceholder,
-        placeholder: d._maskPlaceholder,
-        tokens: d._maskTokens,
+      const cleaned = extractRaw(
+        incoming,
+        descriptor._maskPattern,
+        descriptor._maskTokens,
+      );
+      const result = applyMask(cleaned, descriptor._maskPattern, {
+        showPlaceholder: descriptor._maskShowPlaceholder,
+        placeholder: descriptor._maskPlaceholder,
+        tokens: descriptor._maskTokens,
       });
 
-      props.onChange(d._maskStoreRaw ? result.raw : result.display);
+      props.onChange(descriptor._maskStoreRaw ? result.raw : result.display);
 
       const pos = Math.max(result.nextCursorPos, firstEditablePos);
       pendingCaretRef.current = { start: pos, end: pos };
     },
     [
-      d._maskLowercase,
-      d._maskPattern,
-      d._maskPlaceholder,
-      d._maskShowPlaceholder,
-      d._maskStoreRaw,
-      d._maskTokens,
-      d._maskUppercase,
+      descriptor._maskLowercase,
+      descriptor._maskPattern,
+      descriptor._maskPlaceholder,
+      descriptor._maskShowPlaceholder,
+      descriptor._maskStoreRaw,
+      descriptor._maskTokens,
+      descriptor._maskUppercase,
       firstEditablePos,
       props.onChange,
     ],
@@ -295,8 +309,8 @@ export const MaskedInput: React.FC<Props> = ({
   );
 
   const autoLayout = useMemo(
-    () => getMaskAutoLayout(d._maskPattern, d._maskTokens),
-    [d._maskPattern, d._maskTokens],
+    () => getMaskAutoLayout(descriptor._maskPattern, descriptor._maskTokens),
+    [descriptor._maskPattern, descriptor._maskTokens],
   );
 
   return (
@@ -318,7 +332,7 @@ export const MaskedInput: React.FC<Props> = ({
         id,
         label: props.label,
         name: props.name,
-        required: Boolean(d._required),
+        required: Boolean(descriptor._required),
         hideLabel,
         classNames: classNames as Record<string, string | undefined>,
         styles: styles as Record<string, CSSProperties | undefined>,
@@ -340,12 +354,18 @@ export const MaskedInput: React.FC<Props> = ({
         value={displayValue}
         placeholder={placeholderText}
         disabled={props.disabled}
-        readOnly={web.readOnly}
-        autoComplete={web.autoComplete ?? 'off'}
-        spellCheck={web.spellCheck}
-        inputMode={getMaskInputMode(d._maskPattern, d._maskTokens)}
+        readOnly={inputBehavior.readOnly}
+        autoComplete={inputBehavior.autoComplete ?? 'off'}
+        // biome-ignore lint/a11y/noAutofocus: form builders expose autofocus intentionally.
+        autoFocus={inputBehavior.autoFocus}
+        spellCheck={inputBehavior.spellCheck}
+        inputMode={
+          inputBehavior.inputMode ??
+          getMaskInputMode(descriptor._maskPattern, descriptor._maskTokens)
+        }
+        enterKeyHint={inputBehavior.enterKeyHint}
         aria-invalid={hasError || undefined}
-        aria-required={d._required || undefined}
+        aria-required={descriptor._required || undefined}
         aria-describedby={describedBy}
         aria-disabled={props.disabled || undefined}
         data-fb-slot="input"

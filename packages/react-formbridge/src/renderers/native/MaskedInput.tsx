@@ -22,22 +22,23 @@ import type {
   ExtraFieldProps,
   FieldRenderProps,
   FocusableFieldHandle,
-  NativeTextFieldUiOverrides,
+  NativeTextFieldPropsOverrides,
 } from '../../types';
 import {
   defaultErrorChromeStyle,
   defaultErrorTextStyle,
   defaultRequiredMarkStyle,
-  type ResolvedNativeFieldUi,
+  type ResolvedNativeFieldProps,
+  resolveNativeInputBehavior,
   shouldHighlightOnError,
   sx,
 } from './shared';
 
 interface Props extends FieldRenderProps<string> {
   descriptor: MaskedDescriptor<string> & {
-    _ui?: ResolvedNativeFieldUi;
+    fieldPropsFromClient?: ResolvedNativeFieldProps;
   };
-  extra?: ExtraFieldProps<NativeTextFieldUiOverrides, 'native'>;
+  extra?: ExtraFieldProps<NativeTextFieldPropsOverrides, 'native'>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -51,12 +52,17 @@ function getMaskKeyboardType(
 }
 
 export const NativeMaskedInput = ({
-  descriptor: d,
+  descriptor,
   extra,
   registerFocusable,
   ...props
 }: Props) => {
   const pendingSelectionRef = useRef<{ start: number; end: number } | null>(null);
+  const inputBehavior = resolveNativeInputBehavior(
+    extra,
+    descriptor.fieldPropsFromClient,
+  );
+  const isReadOnly = Boolean(inputBehavior.readOnly);
 
   const {
     styles,
@@ -88,69 +94,77 @@ export const NativeMaskedInput = ({
     style?: StyleProp<TextStyle>;
   } & Record<string, unknown>;
 
-  const id = extra?.id ?? d._ui?.id ?? props.name;
+  const id = extra?.id ?? descriptor.fieldPropsFromClient?.id ?? props.name;
   const hasError = Boolean(props.error);
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
-    d._ui?.highlightOnError,
+    descriptor.fieldPropsFromClient?.highlightOnError,
   );
   const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
   const [selection, setSelection] = useState<{ start: number; end: number } | undefined>(
     undefined,
   );
   const firstEditablePos = useMemo(
-    () => getFirstInputPosition(d._maskPattern, d._maskTokens),
-    [d._maskPattern, d._maskTokens],
+    () => getFirstInputPosition(descriptor._maskPattern, descriptor._maskTokens),
+    [descriptor._maskPattern, descriptor._maskTokens],
   );
 
   const maskState = useMemo(() => {
     const incoming = props.value ?? '';
-    const raw = d._maskStoreRaw
+    const raw = descriptor._maskStoreRaw
       ? incoming
-      : extractRaw(incoming, d._maskPattern, d._maskTokens);
+      : extractRaw(incoming, descriptor._maskPattern, descriptor._maskTokens);
 
-    const result = applyMask(raw, d._maskPattern, {
-      showPlaceholder: d._maskShowPlaceholder,
-      placeholder: d._maskPlaceholder,
-      tokens: d._maskTokens,
+    const result = applyMask(raw, descriptor._maskPattern, {
+      showPlaceholder: descriptor._maskShowPlaceholder,
+      placeholder: descriptor._maskPlaceholder,
+      tokens: descriptor._maskTokens,
     });
 
     return {
       ...result,
     };
   }, [
-    d._maskPattern,
-    d._maskPlaceholder,
-    d._maskShowPlaceholder,
-    d._maskStoreRaw,
-    d._maskTokens,
+    descriptor._maskPattern,
+    descriptor._maskPlaceholder,
+    descriptor._maskShowPlaceholder,
+    descriptor._maskStoreRaw,
+    descriptor._maskTokens,
     props.value,
   ]);
   const displayValue = maskState.display;
   const maxCaretPos = Math.max(maskState.nextCursorPos, firstEditablePos);
   const placeholderText =
     props.placeholder ??
-    d._placeholder ??
-    (d._maskShowInPlaceholder
-      ? getMaskPlaceholder(d._maskPattern, d._maskPlaceholder, d._maskTokens)
+    descriptor._placeholder ??
+    (descriptor._maskShowInPlaceholder
+      ? getMaskPlaceholder(
+          descriptor._maskPattern,
+          descriptor._maskPlaceholder,
+          descriptor._maskTokens,
+        )
       : undefined);
 
   const resolveMaxCaretPos = useCallback(
     (currentDisplay: string) => {
-      const raw = extractRaw(currentDisplay, d._maskPattern, d._maskTokens);
-      const nextState = applyMask(raw, d._maskPattern, {
-        showPlaceholder: d._maskShowPlaceholder,
-        placeholder: d._maskPlaceholder,
-        tokens: d._maskTokens,
+      const raw = extractRaw(
+        currentDisplay,
+        descriptor._maskPattern,
+        descriptor._maskTokens,
+      );
+      const nextState = applyMask(raw, descriptor._maskPattern, {
+        showPlaceholder: descriptor._maskShowPlaceholder,
+        placeholder: descriptor._maskPlaceholder,
+        tokens: descriptor._maskTokens,
       });
 
       return Math.max(nextState.nextCursorPos, firstEditablePos);
     },
     [
-      d._maskPattern,
-      d._maskPlaceholder,
-      d._maskShowPlaceholder,
-      d._maskTokens,
+      descriptor._maskPattern,
+      descriptor._maskPlaceholder,
+      descriptor._maskShowPlaceholder,
+      descriptor._maskTokens,
       firstEditablePos,
     ],
   );
@@ -196,37 +210,37 @@ export const NativeMaskedInput = ({
     (value: string) => {
       let next = value;
 
-      if (d._maskUppercase) next = next.toUpperCase();
-      if (d._maskLowercase) next = next.toLowerCase();
+      if (descriptor._maskUppercase) next = next.toUpperCase();
+      if (descriptor._maskLowercase) next = next.toLowerCase();
 
-      const cleaned = extractRaw(next, d._maskPattern, d._maskTokens);
-      const result = applyMask(cleaned, d._maskPattern, {
-        showPlaceholder: d._maskShowPlaceholder,
-        placeholder: d._maskPlaceholder,
-        tokens: d._maskTokens,
+      const cleaned = extractRaw(next, descriptor._maskPattern, descriptor._maskTokens);
+      const result = applyMask(cleaned, descriptor._maskPattern, {
+        showPlaceholder: descriptor._maskShowPlaceholder,
+        placeholder: descriptor._maskPlaceholder,
+        tokens: descriptor._maskTokens,
       });
 
-      props.onChange(d._maskStoreRaw ? result.raw : result.display);
+      props.onChange(descriptor._maskStoreRaw ? result.raw : result.display);
 
       const pos = Math.max(result.nextCursorPos, firstEditablePos);
       pendingSelectionRef.current = { start: pos, end: pos };
     },
     [
-      d._maskLowercase,
-      d._maskPattern,
-      d._maskPlaceholder,
-      d._maskShowPlaceholder,
-      d._maskStoreRaw,
-      d._maskTokens,
-      d._maskUppercase,
+      descriptor._maskLowercase,
+      descriptor._maskPattern,
+      descriptor._maskPlaceholder,
+      descriptor._maskShowPlaceholder,
+      descriptor._maskStoreRaw,
+      descriptor._maskTokens,
+      descriptor._maskUppercase,
       firstEditablePos,
       props.onChange,
     ],
   );
 
   const autoLayout = useMemo(
-    () => getMaskAutoLayout(d._maskPattern, d._maskTokens),
-    [d._maskPattern, d._maskTokens],
+    () => getMaskAutoLayout(descriptor._maskPattern, descriptor._maskTokens),
+    [descriptor._maskPattern, descriptor._maskTokens],
   );
 
   const requiredMark = renderRequiredMark?.() ?? (
@@ -242,7 +256,7 @@ export const NativeMaskedInput = ({
         (renderLabel?.({
           id,
           label: props.label,
-          required: Boolean(d._required),
+          required: Boolean(descriptor._required),
           name: props.name,
         }) ?? (
           <Text
@@ -250,18 +264,18 @@ export const NativeMaskedInput = ({
             {...labelPropsRest}
           >
             {props.label}
-            {d._required && requiredMark}
+            {descriptor._required && requiredMark}
           </Text>
         ))}
 
       <TextInput
         nativeID={id}
         ref={registerFocusable}
-        testID={d._ui?.testID}
+        testID={inputBehavior.testID}
         value={displayValue}
         selection={selection}
         placeholder={placeholderText}
-        editable={!props.disabled}
+        editable={!(props.disabled || isReadOnly)}
         maxLength={autoLayout.visualLength}
         onChangeText={handleChangeText}
         onBlur={props.onBlur}
@@ -276,7 +290,13 @@ export const NativeMaskedInput = ({
         }}
         autoCapitalize="none"
         autoCorrect={false}
-        keyboardType={getMaskKeyboardType(d._maskPattern, d._maskTokens)}
+        autoFocus={inputBehavior.autoFocus}
+        autoComplete={inputBehavior.autoComplete as TextInputProps['autoComplete']}
+        keyboardType={
+          (inputBehavior.keyboardType as TextInputProps['keyboardType']) ??
+          getMaskKeyboardType(descriptor._maskPattern, descriptor._maskTokens)
+        }
+        secureTextEntry={inputBehavior.secureTextEntry}
         style={sx(
           autoLayout.compact
             ? {
@@ -288,9 +308,9 @@ export const NativeMaskedInput = ({
                 width: '100%',
                 alignSelf: 'stretch',
               },
-          controlErrorStyle,
           styles?.input,
           inputPropsStyle,
+          controlErrorStyle,
         )}
         {...(inputPropsRest as Partial<TextInputProps>)}
       />

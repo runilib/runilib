@@ -15,7 +15,7 @@ import type { FileFieldMeta, FileSourceType, FileValue } from './types';
 
 export class FileFieldBuilder {
   private readonly _meta: FileFieldMeta;
-  private _conditions: FieldConditions = {
+  private readonly _conditions: FieldConditions = {
     ...DEFAULT_FIELD_CONDITIONS,
     visible: [],
     required: [],

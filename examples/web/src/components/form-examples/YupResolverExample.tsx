@@ -13,12 +13,8 @@ export function YupResolverExample() {
   const formSchema = useMemo(
     () => ({
       companyName: field.text().label('Company name').placeholder('Runilib Studio'),
-      website: field.url().label('Website').placeholder('https://runilib.dev').behavior({
-        inputMode: 'url',
-      }),
-      monthlyBudget: field.text().label('Monthly budget').placeholder('2500').behavior({
-        inputMode: 'numeric',
-      }),
+      website: field.url().label('Website').placeholder('https://runilib.dev'),
+      monthlyBudget: field.text().label('Monthly budget').placeholder('2500'),
       acceptsPilot: field
         .checkbox()
         .label('Approve pilot terms')

@@ -14,16 +14,8 @@ export function JoiResolverExample() {
     () => ({
       city: field.text().label('City').placeholder('Lyon'),
       department: field.select().label('Department').options(CUSTOMER_DEPARTMENTS),
-      phone: field
-        .tel()
-        .label('Support phone')
-        .placeholder('+33 6 98 12 45 78')
-        .behavior({
-          inputMode: 'tel',
-        }),
-      postalCode: field.text().label('Postal code').placeholder('69002').behavior({
-        inputMode: 'numeric',
-      }),
+      phone: field.tel().label('Support phone').placeholder('+33 6 98 12 45 78'),
+      postalCode: field.text().label('Postal code').placeholder('69002'),
     }),
     [],
   );

@@ -17,13 +17,8 @@ export function ValibotResolverExample() {
       receiptEmail: field
         .email()
         .label('Receipt email')
-        .placeholder('billing@runilib.dev')
-        .behavior({
-          inputMode: 'email',
-        }),
-      cardLast4: field.text().label('Card last 4').placeholder('1842').behavior({
-        inputMode: 'numeric',
-      }),
+        .placeholder('billing@runilib.dev'),
+      cardLast4: field.text().label('Card last 4').placeholder('1842'),
     }),
     [],
   );

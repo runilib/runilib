@@ -8,39 +8,44 @@ import { getDocsLandingHref } from '@/lib/docs';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import styled, { css } from 'styled-components';
+import styled, { css, useTheme } from 'styled-components';
 import { DocsSearch } from './DocsSearch';
 import { ThemeToggle } from './ThemeToggle';
 
-const HEADER_LOGO_SIZE = 54;
-const HEADER_LOGO_SIZE_MOBILE = 30;
+const LOGO_WORDMARK_RATIO = 1201.5 / 292.5;
+// Drive the wordmark size from height. Width follows the SVG ratio automatically.
+const HEADER_LOGO_HEIGHT = 58;
+const HEADER_LOGO_HEIGHT_MOBILE = 32;
+const HEADER_LOGO_WIDTH = Math.round(HEADER_LOGO_HEIGHT * LOGO_WORDMARK_RATIO);
+const HEADER_LOGO_WIDTH_MOBILE = Math.round(
+  HEADER_LOGO_HEIGHT_MOBILE * LOGO_WORDMARK_RATIO,
+);
 
 export function SiteHeader() {
   const docsHref = getDocsLandingHref();
   const pathname = usePathname();
+  const theme = useTheme();
   const feedbackHref =
     pathname && pathname !== '/feedback'
       ? `/feedback?from=${encodeURIComponent(pathname)}`
       : '/feedback';
+  const logoSrc =
+    theme.mode === 'dark' ? '/brand/logo-light.svg' : '/brand/logo-black.svg';
 
   return (
     <Header>
       <HeaderInner className="shell">
         <Brand href="/">
-          <LogoBadge $size={HEADER_LOGO_SIZE}>
+          <LogoBadge>
             <LogoImage
-              src="/brand/formbridge-logos/formbridge-icon-blue.svg"
+              src={logoSrc}
               alt="react-formbridge"
-              width={HEADER_LOGO_SIZE}
-              height={HEADER_LOGO_SIZE}
+              fill
               priority
+              sizes={`(max-width: 520px) ${HEADER_LOGO_WIDTH_MOBILE}px, ${HEADER_LOGO_WIDTH}px`}
               unoptimized
             />
           </LogoBadge>
-          <BrandCopy>
-            <BrandName>REACT FORMBRIDGE</BrandName>
-          </BrandCopy>
-          <BrandMeta>BY RUNILIB</BrandMeta>
         </Brand>
 
         <Nav aria-label="Primary">
@@ -75,7 +80,7 @@ export function SiteHeader() {
   );
 }
 
-function NpmIcon(props: ComponentProps<'svg'>) {
+const NpmIcon = (props: ComponentProps<'svg'>) => {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -91,9 +96,9 @@ function NpmIcon(props: ComponentProps<'svg'>) {
       <path d="M8.7 11v5.5" />
     </svg>
   );
-}
+};
 
-function GitHubIcon(props: ComponentProps<'svg'>) {
+const GitHubIcon = (props: ComponentProps<'svg'>) => {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -104,7 +109,7 @@ function GitHubIcon(props: ComponentProps<'svg'>) {
       <path d="M12 2.75a9.25 9.25 0 0 0-2.92 18.03c.46.08.63-.2.63-.45v-1.58c-2.56.56-3.1-1.09-3.1-1.09-.41-1.03-1.03-1.3-1.03-1.3-.84-.57.06-.56.06-.56.93.07 1.42.95 1.42.95.82 1.42 2.2 1 2.74.77.08-.61.32-1.03.58-1.26-2.04-.23-4.18-1.02-4.18-4.55 0-1 .36-1.82.95-2.46-.1-.23-.41-1.17.09-2.44 0 0 .77-.25 2.53.94a8.7 8.7 0 0 1 4.6 0c1.76-1.19 2.53-.94 2.53-.94.5 1.27.19 2.21.1 2.44.59.64.94 1.46.94 2.46 0 3.54-2.14 4.32-4.19 4.55.33.28.62.84.62 1.7v2.52c0 .25.17.53.64.45A9.25 9.25 0 0 0 12 2.75Z" />
     </svg>
   );
-}
+};
 
 const Header = styled.header`
   position: sticky;
@@ -146,82 +151,37 @@ const Brand = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  min-height: 40px;
+  min-height: ${HEADER_LOGO_HEIGHT}px;
   min-width: 0;
   width: fit-content;
 
   @media (max-width: 520px) {
     gap: 8px;
+    min-height: ${HEADER_LOGO_HEIGHT_MOBILE}px;
   }
 `;
 
-const LogoBadge = styled.span<{ $size: number }>`
+const LogoBadge = styled.span`
+  position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: ${({ $size }) => `${$size}px`};
-  height: ${({ $size }) => `${$size}px`};
-  flex: 0 0 ${({ $size }) => `${$size}px`};
+  justify-content: flex-start;
+  width: ${HEADER_LOGO_WIDTH}px;
+  height: ${HEADER_LOGO_HEIGHT}px;
+  flex: 0 0 ${HEADER_LOGO_WIDTH}px;
   line-height: 0;
+  overflow: hidden;
 
   @media (max-width: 520px) {
-    width: ${HEADER_LOGO_SIZE_MOBILE}px;
-    height: ${HEADER_LOGO_SIZE_MOBILE}px;
-    flex-basis: ${HEADER_LOGO_SIZE_MOBILE}px;
+    width: ${HEADER_LOGO_WIDTH_MOBILE}px;
+    height: ${HEADER_LOGO_HEIGHT_MOBILE}px;
+    flex-basis: ${HEADER_LOGO_WIDTH_MOBILE}px;
   }
 `;
 
 const LogoImage = styled(Image)`
-  display: block;
-  width: 100%;
-  height: 100%;
-`;
-
-const BrandName = styled.span`
-  display: inline-flex;
-  align-items: center;
-  color: ${({ theme }) => theme.text};
-  font-size: 20px;
-  font-weight: 800;
-  line-height: 1;
-  white-space: nowrap;
-  min-width: 0;
-
-  @media (max-width: 520px) {
-    font-size: 15px;
-  }
-`;
-
-const BrandCopy = styled.span`
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 3px;
-  min-width: 0;
-
-  @media (max-width: 520px) {
-    gap: 2px;
-  }
-`;
-
-const BrandMeta = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 28px;
-  padding: 0 7px;
-  border-radius: 9px;
-  border: 1px solid ${({ theme }) => theme.border};
-  background: ${({ theme }) => theme.accentSoft};
-  color: ${({ theme }) => theme.textSoft};
-  font-size: 12px;
-  font-weight: 700;
-
-  @media (max-width: 520px) {
-    min-height: 24px;
-    padding: 0 6px;
-    font-size: 11px;
-  }
+  object-fit: contain;
+  object-position: left center;
 `;
 
 const Nav = styled.nav`
@@ -239,12 +199,14 @@ const Nav = styled.nav`
     overflow-x: auto;
     flex-wrap: nowrap;
     width: 100%;
-    padding: 2px 0 1px;
+    padding: 4px 0 2px;
+    border-top: 1px solid ${({ theme }) => theme.border};
     scrollbar-width: none;
   }
 
   @media (max-width: 520px) {
     gap: 12px;
+    padding-top: 6px;
   }
 
   &::-webkit-scrollbar {
@@ -293,6 +255,18 @@ const actionIconStyles = css`
     height: 18px;
     display: block;
   }
+
+  @media (max-width: 520px) {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    border-radius: 7px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
 `;
 
 const ActionIconLink = styled.a`
@@ -302,11 +276,9 @@ const ActionIconLink = styled.a`
 const HeaderActions = styled.div`
   grid-area: actions;
   display: flex;
+  flex-wrap: nowrap;
   gap: 8px;
   justify-content: flex-end;
   align-items: center;
-
-  @media (max-width: 880px) {
-    justify-content: flex-end;
-  }
+  min-width: fit-content;
 `;

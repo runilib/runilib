@@ -28,6 +28,7 @@
 
     // Lint et check: pas de cache de fichiers générés
     "lint": {
+      "cache": false,
       "outputs": []
     },
     "lint:fix": {
@@ -40,6 +41,7 @@
 
     // Typecheck
     "typecheck": {
+      "cache": false,
       "outputs": []
     },
 

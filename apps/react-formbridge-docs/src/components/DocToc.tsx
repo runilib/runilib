@@ -14,11 +14,11 @@ type DocTocProps = {
 const SECTION_OFFSET = 140;
 
 function getActiveSectionId(items: TocItem[]) {
-  if (typeof window === 'undefined') {
+  if (globalThis.window === undefined) {
     return items[0]?.id ?? null;
   }
 
-  const hash = window.location.hash.replace(/^#/, '');
+  const hash = globalThis.window.location.hash.replace(/^#/, '');
 
   if (hash && items.some((item) => item.id === hash)) {
     const target = document.getElementById(hash);
@@ -52,7 +52,7 @@ function getActiveSectionId(items: TocItem[]) {
   return activeId;
 }
 
-export function DocToc({ items }: DocTocProps) {
+export const DocToc = ({ items }: DocTocProps) => {
   const [activeId, setActiveId] = useState<string | null>(items[0]?.id ?? null);
 
   useEffect(() => {
@@ -71,19 +71,19 @@ export function DocToc({ items }: DocTocProps) {
 
     const requestUpdate = () => {
       cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(updateActiveSection);
+      frame = globalThis.window.requestAnimationFrame(updateActiveSection);
     };
 
     requestUpdate();
     window.addEventListener('scroll', requestUpdate, { passive: true });
     window.addEventListener('resize', requestUpdate);
-    window.addEventListener('hashchange', requestUpdate);
+    globalThis.window.addEventListener('hashchange', requestUpdate);
 
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener('scroll', requestUpdate);
       window.removeEventListener('resize', requestUpdate);
-      window.removeEventListener('hashchange', requestUpdate);
+      globalThis.window.removeEventListener('hashchange', requestUpdate);
     };
   }, [items]);
 
@@ -112,4 +112,4 @@ export function DocToc({ items }: DocTocProps) {
       </div>
     </nav>
   );
-}
+};

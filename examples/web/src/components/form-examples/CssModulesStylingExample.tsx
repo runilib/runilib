@@ -21,11 +21,7 @@ export function CssModulesStylingExample() {
         .email()
         .required('Owner email is required')
         .trim()
-        .placeholder('owner@runilib.dev')
-        .behavior({
-          autoComplete: 'email',
-          inputMode: 'email',
-        }),
+        .placeholder('owner@runilib.dev'),
       department: field
         .select()
         .options(CUSTOMER_DEPARTMENTS)
@@ -93,7 +89,10 @@ export function CssModulesStylingExample() {
       >
         <div className={styles.formRow}>
           <fields.projectName />
-          <fields.ownerEmail />
+          <fields.ownerEmail
+            autoComplete="email"
+            inputMode="email"
+          />
         </div>
 
         <fields.department

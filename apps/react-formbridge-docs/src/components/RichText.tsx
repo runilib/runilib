@@ -2,13 +2,13 @@
 
 import React from 'react';
 
-import type { CodeSnippet, DocPreview, DocSection } from '@/types';
+import type { CodeSnippet, DocSection } from '@/types';
 
-import Image from 'next/image';
-import { CodeBlock } from './CodeBlock';
 import { CodeTabs } from './CodeTabs';
+import { DocSnippetRenderer } from './DocSnippetRenderer';
 
 type RichTextProps = {
+  interactiveCode?: boolean;
   section: DocSection;
 };
 
@@ -182,50 +182,22 @@ function parseRecipeItem(text: string): { label: string; example: string } | nul
   };
 }
 
-function PreviewPanel({ preview }: { preview?: DocPreview }) {
-  if (!preview) {
-    return null;
-  }
-
-  return (
-    <figure className="preview-panel">
-      <div className="preview-panel__frame">
-        {preview.video ? (
-          <video
-            className="preview-panel__media"
-            src={preview.src}
-            autoPlay
-            loop
-            muted
-            playsInline
-          />
-        ) : (
-          <Image
-            className="preview-panel__media"
-            src={preview.src}
-            alt={preview.alt}
-            width={preview.maxWidth ?? 960}
-            height={preview.maxHeight ?? 540}
-            unoptimized
-          />
-        )}
-      </div>
-      {preview.caption ? (
-        <figcaption className="preview-panel__caption">{preview.caption}</figcaption>
-      ) : null}
-    </figure>
-  );
-}
-
-function SectionCode({
+const SectionCode = ({
   code,
   codeTabs,
+  interactive = false,
 }: {
   code?: CodeSnippet;
   codeTabs?: CodeSnippet[];
-}) {
+  interactive?: boolean;
+}) => {
   if (codeTabs?.length) {
-    return <CodeTabs snippets={codeTabs} />;
+    return (
+      <CodeTabs
+        interactive={interactive}
+        snippets={codeTabs}
+      />
+    );
   }
 
   if (!code) {
@@ -233,19 +205,22 @@ function SectionCode({
   }
 
   return (
-    <>
-      <CodeBlock
-        code={code.code}
-        lang={code.lang}
-        filename={code.filename}
-        maxHeight={code.maxHeight}
-      />
-      <PreviewPanel preview={code.preview} />
-    </>
+    <DocSnippetRenderer
+      interactive={interactive}
+      snippet={code}
+    />
   );
+};
+
+function normalizeInlineSnippetLang(lang?: string): CodeSnippet['lang'] {
+  if (lang === 'bash' || lang === 'json' || lang === 'ts') {
+    return lang;
+  }
+
+  return 'tsx';
 }
 
-function renderRichText(content: string): React.ReactNode {
+function renderRichText(content: string, interactiveCode = false): React.ReactNode {
   return parseRichTextBlocks(content).map((block, index) => {
     if (block.type === 'code') {
       return (
@@ -253,9 +228,15 @@ function renderRichText(content: string): React.ReactNode {
           className="doc-content__block"
           key={`code-${index.toString()}`}
         >
-          <CodeBlock
-            code={block.code}
-            lang={block.lang ?? 'tsx'}
+          <DocSnippetRenderer
+            interactive={interactiveCode}
+            snippet={{
+              code: block.code,
+              filename: `InlineExample-${index.toString()}.${normalizeInlineSnippetLang(
+                block.lang,
+              )}`,
+              lang: normalizeInlineSnippetLang(block.lang),
+            }}
           />
         </div>
       );
@@ -328,15 +309,18 @@ function renderRichText(content: string): React.ReactNode {
   });
 }
 
-export function RichText({ section }: RichTextProps) {
+export const RichText = ({ interactiveCode = false, section }: RichTextProps) => {
   return (
     <div className="doc-content">
       {section.content ? (
-        <div className="doc-content__body">{renderRichText(section.content)}</div>
+        <div className="doc-content__body">
+          {renderRichText(section.content, interactiveCode)}
+        </div>
       ) : null}
       <SectionCode
         code={section.code}
         codeTabs={section.codeTabs}
+        interactive={interactiveCode}
       />
 
       {section.subsections?.map((subsection) => (
@@ -347,14 +331,17 @@ export function RichText({ section }: RichTextProps) {
         >
           <h2 className="doc-subsection__title">{subsection.title}</h2>
           {subsection.content ? (
-            <div className="doc-content__body">{renderRichText(subsection.content)}</div>
+            <div className="doc-content__body">
+              {renderRichText(subsection.content, interactiveCode)}
+            </div>
           ) : null}
           <SectionCode
             code={subsection.code}
             codeTabs={subsection.codeTabs}
+            interactive={interactiveCode}
           />
         </section>
       ))}
     </div>
   );
-}
+};

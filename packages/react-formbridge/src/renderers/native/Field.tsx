@@ -18,51 +18,37 @@ import type {
   FieldDescriptor,
   FieldRenderProps,
   FocusableFieldHandle,
-  NativeFieldUiOverrides,
+  NativeFieldPropsOverrides,
   SelectOption,
   SelectPickerRenderContext,
 } from '../../types';
+import {
+  defaultOptionCheckStyle,
+  defaultOptionHeaderStyle,
+  defaultOptionLabelStyle,
+  defaultOptionListContentStyle,
+  defaultOptionModalBackdropStyle,
+  defaultOptionModalCardStyle,
+  defaultOptionRowStyle,
+  defaultOptionTitleStyle,
+  defaultOptionTriggerLabelStyle,
+  defaultOptionTriggerStyle,
+} from './default-styles';
 import {
   defaultErrorChromeStyle,
   defaultErrorTextStyle,
   defaultRequiredMarkStyle,
   type NativeTextFieldDescriptorWebLike,
+  resolveNativeInputBehavior,
   shouldHighlightOnError,
   sx,
 } from './shared';
 
 interface Props extends FieldRenderProps<unknown> {
   descriptor: FieldDescriptor<unknown> & NativeTextFieldDescriptorWebLike;
-  extra?: ExtraFieldProps<NativeFieldUiOverrides, 'native'>;
+  extra?: ExtraFieldProps<NativeFieldPropsOverrides, 'native'>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
-
-const defaultOptionModalBackdropStyle: ViewStyle = {
-  flex: 1,
-  justifyContent: 'center',
-  padding: 20,
-  backgroundColor: 'rgba(15, 23, 42, 0.42)',
-};
-
-const defaultOptionModalCardStyle: ViewStyle = {
-  width: '100%',
-  maxHeight: '72%',
-  borderRadius: 18,
-  backgroundColor: '#ffffff',
-  padding: 16,
-  gap: 10,
-};
-
-const defaultOptionRowStyle: ViewStyle = {
-  borderRadius: 12,
-  paddingHorizontal: 14,
-  paddingVertical: 12,
-};
-
-const defaultOptionLabelStyle: TextStyle = {
-  fontSize: 15,
-  color: '#0f172a',
-};
 
 function getStringValue(value: unknown): string {
   if (typeof value === 'string') return value;
@@ -91,8 +77,10 @@ const OptionPicker = ({
   selectedValue: unknown;
   onClose: () => void;
   onSelect: (value: unknown) => void;
-  ui?: NativeFieldUiOverrides;
+  ui?: NativeFieldPropsOverrides;
 }) => {
+  const hasTitle = title.trim().length > 0;
+
   return (
     <Modal
       visible={visible}
@@ -108,11 +96,18 @@ const OptionPicker = ({
           style={sx(defaultOptionModalCardStyle, ui?.styles?.modalCard)}
           onPress={(event) => event.stopPropagation()}
         >
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#0f172a' }}>
-            {title}
-          </Text>
+          {hasTitle ? (
+            <View style={defaultOptionHeaderStyle}>
+              <Text style={defaultOptionTitleStyle}>{title}</Text>
+            </View>
+          ) : null}
 
-          <ScrollView keyboardShouldPersistTaps="handled">
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            style={{ flexGrow: 0 }}
+            contentContainerStyle={defaultOptionListContentStyle}
+            showsVerticalScrollIndicator={false}
+          >
             {options.map((option) => {
               const selected = option.value === selectedValue;
 
@@ -126,8 +121,9 @@ const OptionPicker = ({
                   style={sx(defaultOptionRowStyle, ui?.styles?.optionRow)}
                 >
                   <Text style={sx(defaultOptionLabelStyle, ui?.styles?.optionLabel)}>
-                    {selected ? `✓ ${option.label}` : option.label}
+                    {option.label}
                   </Text>
+                  {selected ? <Text style={defaultOptionCheckStyle}>✓</Text> : null}
                 </Pressable>
               );
             })}
@@ -139,12 +135,14 @@ const OptionPicker = ({
 };
 
 export const NativeField: React.FC<Props> = ({
-  descriptor: d,
+  descriptor,
   extra,
   registerFocusable,
   ...p
 }) => {
-  const native = d._ui ?? {};
+  const native = descriptor.fieldPropsFromClient ?? {};
+  const inputBehavior = resolveNativeInputBehavior(extra, native);
+  const isReadOnly = Boolean(inputBehavior.readOnly);
 
   const {
     styles,
@@ -178,6 +176,9 @@ export const NativeField: React.FC<Props> = ({
   } & Record<string, unknown>;
 
   const id = extra?.id ?? native.id ?? p.name;
+  const labelId = `${id}-label`;
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
   const hasError = Boolean(p.error);
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
@@ -189,7 +190,7 @@ export const NativeField: React.FC<Props> = ({
   const otpRefs = useRef<Array<TextInput | null>>([]);
   const pickerRenderer = renderPicker ?? native.renderPicker;
 
-  const selectOptions = d._options ?? [];
+  const selectOptions = descriptor._options ?? [];
   const selectedOption = useMemo(
     () =>
       selectOptions.find((option) => String(option.value) === String(p.value)) ?? null,
@@ -215,11 +216,11 @@ export const NativeField: React.FC<Props> = ({
   }, [clearPickerSearch]);
 
   const openPicker = useCallback(() => {
-    if (p.disabled) return;
+    if (p.disabled || isReadOnly) return;
 
     setPickerOpen(true);
     p.onFocus();
-  }, [p.disabled, p.onFocus]);
+  }, [isReadOnly, p.disabled, p.onFocus]);
 
   const selectPickerOption = useCallback(
     (next: SelectOption | SelectOption['value']) => {
@@ -235,13 +236,13 @@ export const NativeField: React.FC<Props> = ({
 
   const pickerContext: SelectPickerRenderContext = {
     platform: 'native',
-    fieldType: d._type === 'radio' ? 'radio' : 'select',
+    fieldType: descriptor._type === 'radio' ? 'radio' : 'select',
     open: pickerOpen,
     label: p.label,
     placeholder: p.placeholder,
-    required: Boolean(d._required),
-    disabled: p.disabled,
-    searchable: Boolean(d._searchable),
+    required: Boolean(descriptor._required),
+    disabled: p.disabled || isReadOnly,
+    searchable: Boolean(descriptor._searchable),
     loading: false,
     error: null,
     search: pickerSearch,
@@ -260,7 +261,10 @@ export const NativeField: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    if ((d._type !== 'select' && d._type !== 'radio') || !registerFocusable) {
+    if (
+      (descriptor._type !== 'select' && descriptor._type !== 'radio') ||
+      !registerFocusable
+    ) {
       return;
     }
 
@@ -272,11 +276,24 @@ export const NativeField: React.FC<Props> = ({
     return () => {
       registerFocusable(null);
     };
-  }, [closePicker, d._type, openPicker, registerFocusable]);
+  }, [closePicker, descriptor._type, openPicker, registerFocusable]);
 
   const requiredMark = renderRequiredMark?.() ?? (
     <Text style={sx(defaultRequiredMarkStyle(), styles?.requiredMark)}>*</Text>
   );
+  const labelText = typeof p.label === 'string' ? p.label : undefined;
+  const helperText = p.error ?? p.hint ?? undefined;
+  const useLinkedLabel = !hideLabel && !renderLabel && descriptor._type !== 'checkbox';
+
+  const commonAccessibilityProps = {
+    accessibilityLabel: labelText,
+    accessibilityLabelledBy: useLinkedLabel ? labelId : undefined,
+    accessibilityHint: helperText,
+    accessibilityState: {
+      disabled: Boolean(p.disabled),
+      ...(hasError ? { invalid: true } : {}),
+    },
+  } as const;
 
   const renderLabelNode = () => {
     if (hideLabel) return null;
@@ -285,22 +302,23 @@ export const NativeField: React.FC<Props> = ({
       return renderLabel({
         id,
         label: p.label,
-        required: Boolean(d._required),
+        required: Boolean(descriptor._required),
         name: p.name,
       });
     }
 
-    if (d._type === 'checkbox') {
+    if (descriptor._type === 'checkbox') {
       return null;
     }
 
     return (
       <Text
+        nativeID={labelId}
         style={sx(styles?.label, labelPropsStyle)}
         {...labelPropsRest}
       >
         {p.label}
-        {d._required && requiredMark}
+        {descriptor._required && requiredMark}
       </Text>
     );
   };
@@ -310,6 +328,8 @@ export const NativeField: React.FC<Props> = ({
       return (
         renderError?.({ id, name: p.name, error: p.error }) ?? (
           <Text
+            nativeID={errorId}
+            accessibilityLiveRegion="polite"
             style={sx(defaultErrorTextStyle(true), styles?.error, errorPropsStyle)}
             {...errorPropsRest}
           >
@@ -323,6 +343,7 @@ export const NativeField: React.FC<Props> = ({
       return (
         renderHint?.({ id, name: p.name, hint: p.hint }) ?? (
           <Text
+            nativeID={hintId}
             style={sx(styles?.hint, hintPropsStyle)}
             {...hintPropsRest}
           >
@@ -336,19 +357,20 @@ export const NativeField: React.FC<Props> = ({
   };
 
   const commonInputProps: Omit<TextInputProps, 'value' | 'onChangeText'> = {
-    editable: !(p.disabled || native.readOnly),
-    autoFocus: native.autoFocus,
-    autoComplete: native.autoComplete as TextInputProps['autoComplete'],
-    keyboardType: native.keyboardType as TextInputProps['keyboardType'],
-    secureTextEntry: native.secureTextEntry,
+    editable: !(p.disabled || isReadOnly),
+    autoFocus: inputBehavior.autoFocus,
+    autoComplete: inputBehavior.autoComplete as TextInputProps['autoComplete'],
+    keyboardType: inputBehavior.keyboardType as TextInputProps['keyboardType'],
+    secureTextEntry: inputBehavior.secureTextEntry,
     onBlur: p.onBlur,
     onFocus: p.onFocus,
-    testID: native.testID,
+    testID: inputBehavior.testID,
+    ...commonAccessibilityProps,
     ...(inputPropsRest as Partial<TextInputProps>),
   };
 
   const renderInput = () => {
-    switch (d._type) {
+    switch (descriptor._type) {
       case 'textarea':
         return (
           <TextInput
@@ -358,7 +380,7 @@ export const NativeField: React.FC<Props> = ({
             placeholder={p.placeholder}
             multiline
             textAlignVertical="top"
-            style={sx(styles?.input, inputPropsStyle)}
+            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
             onChangeText={(value) => p.onChange(value)}
             {...commonInputProps}
           />
@@ -368,19 +390,26 @@ export const NativeField: React.FC<Props> = ({
         return (
           <Pressable
             onPress={() => {
-              if (!p.disabled) p.onChange(!p.value);
+              if (!p.disabled && !isReadOnly) p.onChange(!p.value);
             }}
             style={sx(styles?.checkboxRow)}
             accessibilityRole="checkbox"
+            accessibilityLabel={labelText}
+            accessibilityHint={helperText}
+            testID={inputBehavior.testID}
             accessibilityState={{
               checked: Boolean(p.value),
-              disabled: Boolean(p.disabled),
+              disabled: Boolean(p.disabled || isReadOnly),
+              ...(hasError ? { invalid: true } : {}),
             }}
           >
-            <View style={sx(controlErrorStyle, styles?.checkboxBox)} />
-            <Text style={sx(styles?.checkboxLabel)}>
+            <View style={sx(styles?.checkboxBox, controlErrorStyle)} />
+            <Text
+              nativeID={labelId}
+              style={sx(styles?.checkboxLabel)}
+            >
               {p.label}
-              {d._required && requiredMark}
+              {descriptor._required && requiredMark}
             </Text>
           </Pressable>
         );
@@ -390,12 +419,25 @@ export const NativeField: React.FC<Props> = ({
           <View>
             <Switch
               value={Boolean(p.value)}
-              onValueChange={(value) => p.onChange(value)}
-              disabled={p.disabled}
+              onValueChange={(value) => {
+                if (isReadOnly) {
+                  return;
+                }
+
+                p.onChange(value);
+              }}
+              disabled={p.disabled || isReadOnly}
+              accessibilityLabel={labelText}
+              accessibilityHint={helperText}
+              accessibilityState={{
+                checked: Boolean(p.value),
+                disabled: Boolean(p.disabled || isReadOnly),
+                ...(hasError ? { invalid: true } : {}),
+              }}
             />
-            <Text>
+            <Text nativeID={labelId}>
               {p.label}
-              {d._required && requiredMark}
+              {descriptor._required && requiredMark}
             </Text>
           </View>
         );
@@ -406,10 +448,24 @@ export const NativeField: React.FC<Props> = ({
           <>
             <Pressable
               onPress={openPicker}
-              style={sx(controlErrorStyle, styles?.optionTrigger)}
+              style={sx(
+                defaultOptionTriggerStyle,
+                styles?.optionTrigger,
+                controlErrorStyle,
+              )}
+              testID={inputBehavior.testID}
+              accessibilityRole={descriptor._type === 'radio' ? 'radiogroup' : 'button'}
+              accessibilityLabel={labelText}
+              accessibilityLabelledBy={useLinkedLabel ? labelId : undefined}
+              accessibilityHint={helperText}
+              accessibilityState={{
+                disabled: Boolean(p.disabled || isReadOnly),
+                expanded: pickerOpen,
+                ...(hasError ? { invalid: true } : {}),
+              }}
             >
-              <Text>
-                {getSelectedLabel(d._options, p.value) ||
+              <Text style={defaultOptionTriggerLabelStyle}>
+                {getSelectedLabel(descriptor._options, p.value) ||
                   p.placeholder ||
                   `Select ${p.label}`}
               </Text>
@@ -421,7 +477,7 @@ export const NativeField: React.FC<Props> = ({
               <OptionPicker
                 visible={pickerOpen}
                 title={String(p.label)}
-                options={d._options ?? []}
+                options={descriptor._options ?? []}
                 selectedValue={p.value}
                 onClose={closePicker}
                 onSelect={(value) => p.onChange(value)}
@@ -431,7 +487,7 @@ export const NativeField: React.FC<Props> = ({
           </>
         );
       case 'otp': {
-        const length = d._otpLength ?? 6;
+        const length = descriptor._otpLength ?? 6;
         const chars = getStringValue(p.value).split('');
 
         return (
@@ -450,11 +506,24 @@ export const NativeField: React.FC<Props> = ({
                 }}
                 value={chars[index] ?? ''}
                 maxLength={1}
-                keyboardType="number-pad"
+                keyboardType={
+                  (inputBehavior.keyboardType as TextInputProps['keyboardType']) ??
+                  'number-pad'
+                }
                 textAlign="center"
-                style={sx(controlErrorStyle, styles?.otpInput)}
-                editable={!p.disabled}
+                style={sx(styles?.otpInput, controlErrorStyle)}
+                editable={!(p.disabled || isReadOnly)}
+                autoComplete={
+                  inputBehavior.autoComplete as TextInputProps['autoComplete']
+                }
+                autoFocus={index === 0 ? inputBehavior.autoFocus : undefined}
+                secureTextEntry={inputBehavior.secureTextEntry}
+                testID={index === 0 ? inputBehavior.testID : undefined}
                 onChangeText={(char) => {
+                  if (isReadOnly) {
+                    return;
+                  }
+
                   const next = [...chars];
                   next[index] = char.slice(-1);
                   p.onChange(next.join(''));
@@ -483,8 +552,10 @@ export const NativeField: React.FC<Props> = ({
             ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder}
-            style={sx(controlErrorStyle, styles?.input, inputPropsStyle)}
-            keyboardType="numeric"
+            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
+            keyboardType={
+              (inputBehavior.keyboardType as TextInputProps['keyboardType']) ?? 'numeric'
+            }
             onChangeText={(value) => {
               p.onChange(value === '' ? '' : Number(value));
             }}
@@ -499,7 +570,7 @@ export const NativeField: React.FC<Props> = ({
             ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder ?? 'YYYY-MM-DD'}
-            style={sx(controlErrorStyle, styles?.input, inputPropsStyle)}
+            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
             onChangeText={(value) => p.onChange(value)}
             {...commonInputProps}
           />
@@ -512,17 +583,22 @@ export const NativeField: React.FC<Props> = ({
             ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder}
-            style={sx(controlErrorStyle, styles?.input, inputPropsStyle)}
+            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
             onChangeText={(value) => p.onChange(value)}
-            autoCapitalize={d._type === 'email' ? 'none' : 'sentences'}
+            autoCapitalize={descriptor._type === 'email' ? 'none' : 'sentences'}
             keyboardType={
-              d._type === 'email'
+              descriptor._type === 'email'
                 ? 'email-address'
-                : d._type === 'tel'
+                : descriptor._type === 'tel'
                   ? 'phone-pad'
-                  : d._type === 'url'
+                  : descriptor._type === 'url'
                     ? 'url'
                     : commonInputProps.keyboardType
+            }
+            secureTextEntry={
+              descriptor._type === 'password'
+                ? (inputBehavior.secureTextEntry ?? true)
+                : commonInputProps.secureTextEntry
             }
             {...commonInputProps}
           />

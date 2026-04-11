@@ -75,7 +75,7 @@ export const LIBRARIES: LibraryInfo[] = [
       'Masks, OTP, password strength and file upload',
       'Draft persistence with local / session / async storage',
       'Reactive conditional fields and visibility map',
-      'useFormWizard() for multi-step forms and onboarding flows',
+      'useFormBridgeWizard() for multi-step forms and onboarding flows',
       'inferFromObject() and inferFromType() helpers',
       'useReadonlyFormBridge() for readonly and diff views',
     ],

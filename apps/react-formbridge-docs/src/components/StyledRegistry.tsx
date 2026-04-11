@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useServerInsertedHTML } from 'next/navigation';
 import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
 
-export function StyledRegistry({ children }: { children: React.ReactNode }) {
+export const StyledRegistry = ({ children }: { children: React.ReactNode }) => {
   const [sheet] = useState(() => new ServerStyleSheet());
 
   useServerInsertedHTML(() => {
@@ -15,9 +15,9 @@ export function StyledRegistry({ children }: { children: React.ReactNode }) {
     return <>{styles}</>;
   });
 
-  if (typeof window !== 'undefined') {
+  if (globalThis.window) {
     return <>{children}</>;
   }
 
   return <StyleSheetManager sheet={sheet.instance}>{children}</StyleSheetManager>;
-}
+};

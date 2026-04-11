@@ -31,6 +31,9 @@ jobs:
   release:
     if: github.repository == 'runilib/runilib'
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      published_packages: ${{ steps.changesets.outputs.publishedPackages }}
 
     steps:
       - name: Checkout repository
@@ -57,10 +60,86 @@ jobs:
         run: yarn size:check
 
       - name: Create release PR or publish packages
+        id: changesets
         uses: changesets/action@v1
         with:
           version: yarn version-packages
           publish: yarn release
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  prepare_mirror_releases:
+    name: Prepare Mirror Release Matrix
+    needs: release
+    if: github.repository == 'runilib/runilib' && github.event_name == 'push' && needs.release.outputs.published == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      has_packages: ${{ steps.matrix.outputs.has_packages }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build mirror release matrix
+        id: matrix
+        env:
+          PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
+        run: |
+          set -euo pipefail
+
+          config_file=".github/mirror-packages.json"
+          empty_matrix='{"include":[]}'
+
+          if [ ! -f "$config_file" ]; then
+            echo "matrix=${empty_matrix}" >> "$GITHUB_OUTPUT"
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "${PUBLISHED_PACKAGES:-}" ] || [ "$PUBLISHED_PACKAGES" = "[]" ]; then
+            echo "matrix=${empty_matrix}" >> "$GITHUB_OUTPUT"
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          matrix="$(jq -c --argjson published "$PUBLISHED_PACKAGES" '
+            {
+              include: [
+                .packages[] as $pkg
+                | $published[]
+                | select(.name == $pkg.workspace)
+                | $pkg + { version: .version }
+              ]
+            }
+          ' "$config_file")"
+
+          if [ "$(echo "$matrix" | jq '.include | length')" -gt 0 ]; then
+            echo "has_packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  release_mirrors:
+    name: Release ${{ matrix.workspace }} mirror
+    needs: prepare_mirror_releases
+    if: needs.prepare_mirror_releases.outputs.has_packages == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare_mirror_releases.outputs.matrix) }}
+    uses: ./.github/workflows/release-mirrored-package.yml
+    with:
+      workspace: ${{ matrix.workspace }}
+      package_path: ${{ matrix.package_path }}
+      target_repo: ${{ matrix.target_repo }}
+      target_branch: ${{ matrix.target_branch }}
+      version: ${{ matrix.version }}
+    secrets:
+      mirror_push_token: ${{ secrets.MIRROR_PUSH_TOKEN }}
+      mirror_git_user_name_secret: ${{ secrets.MIRROR_GIT_USER_NAME }}
+      mirror_git_user_email_secret: ${{ secrets.MIRROR_GIT_USER_EMAIL }}

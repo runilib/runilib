@@ -15,7 +15,11 @@ import type { PasswordRule, StrengthResult } from '../core/field-builders/passwo
 import type { PhoneValue } from '../core/field-builders/phone/countries';
 import type { CountryInfo, PhoneCountryLayout } from '../core/field-builders/phone/types';
 import type { FieldAutoComplete } from './autoComplete';
-import type { FieldUiRenderers, SelectOption, SelectPickerRenderContext } from './field';
+import type {
+  FieldRenderersProps,
+  SelectOption,
+  SelectPickerRenderContext,
+} from './field';
 
 // ─── Slot utilities ─────────────────────────────────────────────────────────────
 
@@ -27,11 +31,17 @@ type WebTextOverride<TContext> = string | ((ctx: TContext) => string);
 
 // ─── Base types ─────────────────────────────────────────────────────────────────
 
-type WebFieldUiBase<TSlots extends string> = FieldUiRenderers & {
+type WebFieldPropsBase<TSlots extends string> = FieldRenderersProps & {
   id?: string;
   hideLabel?: boolean;
   /** When false, the default red field chrome is suppressed while the error message still renders. */
   highlightOnError?: boolean;
+  readOnly?: boolean;
+  autoComplete?: FieldAutoComplete;
+  autoFocus?: boolean;
+  spellCheck?: boolean;
+  inputMode?: InputHTMLAttributes<HTMLInputElement>['inputMode'];
+  enterKeyHint?: InputHTMLAttributes<HTMLInputElement>['enterKeyHint'];
   classNames?: WebClassNames<TSlots>;
   styles?: WebStyles<TSlots>;
   rootProps?: HTMLAttributes<HTMLDivElement>;
@@ -40,14 +50,10 @@ type WebFieldUiBase<TSlots extends string> = FieldUiRenderers & {
   errorProps?: HTMLAttributes<HTMLSpanElement>;
 };
 
-type WebInputBehaviorUi = {
-  readOnly?: boolean;
-  autoComplete?: FieldAutoComplete;
-  autoFocus?: boolean;
-  spellCheck?: boolean;
-  inputMode?: InputHTMLAttributes<HTMLInputElement>['inputMode'];
-  enterKeyHint?: InputHTMLAttributes<HTMLInputElement>['enterKeyHint'];
-};
+type WebInputBehaviorProps = Pick<
+  WebFieldPropsBase<WebFieldSlot>,
+  'readOnly' | 'autoComplete' | 'autoFocus' | 'spellCheck' | 'inputMode' | 'enterKeyHint'
+>;
 
 // ─── Slot types ─────────────────────────────────────────────────────────────────
 
@@ -196,76 +202,69 @@ export interface WebPhoneFieldCountryItemRenderContext
 
 // ─── Global overrides ───────────────────────────────────────────────────────────
 
-export interface WebGlobalFieldUiOverrides extends WebFieldUiBase<WebFieldSlot> {}
+export interface WebGlobalFieldPropsOverrides extends WebFieldPropsBase<WebFieldSlot> {}
 
 // ─── Per-field-type overrides ───────────────────────────────────────────────────
 
-export interface WebTextFieldUiOverrides
-  extends WebFieldUiBase<WebTextFieldSlot>,
-    WebInputBehaviorUi {
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+type OmittedHtmlInputAttribute =
+  | 'value'
+  | 'defaultValue'
+  | 'onChange'
+  | 'onBlur'
+  | 'onFocus'
+  | 'disabled'
+  | 'name'
+  | 'checked'
+  | 'defaultChecked';
+export interface WebTextFieldPropsOverrides
+  extends WebFieldPropsBase<WebTextFieldSlot>,
+    WebInputBehaviorProps {
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
 }
 
-export interface WebTextareaFieldUiOverrides
-  extends WebFieldUiBase<WebTextareaFieldSlot>,
-    WebInputBehaviorUi {
+export interface WebTextareaFieldPropsOverrides
+  extends WebFieldPropsBase<WebTextareaFieldSlot>,
+    WebInputBehaviorProps {
   textareaProps?: Omit<
     TextareaHTMLAttributes<HTMLTextAreaElement>,
-    'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
+    OmittedHtmlInputAttribute
   >;
 }
 
-export interface WebCheckboxFieldUiOverrides
-  extends WebFieldUiBase<WebCheckboxFieldSlot>,
-    WebInputBehaviorUi {
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'checked' | 'defaultChecked' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+export interface WebCheckboxFieldPropsOverrides
+  extends WebFieldPropsBase<WebCheckboxFieldSlot>,
+    WebInputBehaviorProps {
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
 }
 
-export interface WebSwitchFieldUiOverrides
-  extends WebFieldUiBase<WebSwitchFieldSlot>,
-    WebInputBehaviorUi {
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'checked' | 'defaultChecked' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+export interface WebSwitchFieldPropsOverrides
+  extends WebFieldPropsBase<WebSwitchFieldSlot>,
+    WebInputBehaviorProps {
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
 }
 
-export interface WebSelectFieldUiOverrides extends WebFieldUiBase<WebSelectFieldSlot> {
-  selectProps?: Omit<
-    SelectHTMLAttributes<HTMLSelectElement>,
-    'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+export interface WebSelectFieldPropsOverrides
+  extends WebFieldPropsBase<WebSelectFieldSlot> {
+  selectProps?: Omit<SelectHTMLAttributes<HTMLSelectElement>, OmittedHtmlInputAttribute>;
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
-export interface WebRadioFieldUiOverrides
-  extends WebFieldUiBase<WebCheckboxFieldSlot>,
-    WebInputBehaviorUi {
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'checked' | 'defaultChecked' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+export interface WebRadioFieldPropsOverrides
+  extends WebFieldPropsBase<WebCheckboxFieldSlot>,
+    WebInputBehaviorProps {
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
-export interface WebOtpFieldUiOverrides
-  extends WebFieldUiBase<WebOtpFieldSlot>,
-    WebInputBehaviorUi {
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+export interface WebOtpFieldPropsOverrides
+  extends WebFieldPropsBase<WebOtpFieldSlot>,
+    WebInputBehaviorProps {
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
 }
 
-export interface WebPasswordFieldUiOverrides
-  extends WebFieldUiBase<WebPasswordFieldSlot>,
-    WebInputBehaviorUi {
+export interface WebPasswordFieldPropsOverrides
+  extends WebFieldPropsBase<WebPasswordFieldSlot>,
+    WebInputBehaviorProps {
   inputProps?: Omit<
     InputHTMLAttributes<HTMLInputElement>,
     | 'type'
@@ -313,9 +312,9 @@ export interface WebPasswordFieldUiOverrides
   ) => ReactNode;
 }
 
-export interface WebPhoneFieldUiOverrides
-  extends WebFieldUiBase<WebPhoneFieldSlot>,
-    WebInputBehaviorUi {
+export interface WebPhoneFieldPropsOverrides
+  extends WebFieldPropsBase<WebPhoneFieldSlot>,
+    WebInputBehaviorProps {
   inputProps?: Omit<
     InputHTMLAttributes<HTMLInputElement>,
     | 'type'
@@ -363,7 +362,7 @@ export interface WebPhoneFieldUiOverrides
   ) => ReactNode;
 }
 
-export interface WebFileFieldUiOverrides extends WebFieldUiBase<WebFileFieldSlot> {
+export interface WebFileFieldPropsOverrides extends WebFieldPropsBase<WebFileFieldSlot> {
   inputProps?: Omit<
     InputHTMLAttributes<HTMLInputElement>,
     | 'type'
@@ -426,8 +425,8 @@ export interface WebFileFieldUiOverrides extends WebFieldUiBase<WebFileFieldSlot
   ) => ReactNode;
 }
 
-export interface WebAsyncAutocompleteFieldUiOverrides
-  extends WebFieldUiBase<WebAsyncAutocompleteFieldSlot> {
+export interface WebAsyncAutocompleteFieldPropsOverrides
+  extends WebFieldPropsBase<WebAsyncAutocompleteFieldSlot> {
   inputProps?: Omit<
     InputHTMLAttributes<HTMLInputElement>,
     | 'value'
@@ -454,21 +453,15 @@ export interface WebAsyncAutocompleteFieldUiOverrides
 
 // ─── Combined field overrides (catch-all for generic usage) ─────────────────────
 
-export interface WebFieldUiOverrides
-  extends WebFieldUiBase<WebFieldSlot>,
-    WebInputBehaviorUi {
-  inputProps?: Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+export interface WebFieldPropsOverrides
+  extends WebFieldPropsBase<WebFieldSlot>,
+    WebInputBehaviorProps {
+  inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
   textareaProps?: Omit<
     TextareaHTMLAttributes<HTMLTextAreaElement>,
-    'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
+    OmittedHtmlInputAttribute
   >;
-  selectProps?: Omit<
-    SelectHTMLAttributes<HTMLSelectElement>,
-    'value' | 'defaultValue' | 'onChange' | 'onBlur' | 'onFocus' | 'disabled' | 'name'
-  >;
+  selectProps?: Omit<SelectHTMLAttributes<HTMLSelectElement>, OmittedHtmlInputAttribute>;
   searchInputProps?: Omit<
     InputHTMLAttributes<HTMLInputElement>,
     'value' | 'defaultValue' | 'onChange'
@@ -597,7 +590,7 @@ export interface WebFieldUiOverrides
 
 // ─── Form & submit overrides ────────────────────────────────────────────────────
 
-export interface WebFormUiOverrides {
+export interface WebFormPropsOverrides {
   className?: string;
   style?: CSSProperties;
   props?: Omit<
@@ -606,7 +599,7 @@ export interface WebFormUiOverrides {
   >;
 }
 
-export interface WebSubmitUiOverrides {
+export interface WebSubmitPropsOverrides {
   className?: string;
   style?: CSSProperties;
   loadingText?: string;

@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-import { type FormSchema, field, useFormWizard } from '@runilib/react-formbridge';
+import { type FormSchema, field, useFormBridgeWizard } from '@runilib/react-formbridge';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -85,7 +85,7 @@ export function FormbridgeWizardScreen() {
   const params = useLocalSearchParams<{ stepId?: string }>();
   const routeStepId = isWizardStepId(params.stepId) ? params.stepId : undefined;
 
-  const wizard = useFormWizard([...WIZARD_STEPS], {
+  const wizard = useFormBridgeWizard([...WIZARD_STEPS], {
     stepId: routeStepId,
     initialStepId: 'personal',
     persist: {

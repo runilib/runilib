@@ -1,44 +1,44 @@
 import type { EmptyProps, FieldType, Platform, PlatformStyleValue } from './field';
 import type { FormSchema, SchemaFieldType } from './schema';
 import type {
-  NativeAsyncAutocompleteFieldUiOverrides,
-  NativeCheckboxFieldUiOverrides,
-  NativeFieldUiOverrides,
-  NativeFileFieldUiOverrides,
-  NativeFormUiOverrides,
-  NativeGlobalFieldUiOverrides,
-  NativeOtpFieldUiOverrides,
-  NativePasswordFieldUiOverrides,
-  NativePhoneFieldUiOverrides,
-  NativeSelectFieldUiOverrides,
-  NativeSubmitUiOverrides,
-  NativeSwitchFieldUiOverrides,
-  NativeTextFieldUiOverrides,
+  NativeAsyncAutocompleteFieldPropsOverrides,
+  NativeCheckboxFieldPropsOverrides,
+  NativeFieldPropsOverrides,
+  NativeFileFieldPropsOverrides,
+  NativeFormPropsOverrides,
+  NativeGlobalFieldPropsOverrides,
+  NativeOtpFieldPropsOverrides,
+  NativePasswordFieldPropsOverrides,
+  NativePhoneFieldPropsOverrides,
+  NativeSelectFieldPropsOverrides,
+  NativeSubmitPropsOverrides,
+  NativeSwitchFieldPropsOverrides,
+  NativeTextFieldPropsOverrides,
 } from './ui-native';
 import type {
-  WebAsyncAutocompleteFieldUiOverrides,
-  WebCheckboxFieldUiOverrides,
-  WebFieldUiOverrides,
-  WebFileFieldUiOverrides,
-  WebFormUiOverrides,
-  WebGlobalFieldUiOverrides,
-  WebOtpFieldUiOverrides,
-  WebPasswordFieldUiOverrides,
-  WebPhoneFieldUiOverrides,
-  WebRadioFieldUiOverrides,
-  WebSelectFieldUiOverrides,
-  WebSubmitUiOverrides,
-  WebSwitchFieldUiOverrides,
-  WebTextareaFieldUiOverrides,
-  WebTextFieldUiOverrides,
+  WebAsyncAutocompleteFieldPropsOverrides,
+  WebCheckboxFieldPropsOverrides,
+  WebFieldPropsOverrides,
+  WebFileFieldPropsOverrides,
+  WebFormPropsOverrides,
+  WebGlobalFieldPropsOverrides,
+  WebOtpFieldPropsOverrides,
+  WebPasswordFieldPropsOverrides,
+  WebPhoneFieldPropsOverrides,
+  WebRadioFieldPropsOverrides,
+  WebSelectFieldPropsOverrides,
+  WebSubmitPropsOverrides,
+  WebSwitchFieldPropsOverrides,
+  WebTextareaFieldPropsOverrides,
+  WebTextFieldPropsOverrides,
 } from './ui-web';
 
 // ─── Combined overrides ─────────────────────────────────────────────────────────
 
-export type FieldUiOverrides = WebFieldUiOverrides | NativeFieldUiOverrides;
+export type FieldPropsOverrides = WebFieldPropsOverrides | NativeFieldPropsOverrides;
 
 export type FieldStyleProps<
-  TUi = FieldUiOverrides,
+  TProps = FieldPropsOverrides,
   TPlatform extends Platform = Platform,
 > = (TPlatform extends 'web'
   ? {
@@ -48,12 +48,12 @@ export type FieldStyleProps<
   : EmptyProps) & {
   /** Forwarded to the field root. */
   style?: PlatformStyleValue<TPlatform>;
-} & TUi;
+} & TProps;
 
 export type ExtraFieldProps<
-  TUi = FieldUiOverrides,
+  TProps = FieldPropsOverrides,
   TPlatform extends Platform = Platform,
-> = FieldStyleProps<TUi, TPlatform> & {
+> = FieldStyleProps<TProps, TPlatform> & {
   /** Override the label defined in the schema */
   label?: string;
   /** Override placeholder */
@@ -63,78 +63,78 @@ export type ExtraFieldProps<
 };
 
 export type FieldTheme<
-  TUi = FieldUiOverrides,
+  TProps = FieldPropsOverrides,
   TPlatform extends Platform = Platform,
 > = (TPlatform extends 'web' ? { className?: string } : EmptyProps) & {
   style?: PlatformStyleValue<TPlatform>;
-} & TUi;
+} & TProps;
 
 // ─── Platform form / submit overrides ───────────────────────────────────────────
 
-export type FormUiOverrides = WebFormUiOverrides | NativeFormUiOverrides;
+export type FormPropsOverrides = WebFormPropsOverrides | NativeFormPropsOverrides;
 
-export type SubmitUiOverrides = WebSubmitUiOverrides | NativeSubmitUiOverrides;
+export type SubmitPropsOverrides = WebSubmitPropsOverrides | NativeSubmitPropsOverrides;
 
-export type PlatformFormUiOverrides<TPlatform extends Platform> = TPlatform extends 'web'
-  ? WebFormUiOverrides
-  : NativeFormUiOverrides;
+export type PlatformFormPropsOverrides<TPlatform extends Platform> =
+  TPlatform extends 'web' ? WebFormPropsOverrides : NativeFormPropsOverrides;
 
-export type PlatformSubmitUiOverrides<TPlatform extends Platform> =
-  TPlatform extends 'web' ? WebSubmitUiOverrides : NativeSubmitUiOverrides;
+export type PlatformSubmitPropsOverrides<TPlatform extends Platform> =
+  TPlatform extends 'web' ? WebSubmitPropsOverrides : NativeSubmitPropsOverrides;
 
-export type PlatformGlobalFieldUiOverrides<TPlatform extends Platform> =
-  TPlatform extends 'web' ? WebGlobalFieldUiOverrides : NativeGlobalFieldUiOverrides;
+export type PlatformGlobalFieldPropsOverrides<TPlatform extends Platform> =
+  TPlatform extends 'web'
+    ? WebGlobalFieldPropsOverrides
+    : NativeGlobalFieldPropsOverrides;
 
-export type PlatformFieldUiOverrides<TPlatform extends Platform> = TPlatform extends 'web'
-  ? WebFieldUiOverrides
-  : NativeFieldUiOverrides;
+export type PlatformFieldPropsOverrides<TPlatform extends Platform> =
+  TPlatform extends 'web' ? WebFieldPropsOverrides : NativeFieldPropsOverrides;
 
 // ─── Per-type platform field UI resolution ──────────────────────────────────────
 
-export type PlatformFieldUiForType<
+export type PlatformFieldPropsForType<
   TPlatform extends Platform,
   TType extends FieldType,
 > = TPlatform extends 'web'
   ? TType extends 'textarea'
-    ? WebTextareaFieldUiOverrides
+    ? WebTextareaFieldPropsOverrides
     : TType extends 'checkbox'
-      ? WebCheckboxFieldUiOverrides
+      ? WebCheckboxFieldPropsOverrides
       : TType extends 'switch'
-        ? WebSwitchFieldUiOverrides
+        ? WebSwitchFieldPropsOverrides
         : TType extends 'select'
-          ? WebSelectFieldUiOverrides | WebAsyncAutocompleteFieldUiOverrides
+          ? WebSelectFieldPropsOverrides | WebAsyncAutocompleteFieldPropsOverrides
           : TType extends 'radio'
-            ? WebRadioFieldUiOverrides
+            ? WebRadioFieldPropsOverrides
             : TType extends 'otp'
-              ? WebOtpFieldUiOverrides
+              ? WebOtpFieldPropsOverrides
               : TType extends 'password'
-                ? WebPasswordFieldUiOverrides
+                ? WebPasswordFieldPropsOverrides
                 : TType extends 'phone'
-                  ? WebPhoneFieldUiOverrides
+                  ? WebPhoneFieldPropsOverrides
                   : TType extends 'file'
-                    ? WebFileFieldUiOverrides
+                    ? WebFileFieldPropsOverrides
                     : TType extends 'custom'
-                      ? WebGlobalFieldUiOverrides
-                      : WebTextFieldUiOverrides
+                      ? WebGlobalFieldPropsOverrides
+                      : WebTextFieldPropsOverrides
   : TType extends 'checkbox'
-    ? NativeCheckboxFieldUiOverrides
+    ? NativeCheckboxFieldPropsOverrides
     : TType extends 'switch'
-      ? NativeSwitchFieldUiOverrides
+      ? NativeSwitchFieldPropsOverrides
       : TType extends 'select'
-        ? NativeSelectFieldUiOverrides | NativeAsyncAutocompleteFieldUiOverrides
+        ? NativeSelectFieldPropsOverrides | NativeAsyncAutocompleteFieldPropsOverrides
         : TType extends 'radio'
-          ? NativeSelectFieldUiOverrides
+          ? NativeSelectFieldPropsOverrides
           : TType extends 'otp'
-            ? NativeOtpFieldUiOverrides
+            ? NativeOtpFieldPropsOverrides
             : TType extends 'password'
-              ? NativePasswordFieldUiOverrides
+              ? NativePasswordFieldPropsOverrides
               : TType extends 'phone'
-                ? NativePhoneFieldUiOverrides
+                ? NativePhoneFieldPropsOverrides
                 : TType extends 'file'
-                  ? NativeFileFieldUiOverrides
+                  ? NativeFileFieldPropsOverrides
                   : TType extends 'custom'
-                    ? NativeGlobalFieldUiOverrides
-                    : NativeTextFieldUiOverrides;
+                    ? NativeGlobalFieldPropsOverrides
+                    : NativeTextFieldPropsOverrides;
 
 // ─── Field component types ──────────────────────────────────────────────────────
 
@@ -142,7 +142,7 @@ export type FieldPropsForSchemaEntry<
   TEntry,
   TPlatform extends Platform,
 > = ExtraFieldProps<
-  PlatformFieldUiForType<TPlatform, SchemaFieldType<TEntry>>,
+  PlatformFieldPropsForType<TPlatform, SchemaFieldType<TEntry>>,
   TPlatform
 >;
 
@@ -159,8 +159,8 @@ export type FieldComponents<
 
 // ─── Global UI options ──────────────────────────────────────────────────────────
 
-export type FormBridgeUiOptions<TPlatform extends Platform = Platform> = {
-  field?: FieldTheme<PlatformGlobalFieldUiOverrides<TPlatform>, TPlatform>;
-  form?: PlatformFormUiOverrides<TPlatform>;
-  submit?: PlatformSubmitUiOverrides<TPlatform>;
+export type FormBridgeOptions<TPlatform extends Platform = Platform> = {
+  field?: FieldTheme<PlatformGlobalFieldPropsOverrides<TPlatform>, TPlatform>;
+  form?: PlatformFormPropsOverrides<TPlatform>;
+  submit?: PlatformSubmitPropsOverrides<TPlatform>;
 };

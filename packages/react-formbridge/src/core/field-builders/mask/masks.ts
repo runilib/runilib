@@ -2,7 +2,7 @@
  * formbridge — Input Mask Engine
  */
 
-import { MASK_REGEX, MASKS, type MaskPreset } from './constants';
+import { type MASK_PRESET, MASK_REGEX, MASKS } from './constants';
 import type {
   ApplyMaskOptions,
   MaskPatternConfig,
@@ -11,7 +11,7 @@ import type {
   MaskTokenMap,
 } from './types';
 
-export type MaskPatternInput = string | MaskPreset | MaskPatternConfig;
+export type MaskPatternInput = string | MASK_PRESET | MaskPatternConfig;
 
 function getMaskTokenMap(tokens?: MaskTokenMap): MaskTokenMap {
   return {
@@ -27,7 +27,7 @@ export function resolveMaskPattern(patternInput: MaskPatternInput): {
   if (typeof patternInput === 'string') {
     return {
       pattern: Object.hasOwn(MASKS, patternInput)
-        ? MASKS[patternInput as MaskPreset]
+        ? MASKS[patternInput as MASK_PRESET]
         : patternInput,
     };
   }

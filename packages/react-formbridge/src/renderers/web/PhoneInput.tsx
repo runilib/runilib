@@ -18,13 +18,14 @@ import {
 import type { PhoneDescriptor } from '../../core/field-builders/phone/PhoneFieldBuilder';
 import type { CountryInfo } from '../../core/field-builders/phone/types';
 import type { FocusableFieldHandle } from '../../types';
-import type { WebPhoneFieldUiOverrides } from '../../types/ui-web';
+import type { WebPhoneFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultBorderColor,
   defaultErrorChromeStyle,
-  type ResolvedWebFieldUi,
+  type ResolvedWebFieldProps,
+  resolveWebInputBehavior,
   shouldHighlightOnError,
 } from './shared';
 
@@ -49,9 +50,9 @@ function resolveText<TContext>(
 
 interface Props extends FieldRenderProps<PhoneValue | string | null> {
   descriptor: PhoneDescriptor & {
-    _ui?: ResolvedWebFieldUi;
+    fieldPropsFromClient?: ResolvedWebFieldProps;
   };
-  extra?: ExtraFieldProps<WebPhoneFieldUiOverrides>;
+  extra?: ExtraFieldProps<WebPhoneFieldPropsOverrides>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
 
@@ -130,14 +131,12 @@ const defaultIntegratedInputStyle: CSSProperties = {
   lineHeight: 1.35,
 };
 
-export const PhoneInput = ({
-  descriptor: d,
-  extra,
-  registerFocusable,
-  ...props
-}: Props) => {
-  const defaultCountry = getCountry(d._phoneDefaultCountry) ?? COUNTRIES_SORTED[0];
-  const web = d._ui ?? {};
+export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: Props) => {
+  const defaultCountry =
+    getCountry(descriptor._phoneDefaultCountry) ?? COUNTRIES_SORTED[0];
+  const web = descriptor.fieldPropsFromClient ?? {};
+  const inputBehavior = resolveWebInputBehavior(extra, web);
+  const isReadOnly = Boolean(inputBehavior.readOnly);
 
   const {
     classNames,
@@ -225,14 +224,14 @@ export const PhoneInput = ({
         return;
       }
 
-      if (d._phoneStoreE164) {
+      if (descriptor._phoneStoreE164) {
         props.onChange(phoneValue.e164 || null);
         return;
       }
 
       props.onChange(phoneValue);
     },
-    [d._phoneStoreE164, props.onChange],
+    [descriptor._phoneStoreE164, props.onChange],
   );
 
   const filteredCountries = useMemo<CountryListItem[]>(() => {
@@ -242,7 +241,9 @@ export const PhoneInput = ({
       return results;
     }
 
-    const preferredSet = new Set(d._phonePreferred.map((code) => code.toUpperCase()));
+    const preferredSet = new Set(
+      descriptor._phonePreferred.map((code) => code.toUpperCase()),
+    );
     const preferred = results.filter((country) => preferredSet.has(country.code));
     const rest = results.filter((country) => !preferredSet.has(country.code));
 
@@ -251,10 +252,14 @@ export const PhoneInput = ({
     }
 
     return [...preferred, { separator: true, key: 'preferred-separator' }, ...rest];
-  }, [d._phonePreferred, search]);
+  }, [descriptor._phonePreferred, search]);
 
   const handleNationalChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (isReadOnly) {
+        return;
+      }
+
       const nextInput = event.target.value;
 
       if (!nextInput.trim()) {
@@ -266,11 +271,15 @@ export const PhoneInput = ({
       setSelectedCountryCode(nextValue.country);
       emitValue(nextValue);
     },
-    [currentCountry, emitValue],
+    [currentCountry, emitValue, isReadOnly],
   );
 
   const selectCountry = useCallback(
     (country: CountryInfo) => {
+      if (isReadOnly) {
+        return;
+      }
+
       setSelectedCountryCode(country.code);
       setOpen(false);
       setSearch('');
@@ -280,7 +289,7 @@ export const PhoneInput = ({
         inputRef.current?.focus();
       });
     },
-    [props.onChange],
+    [isReadOnly, props.onChange],
   );
 
   const id = extra?.id ?? web.id ?? props.name;
@@ -289,7 +298,7 @@ export const PhoneInput = ({
   const describedBy = props.error ? errorId : props.hint ? hintId : undefined;
   const displayValue = normalizedValue?.national ?? '';
   const hasError = Boolean(props.error);
-  const countryLayout = extra?.countryLayout ?? d._phoneCountryLayout;
+  const countryLayout = extra?.countryLayout ?? descriptor._phoneCountryLayout;
   const integrated = countryLayout === 'integrated';
   const highlightOnError = shouldHighlightOnError(
     extra?.highlightOnError,
@@ -299,7 +308,7 @@ export const PhoneInput = ({
   const placeholder =
     currentCountry.exampleNational ||
     props.placeholder ||
-    d._placeholder ||
+    descriptor._placeholder ||
     'Enter phone number';
   const renderContext = useMemo(
     () => ({
@@ -311,21 +320,21 @@ export const PhoneInput = ({
       layout: countryLayout,
       nationalValue: displayValue,
       open,
-      preferredCountries: d._phonePreferred,
+      preferredCountries: descriptor._phonePreferred,
       search,
-      searchable: d._phoneSearchable,
-      showDialCode: d._phoneShowDialCode,
-      showFlag: d._phoneShowFlag,
-      storeE164: d._phoneStoreE164,
+      searchable: descriptor._phoneSearchable,
+      showDialCode: descriptor._phoneShowDialCode,
+      showFlag: descriptor._phoneShowFlag,
+      storeE164: descriptor._phoneStoreE164,
       value: props.value,
     }),
     [
       currentCountry,
-      d._phonePreferred,
-      d._phoneSearchable,
-      d._phoneShowDialCode,
-      d._phoneShowFlag,
-      d._phoneStoreE164,
+      descriptor._phonePreferred,
+      descriptor._phoneSearchable,
+      descriptor._phoneShowDialCode,
+      descriptor._phoneShowFlag,
+      descriptor._phoneStoreE164,
       countryLayout,
       displayValue,
       filteredCountries.length,
@@ -353,7 +362,7 @@ export const PhoneInput = ({
   );
   const defaultCountryButtonContent = (
     <>
-      {d._phoneShowFlag && (
+      {descriptor._phoneShowFlag && (
         <span
           data-fb-slot="country-flag"
           className={classNames?.countryFlag}
@@ -363,7 +372,7 @@ export const PhoneInput = ({
         </span>
       )}
 
-      {d._phoneShowDialCode && (
+      {descriptor._phoneShowDialCode && (
         <span
           data-fb-slot="country-dial"
           className={classNames?.countryDial}
@@ -418,7 +427,7 @@ export const PhoneInput = ({
         id,
         label: props.label,
         name: props.name,
-        required: Boolean(d._required),
+        required: Boolean(descriptor._required),
         hideLabel,
         classNames: classNames as Record<string, string | undefined>,
         styles: styles as Record<string, CSSProperties | undefined>,
@@ -450,7 +459,13 @@ export const PhoneInput = ({
         >
           <button
             type="button"
-            onClick={() => !props.disabled && setOpen((prev) => !prev)}
+            onClick={() => {
+              if (props.disabled || isReadOnly) {
+                return;
+              }
+
+              setOpen((prev) => !prev);
+            }}
             disabled={props.disabled}
             data-fb-slot="country-button"
             {...(open ? { 'data-fb-open': '' } : {})}
@@ -483,7 +498,7 @@ export const PhoneInput = ({
                 styles?.countryList,
               )}
             >
-              {d._phoneSearchable && (
+              {descriptor._phoneSearchable && (
                 <div
                   data-fb-slot="country-search-wrapper"
                   className={classNames?.countrySearchWrapper}
@@ -524,7 +539,7 @@ export const PhoneInput = ({
                   const isSelected = item.code === currentCountry.code;
                   const defaultCountryItemContent = (
                     <>
-                      {d._phoneShowFlag && (
+                      {descriptor._phoneShowFlag && (
                         <span
                           data-fb-slot="country-flag"
                           className={classNames?.countryFlag}
@@ -592,15 +607,16 @@ export const PhoneInput = ({
           value={displayValue}
           placeholder={placeholder}
           disabled={props.disabled}
-          readOnly={web.readOnly}
-          autoComplete={web.autoComplete ?? 'tel-national'}
+          readOnly={inputBehavior.readOnly}
+          autoComplete={inputBehavior.autoComplete ?? 'tel-national'}
           // biome-ignore lint/a11y/noAutofocus: form builders expose autofocus intentionally.
-          autoFocus={web.autoFocus}
-          spellCheck={web.spellCheck}
+          autoFocus={inputBehavior.autoFocus}
+          spellCheck={inputBehavior.spellCheck}
           onChange={handleNationalChange}
           onBlur={props.onBlur}
           onFocus={props.onFocus}
           aria-invalid={hasError || undefined}
+          aria-readonly={isReadOnly || undefined}
           aria-describedby={describedBy}
           data-fb-slot="input"
           className={cx(classNames?.input, inputPropsClassName)}
@@ -609,7 +625,8 @@ export const PhoneInput = ({
             integrated ? defaultIntegratedInputStyle : controlErrorStyle,
             inputPropsStyle,
           )}
-          inputMode="tel"
+          inputMode={inputBehavior.inputMode ?? 'tel'}
+          enterKeyHint={inputBehavior.enterKeyHint}
           {...inputPropsRest}
         />
       </div>
