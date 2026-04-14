@@ -44,9 +44,13 @@ export class MaskedFieldBuilder extends StringFieldBuilder<'text'> {
     return this;
   }
 
-  showMaskInPlaceholder(char = '_'): this {
+  showMaskInPlaceholder(charOrText = '_'): this {
     this._meta._maskShowInPlaceholder = true;
-    this._meta._maskPlaceholder = char;
+    if (charOrText.length > 1) {
+      this._meta._maskPlaceholderText = charOrText;
+    } else {
+      this._meta._maskPlaceholder = charOrText;
+    }
     return this;
   }
 

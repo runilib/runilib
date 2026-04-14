@@ -39,7 +39,7 @@ export function StyleSheetStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => createNativeFormUi(),
+    globalConfigs: () => createNativeFormUi(),
   });
 
   const { Form, fields, state, watchAll } = form;

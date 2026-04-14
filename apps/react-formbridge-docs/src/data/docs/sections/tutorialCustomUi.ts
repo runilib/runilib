@@ -204,13 +204,12 @@ const StyledForm = styled(FormHost)\`
 \`
 
 const EmailField = styled(FieldHost).attrs({
-  ui: {
     inputProps: {
       autoComplete: 'email',
       keyboardType: 'email-address',
     },
     styles: {
-      root: { gap: 6 },
+      wrapper: { gap: 6 },
       input: {
         borderWidth: 1,
         borderColor: '#cbd5e1',
@@ -219,7 +218,6 @@ const EmailField = styled(FieldHost).attrs({
         paddingVertical: 10,
       },
     },
-  },
 })\`\`
 
 const SubmitButton = styled(SubmitHost)\`

@@ -99,12 +99,12 @@ export async function searchCityDirectory({
 function createBaseDemoFieldUi(styles: Record<string, string>): FieldPropsOverrides {
   return {
     classNames: {
-      root: styles.formField,
+      wrapper: styles.formField,
       label: styles.formLabel,
       input: styles.formInput,
     },
     styles: {
-      root: {
+      wrapper: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
@@ -129,9 +129,8 @@ function createBaseDemoFieldUi(styles: Record<string, string>): FieldPropsOverri
         color: '#10203a',
         display: 'block',
         boxSizing: 'border-box',
-        lineHeight: 1.35,
         fontVariantNumeric: 'tabular-nums',
-        padding: '14px 16px',
+        padding: '14px',
         boxShadow: '0 10px 20px rgba(15, 23, 42, 0.04)',
       },
     },

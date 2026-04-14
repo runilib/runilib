@@ -3,8 +3,9 @@ import { sharedVitestConfig } from '../../vitest.shared';
 
 export default mergeConfig(sharedVitestConfig, {
   test: {
-    name: 'react-walkit',
+    name: 'react-formbridge-web',
     environment: 'jsdom',
-    include: ['src/**/*.test.{ts,tsx}']
-  }
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['src/**/*.native.test.{ts,tsx}'],
+  },
 });

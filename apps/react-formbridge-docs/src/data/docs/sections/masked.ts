@@ -1,5 +1,42 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS, STRING_BUILDER_METHODS } from '../constants';
+import {
+  BASE_FIELD_BUILDER_REFERENCE,
+  buildMethodsTable,
+  STRING_FIELD_BUILDER_REFERENCE,
+} from '../constants';
+
+const MASKED_METHODS_TABLE = buildMethodsTable([
+  [
+    '`storeRaw()`',
+    '`() => this`',
+    'Stores the unformatted raw payload instead of the masked value.',
+  ],
+  [
+    '`storeMasked()`',
+    '`() => this`',
+    'Explicitly keeps the formatted masked value, which is the default behavior.',
+  ],
+  [
+    '`showPlaceholder(char?)`',
+    '`char?: string`',
+    'Renders placeholder characters inside the current value.',
+  ],
+  [
+    '`showMaskInPlaceholder(charOrText?)`',
+    '`charOrText?: string`',
+    'Renders the mask as placeholder text while keeping the actual value empty.',
+  ],
+  [
+    '`tokens(map)`',
+    '`map: Record<string, RegExp>`',
+    'Adds or overrides token characters for advanced masks.',
+  ],
+  [
+    '`validateComplete(message?)`',
+    '`message?: string`',
+    'Requires the entire mask to be filled before submit.',
+  ],
+]);
 
 export const maskedSection: LibraryDoc['sections'][number] = {
   id: 'fb-masked',
@@ -37,23 +74,15 @@ const schema = {
   subsections: [
     {
       id: 'fb-masked-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- First argument is required: a \`MASKS\` preset, a custom pattern string, or a \`{ pattern, tokens }\` object
 - defaultValue is \`''\`
 - Masked values are stored by default (separators like \`/\`, \`-\`, spaces are preserved)
-- Inherits all base and string builder methods (see Builder basics)
+${BASE_FIELD_BUILDER_REFERENCE}
+${STRING_FIELD_BUILDER_REFERENCE}
 
 Mask-specific methods:
-- \`storeRaw()\` — stores the unformatted raw payload instead of the masked value
-- \`storeMasked()\` — explicitly keeps the formatted value (default behavior)
-- \`showPlaceholder(char?)\` — renders placeholder characters inside the current value
-- \`showMaskInPlaceholder(char?)\` — renders the mask as placeholder text while keeping the value empty
-- \`tokens(map)\` — adds or overrides token characters for advanced masks
-- \`validateComplete(message?)\` — requires the entire mask to be filled before submit
-
-${BASE_BUILDER_METHODS}
-
-${STRING_BUILDER_METHODS}`,
+${MASKED_METHODS_TABLE}`,
     },
     {
       id: 'fb-masked-runtime',

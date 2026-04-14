@@ -169,9 +169,9 @@ function formatValue(value: unknown, descriptor: FieldDescriptor<unknown>): stri
   }
 }
 
-// ─── useReadonlyFormBridge ────────────────────────────────────────────────────
+// ─── useFormBridgeReadonly ────────────────────────────────────────────────────
 
-export function useReadonlyFormBridge<S extends FormSchema>(
+export function useFormBridgeReadonly<S extends FormSchema>(
   schema: S,
   options: UseReadonlyFormOptions<S>,
 ): UseReadonlyFormReturn<S> {

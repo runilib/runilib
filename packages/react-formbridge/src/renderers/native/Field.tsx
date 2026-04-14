@@ -62,6 +62,26 @@ function getSelectedLabel(options: SelectOption[] | undefined, value: unknown): 
   return found?.label ?? '';
 }
 
+const defaultOtpContainerStyle: ViewStyle = {
+  flexDirection: 'row',
+  alignItems: 'stretch',
+  gap: 8,
+};
+
+const defaultOtpInputStyle: TextStyle = {
+  width: 56,
+  minHeight: 56,
+  paddingHorizontal: 0,
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  // borderRadius: 14,
+  backgroundColor: '#ffffff',
+  color: '#0f172a',
+  textAlign: 'center',
+  fontSize: 18,
+  fontWeight: '600',
+};
+
 const OptionPicker = ({
   visible,
   title,
@@ -69,7 +89,7 @@ const OptionPicker = ({
   selectedValue,
   onClose,
   onSelect,
-  ui,
+  fieldPropsOverrides,
 }: {
   visible: boolean;
   title: string;
@@ -77,7 +97,7 @@ const OptionPicker = ({
   selectedValue: unknown;
   onClose: () => void;
   onSelect: (value: unknown) => void;
-  ui?: NativeFieldPropsOverrides;
+  fieldPropsOverrides?: NativeFieldPropsOverrides;
 }) => {
   const hasTitle = title.trim().length > 0;
 
@@ -89,11 +109,14 @@ const OptionPicker = ({
       onRequestClose={onClose}
     >
       <Pressable
-        style={sx(defaultOptionModalBackdropStyle, ui?.styles?.modalBackdrop)}
+        style={sx(
+          defaultOptionModalBackdropStyle,
+          fieldPropsOverrides?.styles?.modalBackdrop,
+        )}
         onPress={onClose}
       >
         <Pressable
-          style={sx(defaultOptionModalCardStyle, ui?.styles?.modalCard)}
+          style={sx(defaultOptionModalCardStyle, fieldPropsOverrides?.styles?.modalCard)}
           onPress={(event) => event.stopPropagation()}
         >
           {hasTitle ? (
@@ -118,9 +141,17 @@ const OptionPicker = ({
                     onSelect(option.value);
                     onClose();
                   }}
-                  style={sx(defaultOptionRowStyle, ui?.styles?.optionRow)}
+                  style={sx(
+                    defaultOptionRowStyle,
+                    fieldPropsOverrides?.styles?.optionRow,
+                  )}
                 >
-                  <Text style={sx(defaultOptionLabelStyle, ui?.styles?.optionLabel)}>
+                  <Text
+                    style={sx(
+                      defaultOptionLabelStyle,
+                      fieldPropsOverrides?.styles?.optionLabel,
+                    )}
+                  >
                     {option.label}
                   </Text>
                   {selected ? <Text style={defaultOptionCheckStyle}>✓</Text> : null}
@@ -147,7 +178,7 @@ export const NativeField: React.FC<Props> = ({
   const {
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     hintProps,
@@ -159,7 +190,7 @@ export const NativeField: React.FC<Props> = ({
     renderPicker,
   } = extra ?? {};
 
-  const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
+  const { style: wrapperPropsStyle, ...wrapperPropsRest } = (wrapperProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
   const { style: labelPropsStyle, ...labelPropsRest } = (labelProps ?? {}) as {
@@ -307,7 +338,7 @@ export const NativeField: React.FC<Props> = ({
       });
     }
 
-    if (descriptor._type === 'checkbox') {
+    if (descriptor._type === 'checkbox' || descriptor._type === 'switch') {
       return null;
     }
 
@@ -318,7 +349,7 @@ export const NativeField: React.FC<Props> = ({
         {...labelPropsRest}
       >
         {p.label}
-        {descriptor._required && requiredMark}
+        {!!(descriptor._required && p.label) && requiredMark}
       </Text>
     );
   };
@@ -416,7 +447,7 @@ export const NativeField: React.FC<Props> = ({
 
       case 'switch':
         return (
-          <View>
+          <View style={sx(styles?.switchRow)}>
             <Switch
               value={Boolean(p.value)}
               onValueChange={(value) => {
@@ -435,7 +466,10 @@ export const NativeField: React.FC<Props> = ({
                 ...(hasError ? { invalid: true } : {}),
               }}
             />
-            <Text nativeID={labelId}>
+            <Text
+              nativeID={labelId}
+              style={sx(styles?.switchLabel)}
+            >
               {p.label}
               {descriptor._required && requiredMark}
             </Text>
@@ -464,7 +498,9 @@ export const NativeField: React.FC<Props> = ({
                 ...(hasError ? { invalid: true } : {}),
               }}
             >
-              <Text style={defaultOptionTriggerLabelStyle}>
+              <Text
+                style={sx(defaultOptionTriggerLabelStyle, styles?.optionTriggerLabel)}
+              >
                 {getSelectedLabel(descriptor._options, p.value) ||
                   p.placeholder ||
                   `Select ${p.label}`}
@@ -481,7 +517,7 @@ export const NativeField: React.FC<Props> = ({
                 selectedValue={p.value}
                 onClose={closePicker}
                 onSelect={(value) => p.onChange(value)}
-                ui={extra}
+                fieldPropsOverrides={extra}
               />
             )}
           </>
@@ -491,7 +527,7 @@ export const NativeField: React.FC<Props> = ({
         const chars = getStringValue(p.value).split('');
 
         return (
-          <View style={sx(styles?.otpContainer)}>
+          <View style={sx(defaultOtpContainerStyle, styles?.otpContainer)}>
             {Array.from({ length }, (_, index) => ({
               key: `${id}-otp-${index}`,
               index,
@@ -511,7 +547,12 @@ export const NativeField: React.FC<Props> = ({
                   'number-pad'
                 }
                 textAlign="center"
-                style={sx(styles?.otpInput, controlErrorStyle)}
+                style={sx(
+                  defaultOtpInputStyle,
+                  controlErrorStyle,
+                  styles?.otpInput,
+                  inputPropsStyle,
+                )}
                 editable={!(p.disabled || isReadOnly)}
                 autoComplete={
                   inputBehavior.autoComplete as TextInputProps['autoComplete']
@@ -608,8 +649,8 @@ export const NativeField: React.FC<Props> = ({
 
   return (
     <View
-      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
-      {...rootPropsRest}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.wrapper, wrapperPropsStyle)}
+      {...wrapperPropsRest}
     >
       {renderLabelNode()}
       {renderInput()}

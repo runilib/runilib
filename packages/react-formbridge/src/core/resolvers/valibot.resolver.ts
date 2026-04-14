@@ -1,4 +1,4 @@
-import type { ResolverResult, SchemaResolver } from '../../types/options';
+import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
 import type {
   ResolverAdapterOptions,
   ResolverMode,
@@ -120,7 +120,7 @@ async function executeValibotParse(
 export function valibotResolver(
   schema: unknown,
   options: ValibotResolverOptions = {},
-): SchemaResolver {
+): SchemaValidatorResolver {
   return async (values): Promise<ResolverResult> => {
     const result = await executeValibotParse(schema, values, options);
 

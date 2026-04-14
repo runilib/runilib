@@ -198,7 +198,7 @@ function filterExcludedFields(
  * The class itself is side-effect free on construction.
  * Platform listeners are attached later through `attachLifecycleTracking()`.
  */
-export class FormAnalyticsTracker {
+export class FormBridgeAnalyticsTracker {
   private readonly handlers: AnalyticsHandlers;
   private readonly exclude: Set<string>;
   private readonly formId?: string;
@@ -430,7 +430,7 @@ export class FormAnalyticsTracker {
 /* -------------------------------------------------------------------------- */
 
 /**
- * React hook that creates and wires a `FormAnalyticsTracker`.
+ * React hook that creates and wires a `FormBridgeAnalyticsTracker`.
  *
  * @param opts - Analytics configuration. Pass `undefined` to disable analytics.
  * @param getValues - Function returning the latest form values.
@@ -457,8 +457,8 @@ export class FormAnalyticsTracker {
 export function useFormBridgeAnalytics(
   opts: AnalyticsOptions | undefined,
   getValues: () => Record<string, unknown>,
-): FormAnalyticsTracker | null {
-  const trackerRef = useRef<FormAnalyticsTracker | null>(null);
+): FormBridgeAnalyticsTracker | null {
+  const trackerRef = useRef<FormBridgeAnalyticsTracker | null>(null);
   const getValuesRef = useRef(getValues);
 
   getValuesRef.current = getValues;
@@ -471,7 +471,7 @@ export function useFormBridgeAnalytics(
     }
 
     if (!trackerRef.current) {
-      trackerRef.current = new FormAnalyticsTracker(opts);
+      trackerRef.current = new FormBridgeAnalyticsTracker(opts);
       trackerRef.current.attachLifecycleTracking();
     }
 

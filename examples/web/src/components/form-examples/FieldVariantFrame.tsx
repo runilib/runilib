@@ -16,7 +16,7 @@ interface FieldVariantFrameProps {
   children: ReactNode;
 }
 
-export function FieldVariantFrame({
+export const FieldVariantFrame = ({
   familyName,
   accent,
   title,
@@ -27,7 +27,7 @@ export function FieldVariantFrame({
   submittedLabel,
   footer,
   children,
-}: FieldVariantFrameProps) {
+}: FieldVariantFrameProps) => {
   return (
     <div className={styles.resolverFrame}>
       <div className={styles.resolverOverview}>
@@ -81,4 +81,4 @@ export function FieldVariantFrame({
       </div>
     </div>
   );
-}
+};

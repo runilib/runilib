@@ -41,6 +41,49 @@ function normalize(value: unknown): string {
   return value == null ? '' : String(value);
 }
 
+const defaultListboxStyle: CSSProperties = {
+  position: 'absolute',
+  top: '100%',
+  left: 0,
+  right: 0,
+  zIndex: 1000,
+  marginTop: 4,
+  maxHeight: 220,
+  overflowY: 'auto',
+  background: '#fff',
+  border: '1px solid #e2e8f0',
+  boxShadow: '0 10px 12px rgba(0,0,0,0.08)',
+};
+
+const defaultOptionStyle: CSSProperties = {
+  display: 'block',
+  width: '100%',
+  padding: '8px 12px',
+  border: 'none',
+  background: 'transparent',
+  textAlign: 'left',
+  fontSize: 'inherit',
+  fontFamily: 'inherit',
+  cursor: 'pointer',
+  zIndex: 50,
+};
+
+const defaultOptionActiveStyle: CSSProperties = {
+  background: '#f1f5f9',
+};
+
+const defaultOptionSelectedStyle: CSSProperties = {
+  fontWeight: 600,
+  color: '#1e40af',
+};
+
+const defaultStatusStyle: CSSProperties = {
+  padding: '10px 12px',
+  fontSize: '0.875em',
+  color: '#94a3b8',
+  textAlign: 'center',
+};
+
 export const AsyncAutocompleteField: React.FC<Props> = ({
   descriptor,
   extra,
@@ -57,7 +100,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
     classNames,
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     hintProps,
@@ -70,10 +113,10 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   } = extra ?? {};
 
   const {
-    className: rootPropsClassName,
-    style: rootPropsStyle,
-    ...rootPropsRest
-  } = rootProps ?? {};
+    className: wrapperPropsClassName,
+    style: wrapperPropsStyle,
+    ...wrapperPropsRest
+  } = wrapperProps ?? {};
   const {
     className: inputPropsClassName,
     style: inputPropsStyle,
@@ -95,7 +138,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
 
-  const rootRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const depValues = useMemo(() => {
     const result: Record<string, unknown> = {};
@@ -148,7 +191,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node | null;
-      if (!rootRef.current?.contains(target)) {
+      if (!wrapperRef.current?.contains(target)) {
         setIsOpen(false);
       }
     };
@@ -353,28 +396,37 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
     ],
   );
 
-  const rootClassName = cx(
+  const wrapperClassName = cx(
     extra?.className,
-    classNames?.root,
-    rootPropsClassName as string,
+    classNames?.wrapper,
+    wrapperPropsClassName as string,
   );
   const inputClassName = cx(classNames?.input, inputPropsClassName);
 
   return (
     <div
-      ref={rootRef}
+      ref={wrapperRef}
       data-fb-field="async-autocomplete"
       data-fb-name={props.name}
+      {...(isOpen ? { 'data-fb-open': '' } : {})}
       {...(hasError ? { 'data-fb-error': '' } : {})}
       {...(props.disabled ? { 'data-fb-disabled': '' } : {})}
-      className={rootClassName}
+      className={wrapperClassName}
       style={mergeStyles(
-        { position: 'relative' },
+        {
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+          minWidth: 0,
+          overflow: 'visible',
+          zIndex: isOpen ? 999 : undefined,
+        },
         extra?.style,
-        styles?.root,
-        rootPropsStyle as CSSProperties,
+        styles?.wrapper,
+        wrapperPropsStyle as CSSProperties,
       )}
-      {...rootPropsRest}
+      {...wrapperPropsRest}
     >
       {renderLabelSlot({
         id,
@@ -402,12 +454,25 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             data-fb-selected={selectedOptionFromOptions ? '' : undefined}
             onClick={handleFocus}
             className={cx(inputClassName, classNames?.select)}
-            style={mergeStyles(controlErrorStyle, styles?.input, inputPropsStyle)}
+            style={mergeStyles(
+              controlErrorStyle,
+              styles?.input,
+              styles?.select,
+              inputPropsStyle,
+            )}
           >
-            <span data-fb-slot="select-value">{pickerContext.triggerLabel}</span>
+            <span
+              data-fb-slot="select-value"
+              className={classNames?.selectValue}
+              style={mergeStyles(styles?.selectValue)}
+            >
+              {pickerContext.triggerLabel}
+            </span>
             <span
               aria-hidden="true"
               data-fb-slot="select-arrow"
+              className={classNames?.selectArrow}
+              style={mergeStyles(styles?.selectArrow)}
             >
               ▼
             </span>
@@ -465,16 +530,13 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
               role="listbox"
               data-fb-slot="listbox"
               className={classNames?.listbox}
-              style={mergeStyles(
-                { position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50 },
-                styles?.listbox,
-              )}
+              style={mergeStyles(defaultListboxStyle, styles?.listbox)}
             >
               {loading ? (
                 <div
                   data-fb-slot="loading"
                   className={classNames?.loading}
-                  style={mergeStyles(styles?.loading)}
+                  style={mergeStyles(defaultStatusStyle, styles?.loading)}
                 >
                   {renderLoading?.() ?? 'Loading...'}
                 </div>
@@ -482,7 +544,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                 <div
                   data-fb-slot="empty"
                   className={classNames?.empty}
-                  style={mergeStyles(styles?.empty)}
+                  style={mergeStyles(defaultStatusStyle, styles?.empty)}
                 >
                   {renderEmpty?.() ?? 'No results'}
                 </div>
@@ -513,9 +575,17 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                       }}
                       onMouseEnter={() => setHighlightedIndex(index)}
                       style={mergeStyles(
+                        defaultOptionStyle,
                         styles?.option,
-                        active ? styles?.optionActive : undefined,
-                        selected ? styles?.optionSelected : undefined,
+                        active
+                          ? mergeStyles(defaultOptionActiveStyle, styles?.optionActive)
+                          : undefined,
+                        selected
+                          ? mergeStyles(
+                              defaultOptionSelectedStyle,
+                              styles?.optionSelected,
+                            )
+                          : undefined,
                       )}
                     >
                       {renderOption?.(option, { active, selected }) ?? option.label}

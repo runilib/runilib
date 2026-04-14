@@ -68,7 +68,7 @@ export function PhoneVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => {
+    globalConfigs: () => {
       const baseUi = createNativeFormUi();
       const baseInputStyle =
         (baseUi.field?.styles &&

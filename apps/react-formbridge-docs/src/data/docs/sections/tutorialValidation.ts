@@ -114,7 +114,8 @@ const form = useFormBridge(schema, {
           filename: 'valibot-resolver.ts',
           lang: 'ts',
           preview: DOC_PREVIEWS.resolver,
-          code: `import * as v from 'valibot'
+          code: `
+import * as v from 'valibot'
 import { field, useFormBridge, valibotResolver } from '@runilib/react-formbridge'
 
 const schema = {
@@ -142,7 +143,8 @@ const form = useFormBridge(schema, {
           filename: 'AsyncCity.web.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.asyncWeb,
-          code: `import { useAsyncOptions } from '@runilib/react-formbridge'
+          code: `
+import { useAsyncOptions } from '@runilib/react-formbridge'
 
 const cityFetcher = async ({ search, deps, signal }) => {
   const res = await fetch('/api/cities?country=' + deps.country + '&q=' + encodeURIComponent(search), { signal })
@@ -157,13 +159,20 @@ export function CitySelect({ country }: { country: string }) {
     dependsOn: ['country'],
     debounce: 250,
     minChars: 2,
+    fetchOnMount: false,
     cacheTtl: 5 * 60_000,
   }, { country })
+  const canSearch = cities.search.trim().length >= 2
 
   return (
     <div>
-      <input value={cities.search} onChange={(e) => cities.setSearch(e.target.value)} />
-      {cities.loading ? <p>Loading...</p> : null}
+      <input
+        placeholder="Type at least 2 characters"
+        value={cities.search}
+        onChange={(e) => cities.setSearch(e.target.value)}
+      />
+      {!canSearch ? <p>Type at least 2 characters</p> : null}
+      {canSearch && cities.loading ? <p>Loading...</p> : null}
       <ul>{cities.options.map((option) => <li key={option.value}>{option.label}</li>)}</ul>
     </div>
   )
@@ -173,7 +182,8 @@ export function CitySelect({ country }: { country: string }) {
           filename: 'AsyncCity.native.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.asyncNative,
-          code: `import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native'
+          code: `
+import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useAsyncOptions } from '@runilib/react-formbridge'
 
 export function CityPicker({ country }: { country: string }) {
@@ -185,13 +195,20 @@ export function CityPicker({ country }: { country: string }) {
       return data.map((city: any) => ({ value: city.id, label: city.name }))
     },
     dependsOn: ['country'],
-    minChars: 1,
+    minChars: 2,
+    fetchOnMount: false,
   }, { country })
+  const canSearch = cities.search.trim().length >= 2
 
   return (
     <View style={{ gap: 8 }}>
-      <TextInput value={cities.search} onChangeText={cities.setSearch} />
-      {cities.loading ? <Text>Loading…</Text> : null}
+      <TextInput
+        placeholder="Type at least 2 characters"
+        value={cities.search}
+        onChangeText={cities.setSearch}
+      />
+      {!canSearch ? <Text>Type at least 2 characters</Text> : null}
+      {canSearch && cities.loading ? <Text>Loading…</Text> : null}
       <FlatList
         data={cities.options}
         keyExtractor={(item) => String(item.value)}

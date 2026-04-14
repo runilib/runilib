@@ -55,6 +55,7 @@ function stripFormatting(value: string) {
   return value
     .replaceAll('`', '')
     .replaceAll('**', '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
     .replace(/^- /gm, '')
     .replace(/^\d+\.\s/gm, '')
     .replace(/\s+/g, ' ')

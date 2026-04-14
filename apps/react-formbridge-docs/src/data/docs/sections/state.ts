@@ -20,8 +20,8 @@ form.state.status // 'idle' | 'validating' | 'submitting' | 'success' | 'error'
 form.state.isValid
 form.state.isDirty
 form.state.isSubmitting
-form.state.isSuccess
-form.state.isError
+form.state.isSubmitSuccess
+form.state.isSubmitError
 form.state.submitCount`,
   },
   subsections: [

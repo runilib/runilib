@@ -5,7 +5,7 @@ import type {
   WizardStep as SharedWizardStep,
   WizardStepChangeEvent as SharedWizardStepChangeEvent,
 } from './shared/useFormBridgeWizard';
-import { createUseFormWizardBridge } from './shared/useFormBridgeWizard';
+import { createUseFormBridgeWizard } from './shared/useFormBridgeWizard';
 import { useFormBridge } from './useFormBridge.web';
 
 export type UseFormWizardOptions = SharedUseFormWizardOptions<'web'>;
@@ -15,4 +15,4 @@ export type WizardStepChangeEvent = SharedWizardStepChangeEvent<'web'>;
 
 export type { WizardStepChangeReason } from './shared/useFormBridgeWizard';
 
-export const useFormBridgeWizard = createUseFormWizardBridge(useFormBridge);
+export const useFormBridgeWizard = createUseFormBridgeWizard(useFormBridge);

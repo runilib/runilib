@@ -78,7 +78,7 @@ const defaultIntegratedRowStyle: ViewStyle = {
   alignItems: 'stretch',
   borderWidth: 1,
   borderColor: '#d1d5db',
-  borderRadius: 14,
+  // borderRadius: 14,
   backgroundColor: '#ffffff',
 };
 
@@ -88,7 +88,7 @@ const defaultCountryButtonStyle: ViewStyle = {
   paddingHorizontal: 12,
   borderWidth: 1,
   borderColor: '#d1d5db',
-  borderRadius: 14,
+  // borderRadius: 14,
   backgroundColor: '#ffffff',
   flexDirection: 'row',
   alignItems: 'center',
@@ -100,7 +100,7 @@ const defaultIntegratedCountryButtonStyle: ViewStyle = {
   minHeight: 52,
   minWidth: 92,
   borderWidth: 0,
-  borderRadius: 0,
+  // borderRadius: 0,
   backgroundColor: 'transparent',
 };
 
@@ -116,7 +116,7 @@ const defaultIntegratedInputStyle: TextStyle = {
   paddingHorizontal: 14,
   paddingVertical: 12,
   borderWidth: 0,
-  borderRadius: 0,
+  // borderRadius: 0,
   borderTopLeftRadius: 0,
   borderBottomLeftRadius: 0,
   backgroundColor: 'transparent',
@@ -138,7 +138,7 @@ export const NativePhoneInput: React.FC<Props> = ({
   const {
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     searchInputProps,
@@ -158,7 +158,7 @@ export const NativePhoneInput: React.FC<Props> = ({
     renderE164,
   } = extra ?? {};
 
-  const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
+  const { style: wrapperPropsStyle, ...wrapperPropsRest } = (wrapperProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
   const { style: labelPropsStyle, ...labelPropsRest } = (labelProps ?? {}) as {
@@ -360,8 +360,8 @@ export const NativePhoneInput: React.FC<Props> = ({
 
   return (
     <View
-      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
-      {...rootPropsRest}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.wrapper, wrapperPropsStyle)}
+      {...wrapperPropsRest}
     >
       {!hideLabel &&
         (renderLabel?.({

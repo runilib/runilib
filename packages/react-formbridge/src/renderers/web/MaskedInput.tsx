@@ -28,18 +28,18 @@ import {
   shouldHighlightOnError,
 } from './shared';
 
-const defaultMaskedFieldRootStyle: CSSProperties = {
+const defaultMaskedFieldWrapperStyle: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'stretch',
-  gap: 8,
+  gap: 5,
   minWidth: 0,
 };
 
 const defaultMaskedInputStyle: CSSProperties = {
-  display: 'block',
+  display: 'flex',
   boxSizing: 'border-box',
-  lineHeight: 1.35,
+  lineHeight: 1.25,
   fontVariantNumeric: 'tabular-nums',
 };
 
@@ -77,7 +77,7 @@ export const MaskedInput: React.FC<Props> = ({
     classNames,
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     hintProps,
@@ -89,10 +89,10 @@ export const MaskedInput: React.FC<Props> = ({
   } = extra ?? {};
 
   const {
-    className: rootPropsClassName,
-    style: rootPropsStyle,
-    ...rootPropsRest
-  } = rootProps ?? {};
+    className: wrapperPropsClassName,
+    style: wrapperPropsStyle,
+    ...wrapperPropsRest
+  } = wrapperProps ?? {};
   const {
     className: inputPropsClassName,
     style: inputPropsStyle,
@@ -144,11 +144,12 @@ export const MaskedInput: React.FC<Props> = ({
     props.placeholder ??
     descriptor._placeholder ??
     (descriptor._maskShowInPlaceholder
-      ? getMaskPlaceholder(
+      ? (descriptor._maskPlaceholderText ??
+        getMaskPlaceholder(
           descriptor._maskPattern,
           descriptor._maskPlaceholder,
           descriptor._maskTokens,
-        )
+        ))
       : undefined);
 
   const resolveMaxCaretPos = useCallback(
@@ -302,10 +303,10 @@ export const MaskedInput: React.FC<Props> = ({
   );
 
   const inputClassName = cx(classNames?.input, inputPropsClassName);
-  const rootClassName = cx(
+  const wrapperClassName = cx(
     extra?.className,
-    classNames?.root,
-    rootPropsClassName as string,
+    classNames?.wrapper,
+    wrapperPropsClassName as string,
   );
 
   const autoLayout = useMemo(
@@ -319,14 +320,14 @@ export const MaskedInput: React.FC<Props> = ({
       data-fb-name={props.name}
       {...(hasError ? { 'data-fb-error': '' } : {})}
       {...(props.disabled ? { 'data-fb-disabled': '' } : {})}
-      className={rootClassName}
+      className={wrapperClassName}
       style={mergeStyles(
-        defaultMaskedFieldRootStyle,
+        defaultMaskedFieldWrapperStyle,
         extra?.style,
-        styles?.root,
-        rootPropsStyle as CSSProperties,
+        styles?.wrapper,
+        wrapperPropsStyle,
       )}
-      {...rootPropsRest}
+      {...wrapperPropsRest}
     >
       {renderLabelSlot({
         id,
@@ -380,10 +381,9 @@ export const MaskedInput: React.FC<Props> = ({
         onKeyDown={handleKeyDown}
         style={mergeStyles(
           {
-            width: `min(100%, ${autoLayout.webWidthCh}ch)`,
+            width: `${autoLayout.webWidthCh}ch`,
             minWidth: 0,
             maxWidth: '100%',
-            alignSelf: 'flex-start',
           },
           defaultMaskedInputStyle,
           controlErrorStyle,

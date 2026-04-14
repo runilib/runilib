@@ -32,7 +32,7 @@ ${GENERATED_FIELD_UI_SURFACE}`,
       id: 'fb-field-strategy',
       title: 'Which customization path to pick',
       content: `- Start with \`<fields.name />\` when the built-in renderer already matches the input type
-- Stay in \`ui\` / \`globalStyles\` when the structure is fine and you only need visual changes
+- Stay in \`ui\` / \`globalConfigs\` when the structure is fine and you only need visual changes
 - Use \`renderPicker\` for select-like fields when only the picker/modal/sheet needs to be custom
 - Use \`fieldController(name)\` when the schema field type is still right, but you want to own the trigger, shell, modal, helper row, or extra surrounding UI
 - Use \`field.custom(defaultValue)\` when the value shape or interaction model itself is not one of the built-in field types`,

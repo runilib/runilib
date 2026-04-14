@@ -54,6 +54,10 @@ const CACHE = new Map<string, CacheEntry>();
 const EMPTY_OPTIONS: SelectOption[] = [];
 const EMPTY_DEP_KEYS: readonly string[] = [];
 
+function buildDependsOnFingerprint(dependsOn: readonly string[]): string {
+  return JSON.stringify(dependsOn);
+}
+
 function getCached(key: string): SelectOption[] | null {
   const entry = CACHE.get(key);
   if (!entry) return null;
@@ -113,12 +117,20 @@ export function useAsyncOptions<TDeps extends AsyncDependencyShape>(
   const fetchRef = useRef(fetchFn);
   fetchRef.current = fetchFn;
 
+  const dependsOnFingerprint = useMemo(
+    () =>
+      buildDependsOnFingerprint(
+        (Array.isArray(dependsOn) ? dependsOn : EMPTY_DEP_KEYS) as readonly string[],
+      ),
+    [dependsOn],
+  );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const stableDependsOn = useMemo(
     () =>
       (Array.isArray(dependsOn)
         ? [...dependsOn]
         : EMPTY_DEP_KEYS) as readonly AsyncDependencyKey<TDeps>[],
-    [dependsOn],
+    [dependsOnFingerprint, dependsOn],
   );
   const safeInitialOptions = useMemo(
     () => (Array.isArray(initialOptions) ? initialOptions : EMPTY_OPTIONS),

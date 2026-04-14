@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { formExampleStyles as s } from './FormExamples.styles';
 import { JoiResolverExample } from './JoiResolverExample';
 import { ValibotResolverExample } from './ValibotResolverExample';
-import { YupResolverExample } from './YupResolverExample';
+// import { YupResolverExample } from './YupResolverExample';
 import { ZodResolverExample } from './ZodResolverExample';
 
 const RESOLVER_TABS = [
@@ -15,12 +15,12 @@ const RESOLVER_TABS = [
     note: 'Typed parsing',
     component: ZodResolverExample,
   },
-  {
-    id: 'yup',
-    label: 'Yup',
-    note: 'Chainable rules',
-    component: YupResolverExample,
-  },
+  // {
+  //   id: 'yup',
+  //   label: 'Yup',
+  //   note: 'Chainable rules',
+  //   component: YupResolverExample,
+  // },
   {
     id: 'joi',
     label: 'Joi',

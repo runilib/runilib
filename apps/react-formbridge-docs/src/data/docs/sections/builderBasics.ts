@@ -18,13 +18,13 @@ ${STRING_BUILDER_METHODS}
 Special cases:
 - \`field.select()\` and \`field.radio()\` extend the base builder with \`options(...)\`, \`optionsFrom(...)\`, and \`searchable(...)\`
 - \`field.phone()\` extends the base builder directly with country-aware phone helpers such as \`defaultCountry()\` and \`storeE164()\`
-- \`field.file()\` is the main exception: it uses its own upload-focused builder surface and does not expose \`behavior()\`, \`render()\`, or the conditional helpers from \`BaseFieldBuilder\``,
+- \`field.file()\` is the main exception: it uses its own upload-focused builder surface and does not expose the full \`BaseFieldBuilder\` contract such as \`render()\`, \`transform()\`, or the conditional helpers`,
   subsections: [
     {
       id: 'fb-builder-basics-behavior',
       title: 'Behavior vs styling',
       content: `- Put business rules and reusable field behavior in the builder
-- Put shared visual theme in \`useFormBridge(schema, { globalStyles })\`
+- Put shared visual theme in \`useFormBridge(schema, { globalConfigs })\`
 - Put one-off styling exceptions on the rendered field component via \`className\`, \`style\`, and \`ui\` on web, or \`style\` and \`ui\` on native`,
     },
     {

@@ -1,16 +1,26 @@
 import { field } from '../core/field-builders/field';
+import { ref } from '../core/validators/reference';
+import { schema } from '../core/validators/schema';
 import { useFormBridge as useNativeFormBridge } from '../hooks/useFormBridge.native';
 import { useFormBridge as useWebFormBridge } from '../hooks/useFormBridge.web';
 
 function WebTypingHarness() {
-  const form = useWebFormBridge({
+  const signupSchema = schema({
     name: field.text('Name'),
     bio: field.textarea('Bio'),
     country: field.select('Country').options(['FR', 'US']),
     email: field.email('Email'),
+    password: field.text('Password'),
+    confirmPassword: field.text('Confirm password').sameAs(ref('password')),
   });
+  const form = useWebFormBridge(signupSchema);
   const nameController = form.fieldController('name');
   const countryController = form.fieldController('country');
+
+  signupSchema.safeParse({
+    password: 'secret',
+    confirmPassword: 'secret',
+  }).issues[0]?.code;
 
   <form.fields.name
     inputProps={{ maxLength: 80 }}
@@ -36,8 +46,7 @@ function WebTypingHarness() {
   nameController.options;
   // @ts-expect-error text controllers should not expose OTP metadata
   nameController.otpLength;
-  // @ts-expect-error builder behavior API has been removed
-  field.text('Work email').behavior({ autoComplete: 'work-email' });
+  field.text('Work email');
   // @ts-expect-error field ui autocomplete should only accept known tokens
   <form.fields.email autoComplete="custom-email-token" />;
 
@@ -45,11 +54,12 @@ function WebTypingHarness() {
 }
 
 function NativeTypingHarness() {
-  const form = useNativeFormBridge({
+  const nativeSchema = schema({
     name: field.text('Name'),
     country: field.select('Country').options(['FR', 'US']),
     otp: field.otp('Code'),
   });
+  const form = useNativeFormBridge(nativeSchema);
   const countryController = form.fieldController('country');
   const otpController = form.fieldController('otp');
 

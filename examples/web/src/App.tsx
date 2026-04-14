@@ -95,14 +95,14 @@ export default function App() {
   );
 }
 
-function GlobalWalkitPopover({
+const GlobalWalkitPopover = ({
   walkitStep,
   walkitStepIndex,
   totalWalkitSteps,
   onNext,
   onPrev,
   onStop,
-}: RenderWalkitStepProps) {
+}: RenderWalkitStepProps) => {
   const isFirst = walkitStepIndex === 0;
   const isLast = walkitStepIndex === totalWalkitSteps - 1;
 
@@ -274,4 +274,4 @@ function GlobalWalkitPopover({
       </div>
     </div>
   );
-}
+};

@@ -1,4 +1,4 @@
-import type { LibraryDoc } from './../../../types/index';
+import type { LibraryDoc } from '../../../types/index';
 import {
   DOC_PREVIEWS,
   RESOLVER_LIBRARY_OPTIONS_SURFACE,
@@ -8,7 +8,7 @@ import {
 export const adaptersSection: LibraryDoc['sections'][number] = {
   id: 'fb-adapters',
 
-  title: 'Schema adapters (zod, yup, joi, valibot)',
+  title: 'Schema validator resolver (zod, yup, joi, valibot)',
   content: `Use the \`resolver\` option when your real validation source of truth already lives in Zod, Yup, Valibot, Joi, or another schema library.
 
 - The schema builders still drive rendering and UX metadata

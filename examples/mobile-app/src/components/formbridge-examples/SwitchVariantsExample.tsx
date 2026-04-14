@@ -34,7 +34,7 @@ export function SwitchVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onChange',
     revalidateOn: 'onChange',
-    globalStyles: () => createNativeFormUi(),
+    globalConfigs: () => createNativeFormUi(),
   });
 
   const { Form, fields, watchAll } = form;

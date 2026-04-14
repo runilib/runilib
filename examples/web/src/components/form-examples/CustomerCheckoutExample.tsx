@@ -75,7 +75,7 @@ export function CustomerCheckoutExample() {
           L: /[A-Z]/,
         })
         .required('Customer code is required')
-        .showMaskInPlaceholder()
+        .showMaskInPlaceholder('AA-9999')
         .uppercase()
         .validateComplete('Complete the customer code.')
         .hint('Custom mask example: two uppercase letters and four digits.'),
@@ -103,7 +103,7 @@ export function CustomerCheckoutExample() {
   const checkoutForm = useFormBridge(checkoutSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => createDemoFormUi(styles),
+    globalConfigs: () => createDemoFormUi(styles),
     persist: {
       key: 'dashboard-customer-checkout',
       storage: 'local',
@@ -189,10 +189,7 @@ export function CustomerCheckoutExample() {
             }}
           >
             <div className={styles.formRow}>
-              <fields.firstName
-              // readOnly
-              // highlightOnError={false}
-              />
+              <fields.firstName />
               <fields.lastName />
             </div>
 

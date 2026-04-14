@@ -1,5 +1,17 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS, STRING_BUILDER_METHODS } from '../constants';
+import {
+  BASE_FIELD_BUILDER_REFERENCE,
+  buildMethodsTable,
+  STRING_FIELD_BUILDER_REFERENCE,
+} from '../constants';
+
+const TEL_METHODS_TABLE = buildMethodsTable([
+  [
+    '`—`',
+    '`—`',
+    '`field.tel()` does not add methods beyond the shared string-builder surface; it mainly preconfigures a generic phone format validator.',
+  ],
+]);
 
 export const telSection: LibraryDoc['sections'][number] = {
   id: 'fb-tel',
@@ -24,15 +36,16 @@ export const telSection: LibraryDoc['sections'][number] = {
   subsections: [
     {
       id: 'fb-tel-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`tel\`
 - A built-in generic phone regex is wired through \`format(...)\` at construction time
-- No tel-specific methods beyond the shared surface — for richer phone UX, use \`field.phone()\`
+- For richer phone UX, use \`field.phone()\`
+${BASE_FIELD_BUILDER_REFERENCE}
+${STRING_FIELD_BUILDER_REFERENCE}
 
-${BASE_BUILDER_METHODS}
-
-${STRING_BUILDER_METHODS}`,
+Tel-specific methods:
+${TEL_METHODS_TABLE}`,
     },
     {
       id: 'fb-tel-recipes',

@@ -6,6 +6,7 @@ import type {
   FieldType,
   Validator,
 } from '../../../types/field';
+import type { FormSchema } from '../../../types/schema';
 import type { ConditionPredicate, FieldConditions } from '../../conditions/conditions';
 import { DEFAULT_FIELD_CONDITIONS } from '../../conditions/conditions';
 
@@ -49,9 +50,10 @@ function cloneDescriptor<V, TType extends FieldType>(
 export class BaseFieldBuilder<
   FDefaultValue = unknown,
   TType extends FieldType = FieldType,
+  Schema extends FormSchema = FormSchema,
 > {
   protected _desc: FieldDescriptor<FDefaultValue, TType>;
-  protected _conditions: FieldConditions = {
+  protected _conditions: FieldConditions<Schema> = {
     ...DEFAULT_FIELD_CONDITIONS,
     visible: [],
     required: [],
@@ -230,6 +232,16 @@ export class BaseFieldBuilder<
   }
 
   /**
+   * Alias for `validate()` when the intent is explicitly asynchronous.
+   *
+   * Useful for username availability checks, server-side uniqueness validation,
+   * promo code verification, and other async rules.
+   */
+  validateAsync(fn: Validator<FDefaultValue>): this {
+    return this.validate(fn);
+  }
+
+  /**
    * Registers a transform function that is applied to the field value
    * before validation and submission (e.g. trimming whitespace, normalizing case).
    *
@@ -243,7 +255,7 @@ export class BaseFieldBuilder<
    * ```
    */
   transform(fn: (value: FDefaultValue) => FDefaultValue): this {
-    this._desc._transform = fn;
+    this._desc._outputTransform = fn;
     return this;
   }
 
@@ -294,7 +306,7 @@ export class BaseFieldBuilder<
    * field.text('Details', '').visibleWhen((values) => values.age >= 18);
    * ```
    */
-  visibleWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+  visibleWhen(fieldOrFn: string | ConditionPredicate<Schema>, value?: unknown): this {
     if (typeof fieldOrFn === 'function') {
       this._conditions.visible.push({ type: 'fn', fn: fieldOrFn });
     } else {
@@ -327,7 +339,10 @@ export class BaseFieldBuilder<
    * field.text('License', '').visibleAndRequiredWhen((values) => values.age >= 18);
    * ```
    */
-  visibleAndRequiredWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+  visibleAndRequiredWhen(
+    fieldOrFn: string | ConditionPredicate<Schema>,
+    value?: unknown,
+  ): this {
     if (typeof fieldOrFn === 'function') {
       this._conditions.visible.push({ type: 'fn', fn: fieldOrFn });
       this._conditions.required.push({ type: 'fn', fn: fieldOrFn });
@@ -447,7 +462,7 @@ export class BaseFieldBuilder<
    * field.text('Phone', '').requiredWhen((values) => values.contactMethod === 'phone');
    * ```
    */
-  requiredWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+  requiredWhen(fieldOrFn: string | ConditionPredicate<Schema>, value?: unknown): this {
     if (typeof fieldOrFn === 'function') {
       this._conditions.required.push({ type: 'fn', fn: fieldOrFn });
     } else {
@@ -506,7 +521,7 @@ export class BaseFieldBuilder<
    * field.text('Code', '').disabledWhen((values) => values.status === 'submitted');
    * ```
    */
-  disabledWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+  disabledWhen(fieldOrFn: string | ConditionPredicate<Schema>, value?: unknown): this {
     if (typeof fieldOrFn === 'function') {
       this._conditions.disabled.push({ type: 'fn', fn: fieldOrFn });
     } else {
@@ -568,7 +583,9 @@ export class BaseFieldBuilder<
    *
    * @internal
    */
-  _build(): FieldDescriptor<FDefaultValue, TType> & { _conditions?: FieldConditions } {
+  _build(): FieldDescriptor<FDefaultValue, TType> & {
+    _conditions?: FieldConditions<Schema>;
+  } {
     const desc = cloneDescriptor(this._desc);
 
     return {

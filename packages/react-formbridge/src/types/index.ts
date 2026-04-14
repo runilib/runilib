@@ -47,10 +47,11 @@ export type {
   UseFormBridgeReturn,
 } from './form';
 export type {
+  GlobalConfigsContext,
   OptionsFetcher,
   OptionsFetcherContext,
   ResolverResult,
-  SchemaResolver,
+  SchemaValidatorResolver,
   UseFormOptions,
   ValidationTrigger,
 } from './options';
@@ -61,6 +62,7 @@ export type {
   FormStatus,
   ResolvedFieldDescriptor,
   SchemaFieldType,
+  SchemaShape,
   SchemaValues,
 } from './schema';
 export type {
@@ -126,3 +128,14 @@ export type {
   WebTextareaFieldPropsOverrides,
   WebTextFieldPropsOverrides,
 } from './ui-web';
+export type {
+  FieldReference,
+  ValidationContext,
+  ValidationErrorMap,
+  ValidationIssue,
+  ValidationIssueInput,
+  ValidationPath,
+  ValidationPathSegment,
+  ValidationResult,
+  ValidatorResult,
+} from './validation';

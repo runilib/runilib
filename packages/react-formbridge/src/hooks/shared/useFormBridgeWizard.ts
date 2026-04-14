@@ -70,7 +70,7 @@ export interface UseFormWizardReturn<TPlatform extends Platform = Platform> {
   skip: () => boolean;
   submit: () => Promise<void>;
   isSubmitting: boolean;
-  isSuccess: boolean;
+  isSubmitSuccess: boolean;
   submitError: string | null;
   isHydrating: boolean;
 }
@@ -145,10 +145,10 @@ function createStepChangeEvent(
   };
 }
 
-export function createUseFormWizardBridge<TPlatform extends Platform>(
+export function createUseFormBridgeWizard<TPlatform extends Platform>(
   useFormBridge: UseFormBridgeHook<TPlatform>,
 ) {
-  return function useFormWizardBridge(
+  return function useFormBridgeWizard(
     steps: WizardStep<FormSchema, TPlatform>[],
     options: UseFormWizardOptions<TPlatform>,
   ): UseFormWizardReturn<TPlatform> {
@@ -301,11 +301,10 @@ export function createUseFormWizardBridge<TPlatform extends Platform>(
       initialValues: stepInitialValues,
       validateOn: stepFormOptions?.validateOn ?? validateOn,
       revalidateOn: stepFormOptions?.revalidateOn ?? revalidateOn,
-      resolver: stepFormOptions?.resolver,
+      validatorResolver: stepFormOptions?.validatorResolver,
       persist: stepPersist,
       analytics: stepFormOptions?.analytics,
-      globalStyles: stepFormOptions?.globalStyles,
-      showErrorsOn: stepFormOptions?.showErrorsOn,
+      globalConfigs: stepFormOptions?.globalConfigs,
     });
 
     const liveAllValues = step
@@ -437,7 +436,7 @@ export function createUseFormWizardBridge<TPlatform extends Platform>(
       setAccumulatedValues(merged);
       setCompletedSteps(nextCompletedSteps);
 
-      await currentStepForm.saveDraftNow();
+      await currentStepForm.persistanceHelpers.saveDraftNow();
 
       if (isLastStep) {
         await persistWizardSnapshot({
@@ -649,7 +648,7 @@ export function createUseFormWizardBridge<TPlatform extends Platform>(
       skip,
       submit,
       isSubmitting,
-      isSuccess,
+      isSubmitSuccess: isSuccess,
       submitError,
       isHydrating,
     };

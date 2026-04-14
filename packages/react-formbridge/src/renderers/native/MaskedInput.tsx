@@ -67,7 +67,7 @@ export const NativeMaskedInput = ({
   const {
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     hintProps,
@@ -78,7 +78,7 @@ export const NativeMaskedInput = ({
     renderRequiredMark,
   } = extra ?? {};
 
-  const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
+  const { style: wrapperPropsStyle, ...wrapperPropsRest } = (wrapperProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
   const { style: labelPropsStyle, ...labelPropsRest } = (labelProps ?? {}) as {
@@ -138,11 +138,12 @@ export const NativeMaskedInput = ({
     props.placeholder ??
     descriptor._placeholder ??
     (descriptor._maskShowInPlaceholder
-      ? getMaskPlaceholder(
+      ? (descriptor._maskPlaceholderText ??
+        getMaskPlaceholder(
           descriptor._maskPattern,
           descriptor._maskPlaceholder,
           descriptor._maskTokens,
-        )
+        ))
       : undefined);
 
   const resolveMaxCaretPos = useCallback(
@@ -249,8 +250,8 @@ export const NativeMaskedInput = ({
 
   return (
     <View
-      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
-      {...rootPropsRest}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.wrapper, wrapperPropsStyle)}
+      {...wrapperPropsRest}
     >
       {!hideLabel &&
         (renderLabel?.({

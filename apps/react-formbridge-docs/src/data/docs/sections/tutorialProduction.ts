@@ -8,7 +8,7 @@ export const tutorialProductionSection: LibraryDoc['sections'][number] = {
 
 - \`useFormBridgeWizard()\` is the client-owned path for multi-step flows
 - \`useDynamicFormBridge()\` is the backend-owned path when a remote definition controls the fields
-- \`useReadonlyFormBridge()\` keeps review screens aligned with edit screens
+- \`useFormBridgeReadonly()\` keeps review screens aligned with edit screens
 - \`useFormBridgeAnalytics()\` makes lifecycle instrumentation additive instead of invasive`,
   codeTabs: [
     {
@@ -209,7 +209,7 @@ export function RemoteDynamic({ url }: { url: string }) {
         filename: 'ReadonlyReview.tsx',
         lang: 'tsx',
         preview: DOC_PREVIEWS.readonly,
-        code: `import { field, useReadonlyFormBridge } from '@runilib/react-formbridge'
+        code: `import { field, useFormBridgeReadonly } from '@runilib/react-formbridge'
 
 const schema = {
   fullName: field.text('Full name'),
@@ -218,7 +218,7 @@ const schema = {
 }
 
 export function ReviewCard({ values, original }: { values: any; original?: any }) {
-  const readonly = useReadonlyFormBridge(schema, {
+  const readonly = useFormBridgeReadonly(schema, {
     values,
     originalValues: original,
     mode: original ? 'diff' : 'readonly',

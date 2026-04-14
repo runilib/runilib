@@ -7,17 +7,20 @@ import {
 } from '../../core/conditions/conditions';
 import { usePersist } from '../../core/persist/draft';
 import { extractDefaults, validateField } from '../../core/validators/engine';
+import { getSchemaValidationApi } from '../../core/validators/schema';
 import type {
   FieldDescriptor,
   FocusableFieldHandle,
   FormSchema,
   FormState,
+  SchemaShape,
   SchemaValues,
   UseFormOptions,
 } from '../../types';
 import {
   applyCommittedTransforms,
   applyImmediateTransforms,
+  applySubmitTransforms,
   areVisibilityMapsEqual,
   buildSchemaRuntime,
   emitErrorsDiffAnalytics,
@@ -26,7 +29,7 @@ import {
   shallowEqualErrors,
   shouldValidate,
 } from './helpers';
-import { useFormBridgeAnalytics } from './useFormAnalytics';
+import { useFormBridgeAnalytics } from './useFormBridgeAnalytics';
 
 function sortObjectKeys(value: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
@@ -59,7 +62,7 @@ function stableSerializeRuntime(value: unknown): string {
         return currentValue;
       }
 
-      return sortObjectKeys(currentValue as Record<string, unknown>);
+      return sortObjectKeys(currentValue);
     }
 
     return currentValue;
@@ -68,7 +71,7 @@ function stableSerializeRuntime(value: unknown): string {
 
 function isDevelopmentRuntime(): boolean {
   const maybeGlobalDev = (globalThis as { __DEV__?: boolean }).__DEV__;
-  const maybeNodeEnv = process ? process.env.NODE_ENV : undefined;
+  const maybeNodeEnv = typeof process !== 'undefined' ? process.env.NODE_ENV : undefined;
 
   return Boolean(maybeGlobalDev) || maybeNodeEnv !== 'production';
 }
@@ -80,9 +83,10 @@ export function useFormBridgeCore<const S extends FormSchema>(
   const {
     validateOn = 'onBlur',
     revalidateOn = 'onChange',
-    resolver,
+    validatorResolver,
     persist: persistOpts,
   } = options;
+  const schemaValidationApi = getSchemaValidationApi(schema);
 
   const focusableRegistryRef = useRef<Record<string, FocusableFieldHandle | null>>({});
   const schemaRuntimeSignatureRef = useRef<string | null>(null);
@@ -93,7 +97,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
   const schemaRuntimeRef = useRef<{
     descriptors: Record<string, FieldDescriptor<unknown>>;
-    conditionsMap: Record<string, FieldConditions>;
+    conditionsMap: Record<string, FieldConditions<S>>;
   } | null>(null);
 
   const prevFormKeyRef = useRef(options.formKey);
@@ -135,10 +139,12 @@ export function useFormBridgeCore<const S extends FormSchema>(
     [descriptors],
   );
 
-  const stateRef = useRef<FormState<S>>(makeInitialState({ ...defaultValues }));
+  const stateRef = useRef<FormState<S>>(
+    makeInitialState({ ...defaultValues, ...options.initialValues }),
+  );
   const submitConfigRef = useRef<{
     onSubmit: (values: SchemaValues<S>) => void | Promise<void>;
-    onError?: (errors: Partial<Record<keyof S, string>>) => void;
+    onError?: (errors: Partial<Record<keyof SchemaShape<S>, string>>) => void;
     onSubmitError?: (error: unknown) => string;
   } | null>(null);
 
@@ -152,10 +158,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
   }, []);
 
   const [visibility, setVisibility] = useState<VisibilityMap>(() =>
-    evaluateAllConditions(
-      conditionsMap,
-      stateRef.current.values as Record<string, unknown>,
-    ),
+    evaluateAllConditions(conditionsMap, stateRef.current.values),
   );
 
   const prevVisibilityRef = useRef<VisibilityMap>(visibility);
@@ -172,10 +175,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
     stateRef.current = makeInitialState(nextValues);
 
-    const nextVisibility = evaluateAllConditions(
-      conditionsMap,
-      nextValues as Record<string, unknown>,
-    );
+    const nextVisibility = evaluateAllConditions(conditionsMap, nextValues);
 
     prevVisibilityRef.current = nextVisibility;
     setVisibility(nextVisibility);
@@ -211,10 +211,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
         fieldNames.has(name),
       ),
     ) as FormState<S>['dirty'];
-    const nextVisibility = evaluateAllConditions(
-      conditionsMap,
-      nextValues as Record<string, unknown>,
-    );
+    const nextVisibility = evaluateAllConditions(conditionsMap, nextValues);
 
     stateRef.current = {
       ...currentState,
@@ -276,7 +273,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
     (newValues: Record<string, unknown>) => {
       if (Object.keys(conditionsMap).length === 0) return;
 
-      const newVis = evaluateAllConditions(conditionsMap, newValues);
+      const newVis = evaluateAllConditions(conditionsMap, newValues as SchemaValues<S>);
       const prev = prevVisibilityRef.current;
 
       let changedValues = false;
@@ -316,7 +313,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
   );
 
   const getRuntimeFieldState = useCallback(
-    (name: string, values: Record<string, unknown>) => {
+    (name: string, values: SchemaValues<S>) => {
       const map = evaluateAllConditions(conditionsMap, values);
       return map[name] ?? { visible: true, required: false, disabled: false };
     },
@@ -324,7 +321,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
   );
 
   const getEffectiveDescriptor = useCallback(
-    (name: string, values: Record<string, unknown>) => {
+    (name: string, values: SchemaValues<S>) => {
       const runtime = getRuntimeFieldState(name, values);
       const descriptor = descriptors[name];
 
@@ -340,9 +337,9 @@ export function useFormBridgeCore<const S extends FormSchema>(
   const runFieldValidation = useCallback(
     async (name: string, value: unknown): Promise<string | null> => {
       const candidateValues = {
-        ...(stateRef.current.values as Record<string, unknown>),
+        ...stateRef.current.values,
         [name]: value,
-      };
+      } as SchemaValues<S>;
 
       const runtime = getRuntimeFieldState(name, candidateValues);
 
@@ -350,8 +347,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
         return null;
       }
 
-      if (resolver) {
-        const result = await resolver(candidateValues);
+      if (validatorResolver) {
+        const result = await validatorResolver(candidateValues);
         return result.errors[name] ?? null;
       }
 
@@ -359,19 +356,19 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
       return validateField(effectiveDescriptor, value, candidateValues);
     },
-    [getEffectiveDescriptor, getRuntimeFieldState, resolver],
+    [getEffectiveDescriptor, getRuntimeFieldState, validatorResolver],
   );
 
   const runAllValidation = useCallback(async (): Promise<{
     errors: Record<string, string>;
     resolvedValues: Record<string, unknown> | null;
   }> => {
-    const values = stateRef.current.values as Record<string, unknown>;
+    const values = stateRef.current.values;
     const visibilityMap = evaluateAllConditions(conditionsMap, values);
     const errors: Record<string, string> = {};
 
-    if (resolver) {
-      const result = await resolver(values);
+    if (validatorResolver) {
+      const result = await validatorResolver(values);
 
       for (const [name, message] of Object.entries(result.errors)) {
         const runtime = visibilityMap[name] ?? {
@@ -388,6 +385,31 @@ export function useFormBridgeCore<const S extends FormSchema>(
       return {
         errors,
         resolvedValues: result.values,
+      };
+    }
+
+    if (schemaValidationApi) {
+      const result = await schemaValidationApi.safeParseAsync(values);
+
+      for (const [name, message] of Object.entries(result.errorsByField)) {
+        const runtime = visibilityMap[name] ?? {
+          visible: true,
+          required: false,
+          disabled: false,
+        };
+
+        if (runtime.visible && message) {
+          errors[name] = message;
+        }
+      }
+
+      if (result.formErrors.length) {
+        errors.__form = result.formErrors[0];
+      }
+
+      return {
+        errors,
+        resolvedValues: result.success ? (result.data as Record<string, unknown>) : null,
       };
     }
 
@@ -414,7 +436,13 @@ export function useFormBridgeCore<const S extends FormSchema>(
       errors,
       resolvedValues: null,
     };
-  }, [conditionsMap, descriptors, getEffectiveDescriptor, resolver]);
+  }, [
+    conditionsMap,
+    descriptors,
+    getEffectiveDescriptor,
+    validatorResolver,
+    schemaValidationApi,
+  ]);
 
   const validate = useCallback(
     async (names?: keyof S | Array<keyof S>): Promise<boolean> => {
@@ -427,7 +455,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
         nextErrors = { ...(stateRef.current.errors as Record<string, string>) };
 
         for (const fieldName of fieldNames) {
-          const value = (stateRef.current.values as Record<string, unknown>)[fieldName];
+          const value = stateRef.current.values[fieldName];
           const errorMessage = await runFieldValidation(fieldName, value);
 
           if (errorMessage) {
@@ -438,10 +466,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
         }
       }
 
-      const previousErrors = stateRef.current.errors as Record<
-        string,
-        string | undefined
-      >;
+      const previousErrors = stateRef.current.errors;
       const normalizedNextErrors = nextErrors;
       const nextIsValid = Object.keys(nextErrors).length === 0;
       const currentIsValid = stateRef.current.isValid;
@@ -509,8 +534,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
           isDirty: Object.values(nextDirty).some(Boolean),
         };
 
-        updateVisibility(nextState.values as Record<string, unknown>);
-        persistSave(nextState.values as Record<string, unknown>);
+        updateVisibility(nextState.values);
+        persistSave(nextState.values);
 
         return nextState;
       }, false);
@@ -538,16 +563,13 @@ export function useFormBridgeCore<const S extends FormSchema>(
         debounceRefs.current[name] = setTimeout(async () => {
           const errorMessage = await runFieldValidation(name, nextValue);
 
-          const previousErrors = stateRef.current.errors as Record<
-            string,
-            string | undefined
-          >;
+          const previousErrors = stateRef.current.errors;
           const previousError = previousErrors[name];
 
           const nextErrors = {
             ...previousErrors,
             [name]: errorMessage ?? undefined,
-          } as Record<string, string | undefined>;
+          };
 
           if (!errorMessage) {
             delete nextErrors[name];
@@ -596,7 +618,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
   const handleBlur = useCallback(
     async (name: string) => {
       const descriptor = descriptors[name];
-      const currentRawValue = (stateRef.current.values as Record<string, unknown>)[name];
+      const currentRawValue = stateRef.current.values[name];
       const committedValue = applyCommittedTransforms(descriptor, currentRawValue);
       const isDirtyField = committedValue !== defaultValues[name];
 
@@ -643,16 +665,13 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
         const errorMessage = await runFieldValidation(name, committedValue);
 
-        const previousErrors = stateRef.current.errors as Record<
-          string,
-          string | undefined
-        >;
+        const previousErrors = stateRef.current.errors;
         const previousError = previousErrors[name];
 
         const nextErrors = {
           ...previousErrors,
           [name]: errorMessage ?? undefined,
-        } as Record<string, string | undefined>;
+        };
 
         if (!errorMessage) {
           delete nextErrors[name];
@@ -737,13 +756,13 @@ export function useFormBridgeCore<const S extends FormSchema>(
       ...current,
       status: 'validating',
       isSubmitting: false,
-      isSuccess: false,
-      isError: false,
+      isSubmitSuccess: false,
+      isSubmitError: false,
       submitError: null,
       submitCount: current.submitCount + 1,
     }));
 
-    const currentValues = stateRef.current.values as Record<string, unknown>;
+    const currentValues = stateRef.current.values;
     const normalizedValues = Object.fromEntries(
       Object.entries(descriptors).map(([fieldName, descriptor]) => [
         fieldName,
@@ -761,8 +780,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
     const { errors: rawErrors, resolvedValues } = await runAllValidation();
 
-    const previousErrors = stateRef.current.errors as Record<string, string | undefined>;
-    const nextErrorsForAnalytics = rawErrors as Record<string, string | undefined>;
+    const previousErrors = stateRef.current.errors;
+    const nextErrorsForAnalytics = rawErrors;
 
     emitErrorsDiffAnalytics(analyticsRef.current, previousErrors, nextErrorsForAnalytics);
 
@@ -791,7 +810,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
       analyticsRef.current?.onFormSubmitError(rawErrors, stateRef.current.submitCount);
 
-      onError?.(rawErrors as Partial<Record<keyof S, string>>);
+      onError?.(rawErrors as unknown as Partial<Record<keyof SchemaShape<S>, string>>);
       return;
     }
 
@@ -801,14 +820,21 @@ export function useFormBridgeCore<const S extends FormSchema>(
       isSubmitting: true,
     }));
 
-    const visibleValuesSource =
-      resolvedValues ?? (stateRef.current.values as Record<string, unknown>);
+    const visibleValuesSource = resolvedValues ?? stateRef.current.values;
     const submittedValues: Record<string, unknown> = {};
-    const currentVisibility = evaluateAllConditions(conditionsMap, visibleValuesSource);
+    const currentVisibility = evaluateAllConditions(
+      conditionsMap,
+      visibleValuesSource as SchemaValues<S>,
+    );
 
     for (const [key, value] of Object.entries(visibleValuesSource)) {
       const vis = currentVisibility[key];
-      if (!vis || vis.visible) submittedValues[key] = value;
+      if (!vis || vis.visible) {
+        const descriptor = descriptors[key];
+        submittedValues[key] = descriptor
+          ? applySubmitTransforms(descriptor, value)
+          : value;
+      }
     }
 
     try {
@@ -818,8 +844,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
         ...current,
         status: 'success',
         isSubmitting: false,
-        isSuccess: true,
-        isError: false,
+        isSubmitSuccess: true,
+        isSubmitError: false,
       }));
 
       analyticsRef.current?.onFormSubmitSuccess(
@@ -835,8 +861,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
         ...current,
         status: 'error',
         isSubmitting: false,
-        isSuccess: false,
-        isError: true,
+        isSubmitSuccess: false,
+        isSubmitError: true,
         submitError: message,
       }));
     }

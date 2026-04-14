@@ -36,6 +36,7 @@ export interface MaskedFieldMeta {
   _maskShowPlaceholder: boolean;
   _maskShowInPlaceholder: boolean;
   _maskPlaceholder: string;
+  _maskPlaceholderText?: string;
   _maskValidateComplete: boolean;
   _maskCompleteMsg: string;
 }

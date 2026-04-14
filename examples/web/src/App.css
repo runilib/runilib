@@ -31,6 +31,70 @@
   gap: 18px;
 }
 
+.library-form-love-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(238, 244, 255, 0.98));
+}
+
+.library-form-love-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.library-form-love-label {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.09);
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.library-form-love-copy h2 {
+  font-family: var(--font-head);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.library-form-love-copy p {
+  margin-top: 0;
+  max-width: 58ch;
+  font-size: 0.98rem;
+}
+
+.library-form-love-points {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.library-form-love-points span {
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  padding: 14px 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--text);
+  font-size: 0.96rem;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
 .library-eyebrow {
   display: inline-flex;
   width: fit-content;
@@ -280,6 +344,10 @@
 
   .library-grid,
   .library-showcase-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .library-form-love-panel {
     grid-template-columns: 1fr;
   }
 

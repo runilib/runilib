@@ -40,7 +40,7 @@ export function CssModulesStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => createDemoFormUi(styles),
+    globalConfigs: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;

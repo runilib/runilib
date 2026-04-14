@@ -1,4 +1,4 @@
-import type { ResolverResult, SchemaResolver } from '../../types/options';
+import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
 
 type ResolverValues = Record<string, unknown>;
 type ResolverPathSegment = string | number;
@@ -287,7 +287,7 @@ async function executeZodParse(
 export function zodResolver(
   schema: ZodSchema,
   options: ZodResolverOptions = {},
-): SchemaResolver {
+): SchemaValidatorResolver {
   return async (values): Promise<ResolverResult> => {
     const result = await executeZodParse(schema, values, options);
 

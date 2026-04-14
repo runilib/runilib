@@ -17,7 +17,7 @@ interface ResolverExampleFrameProps {
   children: ReactNode;
 }
 
-export function ResolverExampleFrame({
+export const ResolverExampleFrame = ({
   resolverName,
   accent,
   title,
@@ -29,7 +29,7 @@ export function ResolverExampleFrame({
   submitError,
   footer,
   children,
-}: ResolverExampleFrameProps) {
+}: ResolverExampleFrameProps) => {
   return (
     <div className={styles.resolverFrame}>
       <div className={styles.resolverOverview}>
@@ -88,4 +88,4 @@ export function ResolverExampleFrame({
       </div>
     </div>
   );
-}
+};

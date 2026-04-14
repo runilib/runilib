@@ -17,7 +17,7 @@ interface MaskExampleFrameProps {
   children: ReactNode;
 }
 
-export function MaskExampleFrame({
+export const MaskExampleFrame = ({
   maskName,
   accent,
   title,
@@ -29,7 +29,7 @@ export function MaskExampleFrame({
   submitError,
   footer,
   children,
-}: MaskExampleFrameProps) {
+}: MaskExampleFrameProps) => {
   return (
     <div className={styles.resolverFrame}>
       <div className={styles.resolverOverview}>
@@ -88,4 +88,4 @@ export function MaskExampleFrame({
       </div>
     </div>
   );
-}
+};

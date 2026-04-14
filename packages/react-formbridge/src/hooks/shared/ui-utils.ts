@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type {
   ExtraFieldProps,
   FieldStyleValue,
@@ -102,7 +104,7 @@ export function mergeWebFieldProps(
     ...overrideProps,
     classNames: mergeWebSlotClasses(baseProps?.classNames, overrideProps?.classNames),
     styles: mergeWebSlotStyles(baseProps?.styles, overrideProps?.styles),
-    rootProps: mergeObjectLike(baseProps?.rootProps, overrideProps?.rootProps),
+    wrapperProps: mergeObjectLike(baseProps?.wrapperProps, overrideProps?.wrapperProps),
     labelProps: mergeObjectLike(baseProps?.labelProps, overrideProps?.labelProps),
     inputProps: mergeObjectLike(baseProps?.inputProps, overrideProps?.inputProps),
     textareaProps: mergeObjectLike(
@@ -131,7 +133,7 @@ export function mergeNativeFieldProps(
     ...base,
     ...override,
     styles: mergeNativeSlotStyles(base?.styles, override?.styles),
-    rootProps: mergeObjectLike(base?.rootProps, override?.rootProps),
+    wrapperProps: mergeObjectLike(base?.wrapperProps, override?.wrapperProps),
     labelProps: mergeObjectLike(base?.labelProps, override?.labelProps),
     inputProps: mergeObjectLike(base?.inputProps, override?.inputProps),
     hintProps: mergeObjectLike(base?.hintProps, override?.hintProps),
@@ -234,11 +236,11 @@ export function mergeWebSubmitProps(
   theme: WebSubmitPropsOverrides | undefined,
   localClassName?: string,
   localStyle?: FieldStyleValue,
-  localLoadingText?: string,
+  localLoadingText?: ReactNode,
 ): {
   className?: string;
   style?: FieldStyleValue;
-  loadingText?: string;
+  loadingText?: ReactNode;
   props?: WebSubmitPropsOverrides['props'];
 } {
   return {
@@ -271,13 +273,13 @@ export function mergeNativeFormProps(
 export function mergeNativeSubmitProps(
   theme: NativeSubmitPropsOverrides | undefined,
   localStyle?: FieldStyleValue,
-  localLoadingText?: string,
+  localLoadingText?: ReactNode,
 ): {
   style?: NativeStyleValue;
   containerStyle?: NativeStyleValue;
   textStyle?: NativeStyleValue;
   indicatorColor?: string;
-  loadingText?: string;
+  loadingText?: ReactNode;
   props?: NativeSubmitPropsOverrides['props'];
   contentProps?: NativeSubmitPropsOverrides['contentProps'];
 } {

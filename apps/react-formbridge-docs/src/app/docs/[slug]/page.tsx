@@ -17,7 +17,6 @@ import { absoluteUrl } from '@/lib/site';
 import type { CodeSnippet, DocEntry } from '@/types';
 
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -53,33 +52,6 @@ const USE_FORM_BRIDGE_TOC: TocItem[] = [
 
 const USE_FORM_BRIDGE_QUICKSTART: CodeSnippet[] = [
   {
-    code: `import type { FormSchema } from '@runilib/react-formbridge'
-import { field, useFormBridge } from '@runilib/react-formbridge'
-
-const schema = {
-  fullName: field.text('Full name').required(),
-  email: field.email('Email').required().trim().lowercase(),
-} satisfies FormSchema
-
-export function ProfileForm() {
-  const { Form, fields, state } = useFormBridge(schema, {
-    validateOn: 'onBlur',
-    revalidateOn: 'onChange',
-  })
-
-  return (
-    <Form onSubmit={async (values) => api.save(values)}>
-      <fields.fullName />
-      <fields.email />
-      <Form.Submit disabled={!state.isValid}>Save changes</Form.Submit>
-    </Form>
-  )
-}`,
-    filename: 'QuickStart.tsx',
-    label: 'TypeScript',
-    lang: 'tsx',
-  },
-  {
     code: `import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -101,8 +73,39 @@ export function ProfileForm() {
     </Form>
   )
 }`,
-    filename: 'QuickStart.jsx',
-    label: 'JavaScript',
+    filename: 'QuickStart.tsx',
+    label: 'Web',
+    lang: 'tsx',
+  },
+  {
+    code: `import { ScrollView, View } from 'react-native'
+import { field, useFormBridge } from '@runilib/react-formbridge'
+
+const schema = {
+  fullName: field.text('Full name').required(),
+  email: field.email('Email').required().trim().lowercase(),
+}
+
+export function ProfileForm() {
+  const { Form, fields, state } = useFormBridge(schema, {
+    validateOn: 'onBlur',
+    revalidateOn: 'onChange',
+  })
+
+  return (
+    <ScrollView>
+      <Form onSubmit={async (values) => api.save(values)}>
+        <View style={{ gap: 12, padding: 16 }}>
+          <fields.fullName />
+          <fields.email />
+          <Form.Submit disabled={!state.isValid}>Save changes</Form.Submit>
+        </View>
+      </Form>
+    </ScrollView>
+  )
+}`,
+    filename: 'QuickStart.tsx',
+    label: 'Native',
     lang: 'tsx',
   },
 ];
@@ -122,13 +125,22 @@ const USE_FORM_BRIDGE_OPTIONS: FeatureOptionRow[] = [
   {
     description: 'Optional schema adapter for Zod, Yup, Joi, or Valibot validation.',
     property: 'resolver',
-    type: 'SchemaResolver',
+    type: 'SchemaValidatorResolver',
   },
   {
     description:
       'Draft save and restore behavior with storage, TTL, debounce, and exclusions.',
     property: 'persist',
-    type: 'PersistOptions',
+    type: `{
+  key: string;\n
+  storage?: "local" | "session" | "async" | StorageAdapter;\n
+  ttl?: number;\n
+  exclude?: string[];\n
+  debounce?: number;\n
+  onRestore?: (values: Record<string, unknown>) => void;\n
+  onSaveError?: (error: unknown) => void;\n
+  version?: string;
+  }`,
   },
   {
     description: 'Recreate the runtime when the surrounding business context changes.',
@@ -138,6 +150,11 @@ const USE_FORM_BRIDGE_OPTIONS: FeatureOptionRow[] = [
   {
     description: 'Seed the runtime from existing values before the user edits the form.',
     property: 'initialValues',
+    type: 'Partial<SchemaValues<typeof schema>>',
+  },
+  {
+    description: 'Seed the runtime from existing values before the user edits the form.',
+    property: 'globalConfigs',
     type: 'Partial<SchemaValues<typeof schema>>',
   },
 ];
@@ -200,7 +217,7 @@ function buildDefaultToc(entry: DocEntry): TocItem[] {
   );
 }
 
-function UseFormBridgeFeaturePage({
+const UseFormBridgeFeaturePage = ({
   docsHref,
   entry,
   version,
@@ -208,13 +225,26 @@ function UseFormBridgeFeaturePage({
   docsHref: string;
   entry: DocEntry;
   version: string;
-}) {
+}) => {
   const formEntry = getDocEntryById('fb-form');
   const fieldsEntry = getDocEntryById('fb-fields');
   const stateEntry = getDocEntryById('fb-state');
   const fieldControllerEntry = getDocEntryById('fb-field-controller');
+  const fieldErrorEntry = getDocEntryById('fb-field-error');
+  const fieldLabelEntry = getDocEntryById('fb-field-label');
+  const formProviderEntry = getDocEntryById('fb-use-form-bridge-context');
+  const conditionalEntry = getDocEntryById('fb-conditional');
+  const persistenceEntry = getDocEntryById('fb-persistence');
+  const actionsEntry = getDocEntryById('fb-actions');
 
   const returnCards: FeatureReturnCard[] = [
+    {
+      description:
+        'Advanced context wrapper that exposes the form runtime to consumers rendered outside `<Form>`.',
+      href: formProviderEntry?.href,
+      label: 'context wrapper',
+      title: 'FormProvider',
+    },
     {
       description:
         'Generated wrapper component with submit lifecycle and `Form.Submit` helpers.',
@@ -230,6 +260,27 @@ function UseFormBridgeFeaturePage({
     },
     {
       description:
+        'Standalone error renderer for a single field name, useful in custom layouts.',
+      href: fieldErrorEntry?.href,
+      label: 'standalone error',
+      title: 'FieldError',
+    },
+    {
+      description:
+        'Standalone label renderer for a single field name, useful in custom layouts.',
+      href: fieldLabelEntry?.href,
+      label: 'standalone label',
+      title: 'FieldLabel',
+    },
+    {
+      description:
+        'Field-scoped runtime for fully custom UI while keeping the schema contract intact.',
+      href: fieldControllerEntry?.href,
+      label: 'custom renderer bridge',
+      title: 'fieldController()',
+    },
+    {
+      description:
         'Reactive values, errors, dirty flags, touched state, and submit status.',
       href: stateEntry?.href,
       label: 'reactive state',
@@ -237,10 +288,98 @@ function UseFormBridgeFeaturePage({
     },
     {
       description:
-        'Field-scoped runtime for fully custom UI without losing schema behavior.',
-      href: fieldControllerEntry?.href,
-      label: 'custom renderer bridge',
-      title: 'fieldController()',
+        'Per-field visibility, required, and disabled flags computed from conditional rules.',
+      href: conditionalEntry?.href,
+      label: 'conditional runtime',
+      title: 'visibility',
+    },
+    {
+      description: '`true` while a persisted draft is being restored into the runtime.',
+      href: persistenceEntry?.href,
+      label: 'draft lifecycle',
+      title: 'persistanceHelpers.isLoadingDraft',
+    },
+    {
+      description: '`true` once a previously saved draft was found and hydrated.',
+      href: persistenceEntry?.href,
+      label: 'draft lifecycle',
+      title: 'persistanceHelpers.hasDraft',
+    },
+    {
+      description: 'Delete the saved draft from the configured storage backend.',
+      href: persistenceEntry?.href,
+      label: 'draft helper',
+      title: 'persistanceHelpers.clearDraft()',
+    },
+    {
+      description:
+        'Persist the current values immediately without waiting for the debounce window.',
+      href: persistenceEntry?.href,
+      label: 'draft helper',
+      title: 'persistanceHelpers.saveDraftNow()',
+    },
+    {
+      description: 'Set one field value programmatically from outside the form.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'setValue()',
+    },
+    {
+      description: 'Read one field value on demand without subscribing to updates.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'getValue()',
+    },
+    {
+      description: 'Read the full value object on demand without subscribing to updates.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'getValues()',
+    },
+    {
+      description:
+        'Validate a single field, a list of fields, or the entire form on demand.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'validate()',
+    },
+    {
+      description:
+        'Reset the form back to schema defaults or to a provided partial value object.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'resetFields()',
+    },
+    {
+      description: 'Push a manual field error from imperative code or async handlers.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'setError()',
+    },
+    {
+      description: 'Clear errors for one field, a list of fields, or the entire form.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'clearErrors()',
+    },
+    {
+      description: 'Reactive single-field read that re-renders on every value change.',
+      href: actionsEntry?.href,
+      label: 'reactive helper',
+      title: 'watch()',
+    },
+    {
+      description: 'Reactive full-values read that re-renders on every value change.',
+      href: actionsEntry?.href,
+      label: 'reactive helper',
+      title: 'watchAll()',
+    },
+    {
+      description:
+        'Imperatively trigger submission through the same pipeline as `Form.Submit`.',
+      href: actionsEntry?.href,
+      label: 'imperative action',
+      title: 'submit()',
     },
   ];
 
@@ -384,47 +523,6 @@ function UseFormBridgeFeaturePage({
 
       <section
         className="doc-feature-section"
-        id="implementation"
-      >
-        <div className="doc-feature-section__head">
-          <h2>Cross-Platform Implementation</h2>
-        </div>
-        <p className="doc-feature-section__lede">
-          See how the same schema-first runtime keeps web and native UI aligned without
-          duplicating validation, visibility, or submit logic.
-        </p>
-
-        <div className="doc-preview-grid">
-          <figure className="doc-preview-card doc-preview-card--browser">
-            <div className="doc-preview-card__label">Browser Preview</div>
-            <div className="doc-preview-card__frame">
-              <Image
-                alt="Browser preview of a generated profile settings form."
-                height={420}
-                src="/docs/formbridge/formbridge-overview-web.svg"
-                unoptimized
-                width={720}
-              />
-            </div>
-          </figure>
-
-          <figure className="doc-preview-card doc-preview-card--phone">
-            <div className="doc-preview-card__label">Native Preview</div>
-            <div className="doc-preview-card__device">
-              <Image
-                alt="Native preview of the same schema rendered as a mobile form."
-                height={620}
-                src="/docs/formbridge/formbridge-overview-native.svg"
-                unoptimized
-                width={340}
-              />
-            </div>
-          </figure>
-        </div>
-      </section>
-
-      <section
-        className="doc-feature-section"
         id="type-safety"
       >
         <div className="doc-feature-section__head">
@@ -438,7 +536,7 @@ function UseFormBridgeFeaturePage({
       </section>
     </>
   );
-}
+};
 
 function StandardDocPage({
   docsHref,
@@ -470,7 +568,6 @@ function StandardDocPage({
           <span>v{version}</span>
         </div>
         <h1>{entry.title}</h1>
-        <p>{entry.summary}</p>
       </header>
 
       <article className="doc-standard-article">

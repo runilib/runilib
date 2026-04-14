@@ -1,5 +1,4 @@
 import type { LibraryDoc } from './../../../types/index';
-import { DOC_PREVIEWS } from '../constants';
 
 export const tutorialSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial',

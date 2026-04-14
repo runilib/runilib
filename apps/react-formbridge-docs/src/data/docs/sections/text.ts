@@ -1,12 +1,79 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS, DOC_PREVIEWS, STRING_BUILDER_METHODS } from '../constants';
+import { buildMethodsTable } from '../constants';
+
+const TEXT_METHODS_TABLE = buildMethodsTable([
+  [
+    '`min(length, message?)`',
+    '`length: number`',
+    'Sets the minimum accepted string length.',
+  ],
+  [
+    '`max(length, message?)`',
+    '`length: number`',
+    'Sets the maximum accepted string length.',
+  ],
+  [
+    '`pattern(regex | regex[], message?)`',
+    '`RegExp | RegExp[]`',
+    'Appends one or more accepted regex rules.',
+  ],
+  [
+    '`patterns(regexes, message?)`',
+    '`RegExp[]`',
+    'Alias for passing multiple accepted regex alternatives.',
+  ],
+  [
+    '`format(regex, message?)`',
+    '`regex: RegExp`',
+    'Overrides the low-level format regex used by preset string builders.',
+  ],
+  ['`trim()`', '`() => this`', 'Trims whitespace before validation and submit.'],
+  ['`lowercase()`', '`() => this`', 'Lowercases the value before storing it.'],
+  ['`uppercase()`', '`() => this`', 'Uppercases the value before storing it.'],
+  [
+    '`nonEmpty(message?)`',
+    '`message?: string`',
+    'Rejects empty strings **and** whitespace-only input (stricter than `required()`, which only checks for presence).',
+  ],
+  [
+    '`length(exact, message?)`',
+    '`exact: number`',
+    'Requires an exact character count — handy for fixed-size codes like tax IDs, IBAN fragments, or reference numbers.',
+  ],
+  [
+    '`between(min, max, message?)`',
+    '`min: number, max: number`',
+    'Shorthand for `min(min).max(max)` expressed as a single predicate with a combined message.',
+  ],
+  [
+    '`oneOf(values, message?)`',
+    '`values: string[]`',
+    'Accepts only values present in the allow-list. Useful for free-form inputs that must resolve to a known enum.',
+  ],
+  [
+    '`notOneOf(values, message?)`',
+    '`values: string[]`',
+    'Rejects values from a deny-list (reserved words, blocked usernames, forbidden slugs, etc.).',
+  ],
+  [
+    '`matches(fieldName, message?)`',
+    '`fieldName: string | FieldReference`',
+    'Requires equality with another field value (supports `ref()` for nested paths). Classic use: confirm-password.',
+  ],
+  [
+    '`sameAs(fieldName, message?)`',
+    '`fieldName: string | FieldReference`',
+    'Alias for `matches()` with more explicit confirmation semantics.',
+  ],
+]);
 
 export const textSection: LibraryDoc['sections'][number] = {
   id: 'fb-text',
   title: 'field.text()',
   content: `The base builder for free-form strings. Use it for names, titles, slugs, comments, usernames, or any value that does not need a specialized builder.
 
-- Inherits the full base builder surface and all string builder methods (see Builder basics)
+- Inherits all shared methods from [Base field builder](/docs/base-field-builder)
+- This page is also the reference for the shared string-builder methods reused by \`field.email()\`, \`field.password()\`, \`field.tel()\`, \`field.url()\`, \`field.textarea()\`, \`field.date()\`, and \`field.masked()\`
 - \`trim()\`, \`min()\`, \`max()\`, \`pattern()\`, and \`transform()\` are the most used methods on text fields
 - The same schema works on web and React Native without changes`,
   codeTabs: [
@@ -37,14 +104,14 @@ const { Form, fields } = useFormBridge(schema)
   subsections: [
     {
       id: 'fb-text-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`text\`
-- No text-specific methods beyond the shared surface
+- Shared methods: see [Base field builder](/docs/base-field-builder)
+- This page documents the string-specific layer added on top of the base builder
 
-${BASE_BUILDER_METHODS}
-
-${STRING_BUILDER_METHODS}`,
+String builder methods:
+${TEXT_METHODS_TABLE}`,
     },
     {
       id: 'fb-text-recipes',

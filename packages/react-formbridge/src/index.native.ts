@@ -13,6 +13,8 @@ import type {
 
 // ─── Core ─────────────────────────────────────────────────────────────────────
 
+// ─── Core ─────────────────────────────────────────────────────────────────────
+
 export type {
   JsonFieldDescriptor,
   JsonFieldType,
@@ -28,6 +30,7 @@ export type {
   MaskTokenMap,
 } from './core/field-builders/mask/types';
 export type { InferFieldOptions, InferOverrides } from './core/field-builders/types';
+export type { StorageAdapter, StorageType } from './core/persist/storage';
 export {
   type JoiResolverIssue,
   type JoiResolverOptions,
@@ -49,6 +52,14 @@ export type {
   ResolverIssueMapResult,
   ResolverPathInput,
 } from './core/resolvers/types';
+export { ref } from './core/validators/reference';
+export {
+  type FormBridgeSchema,
+  type FormBridgeSchemaApi,
+  FormBridgeSchemaValidationError,
+  getSchemaValidationApi,
+  schema,
+} from './core/validators/schema';
 export {
   type FormBridgeProviderProps,
   useFormBridgeContext,
@@ -62,14 +73,14 @@ export { useAsyncOptions } from './hooks/shared/useAsyncOptions';
 export {
   type AnalyticsHandlers,
   type AnalyticsOptions,
-  FormAnalyticsTracker,
+  FormBridgeAnalyticsTracker,
   useFormBridgeAnalytics,
-} from './hooks/shared/useFormAnalytics';
+} from './hooks/shared/useFormBridgeAnalytics';
 export {
   type UseReadonlyFormOptions,
   type UseReadonlyFormReturn,
-  useReadonlyFormBridge,
-} from './hooks/shared/useReadonlyForm';
+  useFormBridgeReadonly,
+} from './hooks/shared/useFormBridgeReadonly';
 export {
   type UseDynamicFormOptions,
   type UseDynamicFormReturn,

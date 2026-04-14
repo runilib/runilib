@@ -31,7 +31,7 @@ export function FieldOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalStyles: () => ({
+    globalConfigs: () => ({
       submit: {
         loadingText: 'Saving inline theme...',
         containerStyle: {
@@ -47,7 +47,7 @@ export function FieldOverridesStylingExample() {
       },
       field: {
         styles: {
-          root: {
+          wrapper: {
             marginBottom: 0,
             gap: 8,
           },

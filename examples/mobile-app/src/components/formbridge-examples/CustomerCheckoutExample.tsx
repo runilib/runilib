@@ -82,7 +82,7 @@ export function CustomerCheckoutExample() {
   const customerForm = useFormBridge(customerSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => createNativeFormUi(),
+    globalConfigs: () => createNativeFormUi(),
     persist: {
       key: 'mobile-customer-checkout',
       storage: 'local',

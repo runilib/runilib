@@ -1,7 +1,7 @@
 import type { LibraryDoc } from '../../types';
 import { actionsSection } from './sections/actions';
-import { adaptersSection } from './sections/adapters';
 import { analyticsSection } from './sections/analytics';
+import { baseFieldBuilderSection } from './sections/baseFieldBuilder';
 import { builderBasicsSection } from './sections/builderBasics';
 import { checkboxSection } from './sections/checkbox';
 import { conditionalSection } from './sections/conditional';
@@ -10,9 +10,13 @@ import { dateSection } from './sections/date';
 import { dynamicSection } from './sections/dynamic';
 import { emailSection } from './sections/email';
 import { fieldControllerSection } from './sections/fieldController';
+import { fieldErrorSection } from './sections/fieldError';
+import { fieldLabelSection } from './sections/fieldLabel';
 import { fieldsSection } from './sections/fields';
 import { fileSection } from './sections/file';
 import { formSection } from './sections/form';
+import { globalConfigsSection } from './sections/globalConfigs';
+import { hostHelpersSection } from './sections/hostHelpers';
 import { inferSection } from './sections/infer';
 import { inferTypeSection } from './sections/inferType';
 import { installSection } from './sections/install';
@@ -26,9 +30,11 @@ import { phoneSection } from './sections/phone';
 import { quickstartSection } from './sections/quickstart';
 import { radioSection } from './sections/radio';
 import { readonlySection } from './sections/readonly';
-import { schemaSection } from './sections/schema';
+import { schemaApiSection } from './sections/schema';
+import { schemaMentalModelSection } from './sections/schemaMentalModel';
 import { selectSection } from './sections/select';
 import { stateSection } from './sections/state';
+import { submitSection } from './sections/submit';
 import { switchSection } from './sections/switch';
 import { telSection } from './sections/tel';
 import { textSection } from './sections/text';
@@ -44,6 +50,7 @@ import { useAsyncOptionsSection } from './sections/useAsyncOptions';
 import { useFormBridgeSection } from './sections/useFormBridge';
 import { useFormBridgeContextSection } from './sections/useFormBridgeContext';
 import { validationSection } from './sections/validation';
+import { adaptersSection } from './sections/validatoResolver';
 import { webUiSection } from './sections/webUi';
 import { wizardSection } from './sections/wizard';
 import { docSidebar } from './sidebar';
@@ -56,7 +63,7 @@ export const formbridgeDocs: LibraryDoc = {
     overviewSection,
     installSection,
     quickstartSection,
-    schemaSection,
+    schemaMentalModelSection,
     tutorialSection,
     tutorialSignupSection,
     tutorialCheckoutSection,
@@ -64,13 +71,20 @@ export const formbridgeDocs: LibraryDoc = {
     tutorialCustomUiSection,
     tutorialProductionSection,
     useFormBridgeSection,
+    schemaApiSection,
     formSection,
+    submitSection,
+    fieldErrorSection,
+    fieldLabelSection,
     fieldsSection,
     fieldControllerSection,
+    hostHelpersSection,
     stateSection,
     actionsSection,
     validationSection,
+    globalConfigsSection,
     builderBasicsSection,
+    baseFieldBuilderSection,
     textSection,
     emailSection,
     passwordSection,

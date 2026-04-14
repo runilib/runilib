@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomerCheckoutExample } from '../../components/formbridge-examples/CustomerCheckoutExample';
 import { CustomMaskExamplesShowcase } from '../../components/formbridge-examples/CustomMaskExamplesShowcase';
+import { CustomStorageAdapterExample } from '../../components/formbridge-examples/CustomStorageAdapterExample';
 import { FieldVariantsShowcase } from '../../components/formbridge-examples/FieldVariantsShowcase';
 import { PasswordVariantsExample } from '../../components/formbridge-examples/PasswordVariantsExample';
 import { PhoneVariantsExample } from '../../components/formbridge-examples/PhoneVariantsExample';
@@ -70,6 +71,7 @@ export function FormbridgeExamplesScreen() {
             UI patterns.
           </Text>
           <CustomerCheckoutExample />
+          <CustomStorageAdapterExample />
         </View>
 
         <View style={s.sectionCard}>

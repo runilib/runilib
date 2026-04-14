@@ -6,7 +6,7 @@ import type {
   SchemaValues,
   ValidationTrigger,
 } from '../../types';
-import type { FormAnalyticsTracker } from './useFormAnalytics';
+import type { FormBridgeAnalyticsTracker } from './useFormBridgeAnalytics';
 
 export const makeInitialState = <S extends FormSchema>(
   values: SchemaValues<S>,
@@ -20,8 +20,8 @@ export const makeInitialState = <S extends FormSchema>(
     isValid: true,
     isDirty: false,
     isSubmitting: false,
-    isSuccess: false,
-    isError: false,
+    isSubmitSuccess: false,
+    isSubmitError: false,
     submitCount: 0,
     submitError: null,
   };
@@ -31,10 +31,10 @@ export const buildSchemaRuntime = <S extends FormSchema>(
   schema: S,
 ): {
   descriptors: Record<string, FieldDescriptor<unknown>>;
-  conditionsMap: Record<string, FieldConditions>;
+  conditionsMap: Record<string, FieldConditions<S>>;
 } => {
   const desc: Record<string, FieldDescriptor<unknown>> = {};
-  const conds: Record<string, FieldConditions> = {};
+  const conds: Record<string, FieldConditions<S>> = {};
 
   for (const [key, val] of Object.entries(schema)) {
     let built: FieldDescriptor<unknown>;
@@ -52,11 +52,11 @@ export const buildSchemaRuntime = <S extends FormSchema>(
 
     desc[key] = built;
 
-    const candidate = val as { _conditions?: FieldConditions };
+    const candidate = val as { _conditions?: FieldConditions<S> };
     if (candidate?._conditions) {
       conds[key] = candidate._conditions;
     } else {
-      const builtConditions = (built as { _conditions?: FieldConditions })._conditions;
+      const builtConditions = (built as { _conditions?: FieldConditions<S> })._conditions;
 
       if (builtConditions) {
         conds[key] = builtConditions;
@@ -134,6 +134,33 @@ export const applyCommittedTransforms = (
   return nextValue;
 };
 
+export const applySubmitTransforms = (
+  descriptor: FieldDescriptor<unknown>,
+  rawValue: unknown,
+): unknown => {
+  let nextValue = applyCommittedTransforms(descriptor, rawValue);
+
+  if (descriptor._outputTransform) {
+    nextValue = (descriptor._outputTransform as (value: unknown) => unknown)(nextValue);
+  }
+
+  return nextValue;
+};
+
+export const computeTransformedValues = (
+  values: Record<string, unknown>,
+  descriptors: Record<string, FieldDescriptor<unknown>>,
+): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(values)) {
+    const descriptor = descriptors[key];
+    result[key] = descriptor?._outputTransform
+      ? (descriptor._outputTransform as (v: unknown) => unknown)(value)
+      : value;
+  }
+  return result;
+};
+
 function shallowEqualObject(
   a: Record<string, unknown> | undefined,
   b: Record<string, unknown> | undefined,
@@ -177,7 +204,7 @@ export const areVisibilityMapsEqual = (a: VisibilityMap, b: VisibilityMap): bool
   return true;
 };
 
-type AnalyticsTracker = FormAnalyticsTracker | null;
+type AnalyticsTracker = FormBridgeAnalyticsTracker | null;
 
 export const emitFieldErrorAnalytics = (
   analytics: AnalyticsTracker,

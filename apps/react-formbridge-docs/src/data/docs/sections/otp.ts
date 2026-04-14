@@ -1,5 +1,18 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+
+const OTP_METHODS_TABLE = buildMethodsTable([
+  [
+    '`length(length, message?)`',
+    '`length: number`',
+    'Fixes the exact expected code length and syncs the descriptor min/max values.',
+  ],
+  [
+    '`digitsOnly(message?)`',
+    '`message?: string`',
+    'Rejects non-digit characters and hints a numeric keyboard.',
+  ],
+]);
 
 export const otpSection: LibraryDoc['sections'][number] = {
   id: 'fb-otp',
@@ -24,16 +37,13 @@ export const otpSection: LibraryDoc['sections'][number] = {
   subsections: [
     {
       id: 'fb-otp-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`otp\`
-- Inherits base builder methods (see Builder basics)
+${BASE_FIELD_BUILDER_REFERENCE}
 
 OTP-specific methods:
-- \`length(length, message?)\` — fixes the exact expected code length and syncs min/max descriptor values
-- \`digitsOnly(message?)\` — rejects non-digit characters and hints a numeric keyboard
-
-${BASE_BUILDER_METHODS}`,
+${OTP_METHODS_TABLE}`,
     },
     {
       id: 'fb-otp-recipes',

@@ -10,7 +10,7 @@ import {
 export const readonlySection: LibraryDoc['sections'][number] = {
   id: 'fb-readonly',
 
-  title: 'useReadonlyFormBridge()',
+  title: 'useFormBridgeReadonly()',
   content: `Render schema-driven values as readonly rows or as a diff against original values.
 
 - Useful for review steps before submission, audit views, change approval screens, or before/after comparisons
@@ -20,7 +20,7 @@ export const readonlySection: LibraryDoc['sections'][number] = {
       filename: 'Readonly.tsx',
       lang: 'tsx',
       preview: DOC_PREVIEWS.readonly,
-      code: `import { field, useReadonlyFormBridge } from '@runilib/react-formbridge'
+      code: `import { field, useFormBridgeReadonly } from '@runilib/react-formbridge'
 
 const schema = {
   fullName: field.text('Full name'),
@@ -29,7 +29,7 @@ const schema = {
 }
 
 export function ReviewCard({ values, original }: { values: any; original?: any }) {
-  const readonly = useReadonlyFormBridge(schema, {
+  const readonly = useFormBridgeReadonly(schema, {
     values,
     originalValues: original,
     mode: original ? 'diff' : 'readonly',

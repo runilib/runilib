@@ -32,7 +32,7 @@ export function LicensePlateMaskExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => createDemoFormUi(styles),
+    globalConfigs: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;

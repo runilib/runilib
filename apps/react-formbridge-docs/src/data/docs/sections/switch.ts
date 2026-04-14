@@ -1,5 +1,13 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+
+const SWITCH_METHODS_TABLE = buildMethodsTable([
+  [
+    '`mustBeTrue(message?)`',
+    '`message?: string`',
+    'Blocks submit unless the switch is enabled.',
+  ],
+]);
 
 export const switchSection: LibraryDoc['sections'][number] = {
   id: 'fb-switch',
@@ -29,14 +37,13 @@ export const switchSection: LibraryDoc['sections'][number] = {
   subsections: [
     {
       id: 'fb-switch-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`false\`
 - type is \`switch\`
+${BASE_FIELD_BUILDER_REFERENCE}
 
-Boolean-specific method:
-- \`mustBeTrue(message?)\` — submit is blocked unless the switch is enabled
-
-${BASE_BUILDER_METHODS}`,
+Switch-specific methods:
+${SWITCH_METHODS_TABLE}`,
     },
     {
       id: 'fb-switch-recipes',

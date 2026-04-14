@@ -7,38 +7,247 @@ import {
 export const validationSection: LibraryDoc['sections'][number] = {
   id: 'fb-validation',
   title: 'Validation',
-  content: `Validation in react-formbridge happens in two layers.
+  content: `react-formbridge ships with a **complete, self-sufficient validation pipeline**. No external library is required to build a production-grade form.
 
-- Field builders cover most everyday rules directly in the schema: \`required\`, \`min\`, \`max\`, \`pattern/patterns\`, cross-field equality with \`matches/sameAs\`, number helpers, \`mustBeTrue\`, \`validate(fn)\`, and more.
-- A schema-level \`resolver\` lets an external validator such as Zod or Yup own the final result shape.
-- Defaults today: \`validateOn='onBlur'\`, \`revalidateOn='onChange'\`.`,
+Every approach below flows through the same runtime and lands in the same \`state.errors\` bag. There are **five complementary ways** to validate, and you can combine any of them in the same form:
+
+1. **Field-level builder rules** — \`required\`, \`min\`, \`max\`, \`pattern/patterns\`, \`email\`, \`url\`, \`matches/sameAs\`, \`mustBeTrue\`, \`validate(fn)\`, number helpers, file limits, phone formatting, etc. Declared directly on each builder, they cover most everyday rules.
+2. **Schema-level cross-field validation** via \`schema()\` — the recommended path the moment you need rules that span multiple fields (\`refine\`, \`superRefine\`, \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, \`dateRange\`, \`errorMap\`, async refinements, \`safeParse\` / \`validate\`). Zero external dependency required. See the dedicated [schema() API](/docs/schema-api) section.
+3. **Imperative validation** from the runtime — \`validate(names?)\`, \`setError()\`, \`clearErrors()\` let you trigger checks on demand and merge server-side errors into the same bag.
+4. **Trigger configuration** - \`validateOn\` and \`revalidateOn\` control **when** validation runs (\`'onBlur'\`, \`'onChange'\`, \`'onSubmit'\`, \`'onTouched'\`). Defaults: \`validateOn='onBlur'\`, \`revalidateOn='onChange'\`.
+5. **External resolvers** (opt-in) — bring your own Zod / Yup / Joi / Valibot schema via \`validatorResolver\` when you already own a domain schema elsewhere in the app.
+
+> FormBridge's design goal: **built-in validation is the complete path**, not a stepping stone to an external resolver. Resolvers are provided for teams that already have a domain schema they want to reuse, not because the built-in pipeline is incomplete.`,
   subsections: [
     {
       id: 'fb-validation-field-level',
-      title: 'Field-level validation',
-      content: `Use builder methods when the rule belongs to the field itself: required inputs, length or numeric constraints, agreement toggles, file limits, phone formatting, and cross-field checks such as confirm password.
+      title: '1. Field-level validation (builder rules)',
+      content: `Use builder methods when the rule belongs to the field itself. Every builder inherits a common base surface. See the [Base field builder](/docs/base-field-builder) section for the full reference table.
+
+**Common rules available on most builders**
+
+- \`required(message?)\` — the value must be provided
+- \`min(n, message?)\` / \`max(n, message?)\` — length (text) or numeric bounds
+- \`pattern(regex, message?)\` / \`patterns([...])\` — regex checks
+- \`matches(otherField, message?)\` / \`sameAs(otherField, message?)\` — cross-field equality (e.g. confirm password)
+- \`validate((value, allValues) => string | null)\` — custom synchronous predicate, return \`null\` when valid
+- \`mustBeTrue(message?)\` — agreement toggles (checkbox / switch)
+- **Specialised helpers** on typed builders: \`email()\` built into \`field.email()\`, \`url()\` on \`field.url()\`, \`integer()\` / \`positive()\` / \`step()\` on \`field.number()\`, country / format rules on \`field.phone()\`, \`accept\` / \`maxSize\` / \`maxFiles\` on \`field.file()\`, length and character-class options on \`field.password()\`, etc.
+
+Each typed builder has its own dedicated section with the exhaustive list of rules it supports (see the **Fields** sidebar group).
 
 ${VALIDATION_RUNTIME_SURFACE}`,
+      code: {
+        filename: 'field-level-rules.tsx',
+        lang: 'tsx',
+        code: `import { field, useFormBridge } from '@runilib/react-formbridge'
+
+const signupSchema = {
+  displayName: field
+    .text('Display name')
+    .required('Choose a display name')
+    .min(2, 'Use at least 2 characters')
+    .max(40),
+
+  email: field.email('Email').required(),
+
+  age: field.number('Age').required().integer().min(13).max(120),
+
+  password: field
+    .password('Password')
+    .required()
+    .min(8)
+    .pattern(/[A-Z]/, 'Needs an uppercase letter'),
+
+  confirmPassword: field
+    .password('Confirm password')
+    .required()
+    .sameAs('password', 'Passwords do not match'),
+
+  terms: field.checkbox('I accept the terms').mustBeTrue('You must accept the terms'),
+}`,
+      },
     },
     {
-      id: 'fb-validation-resolver',
-      title: 'Resolver validation',
-      content: `Use a resolver when you already own a domain schema elsewhere in the app. The resolver returns \`{ values, errors }\` and becomes the validation source of truth for the form runtime.
+      id: 'fb-validation-schema',
+      title: '2. Schema-level validation — schema() (recommended for cross-field rules)',
+      content: `Wrap your shape with \`schema()\` the moment you need rules that depend on **more than one field**, form-level errors, parsing utilities, async refinements, or global error message mapping. The wrapped value is still handed straight to \`useFormBridge\`, so you never split rendering and validation across two objects.
 
-${RESOLVER_SHARED_OPTIONS_SURFACE}`,
+**Cross-field primitives exposed by \`schema()\`**
+
+- \`refine(predicate, message?)\` / \`refineAsync(predicate, message?)\` — boolean predicate, optionally async
+- \`superRefine((values, ctx) => ...)\` — raise **multiple** issues in a single pass, each routed to its own field
+- \`atLeastOne(fields, message?)\` — at least one of the listed fields must be provided
+- \`exactlyOne(fields, message?)\` — exactly one of the listed fields must be provided
+- \`allOrNone(fields, message?)\` — either all or none of the listed fields are provided
+- \`dateRange({ start, end }, message?)\` — end date must be on or after start date
+- \`errorMap((issue, defaultMessage) => ...)\` — global message transformer (i18n, copy standardisation)
+- \`ref('path.to.field')\` — typed pointer for nested or dynamic field paths
+
+**Parsing utilities** (usable anywhere, not just inside React)
+
+- \`safeParse(values)\` / \`safeParseAsync(values)\` — never throws, returns \`{ success, data, errorsByField, formErrors, issues }\`
+- \`validate(values)\` / \`validateAsync(values)\` — strict variant that throws \`FormBridgeSchemaValidationError\` on failure
+
+Form-level errors (any issue without a \`path\`) surface under the synthetic \`state.errors.__form\` key. Field-level issues land in \`state.errors[fieldName]\` like every other rule.
+
+**For the complete API reference, options, signatures and examples, see the dedicated [\`schema() API\`](/docs/schema-api) section.**`,
+      code: {
+        filename: 'schema-validation.ts',
+        lang: 'ts',
+        code: `import { field, ref, schema } from '@runilib/react-formbridge'
+
+export const tripSchema = schema({
+  email: field.email().label('Email'),
+  phone: field.phone('FR').label('Phone'),
+  departureDate: field.date('Departure').required(),
+  returnDate: field.date('Return').required(),
+  password: field.password().required().min(8),
+  confirmPassword: field.password().required(),
+})
+  .atLeastOne(['email', 'phone'], 'Provide at least an email or a phone.')
+  .dateRange(
+    { start: ref('departureDate'), end: ref('returnDate') },
+    'Return date must be on or after departure.',
+  )
+  .superRefine((values, ctx) => {
+    if (values.password !== values.confirmPassword) {
+      ctx.addIssue({
+        path: 'confirmPassword',
+        code: 'password_mismatch',
+        message: 'Passwords do not match.',
+      })
+    }
+  })
+  .errorMap((issue, defaultMessage) => {
+    if (issue.code === 'required') return 'This field is required.'
+    return defaultMessage
+  })`,
+      },
+    },
+    {
+      id: 'fb-validation-imperative',
+      title: '3. Imperative validation & server-side errors',
+      content: `The runtime returned by \`useFormBridge\` exposes imperative entry points so you can drive validation from your own code — submit handlers, effects, or server round-trips.
+
+- \`validate(names?)\` — run validation on demand. Pass a single field name, an array, or nothing to validate the whole form. Returns the up-to-date error map.
+- \`setError(name, message)\` — push a single error into the state. Ideal for surfacing server-side validation errors under the same field keys the rest of the runtime uses.
+- \`setErrors(errorsByField)\` — merge a bag of server errors in one call.
+- \`clearErrors(names?)\` — clear one, several, or all errors.
+- \`state.errors\` / \`state.touched\` / \`state.dirty\` — read the current error state from React.
+- \`state.errors.__form\` — read form-level errors produced by \`schema()\` refinements.
+
+This is also how you wire **server-side validation** into the same pipeline: call your API inside \`onSubmit\`, then \`setErrors(response.errorsByField)\` to surface any failures under the same field keys your users are already looking at.`,
+      code: {
+        filename: 'imperative-validation.tsx',
+        lang: 'tsx',
+        code: `const { Form, fields, state, validate, setError, setErrors, clearErrors } =
+  useFormBridge(signupSchema)
+
+async function onSubmit(values) {
+  // Re-validate the whole form manually if needed
+  const errors = await validate()
+  if (Object.keys(errors).length > 0) return
+
+  const res = await api.signup(values)
+  if (!res.ok) {
+    // Merge server-side errors into the same state.errors bag
+    setErrors(res.errorsByField)
+    // Or push a single error under one field
+    setError('email', 'This email is already registered')
+    return
+  }
+  clearErrors()
+}`,
+      },
     },
     {
       id: 'fb-validation-triggers',
-      title: 'Trigger matrix',
-      content: `Accepted validation trigger values:
+      title: '4. Trigger matrix — when validation runs',
+      content: `Accepted validation trigger values on \`useFormBridge({ validateOn, revalidateOn })\`:
+
 - \`'onBlur'\` — validate after blur
 - \`'onChange'\` — validate on every change
 - \`'onSubmit'\` — validate only on submit
-- \`'onTouched'\` — validate after blur, then on every subsequent change
+- \`'onTouched'\` — validate after first blur, then on every subsequent change
 
-Runtime defaults:
-- \`validateOn = 'onBlur'\`
-- \`revalidateOn = 'onChange'\``,
+**Runtime defaults**
+
+- \`validateOn = 'onBlur'\` — first validation happens when the user leaves the field
+- \`revalidateOn = 'onChange'\` — after the user has interacted with the field once, every keystroke re-runs validation
+
+Pick \`'onTouched'\` for the smoothest UX: no premature errors while the user is typing for the first time, instant feedback once they've committed. Pick \`'onSubmit'\` for minimal interruptions on long forms.`,
+      code: {
+        filename: 'triggers.tsx',
+        lang: 'tsx',
+        code: `const { Form, fields, state } = useFormBridge(signupSchema, {
+  validateOn: 'onTouched',
+  revalidateOn: 'onChange',
+})`,
+      },
+    },
+    {
+      id: 'fb-validation-resolver',
+      title: '5. External resolvers (opt-in)',
+      content: `Use a resolver when you already own a domain schema elsewhere in the app (Zod, Yup, Joi, Valibot) and want to reuse it as the validation source of truth. The resolver receives the current values and returns \`{ values, errors }\`, which the runtime merges into \`state.errors\` exactly like built-in validation.
+
+- \`zodResolver(schema, options?)\`
+- \`yupResolver(schema, options?)\`
+- \`joiResolver(schema, options?)\`
+- \`valibotResolver(schema, options?)\`
+
+All resolvers share the same options surface documented in the [\`Schema adapters\`](/docs/schema-adapters-zod-yup-joi-valibot) section.
+
+${RESOLVER_SHARED_OPTIONS_SURFACE}
+
+> You do **not** need a resolver to get cross-field validation, async checks, or i18n — \`schema()\` covers all of that natively. Reach for a resolver only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
+      code: {
+        filename: 'resolver.tsx',
+        lang: 'tsx',
+        code: `import { z } from 'zod'
+import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge'
+
+const zSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+})
+
+const formSchema = {
+  email: field.email(),
+  password: field.password(),
+}
+
+const { Form, fields, state } = useFormBridge(formSchema, {
+  resolver: zodResolver(zSchema),
+})`,
+      },
+    },
+    {
+      id: 'fb-validation-parse',
+      title: 'Bonus — parsing outside the form (server actions, tests, utilities)',
+      content: `Because \`schema()\` exposes \`safeParse\` / \`safeParseAsync\` / \`validate\` / \`validateAsync\`, you can reuse the **exact same schema** outside of React — in server actions, tRPC procedures, background jobs, or tests — without mounting a form.
+
+- \`safeParse(values)\` — synchronous, never throws
+- \`safeParseAsync(values)\` — runs sync + async refinements, recommended for server-side
+- \`validate(values)\` / \`validateAsync(values)\` — strict variants that throw \`FormBridgeSchemaValidationError\` on failure
+
+The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formErrors\` (array of form-level messages). See the [\`schema() API\`](/docs/schema-api) section for the full result shape.`,
+      code: {
+        filename: 'server-action.ts',
+        lang: 'ts',
+        code: `'use server'
+
+import { tripSchema } from './tripSchema'
+
+export async function bookTrip(raw: unknown) {
+  const result = await tripSchema.safeParseAsync(raw as any)
+  if (!result.success) {
+    return { ok: false as const, errors: result.errorsByField, formErrors: result.formErrors }
+  }
+  await db.bookings.insert(result.data)
+  return { ok: true as const }
+}`,
+      },
     },
   ],
 };

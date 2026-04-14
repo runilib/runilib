@@ -1,5 +1,17 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS, STRING_BUILDER_METHODS } from '../constants';
+import {
+  BASE_FIELD_BUILDER_REFERENCE,
+  buildMethodsTable,
+  STRING_FIELD_BUILDER_REFERENCE,
+} from '../constants';
+
+const EMAIL_METHODS_TABLE = buildMethodsTable([
+  [
+    '`excludeEmailDomains(domains, message?)`',
+    '`domains: string[]`',
+    'Rejects a list of blocked domains such as personal inbox providers.',
+  ],
+]);
 
 export const emailSection: LibraryDoc['sections'][number] = {
   id: 'fb-email',
@@ -18,7 +30,7 @@ export const emailSection: LibraryDoc['sections'][number] = {
   email: field.email('Work email').required().lowercase().trim(),
 }
 const { Form, fields } = useFormBridge(schema)
-<Form onSubmit={save}><fields.email ui={{ inputProps:{ autoComplete:'email' }}} /><Form.Submit>Send</Form.Submit></Form>`,
+<Form onSubmit={save}><fields.email inputProps={{ autoComplete:'email' }} /><Form.Submit>Send</Form.Submit></Form>`,
     },
     {
       filename: 'Email.native.tsx',
@@ -38,17 +50,15 @@ const { Form, fields } = useFormBridge(schema)
   subsections: [
     {
       id: 'fb-email-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`email\`
 - A built-in email format validator is wired through \`format(...)\` at construction time
+${BASE_FIELD_BUILDER_REFERENCE}
+${STRING_FIELD_BUILDER_REFERENCE}
 
-Email-specific method:
-- \`excludeEmailDomains(domains, message?)\` — rejects a list of blocked domains (e.g. personal inbox providers)
-
-${BASE_BUILDER_METHODS}
-
-${STRING_BUILDER_METHODS}`,
+Email-specific methods:
+${EMAIL_METHODS_TABLE}`,
     },
     {
       id: 'fb-email-recipes',
@@ -56,7 +66,7 @@ ${STRING_BUILDER_METHODS}`,
       content: `Patterns that showcase email-specific strengths:
 - Block personal providers → \`field.email('Work email').trim().lowercase().excludeEmailDomains(['gmail.com', 'yahoo.com', 'hotmail.com'], 'Use your company email.')\`
 - Domain-locked guard → \`field.email('Partner email').validate((value) => value.endsWith('@partner.io') ? null : 'Use your @partner.io address.')\`
-- Enterprise login with autocomplete → \`field.email('Email').required().behavior({ autoComplete: 'email', inputMode: 'email' }).placeholder('you@company.com')\``,
+- Enterprise login with polished field copy → \`field.email('Email').required().trim().lowercase().placeholder('you@company.com').hint('Use your work address.')\``,
     },
   ],
 };

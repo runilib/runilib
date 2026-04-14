@@ -143,6 +143,9 @@ export default function HomePage() {
       <Main>
         <Shell>
           <HeroSection>
+            <HeroIntroTitle>
+              Build forms you&apos;ll <HeroIntroAccent>love shipping</HeroIntroAccent>
+            </HeroIntroTitle>
             <HeroGrid>
               <HeroCopy>
                 <HeroBadge>{libraryInfo.packageName}</HeroBadge>
@@ -532,10 +535,44 @@ const cardBase = css`
 `;
 
 const HeroSection = styled.section`
+  width: 100%;
   padding: 28px 0 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+`;
+
+const HeroIntroTitle = styled.h1`
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+  color: ${({ theme }) => theme.text};
+  font-size: clamp(2.3rem, 4vw, 4rem);
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+
+  @media (max-width: 980px) {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  @media (max-width: 640px) {
+    max-width: 9.5ch;
+    white-space: normal;
+    text-wrap: balance;
+    font-size: clamp(1.9rem, 10vw, 2.7rem);
+  }
+`;
+
+const HeroIntroAccent = styled.span`
+  color: ${({ theme }) => theme.accent};
 `;
 
 const HeroGrid = styled.div`
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
   gap: 40px;
@@ -579,7 +616,7 @@ const HeroTitle = styled.h1`
   line-height: 0.94;
 
   @media (max-width: 640px) {
-    max-width: 9.2ch;
+    max-width: 12ch;
     font-size: clamp(2.5rem, 13vw, 3.6rem);
   }
 `;

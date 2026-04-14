@@ -95,7 +95,7 @@ export function PasswordVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => {
+    globalConfigs: () => {
       const baseUi = createNativeFormUi();
       const baseInputStyle =
         (baseUi.field?.styles &&
@@ -106,8 +106,8 @@ export function PasswordVariantsExample() {
       const baseRootStyle =
         (baseUi.field?.styles &&
         typeof baseUi.field.styles === 'object' &&
-        'root' in baseUi.field.styles
-          ? baseUi.field.styles.root
+        'wrapper' in baseUi.field.styles
+          ? baseUi.field.styles.wrapper
           : undefined) ?? {};
 
       return {
@@ -127,7 +127,7 @@ export function PasswordVariantsExample() {
               borderColor: 'rgba(148, 163, 184, 0.2)',
               backgroundColor: '#ffffff',
             },
-            root: {
+            wrapper: {
               ...(typeof baseRootStyle === 'object' ? baseRootStyle : {}),
               gap: 8,
             },

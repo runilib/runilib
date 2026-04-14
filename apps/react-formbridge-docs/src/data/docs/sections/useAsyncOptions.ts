@@ -35,17 +35,20 @@ export function CitySelect({ country }: { country: string }) {
     cacheTtl: 5 * 60_000,
     debounce: 250,
     minChars: 2,
+    fetchOnMount: false,
     keepPreviousOptions: true,
   }, { country })
+  const canSearch = asyncCity.search.trim().length >= 2
 
   return (
     <div>
       <input
-        placeholder="Type a city"
+        placeholder="Type at least 2 characters"
         value={asyncCity.search}
         onChange={(e) => asyncCity.setSearch(e.target.value)}
       />
-      {asyncCity.loading ? <p>Loading...</p> : null}
+      {!canSearch ? <p>Type at least 2 characters</p> : null}
+      {canSearch && asyncCity.loading ? <p>Loading...</p> : null}
       {asyncCity.error ? <p>{asyncCity.error}</p> : null}
       <ul>
         {asyncCity.options.map((opt) => (
@@ -72,17 +75,20 @@ export function CityPickerNative({ country }: { country: string }) {
       return data.map((c: any) => ({ value: c.id, label: c.name }))
     },
     dependsOn: ['country'],
-    minChars: 1,
+    minChars: 2,
+    fetchOnMount: false,
   }, { country })
+  const canSearch = cities.search.trim().length >= 2
 
   return (
     <View style={{ gap: 8 }}>
       <TextInput
-        placeholder="Search city"
+        placeholder="Type at least 2 characters"
         value={cities.search}
         onChangeText={cities.setSearch}
       />
-      {cities.loading ? <Text>Loading…</Text> : null}
+      {!canSearch ? <Text>Type at least 2 characters</Text> : null}
+      {canSearch && cities.loading ? <Text>Loading…</Text> : null}
       <FlatList
         data={cities.options}
         keyExtractor={(item) => String(item.value)}

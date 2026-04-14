@@ -100,4 +100,61 @@ describe('web select field', () => {
     expect(screen.getByTestId('plan-value').textContent).toBe('2');
     expect(screen.getByTestId('plan-type').textContent).toBe('number');
   });
+
+  it('applies picker trigger and inner slot style overrides', () => {
+    const descriptor = field
+      .select('Country')
+      .options([
+        { label: 'France', value: 'FR' },
+        { label: 'United States', value: 'US' },
+      ])
+      ._build() as WebFieldProps['descriptor'];
+
+    const view = render(
+      <Field
+        descriptor={descriptor}
+        name="country"
+        value=""
+        label="Country"
+        error={null}
+        touched={false}
+        dirty={false}
+        validating={false}
+        disabled={false}
+        required={descriptor._required}
+        onChange={vi.fn()}
+        onBlur={vi.fn()}
+        onFocus={vi.fn()}
+        allValues={{}}
+        extra={{
+          renderPicker: () => null,
+          styles: {
+            select: { backgroundColor: 'rgb(1, 2, 3)' },
+            selectValue: { color: 'rgb(4, 5, 6)' },
+            selectArrow: { color: 'rgb(7, 8, 9)' },
+          },
+        }}
+      />,
+    );
+
+    const trigger = view.container.querySelector('[data-fb-slot="select-trigger"]');
+    const value = view.container.querySelector('[data-fb-slot="select-value"]');
+    const arrow = view.container.querySelector('[data-fb-slot="select-arrow"]');
+
+    expect(trigger instanceof HTMLButtonElement).toBe(true);
+    expect(value instanceof HTMLSpanElement).toBe(true);
+    expect(arrow instanceof HTMLSpanElement).toBe(true);
+
+    if (
+      !(trigger instanceof HTMLButtonElement) ||
+      !(value instanceof HTMLSpanElement) ||
+      !(arrow instanceof HTMLSpanElement)
+    ) {
+      throw new TypeError('Expected custom picker trigger, value, and arrow to render.');
+    }
+
+    expect(trigger.style.backgroundColor).toBe('rgb(1, 2, 3)');
+    expect(value.style.color).toBe('rgb(4, 5, 6)');
+    expect(arrow.style.color).toBe('rgb(7, 8, 9)');
+  });
 });

@@ -30,7 +30,7 @@ export function SlotOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalStyles: () => ({
+    globalConfigs: () => ({
       form: {
         style: {
           display: 'flex',
@@ -52,7 +52,7 @@ export function SlotOverridesStylingExample() {
       },
       field: {
         styles: {
-          root: {
+          wrapper: {
             marginBottom: 0,
             gap: 8,
           },

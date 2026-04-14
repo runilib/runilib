@@ -95,7 +95,7 @@ export function PasswordVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => {
+    globalConfigs: () => {
       const baseUi = createDemoFormUi(styles);
 
       return {
@@ -113,8 +113,8 @@ export function PasswordVariantsExample() {
               width: '100%',
               paddingRight: '132px',
             },
-            root: {
-              ...(baseUi.field?.styles?.root ?? {}),
+            wrapper: {
+              ...baseUi.field?.styles?.wrapper,
               gap: 8,
             },
             toggle: {

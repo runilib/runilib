@@ -160,7 +160,7 @@ export function toInputValue(value: unknown): string {
 }
 
 /**
- * Build a data-attribute map for the field root element.
+ * Build a data-attribute map for the field wrapper element.
  * Allows consumers to target fields with CSS selectors like:
  *   [data-fb-field="text"]
  *   [data-fb-error]
@@ -269,7 +269,7 @@ export function renderLabelSlot(ctx: {
       {...labelPropsRest}
     >
       {ctx.label}
-      {requiredMark}
+      {ctx.label && requiredMark}
     </label>
   );
 }

@@ -7,11 +7,11 @@ export const quickstartSection: LibraryDoc['sections'][number] = {
 
 - Web and native can share the same schema.
 - The generated \`fields\` map is fully typed from the schema keys.
-- The generated \`ui\` prop is also typed from the exact field type, so text fields, textareas, and selects do not expose the same override surface.
+- The generated \`field\` prop is also typed from the exact field type, so text fields, textareas, and selects do not expose the same override surface.
 - \`Form.Submit\` automatically follows submit state and can be disabled from \`state.isValid\`.`,
   codeTabs: [
     {
-      filename: 'RegistrationForm.tsx',
+      filename: 'web.tsx',
       lang: 'tsx',
       code: `import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
@@ -38,7 +38,7 @@ export function RegistrationForm() {
 }`,
     },
     {
-      filename: 'Registration.native.tsx',
+      filename: 'native.tsx',
       lang: 'tsx',
       code: `import { ScrollView, View } from 'react-native'
 import type { FormSchema } from '@runilib/react-formbridge'

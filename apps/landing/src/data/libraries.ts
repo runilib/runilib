@@ -77,7 +77,7 @@ export const LIBRARIES: LibraryInfo[] = [
       'Reactive conditional fields and visibility map',
       'useFormBridgeWizard() for multi-step forms and onboarding flows',
       'inferFromObject() and inferFromType() helpers',
-      'useReadonlyFormBridge() for readonly and diff views',
+      'useFormBridgeReadonly() for readonly and diff views',
     ],
     install: 'npm install @runilib/react-formbridge',
     status: 'stable',

@@ -1,5 +1,52 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS } from '../constants';
+import {
+  BASE_FIELD_BUILDER_REFERENCE,
+  buildMethodsTable,
+  SELECT_FIELD_BUILDER_REFERENCE,
+} from '../constants';
+
+const RADIO_METHODS_TABLE = buildMethodsTable([
+  [
+    '`options(list)`',
+    '`string[] | { label, value }[]`',
+    'Loads local options from plain strings or explicit label/value objects.',
+  ],
+  [
+    '`optionsFrom(fetcher, config)`',
+    '`fetcher + async config`',
+    'Loads remote options with debounce, cache, dependency tracking, and loading state support.',
+  ],
+  [
+    '`searchable(value = true)`',
+    '`value?: boolean`',
+    'Enables search-oriented radio-picker behavior when a custom picker is used.',
+  ],
+  [
+    '`defaultSelected(valueOrOption)`',
+    '`value | option object`',
+    'Pre-selects an option by raw value or option object.',
+  ],
+  [
+    '`selected(valueOrOption)`',
+    '`value | option object`',
+    'Alias for `defaultSelected()` with more explicit wording.',
+  ],
+  [
+    '`oneOf(values, message?)`',
+    '`Array<value | option>`',
+    'Additional allow-list check layered on top of `options()` — restricts the runtime-accepted values to a narrower subset.',
+  ],
+  [
+    '`notOneOf(values, message?)`',
+    '`Array<value | option>`',
+    'Deny-list version of `oneOf()`. Rejects specific values even if they remain selectable in the UI.',
+  ],
+  [
+    '`disallowPlaceholder(message?)`',
+    '`message?: string`',
+    'Radio-oriented alias for `required()` with the default message `"Please select an option."`.',
+  ],
+]);
 
 export const radioSection: LibraryDoc['sections'][number] = {
   id: 'fb-radio',
@@ -24,12 +71,15 @@ export const radioSection: LibraryDoc['sections'][number] = {
   subsections: [
     {
       id: 'fb-radio-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`radio\`
 - Reuses the same \`SelectFieldBuilder\` as \`field.select()\` — all select-specific methods are available (\`options()\`, \`optionsFrom()\`, \`searchable()\`, \`defaultSelected()\`, \`selected()\`)
+${BASE_FIELD_BUILDER_REFERENCE}
+${SELECT_FIELD_BUILDER_REFERENCE}
 
-${BASE_BUILDER_METHODS}`,
+Radio-specific methods:
+${RADIO_METHODS_TABLE}`,
     },
     {
       id: 'fb-radio-recipes',

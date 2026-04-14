@@ -2,7 +2,7 @@ import type { FieldType, SelectOption } from '../../types/field';
 import type { BaseFieldBuilder } from './base/BaseFieldBuilder';
 import type { BooleanFieldBuilder } from './boolean/BooleanFieldBuilder';
 import type { DateFieldBuilder } from './date/DateFieldBuilder';
-import type { FileFieldBuilder } from './file/FileField';
+import type { FileFieldBuilder } from './file/FileFieldBuilder';
 import type { inferFromObject, inferFromType } from './infer';
 import type { MaskedFieldBuilder } from './mask/MaskedFieldBuilder';
 import type { MaskPatternInput } from './mask/masks';

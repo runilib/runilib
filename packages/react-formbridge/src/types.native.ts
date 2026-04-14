@@ -23,6 +23,7 @@ import type {
 export type {
   AsyncValidator,
   FieldController,
+  FieldReference,
   FieldRenderProps,
   FileValue,
   FocusableFieldHandle,
@@ -41,7 +42,7 @@ export type {
   PhoneCountryLayout,
   PhoneValue,
   ResolverResult,
-  SchemaResolver,
+  SchemaValidatorResolver,
   SchemaValues,
   SelectOption,
   SelectPickerRenderContext,
@@ -50,8 +51,16 @@ export type {
   StrengthRuleConfig,
   StrengthScoreLevel,
   SyncValidator,
+  ValidationContext,
+  ValidationErrorMap,
+  ValidationIssue,
+  ValidationIssueInput,
+  ValidationPath,
+  ValidationPathSegment,
+  ValidationResult,
   ValidationTrigger,
   Validator,
+  ValidatorResult,
 } from './types';
 export type { FieldAutoComplete } from './types/autoComplete';
 

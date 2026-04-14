@@ -19,7 +19,7 @@ export interface PhoneFieldMeta {
 
 export type PhoneDescriptor = FieldDescriptor<PhoneValue | string | null, 'phone'> &
   PhoneFieldMeta & {
-    _conditions?: FieldConditions;
+    _conditions?: FieldConditions<any>;
   };
 
 export class PhoneFieldBuilder extends BaseFieldBuilder<

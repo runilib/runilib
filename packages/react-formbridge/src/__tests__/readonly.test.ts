@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { field } from '../core/field-builders/field';
-import { useReadonlyFormBridge } from '../hooks/shared/useReadonlyForm';
+import { useFormBridgeReadonly } from '../hooks/shared/useFormBridgeReadonly';
 
 const SCHEMA = {
   name: field.text('Full name'),
@@ -24,10 +24,10 @@ const VALUES = {
   password: 'secret123',
 };
 
-describe('useReadonlyFormBridgeBridge — readonly mode', () => {
+describe('useFormBridgeReadonlyBridge — readonly mode', () => {
   it('returns all non-hidden fields', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, { mode: 'readonly', values: VALUES as any }),
+      useFormBridgeReadonly(SCHEMA, { mode: 'readonly', values: VALUES }),
     );
     expect(result.current.fieldNames).toContain('name');
     expect(result.current.fieldNames).toContain('email');
@@ -35,7 +35,7 @@ describe('useReadonlyFormBridgeBridge — readonly mode', () => {
 
   it('formats string values as-is', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, { mode: 'readonly', values: VALUES as any }),
+      useFormBridgeReadonly(SCHEMA, { mode: 'readonly', values: VALUES }),
     );
     expect(result.current.fields.name.display).toBe('AKS');
     expect(result.current.fields.email.display).toBe('aks@unikit.dev');
@@ -43,30 +43,30 @@ describe('useReadonlyFormBridgeBridge — readonly mode', () => {
 
   it('formats boolean → Yes/No', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, { mode: 'readonly', values: VALUES as any }),
+      useFormBridgeReadonly(SCHEMA, { mode: 'readonly', values: VALUES }),
     );
     expect(result.current.fields.active.display).toBe('✓ Yes');
   });
 
   it('formats select options by label', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, { mode: 'readonly', values: VALUES as any }),
+      useFormBridgeReadonly(SCHEMA, { mode: 'readonly', values: VALUES }),
     );
     expect(result.current.fields.country.display).toBe('France');
   });
 
   it('masks password fields', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, { mode: 'readonly', values: VALUES as any }),
+      useFormBridgeReadonly(SCHEMA, { mode: 'readonly', values: VALUES }),
     );
     expect(result.current.fields.password.display).toBe('••••••••');
   });
 
   it('formats empty/null values as —', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'readonly',
-        values: { ...VALUES, name: '' } as any,
+        values: { ...VALUES, name: '' },
       }),
     );
     expect(result.current.fields.name.display).toBe('—');
@@ -74,13 +74,13 @@ describe('useReadonlyFormBridgeBridge — readonly mode', () => {
 
   it('hasChanges is false in readonly mode', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, { mode: 'readonly', values: VALUES as any }),
+      useFormBridgeReadonly(SCHEMA, { mode: 'readonly', values: VALUES }),
     );
     expect(result.current.hasChanges).toBe(false);
   });
 });
 
-describe('useReadonlyFormBridge — diff mode', () => {
+describe('useFormBridgeReadonly — diff mode', () => {
   const ORIGINAL = {
     name: 'Old Name',
     email: 'old@email.com',
@@ -92,10 +92,10 @@ describe('useReadonlyFormBridge — diff mode', () => {
 
   it('detects changed fields', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'diff',
-        values: VALUES as any,
-        originalValues: ORIGINAL as any,
+        values: VALUES,
+        originalValues: ORIGINAL,
       }),
     );
     expect(result.current.changedFields).toContain('name');
@@ -107,10 +107,10 @@ describe('useReadonlyFormBridge — diff mode', () => {
 
   it('marks changed as true for changed fields', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'diff',
-        values: VALUES as any,
-        originalValues: ORIGINAL as any,
+        values: VALUES,
+        originalValues: ORIGINAL,
       }),
     );
     expect(result.current.fields.name.changed).toBe(true);
@@ -119,10 +119,10 @@ describe('useReadonlyFormBridge — diff mode', () => {
 
   it('marks changed as false for unchanged fields', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'diff',
-        values: VALUES as any,
-        originalValues: { ...ORIGINAL, name: VALUES.name } as any,
+        values: VALUES,
+        originalValues: { ...ORIGINAL, name: VALUES.name },
       }),
     );
     expect(result.current.fields.name.changed).toBe(false);
@@ -130,10 +130,10 @@ describe('useReadonlyFormBridge — diff mode', () => {
 
   it('provides originalDisplay for changed fields', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'diff',
-        values: VALUES as any,
-        originalValues: ORIGINAL as any,
+        values: VALUES,
+        originalValues: ORIGINAL,
       }),
     );
     expect(result.current.fields.name.originalDisplay).toBe('Old Name');
@@ -142,10 +142,10 @@ describe('useReadonlyFormBridge — diff mode', () => {
 
   it('hasChanges is true when fields differ', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'diff',
-        values: VALUES as any,
-        originalValues: ORIGINAL as any,
+        values: VALUES,
+        originalValues: ORIGINAL,
       }),
     );
     expect(result.current.hasChanges).toBe(true);
@@ -153,10 +153,10 @@ describe('useReadonlyFormBridge — diff mode', () => {
 
   it('hasChanges is false when nothing changed', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'diff',
-        values: VALUES as any,
-        originalValues: VALUES as any,
+        values: VALUES,
+        originalValues: VALUES,
       }),
     );
     expect(result.current.hasChanges).toBe(false);
@@ -165,7 +165,7 @@ describe('useReadonlyFormBridge — diff mode', () => {
 
   it('applies custom formatter', () => {
     const { result } = renderHook(() =>
-      useReadonlyFormBridge(SCHEMA, {
+      useFormBridgeReadonly(SCHEMA, {
         mode: 'diff',
         values: VALUES,
         formatters: { age: (v) => `${v} years old` },

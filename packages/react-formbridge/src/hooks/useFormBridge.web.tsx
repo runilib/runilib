@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import { isFileDescriptor } from '../core/field-builders/file/FileField';
+import { isFileDescriptor } from '../core/field-builders/file/FileFieldBuilder';
 import { isMaskedDescriptor } from '../core/field-builders/mask/MaskedFieldBuilder';
 import { isStrengthDescriptor } from '../core/field-builders/password/PasswordWithStrength';
 import { isPhoneDescriptor } from '../core/field-builders/phone/PhoneFieldBuilder';
@@ -21,13 +21,14 @@ import type {
   UseFormOptions,
 } from '../types';
 import { FormBridgeProvider } from './shared/form-context';
+import { computeTransformedValues } from './shared/helpers';
 import {
   mergeFieldStyleProps,
   mergeWebFieldProps,
   mergeWebFormProps,
   mergeWebSubmitProps,
 } from './shared/ui-utils';
-import { useFormBridgeCore } from './shared/useFormBridge';
+import { useFormBridgeCore } from './shared/useFormBridgeCore';
 
 export function useFormBridge<const S extends FormSchema>(
   schema: S,
@@ -57,8 +58,21 @@ export function useFormBridge<const S extends FormSchema>(
     blurField,
   } = core;
 
-  const globalStylesRef = useRef(options.globalStyles);
-  globalStylesRef.current = options.globalStyles;
+  const globalConfigsRef = useRef(options.globalConfigs);
+  globalConfigsRef.current = options.globalConfigs;
+
+  const schemaRef = useRef(schema);
+  schemaRef.current = schema;
+
+  const resolveGlobalConfigs = useCallback(
+    () =>
+      globalConfigsRef.current?.({
+        state: stateRef.current,
+        schema: schemaRef.current,
+        platform: 'web',
+      }),
+    [stateRef],
+  );
 
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
@@ -76,15 +90,23 @@ export function useFormBridge<const S extends FormSchema>(
   );
 
   const getValue = useCallback(
-    <K extends keyof S>(name: K): SchemaValues<S>[K] =>
-      (stateRef.current.values as Record<string, unknown>)[
-        name as string
-      ] as SchemaValues<S>[K],
+    <K extends keyof S>(name: K): SchemaValues<S>[K] => {
+      const raw = (stateRef.current.values as Record<string, unknown>)[name as string];
+      const desc = descriptorsRef.current[name as string];
+      return (
+        desc?._outputTransform
+          ? (desc._outputTransform as (v: unknown) => unknown)(raw)
+          : raw
+      ) as SchemaValues<S>[K];
+    },
     [stateRef],
   );
 
   const getValues = useCallback((): SchemaValues<S> => {
-    return { ...stateRef.current.values };
+    return computeTransformedValues(
+      stateRef.current.values as Record<string, unknown>,
+      descriptorsRef.current,
+    ) as SchemaValues<S>;
   }, [stateRef]);
 
   const resetFields = useCallback(
@@ -102,8 +124,8 @@ export function useFormBridge<const S extends FormSchema>(
         isValid: true,
         isDirty: false,
         isSubmitting: false,
-        isSuccess: false,
-        isError: false,
+        isSubmitError: false,
+        isSubmitSuccess: false,
         submitCount: 0,
         submitError: null,
       };
@@ -156,14 +178,26 @@ export function useFormBridge<const S extends FormSchema>(
   );
 
   const watch = useCallback(
-    <K extends keyof S>(name: K): SchemaValues<S>[K] =>
-      (stateRef.current.values as Record<string, unknown>)[
-        name as string
-      ] as SchemaValues<S>[K],
+    <K extends keyof S>(name: K): SchemaValues<S>[K] => {
+      const raw = (stateRef.current.values as Record<string, unknown>)[name as string];
+      const desc = descriptorsRef.current[name as string];
+      return (
+        desc?._outputTransform
+          ? (desc._outputTransform as (v: unknown) => unknown)(raw)
+          : raw
+      ) as SchemaValues<S>[K];
+    },
     [stateRef],
   );
 
-  const watchAll = useCallback(() => ({ ...stateRef.current.values }), [stateRef]);
+  const watchAll = useCallback(
+    () =>
+      computeTransformedValues(
+        stateRef.current.values,
+        descriptorsRef.current,
+      ) as SchemaValues<S>,
+    [stateRef],
+  );
 
   const submit = useCallback(async () => {
     await handleSubmit();
@@ -214,6 +248,7 @@ export function useFormBridge<const S extends FormSchema>(
         label: effectiveDescriptor._label ?? '',
         placeholder: effectiveDescriptor._placeholder,
         allValues: state.values as Record<string, unknown>,
+        defaultValue: effectiveDescriptor._defaultValue as string,
         error: showError ? rawError : null,
         touched,
         dirty,
@@ -278,6 +313,7 @@ export function useFormBridge<const S extends FormSchema>(
       onSubmitError,
       className,
       style,
+      ...nativeProps
     }: Parameters<FormComponent<S, 'web'>>[0]) => {
       submitConfigRef.current = {
         onSubmit,
@@ -285,11 +321,7 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedUi = mergeWebFormProps(
-        globalStylesRef.current?.(stateRef.current)?.form,
-        className,
-        style,
-      );
+      const mergedUi = mergeWebFormProps(resolveGlobalConfigs()?.form, className, style);
 
       const onPress = (event?: { preventDefault?: () => void }) => {
         event?.preventDefault?.();
@@ -305,6 +337,7 @@ export function useFormBridge<const S extends FormSchema>(
           'form',
           {
             ...mergedUi.props,
+            ...nativeProps,
             onSubmit: onPress,
             className: mergedUi.className,
             style: mergedUi.style,
@@ -323,11 +356,13 @@ export function useFormBridge<const S extends FormSchema>(
       style,
       loadingText,
       disabled,
+      type,
+      ...nativeProps
     }: SubmitButtonProps<'web'>) => {
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
       const mergedUi = mergeWebSubmitProps(
-        globalStylesRef.current?.(stateRef.current)?.submit,
+        resolveGlobalConfigs()?.submit,
         className,
         style,
         loadingText,
@@ -340,7 +375,8 @@ export function useFormBridge<const S extends FormSchema>(
         'button',
         {
           ...mergedUi.props,
-          type: 'submit',
+          ...nativeProps,
+          type: type ?? 'submit',
           className: mergedUi.className,
           style: mergedUi.style,
           disabled: loading || disabled,
@@ -353,7 +389,7 @@ export function useFormBridge<const S extends FormSchema>(
 
     (FormInner as unknown as FormComponent<S, 'web'>).Submit = Submit;
     return FormInner as unknown as FormComponent<S, 'web'>;
-  }, [handleSubmit, stateRef, submitConfigRef]);
+  }, [handleSubmit, resolveGlobalConfigs, stateRef, submitConfigRef]);
 
   const FormProvider = useMemo(
     () =>
@@ -385,15 +421,17 @@ export function useFormBridge<const S extends FormSchema>(
 
         const mergedProps = mergeFieldStyleProps(
           'web',
-          globalStylesRef.current?.(stateRef.current)?.field,
+          resolveGlobalConfigs()?.field,
           props,
         );
         const state = stateRef.current;
         const rawValue = (state.values as Record<string, unknown>)[name];
+
         const value =
           rawValue ??
           descriptor._defaultValue ??
           (descriptor._type === 'checkbox' || descriptor._type === 'switch' ? false : '');
+
         const error = (state.errors as Record<string, string | undefined>)[name] ?? null;
         const touched = Boolean((state.touched as Record<string, boolean>)[name]);
         const dirty = Boolean((state.dirty as Record<string, boolean>)[name]);
@@ -426,6 +464,7 @@ export function useFormBridge<const S extends FormSchema>(
         const renderState: FieldRenderState<unknown> = {
           name,
           value,
+          defaultValue: effectiveDescriptor._defaultValue as string,
           label: effectiveDescriptor._label ?? '',
           placeholder: effectiveDescriptor._placeholder,
           allValues: state.values as Record<string, unknown>,
@@ -546,6 +585,7 @@ export function useFormBridge<const S extends FormSchema>(
     registerFocusable,
     stateRef,
     trackFieldFocus,
+    resolveGlobalConfigs,
   ]);
 
   const FieldError = useMemo(() => {
@@ -629,19 +669,22 @@ export function useFormBridge<const S extends FormSchema>(
     return FieldLabelInner;
   }, []);
 
-  const api: UseFormBridgeReturn<S, 'web'> = {
+  const api = {
     FormProvider,
     Form,
     fields,
     FieldError,
     FieldLabel,
     fieldController,
-    state: stateRef.current,
+    state: {
+      ...stateRef.current,
+      values: computeTransformedValues(
+        stateRef.current.values,
+        descriptorsRef.current,
+      ) as SchemaValues<S>,
+    },
     visibility,
-    isLoadingDraft,
-    hasDraft,
-    clearDraft,
-    saveDraftNow,
+    persistanceHelpers: { isLoadingDraft, hasDraft, clearDraft, saveDraftNow },
     setValue,
     getValue,
     getValues,
@@ -652,7 +695,7 @@ export function useFormBridge<const S extends FormSchema>(
     watch,
     watchAll,
     submit,
-  };
+  } as unknown as UseFormBridgeReturn<S, 'web'>;
 
   apiRef.current = api;
 

@@ -1,4 +1,4 @@
-import type { ResolverResult, SchemaResolver } from '../../types/options';
+import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
 import type {
   ResolverAdapterOptions,
   ResolverMode,
@@ -82,7 +82,7 @@ function extractYupIssues(error: YupValidationError): YupResolverIssue[] {
 export function yupResolver(
   schema: YupSchema,
   options: YupResolverOptions = {},
-): SchemaResolver {
+): SchemaValidatorResolver {
   return async (values): Promise<ResolverResult> => {
     try {
       const data = await executeYupValidation(schema, values, options);

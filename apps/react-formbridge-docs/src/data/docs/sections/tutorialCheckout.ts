@@ -10,7 +10,7 @@ export const tutorialCheckoutSection: LibraryDoc['sections'][number] = {
 - Draft persistence helps longer flows survive reloads or app restarts`,
   codeTabs: [
     {
-      filename: 'CheckoutFlow.web.tsx',
+      filename: 'web.tsx',
       lang: 'tsx',
       code: `import { field, MASKS, useFormBridge } from '@runilib/react-formbridge'
 
@@ -63,7 +63,7 @@ export function CustomerCheckout() {
 }`,
     },
     {
-      filename: 'CheckoutFlow.native.tsx',
+      filename: 'native.tsx',
       lang: 'tsx',
       code: `import { Text, View } from 'react-native'
 import { field, MASKS, useFormBridge } from '@runilib/react-formbridge'

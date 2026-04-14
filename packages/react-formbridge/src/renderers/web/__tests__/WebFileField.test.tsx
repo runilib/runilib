@@ -34,7 +34,7 @@ function renderFileField(
   );
 }
 
-describe('WebFileField ui', () => {
+describe('WebFileField', () => {
   it('supports custom drop-zone copy without replacing the whole markup', () => {
     const { getByRole, getByText } = renderFileField(
       field.file().label('Asset').accept(['application/pdf']).maxSize(1024),
@@ -91,5 +91,48 @@ describe('WebFileField ui', () => {
     getByRole('button', { name: 'Remove invoice.pdf' });
 
     expect(getByTestId('custom-file-icon').textContent).toContain('invoice.pdf');
+  });
+
+  it('exposes all file sub-slots to runtime style overrides', () => {
+    const value: FileValue = {
+      uri: 'blob:test',
+      name: 'invoice.pdf',
+      type: 'application/pdf',
+      size: 2048,
+    };
+
+    const { container } = renderFileField(
+      field.file().label('Asset').accept(['application/pdf']).maxSize(1024),
+      {
+        value: [value],
+        extra: {
+          styles: {
+            dropZoneAccept: { color: 'rgb(1, 2, 3)' },
+            dropZoneMaxSize: { color: 'rgb(4, 5, 6)' },
+            fileInfo: { display: 'grid' },
+          },
+        },
+      },
+    );
+
+    const accept = container.querySelector('[data-fb-slot="drop-zone-accept"]');
+    const maxSize = container.querySelector('[data-fb-slot="drop-zone-max-size"]');
+    const fileInfo = container.querySelector('[data-fb-slot="file-info"]');
+
+    expect(accept instanceof HTMLParagraphElement).toBe(true);
+    expect(maxSize instanceof HTMLParagraphElement).toBe(true);
+    expect(fileInfo instanceof HTMLDivElement).toBe(true);
+
+    if (
+      !(accept instanceof HTMLParagraphElement) ||
+      !(maxSize instanceof HTMLParagraphElement) ||
+      !(fileInfo instanceof HTMLDivElement)
+    ) {
+      throw new TypeError('Expected file field sub-slots to render.');
+    }
+
+    expect(accept.style.color).toBe('rgb(1, 2, 3)');
+    expect(maxSize.style.color).toBe('rgb(4, 5, 6)');
+    expect(fileInfo.style.display).toBe('grid');
   });
 });

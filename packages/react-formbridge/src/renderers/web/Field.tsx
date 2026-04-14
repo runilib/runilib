@@ -17,6 +17,13 @@ import type {
 } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
 import {
+  defaultControlStyle,
+  defaultFieldRootStyle,
+  defaultOtpContainerStyle,
+  defaultOtpInputStyle,
+  defaultTextareaStyle,
+} from './default-styles';
+import {
   cx,
   fieldRootAttrs,
   mergeStyles,
@@ -36,25 +43,6 @@ import {
   toHtmlPatternSource,
 } from './utils';
 
-const defaultFieldRootStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'stretch',
-  gap: 8,
-  minWidth: 0,
-};
-
-const defaultControlStyle: CSSProperties = {
-  minWidth: 0,
-  boxSizing: 'border-box',
-  lineHeight: 1.35,
-};
-
-const defaultTextareaStyle: CSSProperties = {
-  ...defaultControlStyle,
-  lineHeight: 1.5,
-};
-
 interface Props extends FieldRenderProps<unknown> {
   descriptor: FieldDescriptor<unknown> & {
     fieldPropsFromClient: ResolvedWebFieldProps;
@@ -72,7 +60,7 @@ export const Field: React.FC<Props> = ({
   const reactId = useId();
   const fieldProps = descriptor.fieldPropsFromClient ?? {};
   const {
-    rootProps,
+    wrapperProps,
     labelProps,
     hintProps,
     errorProps,
@@ -86,10 +74,10 @@ export const Field: React.FC<Props> = ({
   } = extra ?? {};
 
   const {
-    className: rootPropsClassName,
-    style: rootPropsStyle,
-    ...rootPropsRest
-  } = rootProps ?? {};
+    className: wrapperPropsClassName,
+    style: wrapperPropsStyle,
+    ...wrapperPropsRest
+  } = wrapperProps ?? {};
 
   const id = extra?.id ?? fieldProps.id ?? `${restProps.name}-${reactId}`;
   const hintId = `${id}-hint`;
@@ -102,7 +90,11 @@ export const Field: React.FC<Props> = ({
     fieldProps.highlightOnError,
   );
 
-  const rootClassName = cx(extra?.className, classNames?.root, rootPropsClassName);
+  const wrapperClassName = cx(
+    extra?.className,
+    classNames?.wrapper,
+    wrapperPropsClassName,
+  );
 
   const EXCLUDED_INPUT_TYPE = ['checkbox', 'switch'];
 
@@ -117,14 +109,14 @@ export const Field: React.FC<Props> = ({
         disabled: restProps.disabled,
         required,
       })}
-      className={rootClassName}
+      className={wrapperClassName}
       style={mergeStyles(
         defaultFieldRootStyle,
         extra?.style,
-        styles?.root,
-        rootPropsStyle,
+        styles?.wrapper,
+        wrapperPropsStyle,
       )}
-      {...rootPropsRest}
+      {...wrapperPropsRest}
     >
       {EXCLUDED_INPUT_TYPE.includes(descriptor._type) === false
         ? renderLabelSlot({
@@ -283,7 +275,7 @@ const renderInput = (
     case 'switch':
       return (
         <div
-          data-fb-slot="switch-root"
+          data-fb-slot="switch-wrapper"
           className={classNames?.switchRoot}
           style={mergeStyles(
             {
@@ -312,16 +304,22 @@ const renderInput = (
             onFocus={restProps.onFocus}
             disabled={restProps.disabled}
             data-fb-slot="switch-button"
+            className={classNames?.switchButton}
             style={{
-              appearance: 'none',
-              border: 0,
-              background: 'transparent',
-              padding: 0,
-              margin: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              cursor: restProps.disabled ? 'not-allowed' : 'pointer',
-              flexShrink: 0,
+              ...mergeStyles(
+                {
+                  appearance: 'none',
+                  border: 0,
+                  background: 'transparent',
+                  padding: 0,
+                  margin: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  cursor: restProps.disabled ? 'not-allowed' : 'pointer',
+                  flexShrink: 0,
+                },
+                styles?.switchButton,
+              ),
             }}
           >
             <div
@@ -464,11 +462,17 @@ const renderInput = (
           readOnly={isReadOnly}
         />
       ) : (
-        <div data-fb-slot="radio-group">
+        <div
+          data-fb-slot="radio-group"
+          className={classNames?.radioGroup ?? classNames?.checkboxRow}
+          style={mergeStyles(styles?.radioGroup, styles?.checkboxRow)}
+        >
           {descriptor._options?.map((o) => (
             <label
               key={String(o.value)}
               data-fb-slot="radio-option"
+              className={classNames?.radioOption ?? classNames?.checkboxRow}
+              style={mergeStyles(styles?.radioOption, styles?.checkboxRow)}
             >
               <input
                 {...commonInputProps}
@@ -477,10 +481,13 @@ const renderInput = (
                 name={restProps.name}
                 value={String(o.value)}
                 checked={String(restProps.value ?? '') === String(o.value)}
-                className={cx(classNames?.checkboxInput, inputPropsClassName)}
+                className={cx(
+                  classNames?.radioInput ?? classNames?.checkboxInput,
+                  inputPropsClassName,
+                )}
                 style={mergeStyles(
                   controlErrorStyle,
-                  styles?.checkboxInput,
+                  styles?.radioInput ?? styles?.checkboxInput,
                   inputPropsStyle,
                 )}
                 onChange={() => {
@@ -492,7 +499,13 @@ const renderInput = (
                 }}
                 {...inputPropsRest}
               />
-              <span data-fb-slot="radio-label">{o.label}</span>
+              <span
+                data-fb-slot="radio-label"
+                className={classNames?.radioLabel ?? classNames?.checkboxLabel}
+                style={mergeStyles(styles?.radioLabel, styles?.checkboxLabel)}
+              >
+                {o.label}
+              </span>
             </label>
           ))}
         </div>
@@ -506,7 +519,7 @@ const renderInput = (
         <div
           data-fb-slot="otp-container"
           className={classNames?.otpContainer}
-          style={mergeStyles(styles?.otpContainer)}
+          style={mergeStyles(defaultOtpContainerStyle, styles?.otpContainer)}
         >
           {Array.from({ length: len }, (_, index) => ({
             key: `${id}-otp-${index}`,
@@ -554,7 +567,12 @@ const renderInput = (
               }}
               onBlur={restProps.onBlur}
               onFocus={restProps.onFocus}
-              style={mergeStyles(controlErrorStyle, styles?.otpInput, inputPropsStyle)}
+              style={mergeStyles(
+                defaultOtpInputStyle,
+                controlErrorStyle,
+                styles?.otpInput,
+                inputPropsStyle,
+              )}
               {...inputPropsRest}
             />
           ))}
@@ -815,10 +833,18 @@ const PickerSelectField = ({
         style={mergeStyles(controlErrorStyle, styles?.select, selectPropsStyle)}
         {...selectTriggerProps}
       >
-        <span data-fb-slot="select-value">{pickerContext.triggerLabel}</span>
+        <span
+          data-fb-slot="select-value"
+          className={classNames?.selectValue}
+          style={mergeStyles(styles?.selectValue)}
+        >
+          {pickerContext.triggerLabel}
+        </span>
         <span
           aria-hidden="true"
           data-fb-slot="select-arrow"
+          className={classNames?.selectArrow}
+          style={mergeStyles(styles?.selectArrow)}
         >
           ▼
         </span>

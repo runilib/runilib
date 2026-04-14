@@ -69,7 +69,6 @@ function ensureOptionsArray(value: unknown): SelectOption[] {
 
 const defaultTriggerStyle: ViewStyle = {
   minHeight: 52,
-  borderRadius: 16,
   paddingHorizontal: 14,
   justifyContent: 'center',
   borderWidth: 1,
@@ -100,7 +99,7 @@ const defaultModalBackdropStyle: ViewStyle = {
 const defaultModalCardStyle: ViewStyle = {
   width: '100%',
   maxHeight: '72%',
-  borderRadius: 22,
+  // borderRadius: 22,
   backgroundColor: '#ffffff',
   paddingHorizontal: 16,
   paddingTop: 16,
@@ -110,7 +109,7 @@ const defaultModalCardStyle: ViewStyle = {
 
 const defaultSearchInputStyle: TextStyle = {
   minHeight: 52,
-  borderRadius: 16,
+  // borderRadius: 16,
   paddingHorizontal: 14,
   borderWidth: 1,
   borderColor: '#d1d5db',
@@ -134,7 +133,7 @@ const defaultLoadingTextStyle: TextStyle = {
 const defaultOptionRowStyle: ViewStyle = {
   paddingHorizontal: 14,
   paddingVertical: 14,
-  borderRadius: 14,
+  // borderRadius: 14,
   borderWidth: 1,
   borderColor: '#e2e8f0',
   backgroundColor: '#f8fafc',
@@ -177,7 +176,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   const {
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     hintProps,
@@ -192,7 +191,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
   const nativeRenderPicker =
     renderPicker ?? descriptor.fieldPropsFromClient?.renderPicker;
 
-  const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
+  const { style: wrapperPropsStyle, ...wrapperPropsRest } = (wrapperProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
 
@@ -314,8 +313,8 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
 
   return (
     <View
-      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
-      {...rootPropsRest}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.wrapper, wrapperPropsStyle)}
+      {...wrapperPropsRest}
     >
       {!hideLabel &&
         (renderLabel?.({

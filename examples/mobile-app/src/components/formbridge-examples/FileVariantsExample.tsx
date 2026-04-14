@@ -343,7 +343,7 @@ export function FileVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => {
+    globalConfigs: () => {
       const baseUi = createNativeFormUi();
 
       return {
@@ -356,7 +356,7 @@ export function FileVariantsExample() {
           ...baseUi.field,
           styles: {
             ...baseUi.field?.styles,
-            root: {
+            wrapper: {
               gap: 8,
             },
             pickButton: {

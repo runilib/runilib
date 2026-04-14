@@ -1,5 +1,27 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS, STRING_BUILDER_METHODS } from '../constants';
+import {
+  BASE_FIELD_BUILDER_REFERENCE,
+  buildMethodsTable,
+  STRING_FIELD_BUILDER_REFERENCE,
+} from '../constants';
+
+const PASSWORD_METHODS_TABLE = buildMethodsTable([
+  [
+    '`strong(message?)`',
+    '`message?: string`',
+    'Enables the built-in strong-password validator for length, upper, lower, number, and special character rules.',
+  ],
+  [
+    '`withStrengthIndicator(options?)`',
+    '`options?: object`',
+    'Adds strength UI metadata such as bar, label, rules checklist, entropy display, and weak-password blocking.',
+  ],
+  [
+    '`hideRulesWhenValid(enabled = true)`',
+    '`enabled?: boolean`',
+    'Hides the strength checklist once the password becomes valid.',
+  ],
+]);
 
 export const passwordSection: LibraryDoc['sections'][number] = {
   id: 'fb-password',
@@ -26,18 +48,15 @@ export const passwordSection: LibraryDoc['sections'][number] = {
   subsections: [
     {
       id: 'fb-password-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`password\`
+${BASE_FIELD_BUILDER_REFERENCE}
+${STRING_FIELD_BUILDER_REFERENCE}
+- Confirmation helpers such as \`sameAs('password')\` and \`matches('password')\` are inherited from [field.text()](/docs/field-text)
 
 Password-specific methods:
-- \`strong(message?)\` — built-in strong-password validator (length, upper, lower, number, special char)
-- \`withStrengthIndicator(options?)\` — adds strength UI metadata: \`showBar?\`, \`showLabel?\`, \`showRules?\`, \`showEntropy?\`, \`barHeight?\`, \`barRadius?\`, \`config?\`, \`levels?\`, \`blockWeak?\`, \`blockMsg?\`
-- \`sameAs(fieldName, message?)\` / \`matches(fieldName, message?)\` — inherited but especially relevant here for confirmation fields
-
-${BASE_BUILDER_METHODS}
-
-${STRING_BUILDER_METHODS}`,
+${PASSWORD_METHODS_TABLE}`,
     },
     {
       id: 'fb-password-recipes',

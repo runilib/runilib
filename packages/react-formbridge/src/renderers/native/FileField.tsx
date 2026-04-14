@@ -88,7 +88,7 @@ export const NativeFileField: React.FC<Props> = ({
   const {
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     hintProps,
     errorProps,
@@ -108,7 +108,7 @@ export const NativeFileField: React.FC<Props> = ({
     renderMissingPickerNotice,
   } = extra ?? {};
 
-  const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
+  const { style: wrapperPropsStyle, ...wrapperPropsRest } = (wrapperProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
   const { style: labelPropsStyle, ...labelPropsRest } = (labelProps ?? {}) as {
@@ -208,8 +208,8 @@ export const NativeFileField: React.FC<Props> = ({
 
   return (
     <View
-      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
-      {...rootPropsRest}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.wrapper, wrapperPropsStyle)}
+      {...wrapperPropsRest}
     >
       {!hideLabel &&
         (renderLabel?.({

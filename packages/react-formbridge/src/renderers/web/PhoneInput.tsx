@@ -70,7 +70,7 @@ const defaultIntegratedRowStyle: CSSProperties = {
   minHeight: 52,
   boxSizing: 'border-box',
   border: '1px solid #d1d5db',
-  borderRadius: 14,
+  // borderRadius: 14,
   background: '#ffffff',
 };
 
@@ -84,7 +84,7 @@ const defaultCountryButtonStyle: CSSProperties = {
   padding: '0 12px',
   boxSizing: 'border-box',
   border: '1px solid #d1d5db',
-  borderRadius: 14,
+  // borderRadius: 14,
   background: '#ffffff',
   color: '#111827',
   fontSize: 14,
@@ -98,7 +98,7 @@ const defaultIntegratedCountryButtonStyle: CSSProperties = {
   minWidth: 92,
   padding: '0 14px',
   border: 'none',
-  borderRadius: 0,
+  // borderRadius: 0,
   background: 'transparent',
   color: 'inherit',
 };
@@ -113,6 +113,64 @@ const defaultCountryDividerStyle: CSSProperties = {
   pointerEvents: 'none',
 };
 
+const defaultCountryListStyle: CSSProperties = {
+  position: 'absolute',
+  top: '100%',
+  left: 0,
+  zIndex: 50,
+  marginTop: 8,
+  minWidth: 280,
+  background: '#ffffff',
+  border: '1px solid #e5e7eb',
+  // borderRadius: 14,
+  boxShadow: '0 18px 50px rgba(15, 23, 42, 0.14)',
+  overflow: 'hidden',
+};
+
+const defaultCountrySearchWrapperStyle: CSSProperties = {
+  padding: '12px 12px 0',
+};
+
+const defaultCountrySearchInputStyle: CSSProperties = {
+  width: '100%',
+  boxSizing: 'border-box',
+  padding: '10px 12px',
+  border: '1px solid #e5e7eb',
+  // borderRadius: 10,
+  background: '#f8fafc',
+  color: '#111827',
+  fontSize: 13,
+  outline: 'none',
+};
+
+const defaultCountryScrollStyle: CSSProperties = {
+  maxHeight: 260,
+  overflowY: 'auto',
+  display: 'grid',
+  padding: '8px 0',
+};
+
+const defaultCountryItemStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '24px minmax(0, 1fr) auto',
+  gap: 10,
+  alignItems: 'center',
+  padding: '10px 14px',
+  border: 'none',
+  background: 'transparent',
+  color: '#111827',
+  fontSize: 13,
+  textAlign: 'left',
+  cursor: 'pointer',
+  width: '100%',
+};
+
+const defaultCountrySeparatorStyle: CSSProperties = {
+  height: 1,
+  margin: '4px 12px',
+  background: '#e5e7eb',
+};
+
 const defaultIntegratedInputStyle: CSSProperties = {
   minWidth: 0,
   width: '100%',
@@ -120,7 +178,7 @@ const defaultIntegratedInputStyle: CSSProperties = {
   padding: '0 14px',
   boxSizing: 'border-box',
   border: 'none',
-  borderRadius: 0,
+  // borderRadius: 0,
   borderTopLeftRadius: 0,
   borderBottomLeftRadius: 0,
   outline: 'none',
@@ -142,7 +200,7 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
     classNames,
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     searchInputProps,
@@ -163,10 +221,10 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
   } = extra ?? {};
 
   const {
-    className: rootPropsClassName,
-    style: rootPropsStyle,
-    ...rootPropsRest
-  } = rootProps ?? {};
+    className: wrapperPropsClassName,
+    style: wrapperPropsStyle,
+    ...wrapperPropsRest
+  } = wrapperProps ?? {};
   const {
     className: inputPropsClassName,
     style: inputPropsStyle,
@@ -419,9 +477,9 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
       data-fb-layout={countryLayout}
       {...(hasError ? { 'data-fb-error': '' } : {})}
       {...(props.disabled ? { 'data-fb-disabled': '' } : {})}
-      className={cx(extra?.className, classNames?.root, rootPropsClassName as string)}
-      style={mergeStyles(extra?.style, styles?.root, rootPropsStyle as CSSProperties)}
-      {...rootPropsRest}
+      className={cx(extra?.className, classNames?.wrapper, wrapperPropsClassName as string)}
+      style={mergeStyles(extra?.style, styles?.wrapper, wrapperPropsStyle as CSSProperties)}
+      {...wrapperPropsRest}
     >
       {renderLabelSlot({
         id,
@@ -493,16 +551,16 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
             <div
               data-fb-slot="country-list"
               className={classNames?.countryList}
-              style={mergeStyles(
-                { position: 'absolute', top: '100%', left: 0, zIndex: 50 },
-                styles?.countryList,
-              )}
+              style={mergeStyles(defaultCountryListStyle, styles?.countryList)}
             >
               {descriptor._phoneSearchable && (
                 <div
                   data-fb-slot="country-search-wrapper"
                   className={classNames?.countrySearchWrapper}
-                  style={mergeStyles(styles?.countrySearchWrapper)}
+                  style={mergeStyles(
+                    defaultCountrySearchWrapperStyle,
+                    styles?.countrySearchWrapper,
+                  )}
                 >
                   <input
                     value={search}
@@ -513,7 +571,11 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                       classNames?.countrySearchInput,
                       searchInputPropsClassName,
                     )}
-                    style={mergeStyles(styles?.countrySearchInput, searchInputPropsStyle)}
+                    style={mergeStyles(
+                      defaultCountrySearchInputStyle,
+                      styles?.countrySearchInput,
+                      searchInputPropsStyle,
+                    )}
                     {...searchInputPropsRest}
                   />
                 </div>
@@ -522,7 +584,7 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
               <div
                 data-fb-slot="country-scroll"
                 className={classNames?.countryScroll}
-                style={mergeStyles(styles?.countryScroll)}
+                style={mergeStyles(defaultCountryScrollStyle, styles?.countryScroll)}
               >
                 {filteredCountries.map((item, index) => {
                   if ('separator' in item) {
@@ -531,7 +593,7 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                         key={item.key}
                         data-fb-slot="separator"
                         className={classNames?.separator}
-                        style={mergeStyles(styles?.separator)}
+                        style={mergeStyles(defaultCountrySeparatorStyle, styles?.separator)}
                       />
                     );
                   }
@@ -583,7 +645,7 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                       data-fb-slot="country-item"
                       {...(isSelected ? { 'data-fb-selected': '' } : {})}
                       className={classNames?.countryItem}
-                      style={mergeStyles(styles?.countryItem)}
+                      style={mergeStyles(defaultCountryItemStyle, styles?.countryItem)}
                     >
                       {resolvedCountryItemContent}
                     </button>
@@ -621,8 +683,9 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
           data-fb-slot="input"
           className={cx(classNames?.input, inputPropsClassName)}
           style={mergeStyles(
+            integrated ? defaultIntegratedInputStyle : undefined,
+            integrated ? undefined : controlErrorStyle,
             styles?.input,
-            integrated ? defaultIntegratedInputStyle : controlErrorStyle,
             inputPropsStyle,
           )}
           inputMode={inputBehavior.inputMode ?? 'tel'}

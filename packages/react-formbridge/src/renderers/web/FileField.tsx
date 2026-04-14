@@ -9,7 +9,7 @@ import React, {
   useState,
 } from 'react';
 
-import type { BuiltFileDescriptor } from '../../core/field-builders/file/FileField';
+import type { BuiltFileDescriptor } from '../../core/field-builders/file/FileFieldBuilder';
 import type { FileValue } from '../../core/field-builders/file/types';
 import type { FieldRenderProps, WebFileFieldPropsOverrides } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
@@ -117,7 +117,7 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
     classNames,
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     hintProps,
     errorProps,
@@ -143,10 +143,10 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
   } = extra ?? {};
 
   const {
-    className: rootPropsClassName,
-    style: rootPropsStyle,
-    ...rootPropsRest
-  } = rootProps ?? {};
+    className: wrapperPropsClassName,
+    style: wrapperPropsStyle,
+    ...wrapperPropsRest
+  } = wrapperProps ?? {};
 
   const id = extra?.id ?? web.id ?? `${props.name}-${reactId}`;
   const hintId = `${id}-hint`;
@@ -262,10 +262,10 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
 
   const accept = descriptor._fileAccept.join(',');
 
-  const rootClassName = cx(
+  const wrapperClassName = cx(
     extra?.className,
-    classNames?.root,
-    rootPropsClassName as string,
+    classNames?.wrapper,
+    wrapperPropsClassName as string,
   );
   const renderContext = {
     accept: descriptor._fileAccept,
@@ -315,7 +315,13 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
       })
     : null;
   const defaultDropZoneContent = loading ? (
-    <div data-fb-slot="drop-zone-text">⟳ {resolvedLoadingText}</div>
+    <div
+      data-fb-slot="drop-zone-text"
+      className={classNames?.dropZoneText}
+      style={mergeStyles(styles?.dropZoneText)}
+    >
+      ⟳ {resolvedLoadingText}
+    </div>
   ) : (
     <>
       <div
@@ -335,11 +341,23 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
       </p>
 
       {resolvedAcceptedText ? (
-        <p data-fb-slot="drop-zone-accept">{resolvedAcceptedText}</p>
+        <p
+          data-fb-slot="drop-zone-accept"
+          className={classNames?.dropZoneAccept}
+          style={mergeStyles(styles?.dropZoneAccept)}
+        >
+          {resolvedAcceptedText}
+        </p>
       ) : null}
 
       {resolvedMaxSizeText ? (
-        <p data-fb-slot="drop-zone-max-size">{resolvedMaxSizeText}</p>
+        <p
+          data-fb-slot="drop-zone-max-size"
+          className={classNames?.dropZoneMaxSize}
+          style={mergeStyles(styles?.dropZoneMaxSize)}
+        >
+          {resolvedMaxSizeText}
+        </p>
       ) : null}
     </>
   );
@@ -362,9 +380,13 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
       data-fb-name={props.name}
       {...(hasError ? { 'data-fb-error': '' } : {})}
       {...(descriptor._disabled ? { 'data-fb-disabled': '' } : {})}
-      className={rootClassName}
-      style={mergeStyles(extra?.style, styles?.root, rootPropsStyle as CSSProperties)}
-      {...rootPropsRest}
+      className={wrapperClassName}
+      style={mergeStyles(
+        extra?.style,
+        styles?.wrapper,
+        wrapperPropsStyle as CSSProperties,
+      )}
+      {...wrapperPropsRest}
     >
       {renderLabelSlot({
         id,
@@ -503,7 +525,11 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
                   </div>
                 )}
 
-                <div data-fb-slot="file-info">
+                <div
+                  data-fb-slot="file-info"
+                  className={classNames?.fileInfo}
+                  style={mergeStyles(styles?.fileInfo)}
+                >
                   <p
                     data-fb-slot="file-name"
                     className={classNames?.fileName}

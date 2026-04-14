@@ -19,13 +19,58 @@ type RichTextBlock =
 type TextSegment =
   | { type: 'bullet'; items: string[] }
   | { type: 'ordered'; items: string[] }
+  | { type: 'table'; headers: string[]; rows: string[][] }
   | { type: 'paragraph'; lines: string[] };
+
+function isMarkdownTableRow(line: string): boolean {
+  const trimmed = line.trim();
+  return trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.length > 2;
+}
+
+function isMarkdownTableDivider(line: string): boolean {
+  if (!isMarkdownTableRow(line)) {
+    return false;
+  }
+
+  return line
+    .trim()
+    .slice(1, -1)
+    .split('|')
+    .every((cell) => /^:?-{3,}:?$/.test(cell.trim()));
+}
+
+function parseMarkdownTableCells(line: string): string[] {
+  return line
+    .trim()
+    .slice(1, -1)
+    .split('|')
+    .map((cell) => cell.trim());
+}
 
 function renderInlineText(text: string): React.ReactNode[] {
   return text
-    .split(/(`[^`]+`|\*\*[^*]+\*\*)/g)
+    .split(/(\[[^\]]+\]\([^)]+\)|`[^`]+`|\*\*[^*]+\*\*)/g)
     .filter(Boolean)
     .map((part, index) => {
+      const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+
+      if (linkMatch) {
+        const [, label, href] = linkMatch;
+        const external = /^https?:\/\//.test(href);
+
+        return (
+          <a
+            className="inline-link"
+            href={href}
+            key={`${part}-${index.toString()}`}
+            rel={external ? 'noreferrer' : undefined}
+            target={external ? '_blank' : undefined}
+          >
+            {label}
+          </a>
+        );
+      }
+
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={`${part}-${index.toString()}`}>{part.slice(2, -2)}</strong>;
       }
@@ -134,8 +179,38 @@ function splitTextSegments(lines: string[]): TextSegment[] {
     orderedBuffer = [];
   };
 
-  for (const line of lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? '';
     const trimmed = line.trim();
+
+    if (
+      isMarkdownTableRow(line) &&
+      index + 1 < lines.length &&
+      isMarkdownTableDivider(lines[index + 1] ?? '')
+    ) {
+      flushParagraph();
+      flushBullets();
+      flushOrdered();
+
+      const headers = parseMarkdownTableCells(line);
+      const rows: string[][] = [];
+
+      index += 2;
+
+      while (index < lines.length && isMarkdownTableRow(lines[index] ?? '')) {
+        const currentLine = lines[index] ?? '';
+
+        if (!isMarkdownTableDivider(currentLine)) {
+          rows.push(parseMarkdownTableCells(currentLine));
+        }
+
+        index += 1;
+      }
+
+      segments.push({ type: 'table', headers, rows });
+      index -= 1;
+      continue;
+    }
 
     if (trimmed.startsWith('- ')) {
       flushParagraph();
@@ -292,6 +367,49 @@ function renderRichText(content: string, interactiveCode = false): React.ReactNo
               <li key={`item-${itemIndex.toString()}`}>{renderInlineText(item)}</li>
             ))}
           </ol>
+        );
+      }
+
+      if (segment.type === 'table') {
+        const columnCount = Math.max(
+          segment.headers.length,
+          ...segment.rows.map((row) => row.length),
+        );
+        const headers = Array.from({ length: columnCount }, (_value, headerIndex) => {
+          return segment.headers[headerIndex] ?? `Column ${headerIndex + 1}`;
+        });
+
+        return (
+          <div
+            className="doc-rich-table-shell"
+            key={`table-${index.toString()}-${segmentIndex.toString()}`}
+          >
+            <table className="doc-rich-table">
+              <thead>
+                <tr>
+                  {headers.map((header, headerIndex) => (
+                    <th key={`header-${headerIndex.toString()}`}>
+                      {renderInlineText(header)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {segment.rows.map((row, rowIndex) => (
+                  <tr key={`row-${rowIndex.toString()}`}>
+                    {headers.map((header, cellIndex) => (
+                      <td
+                        data-label={header.replaceAll('`', '')}
+                        key={`cell-${rowIndex.toString()}-${cellIndex.toString()}`}
+                      >
+                        {renderInlineText(row[cellIndex] ?? '')}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         );
       }
 

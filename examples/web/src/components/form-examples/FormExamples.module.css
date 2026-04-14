@@ -352,7 +352,7 @@
   min-width: 188px;
   padding: 14px 22px;
   border: none;
-  border-radius: 16px;
+  border-radius: 5px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #120f0a;
   font-size: 13.5px;

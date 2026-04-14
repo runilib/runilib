@@ -121,9 +121,32 @@ export const DOC_PREVIEWS = {
   },
 } as const;
 
+export type DocsMethodTableRow = readonly [string, string, string];
+
+export function buildMethodsTable(rows: readonly DocsMethodTableRow[]) {
+  const escapeCell = (value: string) => value.replaceAll('|', '&#124;');
+
+  return [
+    '| Method | Type | Description |',
+    '| --- | --- | --- |',
+    ...rows.map(
+      ([method, type, description]) =>
+        `| ${escapeCell(method)} | ${escapeCell(type)} | ${escapeCell(description)} |`,
+    ),
+  ].join('\n');
+}
+
+export const BASE_FIELD_BUILDER_REFERENCE =
+  '- Shared methods: see [Base field builder](/docs/base-field-builder)';
+
+export const STRING_FIELD_BUILDER_REFERENCE =
+  '- String builder methods: see [field.text()](/docs/field-text)';
+
+export const SELECT_FIELD_BUILDER_REFERENCE =
+  '- Select-field methods: see [field.select()](/docs/field-select)';
+
 export const BASE_BUILDER_METHODS = [
   'Inherited from `BaseFieldBuilder`:',
-  '- `behavior(config)` merges field-owned behavior metadata such as ids, autocomplete, keyboard hints, picker hooks, and error highlighting',
   '- `defaultValue(value)` overrides the initial value',
   '- `required(message?)` marks the field as required',
   '- `optional()` removes the required flag',
@@ -138,6 +161,7 @@ export const BASE_BUILDER_METHODS = [
   '- `render(fn)` replaces the generated UI while keeping the same form runtime',
   'Conditional logic helpers:',
   '- `visibleWhen(fieldOrFn, value?)` shows the field when another field or predicate matches',
+  '- `visibleAndRequiredWhen(fieldOrFn, value?)` combines visibility and required logic in one call',
   '- `visibleWhenNot(field, value)` shows the field when another field does not match',
   '- `visibleWhenTruthy(field)` shows the field when another field is truthy',
   '- `visibleWhenFalsy(field)` shows the field when another field is falsy',
@@ -160,13 +184,17 @@ export const STRING_BUILDER_METHODS = [
   '- `trim()` trims the value before validation / submit',
   '- `lowercase()` lowercases the value before storing',
   '- `uppercase()` uppercases the value before storing',
-  '- `matches(fieldName, message?)` requires equality with another field value',
+  '- `nonEmpty(message?)` rejects empty **and** whitespace-only strings (stricter than `required()`)',
+  '- `length(exact, message?)` requires an exact character count for fixed-size codes',
+  '- `between(min, max, message?)` shorthand for a combined min+max length check',
+  '- `oneOf(values, message?)` restricts accepted values to an allow-list',
+  '- `notOneOf(values, message?)` blocks values from a deny-list (reserved words, forbidden slugs, etc.)',
+  '- `matches(fieldName, message?)` requires equality with another field value (supports `ref()` paths)',
   '- `sameAs(fieldName, message?)` alias of `matches()` with more explicit semantics',
 ].join('\n');
 
 export const BASE_BUILDER_METHOD_EXAMPLES = [
   'Mini examples for the shared base builder methods:',
-  "- `behavior({ autoComplete: 'email', inputMode: 'email' })` → `field.email('Work email').behavior({ autoComplete: 'email', inputMode: 'email' })`",
   "- `defaultValue('FR')` → `field.select('Country').defaultValue('FR')`",
   "- `required('Required')` / `optional()` → `field.text('Middle name').required('Required').optional()`",
   "- `label('Username')` / `placeholder('@alex')` / `hint('Shown publicly')` → `field.text('Handle').label('Username').placeholder('@alex').hint('Shown publicly')`",
@@ -175,6 +203,7 @@ export const BASE_BUILDER_METHOD_EXAMPLES = [
   "- `transform((value) => value.trim())` → `field.text('Slug').transform((value) => value.trim().toLowerCase().replace(/\\s+/g, '-'))`",
   "- `render(fn)` → `field.custom(0).label('Rating').render(({ value, onChange }) => <Stars value={value} onChange={onChange} />)`",
   "- `visibleWhen('accountType', 'company')` → `field.text('Company name').visibleWhen('accountType', 'company')`",
+  "- `visibleAndRequiredWhen('accountType', 'company')` → `field.text('Company name').visibleAndRequiredWhen('accountType', 'company')`",
   "- `visibleWhenNot('role', 'guest')` / `visibleWhenTruthy('hasVat')` / `visibleWhenFalsy('sameAsBilling')` → `field.text('VAT number').visibleWhenTruthy('hasVat')`",
   "- `visibleWhenAny([['role', 'admin'], ['role', 'manager']])` → `field.text('Internal note').visibleWhenAny([['role', 'admin'], ['role', 'manager']])`",
   "- `requiredWhen('needsInvoice')` / `requiredWhenAny([['country', 'FR'], ['country', 'DE']])` → `field.text('Tax ID').requiredWhenAny([['country', 'FR'], ['country', 'DE']])`",
@@ -199,10 +228,10 @@ export const USE_FORM_BRIDGE_OPTIONS_SURFACE = [
   "  Default: `'onBlur'`",
   "- `revalidateOn?: 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched'`",
   "  Default: `'onChange'`",
-  '- `resolver?: SchemaResolver`',
+  '- `resolver?: SchemaValidatorResolver`',
   '  Async contract: `async (values) => ({ values, errors })`',
   '  When present, resolver output becomes the validation source of truth',
-  "- `showErrorsOn?: 'submit' | 'always'`",
+  // "- `showErrorsOn?: 'submit' | 'always'`",
   '  Public option for inline error display policy; keep validation timing in `validateOn` / `revalidateOn`',
   '- `persist?: PersistOptions`',
   '  Enables draft save/restore with storage, TTL, debounce, exclusion, restore/save callbacks, and versioning',
@@ -212,34 +241,34 @@ export const USE_FORM_BRIDGE_OPTIONS_SURFACE = [
   '  Seeds the runtime with existing values',
   '- `analytics?: AnalyticsOptions`',
   '  Wires analytics without changing the field components',
-  '- `globalStyles?(state): FormBridgeUiOptions`',
+  '- `globalConfigs?(state): FormBridgeUiOptions`',
   '  Shared theming layer for generated fields, the form wrapper, and submit button; because it is a function, the theme can react to submit, dirty, or error state',
 ].join('\n');
 
 export const USE_FORM_BRIDGE_RETURN_SURFACE = [
-  'Complete hook return surface:',
-  '- `FormProvider` — advanced context wrapper for consumers rendered outside `<Form>`',
-  '- `Form` — generated wrapper component with submit lifecycle',
-  '- `fields` — typed generated field components keyed by schema name',
-  '- `FieldError` — standalone error renderer for one field name',
-  '- `FieldLabel` — standalone label renderer for one field name',
-  '- `fieldController(name)` — field-scoped runtime for fully custom UI while keeping the schema contract',
-  '- `state` — reactive `FormState` object',
-  '- `setValue(name, value)` — set one field value programmatically',
-  '- `getValue(name)` — read one field value',
-  '- `getValues()` — read the full value object',
-  '- `validate(names?)` — validate one field, several fields, or the full form',
-  '- `resetFields(values?)` — resetFields to schema defaults or a provided partial value object',
-  '- `setError(name, message)` — push a manual field error',
-  '- `clearErrors(name?)` — clear one field, many fields, or all errors',
-  '- `watch(name)` — reactive single-field read',
-  '- `watchAll()` — reactive full-value read',
-  '- `submit()` — imperative submit using the same submit pipeline as `Form.Submit`',
-  '- `visibility` — per-field visibility / required / disabled state',
-  '- `isLoadingDraft` — true while a persisted draft is being restored',
-  '- `hasDraft` — true once a draft was found and restored',
-  '- `clearDraft()` — delete the saved draft',
-  '- `saveDraftNow()` — persist immediately without waiting for debounce',
+  'Complete hook return surface. Every value listed below is returned by `useFormBridge()` in the exact order shown in the code snippet above, with a link to its dedicated reference section:',
+  '- [`FormProvider`](/docs/useformbridgecontext) — advanced context wrapper for consumers rendered outside `<Form>`',
+  '- [`Form`](/docs/form-component) — generated wrapper component with submit lifecycle (includes `Form.Submit`)',
+  '- [`fields`](/docs/generated-fields) — typed generated field components keyed by schema name',
+  '- [`FieldError`](/docs/fielderror-component) — standalone error renderer for one field name',
+  '- [`FieldLabel`](/docs/fieldlabel-component) — standalone label renderer for one field name',
+  '- [`fieldController(name)`](/docs/fieldcontroller) — field-scoped runtime for fully custom UI while keeping the schema contract',
+  '- [`state`](/docs/state) — reactive `FormState` object (values, errors, touched, dirty, isValid, isSubmitting, …)',
+  '- [`visibility`](/docs/conditional-logic) — per-field visibility / required / disabled state computed from conditional rules',
+  '- [`isLoadingDraft`](/docs/draft-persistence) — `true` while a persisted draft is being restored',
+  '- [`hasDraft`](/docs/draft-persistence) — `true` once a draft was found and restored',
+  '- [`clearDraft()`](/docs/draft-persistence) — delete the saved draft',
+  '- [`saveDraftNow()`](/docs/draft-persistence) — persist immediately without waiting for debounce',
+  '- [`setValue(name, value)`](/docs/actions-and-helpers) — set one field value programmatically',
+  '- [`getValue(name)`](/docs/actions-and-helpers) — read one field value',
+  '- [`getValues()`](/docs/actions-and-helpers) — read the full value object',
+  '- [`validate(names?)`](/docs/actions-and-helpers) — validate one field, several fields, or the full form',
+  '- [`resetFields(values?)`](/docs/actions-and-helpers) — reset to schema defaults or a provided partial value object',
+  '- [`setError(name, message)`](/docs/actions-and-helpers) — push a manual field error',
+  '- [`clearErrors(name?)`](/docs/actions-and-helpers) — clear one field, many fields, or all errors',
+  '- [`watch(name)`](/docs/actions-and-helpers) — reactive single-field read',
+  '- [`watchAll()`](/docs/actions-and-helpers) — reactive full-value read',
+  '- [`submit()`](/docs/actions-and-helpers) — imperative submit using the same submit pipeline as `Form.Submit`',
 ].join('\n');
 
 export const FIELD_CONTROLLER_SURFACE = [
@@ -264,7 +293,7 @@ export const FORM_COMPONENT_PROPS_SURFACE = [
 export const FORM_SUBMIT_PROPS_SURFACE = [
   'Complete `Form.Submit` props surface:',
   '- `children?: ReactNode`',
-  '- `style?` — cross-platform button/root style',
+  '- `style?` — cross-platform button/wrapper style',
   '- `loadingText?: string` — replaces the label while submitting',
   '- `disabled?: boolean` — adds an extra disabled condition on top of submit state',
   '- `className?` — web only',
@@ -278,9 +307,9 @@ export const GENERATED_FIELD_COMMON_PROPS_SURFACE = [
   '- `label?` — override the schema label for this render only',
   '- `placeholder?` — override placeholder copy for this render only',
   '- `hint?` — override helper copy for this render only',
-  '- `style?` — root style override',
+  '- `style?` — wrapper style override',
   '- `ui?` — platform-typed renderer override object',
-  '- `className?` — web only root class override',
+  '- `className?` — web only wrapper class override',
 ].join('\n');
 
 export const GENERATED_FIELD_UI_SURFACE = [
@@ -290,7 +319,7 @@ export const GENERATED_FIELD_UI_SURFACE = [
   '- `highlightOnError?` — keep the error message but suppress the default error chrome when `false`',
   '- `styles?` — slot style map',
   '- `classNames?` — web slot class map',
-  '- `rootProps?`, `labelProps?`, `hintProps?`, `errorProps?` — forward low-level props to the built-in renderer',
+  '- `wrapperProps?`, `labelProps?`, `hintProps?`, `errorProps?` — forward low-level props to the built-in renderer',
   '- `renderLabel?(ctx)`, `renderHint?(ctx)`, `renderError?(ctx)`, `renderRequiredMark?()` — render-hook escape hatches',
   '- Text-like fields: `inputProps?`',
   '- `textarea` on web: `textareaProps?`',
@@ -311,28 +340,28 @@ export const FORM_STATE_SURFACE = [
   '- `isValid` — no current validation errors',
   '- `isDirty` — at least one field differs from its initial/default value',
   '- `isSubmitting` — submit handler currently running',
-  '- `isSuccess` — last submit completed successfully',
-  '- `isError` — last submit ended in error',
+  '- `isSubmitSuccess` — last submit completed successfully',
+  '- `isSubmitError` — last submit ended in error',
   '- `submitCount` — number of submit attempts',
   '- `submitError` — mapped submit error string from `onSubmitError`',
 ].join('\n');
 
 export const ACTIONS_HELPERS_SURFACE = [
-  'Complete imperative helper surface:',
-  '- `validate(name?)` or `validate([nameA, nameB])` or `validate()`',
-  '- `resetFields()` or `resetFields(partialValues)`',
-  '- `setValue(name, value)`',
-  '- `getValue(name)`',
-  '- `getValues()`',
-  '- `setError(name, message)`',
-  '- `clearErrors(name?)` or `clearErrors([nameA, nameB])` or `clearErrors()`',
-  '- `watch(name)`',
-  '- `watchAll()`',
-  '- `submit()`',
-  '- `fieldController(name)`',
-  '- `saveDraftNow()`',
-  '- `clearDraft()`',
-  '- `visibility[fieldName]?.visible` / `.required` / `.disabled`',
+  'Complete imperative helper surface. Each entry below is exposed on the object returned by `useFormBridge()` and runs through the same pipeline as the built-in UI (validation, analytics, conditional rules, persistence):',
+  '- `validate(name?)` / `validate([nameA, nameB])` / `validate()` — trigger validation imperatively. Pass one name to validate a single field, an array to validate a subset, or no argument to validate the entire form. Returns a promise that resolves to `true` when every targeted field is valid.',
+  '- `resetFields()` / `resetFields(partialValues)` — reset the runtime back to the schema defaults, or merge a partial value object on top of the defaults. Clears errors, touched, and dirty flags for every affected field and re-runs conditional rules.',
+  '- `setValue(name, value)` — imperatively write a value into one field. Goes through the normal change pipeline (validation timing, analytics, conditional re-evaluation), so it is safe for presets, paste handlers, clipboard shortcuts, or synchronizing with external state.',
+  '- `getValue(name)` — read one field value on demand without subscribing the calling component to updates. Useful inside event handlers, effects, or submit helpers where you do not want a re-render on every keystroke.',
+  '- `getValues()` — read the full, typed value object on demand without subscribing. Ideal for building payloads, logging, or handing the current values to an external API.',
+  '- `setError(name, message)` — push a manual error onto one field. Typically used to project server-side validation errors back onto the form so they display alongside built-in rules and get cleared by the normal lifecycle.',
+  '- `clearErrors(name?)` / `clearErrors([nameA, nameB])` / `clearErrors()` — clear errors for a single field, a list of fields, or the whole form. Handy when the user edits a field that previously failed a server check, or when retrying a failed submit.',
+  '- `watch(name)` — reactive single-field read. Unlike `getValue`, it subscribes the calling component so it re-renders whenever that field changes. Use it for lightweight cross-field UI (showing a live preview, revealing a helper, computing a derived label).',
+  '- `watchAll()` — reactive full-values read. Subscribes the component to every value change — heavier than `watch`, but perfect for a sticky summary bar, a debug panel, or a "review your answers" step.',
+  '- `submit()` — imperatively trigger submission through the exact same pipeline as `<Form.Submit>`. Runs validation, respects `validateOn` / `revalidateOn`, calls `onSubmit` / `onError` / `onSubmitError`, updates `state.isSubmitting` / `state.submitError`, and fires analytics. Great for submit-on-enter, wizard "next" buttons, or external triggers.',
+  '- `fieldController(name)` — returns a headless controller for one field (reactive value, error, touched, visible, change/blur/focus handlers, imperative `setValue` / `validate` / `setError` / `clearError`, and a focus bridge). Reach for it when the generated field component is not enough but you still want the field to behave like a first-class schema field.',
+  '- `saveDraftNow()` — when `persist` is configured, flush the current values to the storage backend immediately, bypassing the debounce window. Useful before navigating away, on visibility change, or right before a manual snapshot.',
+  '- `clearDraft()` — when `persist` is configured, delete the saved draft for this form. Call it after a successful submit, on explicit "reset and clear" actions, or when the user changes identity.',
+  '- `visibility[fieldName]?.visible` / `.required` / `.disabled` — read the computed per-field flags derived from the schema `conditions`. Use them to drive surrounding layout (section headers, fieldsets, progress indicators) without re-implementing the rule engine.',
 ].join('\n');
 
 export const VALIDATION_RUNTIME_SURFACE = [
@@ -396,8 +425,8 @@ export const PERSIST_OPTIONS_SURFACE = [
 ].join('\n');
 
 export const GLOBAL_UI_SURFACE = [
-  'Complete `globalStyles` surface:',
-  '- `globalStyles` itself is a function: `(state) => ({ ... })`',
+  'Complete `globalConfigs` surface:',
+  '- `globalConfigs` itself is a function: `(state) => ({ ... })`',
   '- `field?: { className?, style?, ui? }` — shared defaults for all generated fields',
   '- `form?: { className?, style?, props? }` on web or `{ style?, props? }` on native',
   '- `submit?: { className?, style?, loadingText?, props? }` on web',
@@ -406,7 +435,7 @@ export const GLOBAL_UI_SURFACE = [
 
 export const WEB_SLOT_SURFACE = [
   'Web field slot names currently exposed through `ui.classNames` / `ui.styles`:',
-  '- Shared: `root`, `label`, `hint`, `error`, `requiredMark`',
+  '- Shared: `wrapper`, `label`, `hint`, `error`, `requiredMark`',
   '- Text-like: `input`, `textarea`, `select`',
   '- Checkbox/radio: `checkboxRow`, `checkboxInput`, `checkboxLabel`',
   '- Switch: `switchRoot`, `switchTrack`, `switchThumb`',
@@ -419,7 +448,7 @@ export const WEB_SLOT_SURFACE = [
 
 export const NATIVE_SLOT_SURFACE = [
   'Native field slot names currently exposed through `ui.styles`:',
-  '- Shared: `root`, `label`, `input`, `error`, `hint`, `requiredMark`',
+  '- Shared: `wrapper`, `label`, `input`, `error`, `hint`, `requiredMark`',
   '- Checkbox: `checkboxRow`, `checkboxBox`, `checkboxLabel`',
   '- Select/radio: `optionTrigger`, `optionRow`, `optionLabel`, `modalBackdrop`, `modalCard`',
   '- OTP: `otpContainer`, `otpInput`',
@@ -602,13 +631,13 @@ export const WIZARD_RETURN_SURFACE = [
   '- `skip()`',
   '- `submit()`',
   '- `isSubmitting`',
-  '- `isSuccess`',
+  '- `isSubmitSuccess`',
   '- `submitError`',
   '- `isHydrating`',
 ].join('\n');
 
 export const READONLY_OPTIONS_SURFACE = [
-  'Complete `useReadonlyFormBridge()` options surface:',
+  'Complete `useFormBridgeReadonly()` options surface:',
   "- `mode: 'readonly' | 'diff'`",
   '- `values` — current values to display',
   '- `originalValues?` — baseline values used in diff mode',
@@ -636,7 +665,7 @@ export const READONLY_FIELD_PROPS_SURFACE = [
 ].join('\n');
 
 export const READONLY_RETURN_SURFACE = [
-  'Complete `useReadonlyFormBridge()` return surface:',
+  'Complete `useFormBridgeReadonly()` return surface:',
   '- `fields` — readonly state map for every visible field',
   '- `fieldNames` — ordered visible field names',
   '- `changedFields` — changed field names in diff mode',

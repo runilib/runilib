@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { field } from '../core/field-builders/field';
 import { validateAll, validateField } from '../core/validators/engine';
+import { ref } from '../core/validators/reference';
 
 const desc = (f: ReturnType<typeof field.text>) => f._build();
 
@@ -64,6 +65,30 @@ describe('validateField — min/max (number)', () => {
     expect(
       await validateField(numDesc(field.number('x').max(100)), 150, {}),
     ).not.toBeNull());
+
+  it('supports gt/gte/lt/lte/between/multipleOf', async () => {
+    const descriptor = numDesc(
+      field.number('Amount').gt(10).gte(11).lt(20).lte(19).between(11, 19).multipleOf(2),
+    );
+
+    await expect(validateField(descriptor, 8, {})).resolves.toBe(
+      'Must be greater than 10.',
+    );
+    await expect(validateField(descriptor, 14, {})).resolves.toBeNull();
+  });
+
+  it('supports greaterThan/lowerThan with refs', async () => {
+    const minDescriptor = numDesc(field.number('Max').greaterThan(ref('min')));
+    const maxDescriptor = numDesc(field.number('Min').lowerThan(ref('max')));
+
+    await expect(validateField(minDescriptor, 10, { min: 12 })).resolves.toBe(
+      'Must be greater than 12.',
+    );
+    await expect(validateField(minDescriptor, 14, { min: 12 })).resolves.toBeNull();
+    await expect(validateField(maxDescriptor, 20, { max: 18 })).resolves.toBe(
+      'Must be lower than 18.',
+    );
+  });
 });
 
 // ─── pattern ──────────────────────────────────────────────────────────────────
@@ -169,6 +194,20 @@ describe('field.text.matches()', () => {
     const err = await validateField(d, 'same', { password: 'same' });
     expect(err).toBeNull();
   });
+
+  it('accepts ref() references too', async () => {
+    const refDescriptor = field
+      .text('Confirm')
+      .sameAs(ref('password'), 'Passwords must match.')
+      ._build();
+
+    await expect(
+      validateField(refDescriptor, 'secret', { password: 'secret' }),
+    ).resolves.toBeNull();
+    await expect(
+      validateField(refDescriptor, 'secret', { password: 'other' }),
+    ).resolves.toBe('Passwords must match.');
+  });
 });
 
 // ─── custom async validator ───────────────────────────────────────────────────
@@ -202,6 +241,97 @@ describe('trim & transform', () => {
       ._build();
     expect(await validateField(d, 'ab', {})).not.toBeNull();
     expect(await validateField(d, 'abc', {})).toBeNull();
+  });
+});
+
+describe('additional string validators', () => {
+  it('supports nonEmpty, length, between, oneOf and notOneOf', async () => {
+    const nonEmpty = desc(field.text('Code').nonEmpty());
+    const exactLength = desc(field.text('Code').length(4));
+    const betweenDescriptor = desc(field.text('Code').between(2, 4));
+    const oneOfDescriptor = desc(field.text('Role').oneOf(['admin', 'editor']));
+    const notOneOfDescriptor = desc(field.text('Role').notOneOf(['banned']));
+
+    await expect(validateField(nonEmpty, '   ', {})).resolves.toBe(
+      'This field cannot be empty.',
+    );
+    await expect(validateField(exactLength, 'abc', {})).resolves.toBe(
+      'Must be exactly 4 characters.',
+    );
+    await expect(validateField(betweenDescriptor, 'abc', {})).resolves.toBeNull();
+    await expect(validateField(oneOfDescriptor, 'user', {})).resolves.toBe(
+      'Value must be one of: admin, editor.',
+    );
+    await expect(validateField(notOneOfDescriptor, 'banned', {})).resolves.toBe(
+      'Value must not be one of: banned.',
+    );
+  });
+});
+
+describe('date validators', () => {
+  const dateDesc = (builder: any) => builder._build();
+
+  it('supports before and after', async () => {
+    const beforeDescriptor = dateDesc(
+      field.date('Start').before('2026-01-10', 'Too late.'),
+    );
+    const afterDescriptor = dateDesc(field.date('End').after('2026-01-10', 'Too early.'));
+
+    await expect(validateField(beforeDescriptor, '2026-01-11', {})).resolves.toBe(
+      'Too late.',
+    );
+    await expect(validateField(afterDescriptor, '2026-01-12', {})).resolves.toBeNull();
+  });
+
+  it('supports past, future, minAge and maxAge', async () => {
+    const today = new Date();
+    const pastDate = new Date(today.getFullYear() - 20, today.getMonth(), today.getDate())
+      .toISOString()
+      .slice(0, 10);
+    const futureDate = new Date(
+      today.getFullYear() + 1,
+      today.getMonth(),
+      today.getDate(),
+    )
+      .toISOString()
+      .slice(0, 10);
+    const teenDate = new Date(today.getFullYear() - 15, today.getMonth(), today.getDate())
+      .toISOString()
+      .slice(0, 10);
+
+    await expect(
+      validateField(dateDesc(field.date('Past').past()), futureDate, {}),
+    ).resolves.toBe('Date must be in the past.');
+    await expect(
+      validateField(dateDesc(field.date('Future').future()), futureDate, {}),
+    ).resolves.toBeNull();
+    await expect(
+      validateField(dateDesc(field.date('Birthdate').minAge(18)), teenDate, {}),
+    ).resolves.toBe('Must be at least 18 years old.');
+    await expect(
+      validateField(dateDesc(field.date('Birthdate').maxAge(30)), pastDate, {}),
+    ).resolves.toBeNull();
+  });
+});
+
+describe('select validators', () => {
+  const selectDesc = (builder: any) => builder._build();
+
+  it('supports oneOf, notOneOf and disallowPlaceholder', async () => {
+    const oneOfDescriptor = selectDesc(field.select('Role').oneOf(['admin', 'editor']));
+    const notOneOfDescriptor = selectDesc(field.select('Role').notOneOf(['guest']));
+    const placeholderDescriptor = selectDesc(field.select('Role').disallowPlaceholder());
+
+    await expect(validateField(oneOfDescriptor, 'guest', {})).resolves.toBe(
+      'Please select an allowed option.',
+    );
+    await expect(validateField(notOneOfDescriptor, 'guest', {})).resolves.toBe(
+      'Please choose a different option.',
+    );
+    await expect(validateField(placeholderDescriptor, '', {})).resolves.toBe(
+      'Please select an option.',
+    );
+    await expect(validateField(placeholderDescriptor, 'admin', {})).resolves.toBeNull();
   });
 });
 

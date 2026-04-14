@@ -1,5 +1,13 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+
+const CUSTOM_METHODS_TABLE = buildMethodsTable([
+  [
+    '`—`',
+    '`—`',
+    '`field.custom(defaultValue)` does not add methods on top of the base builder; it is the raw BaseFieldBuilder escape hatch.',
+  ],
+]);
 
 export const customSection: LibraryDoc['sections'][number] = {
   id: 'fb-custom',
@@ -42,7 +50,7 @@ const { Form, fields } = useFormBridge(schema)
   subsections: [
     {
       id: 'fb-custom-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `\`field.custom(defaultValue)\` returns a typed \`BaseFieldBuilder\` — no extra methods, just the shared base surface (see Builder basics).
 
 - defaultValue is required and stays typed through the generated field
@@ -52,7 +60,10 @@ const { Form, fields } = useFormBridge(schema)
 
 \`render(fn)\` receives: \`name\`, \`label\`, \`value\`, \`placeholder\`, \`error\`, \`touched\`, \`dirty\`, \`validating\`, \`disabled\`, \`hint\`, \`options\`, \`otpLength\`, \`onChange\`, \`onBlur\`, \`onFocus\`, \`allValues\`
 
-${BASE_BUILDER_METHODS}`,
+${BASE_FIELD_BUILDER_REFERENCE}
+
+Custom-field methods:
+${CUSTOM_METHODS_TABLE}`,
     },
     {
       id: 'fb-custom-recipes',

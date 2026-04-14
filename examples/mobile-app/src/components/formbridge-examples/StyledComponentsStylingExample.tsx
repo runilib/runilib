@@ -17,6 +17,7 @@ const PreviewStack = styled.View`
   gap: 10px;
 `;
 
+
 const PreviewValue = styled.Text`
   font-size: 22px;
   font-weight: 800;
@@ -77,7 +78,7 @@ const StudioFormComp = styled(FormHost)`
 
 const StudioNameFieldShell = styled(FieldHost).attrs({
   styles: {
-    root: {
+    wrapper: {
       marginBottom: 0,
       gap: 8,
     },
@@ -119,7 +120,7 @@ const StudioNameFieldShell = styled(FieldHost).attrs({
 
 const ContactEmailFieldShell = styled(FieldHost).attrs({
   styles: {
-    root: {
+    wrapper: {
       marginBottom: 0,
       gap: 8,
     },
@@ -161,7 +162,7 @@ const ContactEmailFieldShell = styled(FieldHost).attrs({
 
 const CityFieldShell = styled(FieldHost).attrs({
   styles: {
-    root: {
+    wrapper: {
       marginBottom: 0,
       gap: 8,
     },
@@ -199,7 +200,7 @@ const CityFieldShell = styled(FieldHost).attrs({
 
 const LaunchNotesFieldShell = styled(FieldHost).attrs({
   styles: {
-    root: {
+    wrapper: {
       marginBottom: 0,
       gap: 8,
     },
@@ -314,7 +315,8 @@ export function StyledComponentsStylingExample() {
     >
       <StudioFormComp
         form={Form}
-        onSubmit={async (values) => {
+        // biome-ignore lint/suspicious/noExplicitAny: To be fixed
+        onSubmit={async (values: any) => {
           await simulateSubmitDelay();
           setLastSubmission(values);
         }}

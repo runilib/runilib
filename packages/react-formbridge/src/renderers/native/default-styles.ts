@@ -10,7 +10,7 @@ export const defaultOptionModalBackdropStyle: ViewStyle = {
 export const defaultOptionModalCardStyle: ViewStyle = {
   width: '100%',
   maxHeight: '72%',
-  borderRadius: 22,
+  // borderRadius: 22,
   backgroundColor: '#ffffff',
   paddingHorizontal: 12,
   paddingTop: 10,
@@ -19,7 +19,7 @@ export const defaultOptionModalCardStyle: ViewStyle = {
 };
 
 export const defaultOptionRowStyle: ViewStyle = {
-  borderRadius: 14,
+  // borderRadius: 14,
   paddingHorizontal: 14,
   paddingVertical: 14,
   backgroundColor: '#f8fafc',
@@ -32,7 +32,7 @@ export const defaultOptionRowStyle: ViewStyle = {
 
 export const defaultOptionTriggerStyle: ViewStyle = {
   minHeight: 52,
-  borderRadius: 16,
+  // borderRadius: 16,
   paddingHorizontal: 14,
   justifyContent: 'center',
 };

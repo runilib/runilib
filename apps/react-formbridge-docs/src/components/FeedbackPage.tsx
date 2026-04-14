@@ -82,7 +82,7 @@ type FeedbackFormValues = SchemaValues<typeof FEEDBACK_SCHEMA>;
 
 function getFeedbackFieldStyles(theme: DefaultTheme) {
   const errorColor = theme.mode === 'dark' ? '#ff9fb0' : '#d1435b';
-  const root: CSSProperties = {
+  const wrapper: CSSProperties = {
     display: 'grid',
     gap: '8px',
     margin: 0,
@@ -172,7 +172,7 @@ function getFeedbackFieldStyles(theme: DefaultTheme) {
     input,
     label,
     requiredMark,
-    root,
+    wrapper,
     select,
     textarea,
   };
@@ -206,7 +206,7 @@ export const FeedbackPage = ({
   );
 
   const feedbackForm = useFormBridge(FEEDBACK_SCHEMA, {
-    globalStyles: (state) => ({
+    globalConfigs: (state) => ({
       field: {
         styles: getFeedbackFieldStyles(theme),
       },
@@ -218,7 +218,7 @@ export const FeedbackPage = ({
         },
       },
       submit: {
-        loadingText: state.isSubmitting ? 'Sending feedback...' : 'Send feedback',
+        loadingText: state.state.isSubmitting ? 'Sending feedback...' : 'Send feedback',
         style: getSubmitStyle(theme),
       },
     }),

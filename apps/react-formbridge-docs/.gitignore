@@ -3,6 +3,4 @@ coverage
 dist
 node_modules
 tsconfig.tsbuildinfo
-.env.local
-.env.example
 

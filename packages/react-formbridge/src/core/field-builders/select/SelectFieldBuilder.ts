@@ -60,6 +60,30 @@ export class SelectFieldBuilder<
     return this;
   }
 
+  oneOf(values: Array<SelectOption | SelectOption['value']>, message?: string): this {
+    const allowed = new Set(values.map((value) => String(normalizeSelectValue(value))));
+
+    return this.validate((value) =>
+      allowed.has(String(normalizeSelectValue(value)))
+        ? null
+        : (message ?? 'Please select an allowed option.'),
+    );
+  }
+
+  notOneOf(values: Array<SelectOption | SelectOption['value']>, message?: string): this {
+    const blocked = new Set(values.map((value) => String(normalizeSelectValue(value))));
+
+    return this.validate((value) =>
+      blocked.has(String(normalizeSelectValue(value)))
+        ? (message ?? 'Please choose a different option.')
+        : null,
+    );
+  }
+
+  disallowPlaceholder(message?: string): this {
+    return this.required(message ?? 'Please select an option.');
+  }
+
   optionsFrom<TDeps extends AsyncDependencyShape>(
     fetcher: OptionsFetcher<TDeps>,
     config: Omit<AsyncOptionsConfig<TDeps>, 'fetch'> = {},

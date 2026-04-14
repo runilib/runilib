@@ -60,7 +60,7 @@ const defaultToggleStyle: ViewStyle = {
   minHeight: 34,
   minWidth: 34,
   paddingHorizontal: 12,
-  borderRadius: 999,
+  // borderRadius: 999,
   borderWidth: 1,
   borderColor: '#d1d5db',
   backgroundColor: 'rgba(255,255,255,0.92)',
@@ -100,7 +100,7 @@ export const NativePasswordStrength = ({
   const {
     styles,
     hideLabel,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     hintProps,
@@ -118,7 +118,7 @@ export const NativePasswordStrength = ({
     renderStrengthRule,
   } = extra ?? {};
 
-  const { style: rootPropsStyle, ...rootPropsRest } = (rootProps ?? {}) as {
+  const { style: wrapperPropsStyle, ...wrapperPropsRest } = (wrapperProps ?? {}) as {
     style?: StyleProp<ViewStyle>;
   } & Record<string, unknown>;
   const { style: labelPropsStyle, ...labelPropsRest } = (labelProps ?? {}) as {
@@ -186,7 +186,7 @@ export const NativePasswordStrength = ({
       <View
         style={sx(
           {
-            borderRadius: descriptor._strengthBarRadius,
+            // borderRadius: descriptor._strengthBarRadius,
             minHeight: descriptor._strengthBarHeight,
             overflow: 'hidden',
           },
@@ -197,7 +197,7 @@ export const NativePasswordStrength = ({
           style={sx(
             {
               backgroundColor: result.color,
-              borderRadius: descriptor._strengthBarRadius,
+              // borderRadius: descriptor._strengthBarRadius,
               minHeight: descriptor._strengthBarHeight,
               width: `${result.percent}%`,
             },
@@ -277,8 +277,8 @@ export const NativePasswordStrength = ({
 
   return (
     <View
-      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.root, rootPropsStyle)}
-      {...rootPropsRest}
+      style={sx(extra?.style as StyleProp<ViewStyle>, styles?.wrapper, wrapperPropsStyle)}
+      {...wrapperPropsRest}
     >
       {!hideLabel &&
         (renderLabel?.({

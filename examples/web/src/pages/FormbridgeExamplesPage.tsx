@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { BrutTestExample } from '../components/form-examples/BrutTest';
+import { CustomStorageAdapterExample } from '../components/form-examples/CustomStorageAdapterExample';
 import { CustomerCheckoutExample } from '../components/form-examples/CustomerCheckoutExample';
 import { CustomMaskExamplesShowcase } from '../components/form-examples/CustomMaskExamplesShowcase';
 import { FieldVariantsShowcase } from '../components/form-examples/FieldVariantsShowcase';
@@ -8,7 +10,11 @@ import { ResolverExamplesShowcase } from '../components/form-examples/ResolverEx
 import { StylingExamplesShowcase } from '../components/form-examples/StylingExamplesShowcase';
 import { DemoAsyncCityForm } from './DemoAsyncCityForm';
 
-export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => void }) {
+export const FormbridgeExamplesPage = ({
+  onOpenWizard,
+}: {
+  onOpenWizard: () => void;
+}) => {
   return (
     <main className="library-shell library-shell-formbridge">
       <section className="library-page-hero fade-up">
@@ -28,12 +34,29 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
         </div>
 
         <span className="library-eyebrow">Formbridge examples</span>
-        <h1>Every `react-formbridge` demo lives here now.</h1>
+        <h1>Build forms you will actually enjoy shipping.</h1>
         <p>
-          This section groups the route-based wizard, production-style forms, field
-          variants, password recipes, phone recipes, file upload demos, masks, styling
-          overrides, resolvers, and async option loading.
+          Every `react-formbridge` demo lives here now, from route-based wizards and
+          production-style checkout flows to masks, styling overrides, resolvers, and
+          async option loading.
         </p>
+        <div className="library-form-love-panel">
+          <div className="library-form-love-copy">
+            <span className="library-form-love-label">Why teams lean into it</span>
+            <h2>Less form plumbing. More product momentum.</h2>
+            <p>
+              The promise is simple: form work should feel fast, expressive, and
+              satisfying to build, not like a pile of repetitive edge cases.
+            </p>
+          </div>
+
+          <div className="library-form-love-points">
+            <span>Schema-first field builders</span>
+            <span>Polished defaults with easy overrides</span>
+            <span>Masks, async options, and resolvers built in</span>
+            <span>One mental model for web and native</span>
+          </div>
+        </div>
 
         <div className="library-hero-actions">
           <button
@@ -110,6 +133,8 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
 
           <CustomerCheckoutExample />
 
+          <CustomStorageAdapterExample />
+
           <div className="library-mini-card">
             <div className="library-mini-card-copy">
               <h3>Async city field</h3>
@@ -135,6 +160,7 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
             </p>
           </div>
 
+          <BrutTestExample />
           <PasswordVariantsExample />
           <PhoneVariantsExample />
           <FieldVariantsShowcase />
@@ -146,4 +172,4 @@ export function FormbridgeExamplesPage({ onOpenWizard }: { onOpenWizard: () => v
       </section>
     </main>
   );
-}
+};

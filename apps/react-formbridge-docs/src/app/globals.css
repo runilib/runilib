@@ -28,8 +28,7 @@ body {
   margin: 0;
   background: linear-gradient(180deg, #f9fbfe 0%, #f2f7fc 100%);
   color: var(--text);
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 a {
@@ -660,6 +659,61 @@ h3 {
 
 .doc-list--ordered {
   list-style: decimal;
+}
+
+.doc-rich-table-shell {
+  margin: 18px 0 22px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.doc-rich-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.doc-rich-table th,
+.doc-rich-table td {
+  padding: 15px 18px;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+  text-align: left;
+}
+
+.doc-rich-table thead th {
+  border-top: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--surface-soft);
+}
+
+.doc-rich-table tbody td {
+  color: var(--text-soft);
+  line-height: 1.7;
+}
+
+.doc-rich-table tbody td:first-child {
+  width: 23%;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.inline-link {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(15, 111, 220, 0.28);
+  text-underline-offset: 2px;
+}
+
+.inline-link:hover {
+  color: var(--accent-strong);
 }
 
 .inline-code {
@@ -1706,7 +1760,9 @@ h3 {
   }
 
   .doc-feature-table th,
-  .doc-feature-table td {
+  .doc-feature-table td,
+  .doc-rich-table th,
+  .doc-rich-table td {
     padding: 12px 14px;
   }
 }
@@ -1772,5 +1828,37 @@ h3 {
 
   .doc-feature-table td:nth-child(3)::before {
     content: "Description";
+  }
+
+  .doc-rich-table,
+  .doc-rich-table tbody,
+  .doc-rich-table tr,
+  .doc-rich-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .doc-rich-table thead {
+    display: none;
+  }
+
+  .doc-rich-table tr + tr td:first-child {
+    border-top: 1px solid var(--border);
+  }
+
+  .doc-rich-table td {
+    border-top: 0;
+    padding-bottom: 10px;
+  }
+
+  .doc-rich-table td::before {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    content: attr(data-label);
   }
 }

@@ -41,8 +41,8 @@ export function ZodResolverExample() {
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
-    globalStyles: () => createDemoFormUi(styles),
-    resolver,
+    globalConfigs: () => createDemoFormUi(styles),
+    validatorResolver:resolver,
   });
 
   const { Form, fields, state, watchAll } = form;

@@ -98,7 +98,7 @@ export async function searchCityDirectory({
 export function createNativeFieldProps() {
   return {
     styles: {
-      root: s.fieldRoot,
+      wrapper: s.fieldRoot,
       label: s.fieldLabel,
       input: s.fieldInput,
       error: s.fieldError,
@@ -123,7 +123,7 @@ export function createNativeFormUi(): FormBridgeOptions {
   return {
     field: {
       styles: {
-        root: s.fieldRoot,
+        wrapper: s.fieldRoot,
         label: s.fieldLabel,
         input: s.fieldInput,
         error: s.fieldError,

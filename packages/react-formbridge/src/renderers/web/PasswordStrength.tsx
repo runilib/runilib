@@ -58,7 +58,7 @@ export const PasswordStrength = ({
     renderHint,
     renderRequiredMark,
     highlightOnError: highlightOnErrorProp,
-    rootProps,
+    wrapperProps,
     labelProps,
     inputProps,
     hintProps,
@@ -79,10 +79,10 @@ export const PasswordStrength = ({
   const controlErrorStyle = defaultErrorChromeStyle(hasError, highlightOnError);
 
   const {
-    className: rootPropsClassName,
-    style: rootPropsStyle,
-    ...rootPropsRest
-  } = rootProps ?? {};
+    className: wrapperPropsClassName,
+    style: wrapperPropsStyle,
+    ...wrapperPropsRest
+  } = wrapperProps ?? {};
   const {
     className: inputPropsClassName,
     style: inputPropsStyle,
@@ -144,7 +144,7 @@ export const PasswordStrength = ({
             className={classNames?.strengthFill}
             style={mergeStyles(
               {
-                borderRadius: meta._strengthBarRadius,
+                // borderRadius: meta._strengthBarRadius,
                 minHeight: meta._strengthBarHeight,
                 ...(active ? { backgroundColor: result.color } : null),
               },
@@ -235,9 +235,9 @@ export const PasswordStrength = ({
 
   return (
     <div
-      className={cx(extra?.className, classNames?.root, rootPropsClassName as string)}
-      style={mergeStyles(extra?.style, styles?.root, rootPropsStyle as CSSProperties)}
-      {...rootPropsRest}
+      className={cx(extra?.className, classNames?.wrapper, wrapperPropsClassName as string)}
+      style={mergeStyles(extra?.style, styles?.wrapper, wrapperPropsStyle as CSSProperties)}
+      {...wrapperPropsRest}
     >
       {renderLabelSlot({
         id,

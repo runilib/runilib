@@ -4,10 +4,10 @@ export const docSidebar: LibraryDoc['sidebar'] = [
   {
     group: 'Getting started',
     items: [
-      { id: 'fb-overview', label: 'Overview' },
+      { id: 'fb-overview', label: 'Introduction' },
       { id: 'fb-install', label: 'Installation' },
       { id: 'fb-quickstart', label: 'Quick start' },
-      { id: 'fb-schema', label: 'Schema mental model' },
+      { id: 'fb-schema-mental-model', label: 'Schema mental model' },
     ],
   },
   {
@@ -27,12 +27,18 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     color: 'blue',
     items: [
       { id: 'fb-use-form-bridge', label: 'useFormBridge()' },
-      { id: 'fb-form', label: 'Form component' },
+      { id: 'fb-schema', label: 'schema()' },
+      { id: 'fb-form', label: 'Form Components' },
+      { id: 'fb-submit', label: 'Submit Components' },
+      { id: 'fb-field-error', label: 'FieldError Components' },
+      { id: 'fb-field-label', label: 'FieldLabel Components' },
       { id: 'fb-fields', label: 'Generated fields' },
       { id: 'fb-field-controller', label: 'fieldController()' },
+      { id: 'fb-host-helpers', label: 'Host Components Helpers' },
       { id: 'fb-state', label: 'State' },
       { id: 'fb-actions', label: 'Actions & helpers' },
       { id: 'fb-validation', label: 'Validation' },
+      { id: 'fb-global-props', label: 'globalConfigs' },
       { id: 'fb-builder-basics', label: 'Builder basics' },
     ],
   },
@@ -40,6 +46,7 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     group: 'Available Field builders',
     color: 'blue',
     items: [
+      { id: 'fb-base-field-builder', label: 'Base field builder' },
       { id: 'fb-text', label: 'field.text()' },
       { id: 'fb-email', label: 'field.email()' },
       { id: 'fb-password', label: 'field.password()' },
@@ -65,7 +72,7 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     group: 'Advanced',
     color: 'blue',
     items: [
-      { id: 'fb-adapters', label: 'Validator adapters' },
+      { id: 'fb-adapters', label: 'Validator resolver' },
       { id: 'fb-conditional', label: 'Conditional logic' },
       { id: 'fb-persistence', label: 'Draft persistence' },
       { id: 'fb-web-ui', label: 'Styling' },
@@ -74,7 +81,7 @@ export const docSidebar: LibraryDoc['sidebar'] = [
       { id: 'fb-use-async-options', label: 'useAsyncOptions()' },
       { id: 'fb-dynamic', label: 'useDynamicFormBridge()' },
       { id: 'fb-wizard', label: 'useFormBridgeWizard()' },
-      { id: 'fb-readonly', label: 'useReadonlyFormBridge()' },
+      { id: 'fb-readonly', label: 'useFormBridgeReadonly()' },
     ],
   },
 ];

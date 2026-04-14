@@ -32,7 +32,7 @@ export function SwitchVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onChange',
     revalidateOn: 'onChange',
-    globalStyles: () => createDemoFormUi(styles),
+    globalConfigs: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, watchAll } = form;

@@ -1,7 +1,7 @@
 import { BaseFieldBuilder } from './base/BaseFieldBuilder';
 import { BooleanFieldBuilder } from './boolean/BooleanFieldBuilder';
 import { DateFieldBuilder } from './date/DateFieldBuilder';
-import { FileFieldBuilder } from './file/FileField';
+import { FileFieldBuilder } from './file/FileFieldBuilder';
 import { inferFromObject, inferFromType } from './infer';
 import { MaskedFieldBuilder } from './mask/MaskedFieldBuilder';
 import type { MaskPatternInput } from './mask/masks';

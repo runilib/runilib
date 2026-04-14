@@ -125,4 +125,22 @@ describe('WebPhoneInput ui', () => {
 
     getByText('No matches for zzz');
   });
+
+  it('lets runtime input styles override integrated defaults', () => {
+    const { getByRole } = renderPhoneField(field.phone('Phone'), {
+      extra: {
+        styles: {
+          input: {
+            padding: '32px',
+            color: 'rgb(1, 2, 3)',
+          },
+        },
+      },
+    });
+
+    const input = getByRole('textbox') as HTMLInputElement;
+
+    expect(input.style.padding).toBe('32px');
+    expect(input.style.color).toBe('rgb(1, 2, 3)');
+  });
 });

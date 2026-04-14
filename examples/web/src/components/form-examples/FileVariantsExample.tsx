@@ -84,7 +84,7 @@ export function FileVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalStyles: () => {
+    globalConfigs: () => {
       const baseUi = createDemoFormUi(styles);
 
       return {
@@ -97,8 +97,8 @@ export function FileVariantsExample() {
           ...baseUi.field,
           styles: {
             ...baseUi.field?.styles,
-            root: {
-              ...baseUi.field?.styles?.root,
+            wrapper: {
+              ...baseUi.field?.styles?.wrapper,
               gap: 8,
             },
             dropZone: {

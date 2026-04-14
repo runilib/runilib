@@ -2,11 +2,18 @@ import { useState } from 'react';
 
 import styles from './FormExamples.module.css';
 import { JoiResolverExample } from './JoiResolverExample';
+import { SchemaRefinementExample } from './SchemaRefinementExample';
 import { ValibotResolverExample } from './ValibotResolverExample';
 import { YupResolverExample } from './YupResolverExample';
 import { ZodResolverExample } from './ZodResolverExample';
 
 const RESOLVER_TABS = [
+  {
+    id: 'built-in',
+    label: 'Built-in',
+    note: 'No resolver',
+    component: SchemaRefinementExample,
+  },
   {
     id: 'zod',
     label: 'Zod',
@@ -36,7 +43,7 @@ const RESOLVER_TABS = [
 type ResolverTabId = (typeof RESOLVER_TABS)[number]['id'];
 
 export function ResolverExamplesShowcase() {
-  const [activeTab, setActiveTab] = useState<ResolverTabId>('zod');
+  const [activeTab, setActiveTab] = useState<ResolverTabId>('built-in');
   const activeEntry =
     RESOLVER_TABS.find((item) => item.id === activeTab) ?? RESOLVER_TABS[0];
   const ActiveExample = activeEntry.component;

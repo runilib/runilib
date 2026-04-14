@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import type {
   FieldReadonlyState,
   ReadonlyFieldProps,
-} from '../../hooks/shared/useReadonlyForm';
+} from '../../hooks/shared/useFormBridgeReadonly';
 import { cx, mergeStyles } from './helpers';
 
 interface Props {

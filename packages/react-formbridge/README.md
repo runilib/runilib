@@ -56,9 +56,9 @@ export function SignUpForm() {
 Generated fields now expose only the UI props that make sense for their platform and field type.
 
 ```tsx
-<fields.email ui={{ inputProps: { autoComplete: 'email', inputMode: 'email' } }} />
-<fields.bio ui={{ textareaProps: { rows: 4 } }} />
-<fields.country ui={{ selectProps: { size: 5 } }} />
+<fields.email inputProps={{ autoComplete: 'email', inputMode: 'email' }} />
+<fields.bio textareaProps={{ rows: 4 }} />
+<fields.country selectProps={{ size: 5  }} />
 ```
 
 - Text-like fields expose `ui.inputProps`

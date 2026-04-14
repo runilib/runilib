@@ -45,7 +45,7 @@ const WIZARD_STEPS = [
       email: field.email().required('Email is required'),
     } satisfies FormSchema,
     formOptions: {
-      globalStyles: wizardUi,
+      globalConfigs: wizardUi,
     },
   },
   {
@@ -61,7 +61,7 @@ const WIZARD_STEPS = [
       ]),
     } satisfies FormSchema,
     formOptions: {
-      globalStyles: wizardUi,
+      globalConfigs: wizardUi,
     },
   },
   {
@@ -69,7 +69,7 @@ const WIZARD_STEPS = [
     label: 'Review',
     schema: {} satisfies FormSchema,
     formOptions: {
-      globalStyles: wizardUi,
+      globalConfigs: wizardUi,
     },
   },
 ] as const;

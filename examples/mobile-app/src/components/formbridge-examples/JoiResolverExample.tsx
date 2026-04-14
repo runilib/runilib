@@ -74,7 +74,7 @@ export function JoiResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    resolver,
+    validatorResolver: resolver,
   });
 
   const { Form, fields, state, watchAll } = form;

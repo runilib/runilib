@@ -1,5 +1,48 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_BUILDER_METHODS } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+
+const SELECT_METHODS_TABLE = buildMethodsTable([
+  [
+    '`options(list)`',
+    '`string[] | { label, value }[]`',
+    'Loads local options from plain strings or explicit label/value objects.',
+  ],
+  [
+    '`optionsFrom(fetcher, config)`',
+    '`fetcher + async config`',
+    'Loads remote options with debounce, cache, dependency tracking, and loading state support.',
+  ],
+  [
+    '`searchable(value = true)`',
+    '`value?: boolean`',
+    'Enables search-oriented picker behavior.',
+  ],
+  [
+    '`defaultSelected(valueOrOption)`',
+    '`value | option object`',
+    'Pre-selects an option by raw value or option object.',
+  ],
+  [
+    '`selected(valueOrOption)`',
+    '`value | option object`',
+    'Alias for `defaultSelected()` with more explicit wording.',
+  ],
+  [
+    '`oneOf(values, message?)`',
+    '`Array<value | option>`',
+    'Additional allow-list check on top of `options()`. Useful when the option list is broader than what the current form should actually accept (e.g. gating promo tiers by user role).',
+  ],
+  [
+    '`notOneOf(values, message?)`',
+    '`Array<value | option>`',
+    'Deny-list version of `oneOf()` — rejects a subset of values even if they exist in `options()`.',
+  ],
+  [
+    '`disallowPlaceholder(message?)`',
+    '`message?: string`',
+    'Shorthand for `required()` with a select-oriented default message (`"Please select an option."`). Use it when the placeholder row is visible but must not be submitted.',
+  ],
+]);
 
 export const selectSection: LibraryDoc['sections'][number] = {
   id: 'fb-select',
@@ -60,9 +103,7 @@ export const selectSection: LibraryDoc['sections'][number] = {
       content: `Need a custom modal, bottom sheet, command palette, or searchable dialog instead of the built-in picker? Pass \`renderPicker\`.
 
 - Works for local options and \`optionsFrom(...)\`
-- Works globally through \`useFormBridge(schema, { globalStyles })\`
-- Works per schema field through \`behavior(...)\`
-- Works per rendered field through \`<fields.city ui={{ renderPicker }} />\`
+- Works per rendered field through \`<fields.city renderPicker={renderPicker} />\`
 - If the built-in trigger itself should disappear too, keep the same select schema field and move to \`form.fieldController(name)\`
 
 \`\`\`tsx
@@ -74,9 +115,14 @@ const schema = {
       debounce: 250,
       minChars: 2,
     })
-    .searchable()
-    .behavior({
-      renderPicker: ({
+    .searchable(),
+}
+
+const form = useFormBridge(schema)
+
+<form.Form onSubmit={save}>
+  <form.fields.city
+    renderPicker={({
         open,
         search,
         setSearch,
@@ -98,30 +144,25 @@ const schema = {
             onClose={closePicker}
             onSelect={(option) => selectOption(option)}
           />
-        ) : null,
-    }),
-}
+        ) : null}
+  />
+</form.Form>
 \`\`\`
 
 The \`renderPicker\` context gives you: \`open\`, \`search\`, \`setSearch\`, \`clearSearch\`, \`options\`, \`loading\`, \`error\`, \`selectedOption\`, \`triggerLabel\`, \`openPicker\`, \`closePicker\`, and \`selectOption\`. That makes it easy to plug the same field into a design-system modal on web, a native sheet on mobile, or a fully custom async search experience without replacing the rest of the field API.`,
     },
     {
       id: 'fb-select-props',
-      title: 'Props & defaults',
+      title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`select\`
 - Selected values are stored as the option \`value\`, so both \`string\` and \`number\` are supported
-- Inherits base builder methods (see Builder basics) — string methods are not available
+${BASE_FIELD_BUILDER_REFERENCE}
+- String-specific helpers are not available on select fields
+- Custom picker UIs are wired through per-field \`ui.renderPicker\` or fully custom \`form.fieldController(name)\` flows
 
 Select-specific methods:
-- \`options(list)\` — local options from \`string[]\` or \`{ label, value }[]\`
-- \`optionsFrom(fetcher, config)\` — remote/async options with debounce, cache, and dependency support
-- \`searchable(value = true)\` — enables search-oriented picker UX
-- \`defaultSelected(valueOrOption)\` — pre-selects an option by value or \`{ label, value }\` object
-- \`selected(valueOrOption)\` — alias for \`defaultSelected\`
-- Custom picker UIs are wired through \`behavior({ renderPicker })\` or per-field \`ui.renderPicker\`
-
-${BASE_BUILDER_METHODS}`,
+${SELECT_METHODS_TABLE}`,
     },
     {
       id: 'fb-select-recipes',

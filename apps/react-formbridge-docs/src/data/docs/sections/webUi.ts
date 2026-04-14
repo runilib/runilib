@@ -14,7 +14,7 @@ export const webUiSection: LibraryDoc['sections'][number] = {
   content: `react-formbridge is intentionally styling-framework agnostic. The form runtime owns value, validation, visibility, and submit lifecycle. Your app stays free to style that runtime with CSS Modules, styled-components, Tailwind-style utilities, inline objects, React Native StyleSheet, NativeWind-friendly wrappers, or an in-house design system.
 
 - Put field-owned behavior metadata in the schema when it should travel with the field everywhere the schema is reused
-- Put styling in \`useFormBridge(schema, { globalStyles })\` when one screen, one route, or one product area needs a shared visual language
+- Put styling in \`useFormBridge(schema, { globalConfigs })\` when one screen, one route, or one product area needs a shared visual language
 - Put styling on \`<fields.name ui={...} />\` when a single field needs a local exception, and let the generated field type decide which \`ui\` keys are available
 - Reach for \`form.fieldController(name)\` when a built-in field needs fully custom chrome; reach for \`field.custom(...).render(...)\` only when the value model itself is no longer one of the built-in field types`,
   codeTabs: [
@@ -33,7 +33,6 @@ const schema = {
   ownerEmail: field
     .email('Owner email')
     .required()
-    .behavior({ autoComplete: 'email', inputMode: 'email' }),
   launchNotes: field
     .textarea('Launch notes')
     .hint('Textarea inherits the same ui theme.'),
@@ -42,22 +41,20 @@ const schema = {
 export function CheckoutForm() {
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalStyles: () => ({
+    globalConfigs: () => ({
       form: { className: styles.form },
       submit: {
         className: styles.submit,
         loadingText: 'Saving...',
       },
       field: {
-        ui: {
           classNames: {
-            root: styles.field,
+            wrapper: styles.field,
             label: styles.label,
             input: styles.input,
             textarea: styles.input,
             error: styles.error,
             hint: styles.hint,
-          },
         },
       },
     }),
@@ -67,10 +64,8 @@ export function CheckoutForm() {
     <form.Form onSubmit={saveCheckout}>
       <form.fields.projectName />
       <form.fields.ownerEmail
-        ui={{
-          styles: {
+        styles={{
             input: { borderColor: '#38bdf8' },
-          },
         }}
       />
       <form.fields.launchNotes />
@@ -115,13 +110,9 @@ const checkoutUi = StyleSheet.create({
 const schema = {
   projectName: field.text('Project name')
     .required()
-    .behavior({
-      autoComplete: 'organization',
-    }),
   ownerEmail: field
     .email('Owner email')
     .required()
-    .behavior({ keyboardType: 'email-address', autoComplete: 'email' }),
   launchNotes: field
     .textarea('Launch notes')
     .hint('Textarea inherits the same ui theme.'),
@@ -129,22 +120,20 @@ const schema = {
 
 export function CheckoutScreen() {
   const form = useFormBridge(schema, {
-    globalStyles: () => ({
+    globalConfigs: () => ({
       submit: {
         containerStyle: checkoutUi.submitButton,
         textStyle: checkoutUi.submitText,
         loadingText: 'Saving...',
       },
       field: {
-        ui: {
           styles: {
-            root: checkoutUi.fieldRoot,
+            wrapper: checkoutUi.fieldRoot,
             label: checkoutUi.fieldLabel,
             input: checkoutUi.fieldInput,
             hint: checkoutUi.fieldHint,
             error: checkoutUi.fieldError,
           },
-        },
       },
     }),
   })
@@ -156,10 +145,8 @@ export function CheckoutScreen() {
           <form.fields.projectName />
           <form.fields.ownerEmail />
           <form.fields.launchNotes
-            ui={{
-              styles: {
-                input: { minHeight: 112 },
-              },
+            styles={{
+                input: { minHeight: 112 }
             }}
           />
           <form.Form.Submit>Save theme</form.Form.Submit>
@@ -174,18 +161,18 @@ export function CheckoutScreen() {
     {
       id: 'fb-web-ui-layers',
       title: 'Choose the right layer',
-      content: `1. Use \`field.text(...).behavior(...)\` for defaults that belong to the field contract itself: autocomplete, keyboard type, ids, error highlighting, or custom picker rendering that should follow the schema everywhere.
-2. Use \`useFormBridge(schema, { globalStyles })\` when a whole screen or product area needs the same theme. This is the default recommendation for CSS Modules, StyleSheet, utility-class maps, or design-system-wide field chrome.
-3. Use local \`ui\` props on \`<fields.name />\` when one field needs a special variant without mutating the shared schema.
-4. Use \`form.fieldController(name)\` when a built-in field needs a fully custom trigger, shell, or modal while keeping the same schema contract. Use \`field.custom(defaultValue).render(...)\` only when the value model itself is custom.
+      content: `
+1. Use \`useFormBridge(schema, { globalConfigs })\` when a whole screen or product area needs the same theme. This is the default recommendation for CSS Modules, StyleSheet, utility-class maps, or design-system-wide field chrome.
+2. Use local \`ui\` props on \`<fields.name />\` when one field needs a special variant without mutating the shared schema.
+3. Use \`form.fieldController(name)\` when a built-in field needs a fully custom trigger, shell, or modal while keeping the same schema contract. Use \`field.custom(defaultValue).render(...)\` only when the value model itself is custom.
 
 The public type surface guards these layers too: a text field does not expose textarea-only or select-only \`ui\` props, and native fields do not expose web-only props such as \`className\`.
 
-Merge order is predictable: builder \`behavior\` -> \`globalStyles\` theme ui -> local field ui -> field controller or custom render layer.`,
+Merge order is predictable: builder \`behavior\` -> \`globalConfigs\` theme ui -> local field ui -> field controller or custom render layer.`,
     },
     {
       id: 'fb-web-ui-global-ui',
-      title: 'globalStyles surface',
+      title: 'globalConfigs surface',
       content: `${GLOBAL_UI_SURFACE}`,
     },
     {
@@ -194,7 +181,7 @@ Merge order is predictable: builder \`behavior\` -> \`globalStyles\` theme ui ->
       content: `- Text-like fields use \`ui.inputProps\`
 - \`textarea\` fields use \`ui.textareaProps\` on web
 - \`select\` fields use \`ui.selectProps\` on web
-- Web fields can use root-level \`className\`
+- Web fields can use wrapper-level \`className\`
 - Native fields intentionally do not expose \`className\`, \`ui.textareaProps\`, or \`ui.selectProps\``,
     },
     {
@@ -211,35 +198,30 @@ Merge order is predictable: builder \`behavior\` -> \`globalStyles\` theme ui ->
           lang: 'tsx',
           preview: DOC_PREVIEWS.stylingWeb,
           code: `const form = useFormBridge(schema, {
-  globalStyles: () => ({
+  globalConfigs: () => ({
     form: { className: styles.formShell },
     submit: {
       className: styles.submitButton,
       loadingText: 'Applying CSS Modules theme...',
     },
     field: {
-      ui: {
         classNames: {
-          root: styles.formField,
+          wrapper: styles.formField,
           label: styles.formLabel,
           input: styles.formInput,
           textarea: styles.formInput,
           select: styles.formInput,
           hint: styles.helperText,
           error: styles.errorBox,
-        },
-      },
-    },
+        },    },
   }),
 })
 
 <form.Form onSubmit={save}>
   <form.fields.projectName />
   <form.fields.ownerEmail
-    ui={{
-      styles: {
+    styles={{
         input: { borderColor: '#38bdf8' },
-      },
     }}
   />
   <form.fields.department />
@@ -251,11 +233,10 @@ Merge order is predictable: builder \`behavior\` -> \`globalStyles\` theme ui ->
           lang: 'tsx',
           preview: DOC_PREVIEWS.stylingNative,
           code: `const form = useFormBridge(schema, {
-  globalStyles: () => ({
+  globalConfigs: () => ({
     field: {
-      ui: {
         styles: {
-          root: s.fieldRoot,
+          wrapper: s.fieldRoot,
           label: s.fieldLabel,
           input: s.fieldInput,
           hint: s.fieldHint,
@@ -263,7 +244,6 @@ Merge order is predictable: builder \`behavior\` -> \`globalStyles\` theme ui ->
           optionTrigger: s.fieldInput,
         },
       },
-    },
     submit: {
       containerStyle: s.submitButton,
       textStyle: s.submitText,
@@ -361,13 +341,12 @@ const StyledForm = styled(FormHost)\`
 \`
 
 const EmailField = styled(FieldHost).attrs({
-  ui: {
     inputProps: {
       autoComplete: 'email',
       keyboardType: 'email-address',
     },
     styles: {
-      root: { marginBottom: 0, gap: 8 },
+      wrapper: { marginBottom: 0, gap: 8 },
       input: {
         minHeight: 52,
         borderWidth: 1.5,
@@ -378,7 +357,6 @@ const EmailField = styled(FieldHost).attrs({
         backgroundColor: 'rgba(15, 23, 42, 0.74)',
       },
     },
-  },
 })\`
   margin-bottom: 0px;
 \`
@@ -490,13 +468,12 @@ const StudioForm = styled(FormHost)\`
 \`
 
 const EmailShell = styled(FieldHost).attrs({
-  ui: {
     inputProps: {
       autoComplete: 'email',
       keyboardType: 'email-address',
     },
     styles: {
-      root: { marginBottom: 0, gap: 8 },
+      wrapper: { marginBottom: 0, gap: 8 },
       label: { color: '#dbeafe', fontSize: 12, fontWeight: '800' },
       input: {
         minHeight: 52,
@@ -508,7 +485,6 @@ const EmailShell = styled(FieldHost).attrs({
         backgroundColor: 'rgba(15, 23, 42, 0.74)',
       },
       hint: { color: '#94a3b8', fontSize: 12 },
-    },
   },
 })\`
   margin-bottom: 0px;
@@ -548,16 +524,15 @@ const form = useFormBridge({
         lang: 'tsx',
         preview: DOC_PREVIEWS.stylingUtilityWeb,
         code: `const form = useFormBridge(schema, {
-  globalStyles: () => ({
+  globalConfigs: () => ({
     form: { className: 'space-y-4' },
     submit: {
       className:
         'inline-flex min-h-12 items-center justify-center rounded-2xl bg-cyan-400 px-5 font-semibold text-slate-950',
     },
     field: {
-      ui: {
         classNames: {
-          root: 'space-y-2',
+          wrapper: 'space-y-2',
           label:
             'text-xs font-semibold uppercase tracking-[0.14em] text-slate-200',
           input:
@@ -569,14 +544,13 @@ const form = useFormBridge({
           hint: 'text-xs text-slate-400',
           error: 'text-sm text-rose-300',
         },
-      },
     },
   }),
 })
 
 <form.Form onSubmit={save}>
   <form.fields.ownerEmail
-    ui={{
+    styles={{
       classNames: {
         input: 'border-cyan-400 focus:ring-2 focus:ring-cyan-400/30',
       },
@@ -606,7 +580,7 @@ const form = useFormBridge({
           preview: DOC_PREVIEWS.stylingSlotWeb,
           code: `const form = useFormBridge(schema, {
   validateOn: 'onTouched',
-  globalStyles: () => ({
+  globalConfigs: () => ({
     submit: {
       loadingText: 'Saving inline theme...',
       style: {
@@ -617,9 +591,8 @@ const form = useFormBridge({
       },
     },
     field: {
-      ui: {
         styles: {
-          root: { marginBottom: 0, gap: 8 },
+          wrapper: { marginBottom: 0, gap: 8 },
           label: {
             color: '#f8fafc',
             fontSize: 12,
@@ -647,26 +620,21 @@ const form = useFormBridge({
         },
         renderRequiredMark: () => <span style={{ color: '#f59e0b' }}>•</span>,
       },
-    },
   }),
 })
 
 <form.fields.receiptEmail
-  ui={{
-    highlightOnError: false,
-    renderHint: () => (
+ renderHint={(props) => (
       <span style={{ color: '#cbd5e1', fontSize: 12 }}>
         We only use it for invoices and receipts.
       </span>
-    ),
-  }}
+    )}
+      highlightOnError={false}
 />
 
 <form.fields.postalCode
-  ui={{
-    styles: {
+  styles={{
       input: { textAlign: 'center', letterSpacing: '0.14em' },
-    },
   }}
 />`,
         },
@@ -676,7 +644,7 @@ const form = useFormBridge({
           preview: DOC_PREVIEWS.stylingSlotNative,
           code: `const form = useFormBridge(schema, {
   validateOn: 'onTouched',
-  globalStyles: () => ({
+  globalConfigs: () => ({
     submit: {
       loadingText: 'Saving inline theme...',
       containerStyle: {
@@ -690,9 +658,8 @@ const form = useFormBridge({
       },
     },
     field: {
-      ui: {
         styles: {
-          root: { marginBottom: 0, gap: 8 },
+          wrapper: { marginBottom: 0, gap: 8 },
           label: {
             color: '#f8fafc',
             fontSize: 12,
@@ -715,26 +682,21 @@ const form = useFormBridge({
         },
         renderRequiredMark: () => <Text style={{ color: '#f59e0b' }}>•</Text>,
       },
-    },
   }),
 })
 
 <form.fields.receiptEmail
-  ui={{
-    highlightOnError: false,
-    renderHint: () => (
+highlightOnError={false}
+  renderHint={() => (
       <Text style={{ color: '#cbd5e1', fontSize: 12 }}>
         We only use it for invoices and receipts.
       </Text>
-    ),
-  }}
+    )}
 />
 
 <form.fields.postalCode
-  ui={{
-    styles: {
+  styles={{
       input: { textAlign: 'center', letterSpacing: 2 },
-    },
   }}
 />`,
         },
@@ -746,12 +708,11 @@ const form = useFormBridge({
       content: `On web, the API is broad enough to work with CSS Modules, utility classes, styled-components, Emotion, or plain objects.
 
 - Root-level \`className\` and \`style\` theme the field container directly
-- \`globalStyles.form\` and \`globalStyles.submit\` style the generated form wrapper and submit button
+- \`globalConfigs.form\` and \`globalConfigs.submit\` style the generated form wrapper and submit button
 - \`ui.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
-- \`ui.rootProps\`, \`ui.labelProps\`, \`ui.hintProps\`, and \`ui.errorProps\` let you push DOM attributes without losing the generated renderer
+- \`ui.wrapperProps\`, \`ui.labelProps\`, \`ui.hintProps\`, and \`ui.errorProps\` let you push DOM attributes without losing the generated renderer
 - \`ui.inputProps\` is available on text-like web fields, \`ui.textareaProps\` on textarea fields, and \`ui.selectProps\` on select fields
 - \`ui.renderLabel\`, \`ui.renderHint\`, \`ui.renderError\`, and \`ui.renderRequiredMark\` cover the cases where styling alone is not enough
-- Builder-level \`.behavior(...)\` stays focused on field-owned behavior metadata such as ids, autocomplete, or picker behavior rather than visual theme
 
 ${WEB_SLOT_SURFACE}`,
     },
@@ -760,13 +721,12 @@ ${WEB_SLOT_SURFACE}`,
       title: 'Native styling surface',
       content: `On React Native, the same layering applies, but the override points stay React Native-friendly instead of DOM-specific.
 
-- Root-level \`style\` themes the field wrapper, while \`globalStyles.form\` and \`globalStyles.submit\` theme the form container and submit button
+- Root-level \`style\` themes the field wrapper, while \`globalConfigs.form\` and \`globalConfigs.submit\` theme the form container and submit button
 - \`ui.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
 - Renderer-specific extra keys are also supported in \`ui.styles\`, which is especially useful for inputs such as checkboxes, async selectors, or modal option lists
-- \`ui.rootProps\`, \`ui.labelProps\`, \`ui.inputProps\`, \`ui.hintProps\`, and \`ui.errorProps\` help with test IDs, accessibility, or integration with surrounding layout primitives
+- \`ui.wrapperProps\`, \`ui.labelProps\`, \`ui.inputProps\`, \`ui.hintProps\`, and \`ui.errorProps\` help with test IDs, accessibility, or integration with surrounding layout primitives
 - Native fields do not expose web-only props such as \`className\`, \`ui.textareaProps\`, or \`ui.selectProps\`
 - \`ui.renderLabel\`, \`ui.renderHint\`, \`ui.renderError\`, and \`ui.renderRequiredMark\` cover the cases where a simple style object is not enough
-- Builder-level \`.behavior(...)\` stays focused on field-owned behavior metadata such as keyboard hints, test IDs, or picker behavior rather than visual theme
 
 ${NATIVE_SLOT_SURFACE}`,
     },
@@ -774,8 +734,7 @@ ${NATIVE_SLOT_SURFACE}`,
       id: 'fb-web-ui-guidance',
       title: 'Use-case guide',
       content: `- Use \`ui\` when a whole route, modal, onboarding flow, or checkout screen should share one visual system
-- Use builder-level \`.behavior()\` when behavior metadata belongs to the field definition and should follow the schema everywhere it is reused
-- Keep platform-specific differences inside the same \`ui\` object or at the screen-level \`globalStyles\` theme
+- Keep platform-specific differences inside the same \`ui\` object or at the screen-level \`globalConfigs\` theme
 - Use local \`ui\` props when one field needs a variant, a special helper text, or a different accent color on one screen
 - Use the stable host recipe for \`styled-components\` and \`styled-components/native\`
 - Use \`className\` and \`classNames\` slot maps for Tailwind-style utility frameworks on web

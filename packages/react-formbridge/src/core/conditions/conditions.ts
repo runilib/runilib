@@ -14,12 +14,14 @@
  *   - disabledWhen:       same API as visibleWhen
  */
 
-import type { FormSchema } from '../../types/schema';
+import type { FormSchema, SchemaValues } from '../../types/schema';
 
 // ─── Condition types ──────────────────────────────────────────────────────────
-export type ConditionPredicate = (values: Record<string, unknown>) => boolean;
+export type ConditionPredicate<Schema extends FormSchema> = (
+  values: SchemaValues<Schema>,
+) => boolean;
 
-type SimpleCondition =
+type SimpleCondition<Schema extends FormSchema> =
   | { type: 'eq'; field: string; value: unknown } // Equal — true when field === value
   | { type: 'neq'; field: string; value: unknown } // Not equal — true when field !== value
   | { type: 'gt'; field: string; value: number } // Greater than — true when field > value
@@ -30,18 +32,20 @@ type SimpleCondition =
   | { type: 'falsy'; field: string } // Falsy — true when field is falsy (null, '', 0, false, undefined)
   | { type: 'in'; field: string; values: unknown[] } // In list — true when field value is in the array
   | { type: 'notIn'; field: string; values: unknown[] } // Not in list — true when field value is NOT in the array
-  | { type: 'fn'; fn: ConditionPredicate }; // Custom predicate — true when fn(allValues) returns true
+  | { type: 'fn'; fn: ConditionPredicate<Schema> }; // Custom predicate — true when fn(allValues) returns true
 
-export type ConditionGroup =
-  | { op: 'AND'; conditions: SimpleCondition[] } // All conditions must pass
-  | { op: 'OR'; conditions: SimpleCondition[] }; // At least one condition must pass
+export type ConditionGroup<Schema extends FormSchema> =
+  | { op: 'AND'; conditions: SimpleCondition<Schema>[] } // All conditions must pass
+  | { op: 'OR'; conditions: SimpleCondition<Schema>[] }; // At least one condition must pass
 
-export type Condition = SimpleCondition | ConditionGroup;
+export type Condition<Schema extends FormSchema> =
+  | SimpleCondition<Schema>
+  | ConditionGroup<Schema>;
 
 // ─── Evaluate a single condition ─────────────────────────────────────────────
-function evaluateSimple(
-  condition: SimpleCondition,
-  values: Record<string, unknown>,
+function evaluateSimple<Schema extends FormSchema>(
+  condition: SimpleCondition<Schema>,
+  values: SchemaValues<Schema>,
 ): boolean {
   switch (condition.type) {
     case 'eq':
@@ -69,9 +73,9 @@ function evaluateSimple(
   }
 }
 
-function evaluateCondition(
-  condition: Condition,
-  values: Record<string, unknown>,
+function evaluateCondition<Schema extends FormSchema>(
+  condition: Condition<Schema>,
+  values: SchemaValues<Schema>,
 ): boolean {
   if ('op' in condition) {
     if (condition.op === 'AND') {
@@ -87,13 +91,13 @@ function evaluateCondition(
 }
 
 // ─── FieldConditions — stored per field ──────────────────────────────────────
-export interface FieldConditions {
+export interface FieldConditions<Schema extends FormSchema> {
   /** Field is visible only when ALL visibleWhen conditions pass */
-  visible: Condition[];
+  visible: Condition<Schema>[];
   /** Field is required only when ALL requiredWhen conditions pass */
-  required: Condition[];
+  required: Condition<Schema>[];
   /** Field is disabled only when ANY disabledWhen condition passes */
-  disabled: Condition[];
+  disabled: Condition<Schema>[];
   /**
    * When a field becomes hidden, what happens to its value?
    * - 'reset'  → reset to defaultValue (default)
@@ -103,7 +107,8 @@ export interface FieldConditions {
   onHide: 'reset' | 'keep' | 'clear';
 }
 
-export const DEFAULT_FIELD_CONDITIONS: FieldConditions = {
+// biome-ignore lint/suspicious/noExplicitAny: To be fixed
+export const DEFAULT_FIELD_CONDITIONS: FieldConditions<any> = {
   visible: [],
   required: [],
   disabled: [],
@@ -123,9 +128,12 @@ export type VisibilityMap = Record<string, FieldVisibilityState>;
  * Evaluate all field conditions given the current form values.
  * Returns a map of { fieldName → { visible, required, disabled } }.
  */
-export function evaluateAllConditions<_K extends keyof FormSchema>(
-  conditionsMap: Record<string, FieldConditions>,
-  values: Record<string, unknown>,
+export function evaluateAllConditions<
+  _K extends keyof FormSchema,
+  Schema extends FormSchema,
+>(
+  conditionsMap: Record<string, FieldConditions<Schema>>,
+  values: SchemaValues<Schema>,
 ): VisibilityMap {
   const result: VisibilityMap = {};
 

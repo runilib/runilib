@@ -7,15 +7,16 @@
  */
 
 import type { FieldDescriptor } from '../../../types/field';
+import type { FormSchema } from '../../../types/schema';
 import type { ConditionPredicate, FieldConditions } from '../../conditions/conditions';
 import { DEFAULT_FIELD_CONDITIONS } from '../../conditions/conditions';
 import type { FileFieldMeta, FileSourceType, FileValue } from './types';
 
 // ─── Builder ──────────────────────────────────────────────────────────────────
 
-export class FileFieldBuilder {
+export class FileFieldBuilder<Schema extends FormSchema = FormSchema> {
   private readonly _meta: FileFieldMeta;
-  private readonly _conditions: FieldConditions = {
+  private readonly _conditions: FieldConditions<Schema> = {
     ...DEFAULT_FIELD_CONDITIONS,
     visible: [],
     required: [],
@@ -76,7 +77,7 @@ export class FileFieldBuilder {
     return this;
   }
 
-  visibleWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+  visibleWhen(fieldOrFn: string | ConditionPredicate<Schema>, value?: unknown): this {
     if (typeof fieldOrFn === 'function') {
       this._conditions.visible.push({ type: 'fn', fn: fieldOrFn });
     } else {
@@ -117,7 +118,7 @@ export class FileFieldBuilder {
     return this;
   }
 
-  requiredWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+  requiredWhen(fieldOrFn: string | ConditionPredicate<Schema>, value?: unknown): this {
     if (typeof fieldOrFn === 'function') {
       this._conditions.required.push({ type: 'fn', fn: fieldOrFn });
     } else {
@@ -143,7 +144,7 @@ export class FileFieldBuilder {
     return this;
   }
 
-  disabledWhen(fieldOrFn: string | ConditionPredicate, value?: unknown): this {
+  disabledWhen(fieldOrFn: string | ConditionPredicate<Schema>, value?: unknown): this {
     if (typeof fieldOrFn === 'function') {
       this._conditions.disabled.push({ type: 'fn', fn: fieldOrFn });
     } else {
@@ -392,7 +393,7 @@ export type BuiltFileDescriptor = FieldDescriptor<
   'file'
 > &
   FileFieldMeta & {
-    _conditions?: FieldConditions;
+    _conditions?: FieldConditions<any>;
   };
 
 /** Check if a descriptor is a file field */

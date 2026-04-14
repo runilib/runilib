@@ -1,4 +1,4 @@
-import type { ResolverResult, SchemaResolver } from '../../types/options';
+import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
 import type {
   ResolverAdapterOptions,
   ResolverMode,
@@ -107,7 +107,7 @@ async function executeJoiValidation(
 export function joiResolver(
   schema: JoiSchema,
   options: JoiResolverOptions = {},
-): SchemaResolver {
+): SchemaValidatorResolver {
   const { normalizeMessage, stripQuotes = true, ...restOptions } = options;
 
   const mergedOptions: JoiResolverOptions = {
