@@ -16,13 +16,20 @@ on:
       - 'packages/**'
       - '.github/mirror-packages.json'
       - '.github/workflows/mirror-package-prs.yml'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Monorepo pull request number to mirror
+        required: true
+        type: number
 
 concurrency:
-  group: mirror-package-prs-${{ github.event.pull_request.number }}
+  group: mirror-package-prs-${{ github.event_name == 'workflow_dispatch' && inputs.pr_number || github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   prepare:
@@ -32,6 +39,11 @@ jobs:
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
       has_packages: ${{ steps.matrix.outputs.has_packages }}
+      pr_number: ${{ steps.pr.outputs.pr_number }}
+      pr_url: ${{ steps.pr.outputs.pr_url }}
+      pr_title: ${{ steps.pr.outputs.pr_title }}
+      pr_body: ${{ steps.pr.outputs.pr_body }}
+      pr_merged: ${{ steps.pr.outputs.pr_merged }}
 
     steps:
       - name: Checkout repository
@@ -40,11 +52,47 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Resolve source PR metadata
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number || github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PR_NUMBER:-}" ]; then
+            echo "::error::Missing pull request number."
+            exit 1
+          fi
+
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          pr_state="$(echo "$pr_json" | jq -r '.state')"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "$pr_state" != "open" ]; then
+            echo "::error::Pull request #${PR_NUMBER} is not open (state=${pr_state})."
+            exit 1
+          fi
+
+          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "base_sha=$(echo "$pr_json" | jq -r '.base.sha')" >> "$GITHUB_OUTPUT"
+          echo "pr_url=$(echo "$pr_json" | jq -r '.html_url')" >> "$GITHUB_OUTPUT"
+          echo "pr_merged=$(echo "$pr_json" | jq -r '.merged')" >> "$GITHUB_OUTPUT"
+          {
+            echo "pr_title<<__EOF__"
+            echo "$pr_json" | jq -r '.title'
+            echo "__EOF__"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "pr_body<<__EOF__"
+            echo "$pr_json" | jq -r '.body // ""'
+            echo "__EOF__"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build mirror matrix
         id: matrix
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_NUMBER: ${{ steps.pr.outputs.pr_number }}
+          BASE_SHA: ${{ steps.pr.outputs.base_sha }}
         run: |
           set -euo pipefail
 
@@ -88,7 +136,7 @@ jobs:
   mirror-open-update:
     name: Mirror PR for ${{ matrix.workspace }}
     needs: prepare
-    if: needs.prepare.outputs.has_packages == 'true' && github.event.action != 'closed'
+    if: needs.prepare.outputs.has_packages == 'true' && !(github.event_name == 'pull_request_target' && github.event.action == 'closed')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -113,7 +161,7 @@ jobs:
       - name: Create subtree branch from source PR
         id: subtree
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
           PACKAGE_PATH: ${{ matrix.package_path }}
         run: |
           set -euo pipefail
@@ -135,7 +183,7 @@ jobs:
           GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
           TARGET_REPO: ${{ matrix.target_repo }}
           MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
         run: |
           set -euo pipefail
 
@@ -167,10 +215,10 @@ jobs:
           TARGET_REPO: ${{ matrix.target_repo }}
           TARGET_BRANCH: ${{ matrix.target_branch }}
           PACKAGE_PATH: ${{ matrix.package_path }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          SOURCE_PR_URL: ${{ github.event.pull_request.html_url }}
-          SOURCE_PR_TITLE: ${{ github.event.pull_request.title }}
-          SOURCE_PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+          SOURCE_PR_URL: ${{ needs.prepare.outputs.pr_url }}
+          SOURCE_PR_TITLE: ${{ needs.prepare.outputs.pr_title }}
+          SOURCE_PR_BODY: ${{ needs.prepare.outputs.pr_body }}
           SOURCE_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
@@ -224,7 +272,7 @@ jobs:
   mirror-close:
     name: Close mirror PR for ${{ matrix.workspace }}
     needs: prepare
-    if: needs.prepare.outputs.has_packages == 'true' && github.event.action == 'closed'
+    if: needs.prepare.outputs.has_packages == 'true' && github.event_name == 'pull_request_target' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -251,9 +299,9 @@ jobs:
           GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
           TARGET_REPO: ${{ matrix.target_repo }}
           TARGET_BRANCH: ${{ matrix.target_branch }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          SOURCE_PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+          SOURCE_PR_URL: ${{ needs.prepare.outputs.pr_url }}
+          PR_MERGED: ${{ needs.prepare.outputs.pr_merged }}
         run: |
           set -euo pipefail
 
@@ -289,7 +337,7 @@ jobs:
           GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
           TARGET_REPO: ${{ matrix.target_repo }}
           MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
         run: |
           set -euo pipefail
 
