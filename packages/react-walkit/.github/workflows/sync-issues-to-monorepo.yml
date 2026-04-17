@@ -34,8 +34,12 @@ jobs:
 
           test -n "${GH_TOKEN:-}" || { echo "Missing MONOREPO_SYNC_TOKEN secret"; exit 1; }
 
-          query="repo:${MONOREPO_REPO} in:body \"mirror-source: ${GITHUB_REPOSITORY}#${ISSUE_NUMBER}\" is:issue"
-          monorepo_issue_number="$(gh api search/issues -f q="$query" --jq '.items[0].number // empty')"
+          marker="<!-- mirror-source: ${GITHUB_REPOSITORY}#${ISSUE_NUMBER} -->"
+          monorepo_issue_number="$(
+            gh api --paginate "repos/${MONOREPO_REPO}/issues?state=all&per_page=100" \
+              | jq -r --arg marker "$marker" '.[] | select(.pull_request == null) | select((.body // "") | contains($marker)) | .number' \
+              | head -n 1
+          )"
           echo "number=${monorepo_issue_number}" >> "$GITHUB_OUTPUT"
 
       - name: Create or update monorepo issue
