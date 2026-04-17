@@ -70,7 +70,7 @@ describe('NativeField', () => {
     renderNativeField(descriptor, {
       extra: {
         styles: {
-          optionTriggerLabel: { color: 'rgb(4, 5, 6)' },
+          selectTriggerLabel: { color: 'rgb(4, 5, 6)' },
         },
       },
     });

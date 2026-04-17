@@ -130,7 +130,7 @@ describe('WebPhoneInput ui', () => {
     const { getByRole } = renderPhoneField(field.phone('Phone'), {
       extra: {
         styles: {
-          input: {
+          phoneInput: {
             padding: '32px',
             color: 'rgb(1, 2, 3)',
           },

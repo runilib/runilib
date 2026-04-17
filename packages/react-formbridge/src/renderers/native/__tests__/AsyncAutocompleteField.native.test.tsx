@@ -43,7 +43,7 @@ describe('Native AsyncAutocompleteField', () => {
         extra={{
           testID: 'city-trigger',
           styles: {
-            trigger: { backgroundColor: 'rgb(1, 2, 3)' },
+            autocompleteTrigger: { backgroundColor: 'rgb(1, 2, 3)' },
           },
         }}
       />,

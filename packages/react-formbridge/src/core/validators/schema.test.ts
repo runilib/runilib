@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { field } from '../field-builders/field';
-import { ref } from './reference';
 import { FormBridgeSchemaValidationError, schema } from './schema';
 
 describe('schema()', () => {
@@ -50,50 +49,36 @@ describe('schema()', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.formErrors).toEqual(['Provide at least one contact channel.']);
+    expect(result.formLevelErrors).toEqual(['Provide at least one contact channel.']);
     expect(result.errorsByField.coupon).toBe('Coupon unavailable.');
   });
 
-  it('supports cross-field helpers like atLeastOne, exactlyOne, allOrNone and dateRange', () => {
+  it('supports cross-field helpers like exactlyOne and allOrNone', () => {
     const checkoutSchema = schema({
       primaryEmail: field.text('Primary email'),
       backupEmail: field.text('Backup email'),
       city: field.text('City'),
       zip: field.text('Zip'),
-      start: field.date('Start date'),
-      end: field.date('End date'),
       password: field.text('Password'),
-      confirmPassword: field
-        .text('Confirm password')
-        .sameAs(ref('password'), 'Must match.'),
+      confirmPassword: field.text('Confirm password').sameAs('password', 'Must match.'),
     })
       .exactlyOne(['primaryEmail', 'backupEmail'], 'Choose exactly one email.')
-      .allOrNone(['city', 'zip'], 'Provide both city and zip.')
-      .dateRange(
-        {
-          start: 'start',
-          end: 'end',
-        },
-        'End date must be after start date.',
-      );
+      .allOrNone(['city', 'zip'], 'Provide both city and zip.');
 
     const result = checkoutSchema.safeParse({
       primaryEmail: 'hello@example.com',
       backupEmail: 'backup@example.com',
       city: 'Paris',
       zip: '',
-      start: '2026-01-10',
-      end: '2026-01-05',
       password: 'secret',
       confirmPassword: 'other',
     });
 
     expect(result.success).toBe(false);
-    expect(result.formErrors).toEqual([
+    expect(result.formLevelErrors).toEqual([
       'Choose exactly one email.',
       'Provide both city and zip.',
     ]);
-    expect(result.errorsByField.end).toBe('End date must be after start date.');
     expect(result.errorsByField.confirmPassword).toBe('Must match.');
   });
 

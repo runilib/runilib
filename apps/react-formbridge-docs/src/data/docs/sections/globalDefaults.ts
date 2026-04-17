@@ -1,20 +1,16 @@
 import type { LibraryDoc } from '../../../types/index';
-import {
-  GLOBAL_UI_SURFACE,
-  NATIVE_SLOT_SURFACE,
-  WEB_SLOT_SURFACE,
-} from '../constants';
+import { GLOBAL_UI_SURFACE, NATIVE_SLOT_SURFACE, WEB_SLOT_SURFACE } from '../constants';
 
-export const globalConfigsSection: LibraryDoc['sections'][number] = {
+export const globalDefaultsSection: LibraryDoc['sections'][number] = {
   id: 'fb-global-props',
-  title: 'globalConfigs',
-  content: `\`globalConfigs\` is the **single place where you theme every generated field, the \`<Form>\` wrapper, and \`Form.Submit\`** at once. You pass it to \`useFormBridge(schema, { globalConfigs })\` and it becomes the shared visual layer for the form — CSS Modules, StyleSheet, utility classes, or design-system components all plug in here.
+  title: 'globalDefaults',
+  content: `\`globalDefaults\` is the **single place where you theme every generated field, the \`<Form>\` wrapper, and \`Form.Submit\`** at once. You pass it to \`useFormBridge(schema, { globalDefaults })\` and it becomes the shared visual layer for the form — CSS Modules, StyleSheet, utility classes, or design-system components all plug in here.
 
 **Signature**
 
 \`\`\`ts
 useFormBridge(schema, {
-  globalConfigs: (state) => ({
+  globalDefaults: (state) => ({
     field?: FieldTheme,   // applied to every rendered field
     form?:  FormTheme,    // applied to the <Form> wrapper
     submit?: SubmitTheme, // applied to Form.Submit
@@ -23,10 +19,10 @@ useFormBridge(schema, {
 \`\`\`
 
 - **It's a function**, not a static object. You receive the live \`FormState<S>\` (\`isSubmitting\`, \`isValid\`, \`isDirty\`, \`errors\`, \`values\`, \`submitError\`, …) and return an options bag. This means the theme can **react to form state**: highlight the form red on submit error, change the submit label while submitting, dim fields while the form is busy, etc.
-- **Local field props still win.** Anything you pass on \`<fields.email ui={...} />\` overrides the matching key from \`globalConfigs.field\`. The merge order is: builder \`behavior\` → \`globalConfigs\` → local \`ui\` → \`fieldController\` / custom render.
+- **Local field props still win.** Anything you pass directly on \`<fields.email classNames={...} />\` overrides the matching key from \`globalDefaults.field\`. The merge order is: builder \`behavior\` → \`globalDefaults\` → local field props → \`fieldController\` / custom render.
 - **Platform-aware typing.** On web, \`field\`/\`form\`/\`submit\` accept web-specific overrides (\`className\`, \`classNames\`, \`wrapperProps\`, \`inputProps\`, …). On native, they accept RN-specific overrides (\`style\`, \`containerStyle\`, \`textStyle\`, \`indicatorColor\`, …). The hook variant you import (\`useFormBridge\` web vs native) selects the correct shape automatically.
 
-> Prefer \`globalConfigs\` over per-field \`ui\` as soon as two or more fields need the same look. Reach for local \`ui\` only for genuine one-off exceptions. For full custom chrome beyond styling, see [\`fieldController\`](/docs/fieldcontroller) or [\`field.custom()\`](/docs/field-custom).`,
+> Prefer \`globalDefaults\` over per-field overrides as soon as two or more fields need the same look. Reach for local field props only for genuine one-off exceptions. For full custom chrome beyond styling, see [\`fieldController\`](/docs/fieldcontroller) or [\`field.custom()\`](/docs/field-custom).`,
   codeTabs: [
     {
       filename: 'ReactiveTheme.web.tsx',
@@ -42,9 +38,9 @@ const schema = {
 export function LoginForm() {
   const { Form, fields, state } = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalConfigs: (state) => ({
+    globalDefaults: (state) => ({
       form: {
-        className: \`\${styles.form} \${state.submitError ? styles.formError : ''}\`,
+        className: \`\${styles.form} \${state.submitError ? styles.formLevelError : ''}\`,
       },
       field: {
         classNames: {
@@ -88,7 +84,7 @@ const schema = {
 export function LoginScreen() {
   const { Form, fields } = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalConfigs: (state) => ({
+    globalDefaults: (state) => ({
       form: { style: s.form },
       field: {
         styles: {
@@ -123,24 +119,27 @@ const s = StyleSheet.create({ /* … */ })`,
     {
       id: 'fb-global-props-signature',
       title: 'Signature & reactive state',
-      content: `\`globalConfigs\` runs on every render of the form, with the latest \`FormState<S>\` as its only argument:
+      content: `\`globalDefaults\` runs on every render of the form, with the latest \`FormState<S>\` as its only argument:
 
 \`\`\`ts
-globalConfigs?(state: FormState<S>): FormBridgeOptions<TPlatform>
+globalDefaults?(state: FormState<S>): FormBridgeOptions<TPlatform>
 \`\`\`
 
 **Fields available on \`state\`** (non-exhaustive — see the [\`useFormBridge()\`](/docs/useformbridge) section for the full list):
 
-- \`values\` — current values, typed from the schema
-- \`errors\` — per-field error map (\`state.errors.__form\` for form-level errors from \`schema()\`)
-- \`touched\` / \`dirty\` — per-field tracking bags
-- \`isValid\` / \`isDirty\` / \`isSubmitting\` / \`isSubmitted\` / \`submitCount\` — form-level flags
-- \`submitError\` — string set by \`onSubmitError(error)\` when your \`onSubmit\` throws
+| Field | Description |
+| --- | --- |
+| \`values\` | Current values, typed from the schema |
+| \`errors\` | Per-field error map |
+| \`formLevelError\` | Form-level error string produced by \`schema()\` refinements (\`null\` when none) |
+| \`touched\` / \`dirty\` | Per-field tracking bags |
+| \`isValid\` / \`isDirty\` / \`isSubmitting\` / \`isSubmitted\` / \`submitCount\` | Form-level flags |
+| \`submitError\` | String set by \`onSubmitError(error)\` when your \`onSubmit\` throws |
 
 Because the selector receives \`state\`, the theme can **react**:
 
 - Switch \`submit.loadingText\` while \`state.isSubmitting\` is \`true\`
-- Add a \`formError\` className when \`state.submitError\` is set
+- Add a \`formLevelError\` className when \`state.submitError\` is set
 - Disable the submit button until \`state.isDirty\`
 - Tint every field wrapper when the form has unresolved errors
 
@@ -152,52 +151,58 @@ Return the same shape regardless of state — React just re-renders the theme ea
       content: `FormBridge merges style/behavior from **four layers**, always in the same order:
 
 1. **Builder \`behavior\`** — anything declared on the schema builder itself (e.g. \`field.text().placeholder('…').hint('…')\`). Lowest precedence.
-2. **\`globalConfigs\`**: the function documented here. Covers every field, the form wrapper, and the submit button.
-3. **Local \`ui\` prop** — anything passed on \`<fields.name ui={...} />\` or on a \`<Form ...>\` / \`<Form.Submit ...>\` call site. Wins over global config.
+2. **\`globalDefaults\`**: the function documented here. Covers every field, the form wrapper, and the submit button.
+3. **Local field props** — anything passed directly on \`<fields.name classNames={...} />\` or on a \`<Form ...>\` / \`<Form.Submit ...>\` call site. Wins over global config.
 4. **\`fieldController\` / \`field.custom().render(...)\`** — fully custom render layer. Wins over everything above because at that point FormBridge is no longer rendering the chrome itself.
 
 Practical consequences:
 
-- Change the **whole form's look** once in \`globalConfigs\` — no need to repeat \`className\` / \`style\` on every \`<fields.*>\` call site.
+- Change the **whole form's look** once in \`globalDefaults\` — no need to repeat \`className\` / \`style\` on every \`<fields.*>\` call site.
 - Override a **single field** locally with \`<fields.email className="..." />\` without touching the global theme.
 - Keep **one-off exceptions local**; keep **shared language global**. That's the mental model.`,
     },
     {
       id: 'fb-global-props-field',
       title: 'field: shared defaults for every rendered field',
-      content: `Everything under \`globalConfigs.field\` is forwarded to **every** \`<fields.*>\` component unless a local \`ui\` overrides it. The shape is \`FieldTheme<PlatformGlobalFieldPropsOverrides<TPlatform>>\` — identical to the per-field override type minus a few props that must stay local (see the caveat below).
+      content: `Everything under \`globalDefaults.field\` is forwarded to **every** \`<fields.*>\` component unless a local prop overrides it. The shape is \`FieldTheme<PlatformGlobalFieldPropsOverrides<TPlatform>>\` — identical to the per-field override type minus a few props that must stay local (see the caveat below).
 
 **Available on both web and native**
 
-- \`style\`: base style applied to every field wrapper
-- \`classNames?\` (web) / \`styles?\`: per-slot overrides (see the **Web slot names** and **Native slot names** subsections below)
-- \`hideLabel?\`: hide visual labels while keeping them for screen readers
-- \`highlightOnError?\`: turn the default red error chrome on/off
-- \`readOnly?\`: mark every field read-only (handy for "view mode")
-- \`inputMode?\`: virtual-keyboard hint for text-like fields
-- \`wrapperProps?\` / \`labelProps?\` / \`hintProps?\` / \`errorProps?\`: passthrough props for the DOM nodes of each slot
-- Plus every per-type passthrough (\`inputProps\`, \`textareaProps\`, \`selectProps\`, \`buttonProps\`, …): FormBridge routes them to the matching renderer.
+| Key | Description |
+| --- | --- |
+| \`style\` | Base style applied to every field wrapper |
+| \`classNames?\` (web) / \`styles?\` | Per-slot overrides (see the **Web slot names** and **Native slot names** subsections below) |
+| \`hideLabel?\` | Hide visual labels while keeping them for screen readers |
+| \`highlightOnError?\` | Turn the default red error chrome on/off |
+| \`readOnly?\` | Mark every field read-only (handy for "view mode") |
+| \`inputMode?\` | Virtual-keyboard hint for text-like fields |
+| \`wrapperProps?\` / \`labelProps?\` / \`hintProps?\` / \`errorProps?\` | Passthrough props for the DOM nodes of each slot |
+| \`inputProps\` / \`textareaProps\` / \`selectProps\` / \`buttonProps\` / … | Per-type passthrough — FormBridge routes them to the matching renderer |
 
 **Web-only extras**
 
-- \`className?\`: class added to every field's wrapper
+| Key | Description |
+| --- | --- |
+| \`className?\` | Class added to every field's wrapper |
 
 **Caveat: props that must stay local, not global**
 
-These keys make sense only on an individual field and are **omitted** from the \`globalConfigs.field\` type to prevent accidents:
+These keys make sense only on an individual field and are **omitted** from the \`globalDefaults.field\` type to prevent accidents:
 
-- \`autoComplete\`: per-field autofill hint
-- \`autoFocus\`: only one field should take focus on mount
-- \`enterKeyHint\`: per-field "enter key" label on mobile
-- \`spellCheck\`: per-field toggle
-- \`id\`: must be unique per field
+| Key | Why it must stay local |
+| --- | --- |
+| \`autoComplete\` | Per-field autofill hint |
+| \`autoFocus\` | Only one field should take focus on mount |
+| \`enterKeyHint\` | Per-field "enter key" label on mobile |
+| \`spellCheck\` | Per-field toggle |
+| \`id\` | Must be unique per field |
 
-Declare those on the local \`ui\` prop of the specific \`<fields.*>\` call site.`,
+Declare those directly on the specific \`<fields.*>\` call site.`,
       code: {
         filename: 'global-field.tsx',
         lang: 'tsx',
         code: `useFormBridge(schema, {
-  globalConfigs: () => ({
+  globalDefaults: () => ({
     field: {
       className: 'fb-field',
       classNames: {
@@ -223,23 +228,27 @@ Declare those on the local \`ui\` prop of the specific \`<fields.*>\` call site.
       title: '`form` — overrides applied to the `<Form>` wrapper',
       content: `Attach styling and passthrough props to the \`<Form>\` wrapper element.
 
-**Web (\`WebFormPropsOverrides\`)**
+**Web**
 
-- \`className?: string\` — class added to the \`<form>\` element
-- \`style?: CSSProperties\` — inline style merged onto the \`<form>\` element
-- \`props?\` — passthrough attributes spread on \`<form>\` (minus FormBridge-owned: \`children\`, \`onSubmit\`, \`className\`, \`style\`)
+| Key | Type | Description |
+| --- | --- | --- |
+| \`className?\` | \`string\` | Class added to the \`<form>\` element |
+| \`style?\` | \`CSSProperties\` | Inline style merged onto the \`<form>\` element |
+| \`props?\` | \`HTMLFormAttributes\` | Passthrough attributes spread on \`<form>\` (minus FormBridge-owned: \`children\`, \`onSubmit\`, \`className\`, \`style\`) |
 
 **Native (\`NativeFormPropsOverrides\`)**
 
-- \`style?: StyleProp<ViewStyle>\` — style applied to the wrapper \`<View>\`
-- \`props?: Record<string, unknown>\` — passthrough props spread on the wrapper \`<View>\`
+| Key | Type | Description |
+| --- | --- | --- |
+| \`style?\` | \`StyleProp<ViewStyle>\` | Style applied to the wrapper \`<View>\` |
+| \`props?\` | \`Record<string, unknown>\` | Passthrough props spread on the wrapper \`<View>\` |
 
-Event handlers like \`onSubmit\`, \`onError\`, and \`onSubmitError\` are set on the \`<Form>\` call site, not here — \`globalConfigs\` is for visual/theming concerns.`,
+Event handlers like \`onSubmit\`, \`onError\`, and \`onSubmitError\` are set on the \`<Form>\` call site, not here — \`globalDefaults\` is for visual/theming concerns.`,
       code: {
         filename: 'global-form.tsx',
         lang: 'tsx',
         code: `useFormBridge(schema, {
-  globalConfigs: (state) => ({
+  globalDefaults: (state) => ({
     form: {
       className: state.submitError ? 'fb-form fb-form--error' : 'fb-form',
       style: { display: 'grid', gap: 16 },
@@ -254,29 +263,33 @@ Event handlers like \`onSubmit\`, \`onError\`, and \`onSubmitError\` are set on 
       title: '`submit` — overrides applied to `Form.Submit`',
       content: `Style the submit button and drive its loading copy from form state.
 
-**Web (\`WebSubmitPropsOverrides\`)**
+**Web**
 
-- \`className?: string\` — class on the \`<button>\`
-- \`style?: CSSProperties\` — inline style on the \`<button>\`
-- \`loadingText?: string\` — label shown while submitting (defaults to \`"Please wait…"\`)
-- \`props?\` — passthrough attributes spread on \`<button>\` (minus FormBridge-owned: \`children\`, \`type\`, \`disabled\`, \`className\`, \`style\`)
+| Key | Type | Description |
+| --- | --- | --- |
+| \`className?\` | \`string\` | Class on the \`<button>\` |
+| \`style?\` | \`CSSProperties\` | Inline style on the \`<button>\` |
+| \`loadingText?\` | \`ReactNode\` | Content shown while submitting (defaults to \`"Please wait…"\`) |
+| \`props?\` | \`HTMLButtonAttributes\` | Passthrough attributes spread on \`<button>\` (minus FormBridge-owned: \`children\`, \`type\`, \`disabled\`, \`className\`, \`style\`) |
 
-**Native (\`NativeSubmitPropsOverrides\`)**
+**Native**
 
-- \`style?: StyleProp<ViewStyle>\` — style applied to the outer \`TouchableOpacity\`
-- \`containerStyle?: StyleProp<ViewStyle>\` — style applied to the inner content \`<View>\`
-- \`textStyle?: StyleProp<TextStyle>\` — style applied to the label \`<Text>\`
-- \`indicatorColor?: string\` — color of the \`ActivityIndicator\` shown while submitting
-- \`loadingText?: string\` — text shown next to the spinner while submitting
-- \`props?: Record<string, unknown>\` — passthrough props spread on the outer \`TouchableOpacity\`
-- \`contentProps?: Record<string, unknown>\` — passthrough props spread on the inner content \`<View>\`
+| Key | Type | Description |
+| --- | --- | --- |
+| \`style?\` | \`StyleProp<ViewStyle>\` | Style applied to the outer \`TouchableOpacity\` |
+| \`containerStyle?\` | \`StyleProp<ViewStyle>\` | Style applied to the inner content \`<View>\` |
+| \`textStyle?\` | \`StyleProp<TextStyle>\` | Style applied to the label \`<Text>\` |
+| \`indicatorColor?\` | \`string\` | Color of the \`ActivityIndicator\` shown while submitting |
+| \`loadingText?\` | \`ReactNode\` | Content shown next to the spinner while submitting |
+| \`props?\` | \`Record<string, unknown>\` | Passthrough props spread on the outer \`TouchableOpacity\` |
+| \`contentProps?\` | \`Record<string, unknown>\` | Passthrough props spread on the inner content \`<View>\` |
 
 FormBridge manages \`disabled\` and the loading transition itself, so \`state.isSubmitting\` is the signal you use to drive \`loadingText\` / \`indicatorColor\` — you never flip \`disabled\` manually mid-submit.`,
       code: {
         filename: 'global-submit.tsx',
         lang: 'tsx',
         code: `useFormBridge(schema, {
-  globalConfigs: (state) => ({
+  globalDefaults: (state) => ({
     submit: {
       className: 'fb-submit',
       loadingText: state.isSubmitting ? 'Saving…' : undefined,
@@ -294,24 +307,24 @@ FormBridge manages \`disabled\` and the loading transition itself, so \`state.is
     {
       id: 'fb-global-props-web-slots',
       title: 'Web slot names',
-      content: `Every web field exposes a set of named slots so \`globalConfigs.field.classNames\` / \`styles\` can target each piece of the rendered field without reaching into the DOM.
+      content: `Every web field exposes a set of named slots so \`globalDefaults.field.classNames\` / \`styles\` can target each piece of the rendered field without reaching into the DOM.
 
 ${WEB_SLOT_SURFACE}`,
     },
     {
       id: 'fb-global-props-native-slots',
       title: 'Native slot names',
-      content: `Every native field exposes a set of named style slots so \`globalConfigs.field.styles\` can target each piece of the rendered field.
+      content: `Every native field exposes a set of named style slots so \`globalDefaults.field.styles\` can target each piece of the rendered field.
 
 ${NATIVE_SLOT_SURFACE}`,
     },
     {
       id: 'fb-global-props-when-to-use',
-      title: 'When to use globalConfigs vs. alternatives',
+      title: 'When to use globalDefaults vs. alternatives',
       content: `FormBridge offers three styling layers. Pick the right one for the scope of your change:
 
-- **\`globalConfigs\`** — use when **two or more fields** need the same look, or when you want the theme to **react to form state**. Default recommendation for CSS Modules / StyleSheet / design-system-wide chrome. Declared once on \`useFormBridge\`.
-- **Local \`ui\` prop** — use for **one-off exceptions** on a single field. Example: \`<fields.email className='narrow' />\`. Wins over global config.
+- **\`globalDefaults\`** — use when **two or more fields** need the same look, or when you want the theme to **react to form state**. Default recommendation for CSS Modules / StyleSheet / design-system-wide chrome. Declared once on \`useFormBridge\`.
+- **Local field props** — use for **one-off exceptions** on a single field. Example: \`<fields.email className='narrow' />\`. Wins over global config.
 - **\`fieldController\` / \`field.custom().render(...)\`** — use when styling isn't enough and you need **custom chrome** (e.g. a bespoke phone picker UI on top of the built-in value model, or a totally new field type). See [\`fieldController\`](/docs/fieldcontroller) and [\`field.custom()\`](/docs/field-custom).
 
 > The [\`Styling\`](/docs/styling) section shows end-to-end examples that combine all three layers.`,

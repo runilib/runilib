@@ -116,4 +116,4 @@
 //     </ResolverExampleCard>
 //   );
 // }
-export {}
+export {};

@@ -22,6 +22,11 @@ const FIELD_ERROR_PROPS_TABLE = buildMethodsTable([
     '`CSSProperties | StyleProp<TextStyle>`',
     'Inline style — `CSSProperties` on web, `StyleProp<TextStyle>` on native. Merged on top of the default error color.',
   ],
+  [
+    '`render(...)` for extra native attrs',
+    '`(ctx) => ReactNode`',
+    'If you need custom DOM/native attributes beyond the focused built-in surface, render the error element yourself via `render` and attach the attributes there.',
+  ],
 ]);
 
 export const fieldErrorSection: LibraryDoc['sections'][number] = {
@@ -32,7 +37,8 @@ export const fieldErrorSection: LibraryDoc['sections'][number] = {
 - Returns \`null\` when there is nothing to show, so it's safe to mount unconditionally — no \`{error && ...}\` boilerplate at the call site
 - Visibility follows the standard FormBridge rule: \`touched || submitCount > 0\`. The message stays hidden until the user has interacted with the field or tried to submit
 - Fully typed: the \`name\` prop autocompletes from your schema keys, so renaming a field breaks the usage site at compile time instead of at runtime
-- Use it when you render fields through \`form.fieldController(name)\` or a fully custom UI and want FormBridge to keep driving the error rendering`,
+- Use it when you render fields through \`form.fieldController(name)\` or a fully custom UI and want FormBridge to keep driving the error rendering
+- Unlike \`Form\` and \`Form.Submit\`, \`FieldError\` keeps a focused API instead of exposing every native wrapper attribute; if you need full control over the alert element, use \`render\``,
   codeTabs: [
     {
       filename: 'FieldError.web.tsx',

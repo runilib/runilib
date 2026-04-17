@@ -52,6 +52,7 @@ const USE_FORM_BRIDGE_TOC: TocItem[] = [
 
 const USE_FORM_BRIDGE_QUICKSTART: CodeSnippet[] = [
   {
+    interactive: true,
     code: `import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -73,11 +74,12 @@ export function ProfileForm() {
     </Form>
   )
 }`,
-    filename: 'QuickStart.tsx',
+    filename: 'QuickStartPlayground.web.tsx',
     label: 'Web',
     lang: 'tsx',
   },
   {
+    interactive: true,
     code: `import { ScrollView, View } from 'react-native'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
@@ -104,7 +106,7 @@ export function ProfileForm() {
     </ScrollView>
   )
 }`,
-    filename: 'QuickStart.tsx',
+    filename: 'QuickStartPlayground.native.tsx',
     label: 'Native',
     lang: 'tsx',
   },
@@ -124,7 +126,7 @@ const USE_FORM_BRIDGE_OPTIONS: FeatureOptionRow[] = [
   },
   {
     description: 'Optional schema adapter for Zod, Yup, Joi, or Valibot validation.',
-    property: 'resolver',
+    property: 'validatorResolver',
     type: 'SchemaValidatorResolver',
   },
   {
@@ -154,7 +156,7 @@ const USE_FORM_BRIDGE_OPTIONS: FeatureOptionRow[] = [
   },
   {
     description: 'Seed the runtime from existing values before the user edits the form.',
-    property: 'globalConfigs',
+    property: 'globalDefaults',
     type: 'Partial<SchemaValues<typeof schema>>',
   },
 ];
@@ -548,6 +550,11 @@ function StandardDocPage({
   version: string;
 }) {
   const isTutorialPage = entry.id.startsWith('fb-tutorial');
+  const supportsInteractiveCode =
+    isTutorialPage ||
+    entry.id === 'fb-readonly' ||
+    entry.id === 'fb-use-form-bridge-context' ||
+    entry.id === 'fb-use-async-options';
 
   return (
     <>
@@ -572,7 +579,7 @@ function StandardDocPage({
 
       <article className="doc-standard-article">
         <RichText
-          interactiveCode={isTutorialPage}
+          interactiveCode={supportsInteractiveCode}
           section={entry.section}
         />
       </article>

@@ -157,4 +157,49 @@ describe('web select field', () => {
     expect(value.style.color).toBe('rgb(4, 5, 6)');
     expect(arrow.style.color).toBe('rgb(7, 8, 9)');
   });
+
+  it('forces blur on the first outside click for native selects', async () => {
+    vi.useFakeTimers();
+
+    const onBlur = vi.fn();
+    const descriptor = field
+      .select('Country')
+      .options([
+        { label: 'France', value: 'FR' },
+        { label: 'United States', value: 'US' },
+      ])
+      .required()
+      ._build() as WebFieldProps['descriptor'];
+
+    render(
+      <Field
+        descriptor={descriptor}
+        name="country"
+        value=""
+        label="Country"
+        error="Country is required"
+        touched={false}
+        dirty={false}
+        validating={false}
+        disabled={false}
+        required={descriptor._required}
+        onChange={vi.fn()}
+        onBlur={onBlur}
+        onFocus={vi.fn()}
+        allValues={{}}
+      />,
+    );
+
+    const select = screen.getByRole('combobox', {
+      name: 'Country *',
+    }) as HTMLSelectElement;
+
+    select.focus();
+    fireEvent.click(document.body);
+    vi.runAllTimers();
+
+    expect(onBlur).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
 });

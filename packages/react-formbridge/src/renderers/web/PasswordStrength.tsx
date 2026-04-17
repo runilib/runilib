@@ -7,6 +7,11 @@ import type { StrengthResult } from '../../core/field-builders/password/types';
 import type { FocusableFieldHandle } from '../../types';
 import type { WebPasswordFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
+import {
+  defaultFieldRootStyle,
+  defaultPasswordInputStyle,
+  defaultPasswordToggleStyle,
+} from './default-styles';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultErrorChromeStyle,
@@ -89,6 +94,14 @@ export const PasswordStrength = ({
     ...inputPropsRest
   } = inputProps ?? {};
   const id = extra?.id ?? web.id ?? props.name;
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
+  const describedBy = props.error ? errorId : props.hint ? hintId : undefined;
+  const inputClassName = cx(
+    classNames?.textInput,
+    classNames?.passwordInput,
+    inputPropsClassName,
+  );
 
   const result = useMemo<StrengthResult | null>(() => {
     if (!props.value) return null;
@@ -125,12 +138,12 @@ export const PasswordStrength = ({
     }) ?? defaultToggleContent;
   const defaultStrengthBarContent = result ? (
     <div
-      className={classNames?.strengthBar}
+      className={classNames?.passwordStrengthBar}
       style={mergeStyles(
         {
           minHeight: meta._strengthBarHeight,
         },
-        styles?.strengthBar,
+        styles?.passwordStrengthBar,
       )}
     >
       {[1, 2, 3, 4].map((level) => {
@@ -141,14 +154,14 @@ export const PasswordStrength = ({
             key={level}
             data-fb-slot="strength-segment"
             {...(active ? { 'data-fb-active': '' } : {})}
-            className={classNames?.strengthFill}
+            className={classNames?.passwordStrengthFill}
             style={mergeStyles(
               {
                 // borderRadius: meta._strengthBarRadius,
                 minHeight: meta._strengthBarHeight,
                 ...(active ? { backgroundColor: result.color } : null),
               },
-              styles?.strengthFill,
+              styles?.passwordStrengthFill,
             )}
           />
         );
@@ -160,8 +173,8 @@ export const PasswordStrength = ({
       <span
         data-fb-slot="strength-label"
         data-fb-strength-level={result.label}
-        className={classNames?.strengthLabel}
-        style={mergeStyles({ color: result.color }, styles?.strengthLabel)}
+        className={classNames?.passwordStrengthLabel}
+        style={mergeStyles({ color: result.color }, styles?.passwordStrengthLabel)}
       >
         {result.label}
       </span>
@@ -178,8 +191,8 @@ export const PasswordStrength = ({
     meta._strengthShowEntropy && result ? (
       <span
         data-fb-slot="strength-entropy"
-        className={classNames?.strengthEntropy}
-        style={mergeStyles(styles?.strengthEntropy)}
+        className={classNames?.passwordStrengthEntropy}
+        style={mergeStyles(styles?.passwordStrengthEntropy)}
       >
         {result.entropy} bits
       </span>
@@ -196,8 +209,8 @@ export const PasswordStrength = ({
     resolvedStrengthLabelContent || resolvedStrengthEntropyContent ? (
       <div
         data-fb-slot="strength-meta"
-        className={classNames?.strengthMeta}
-        style={mergeStyles(styles?.strengthMeta)}
+        className={classNames?.passwordStrengthMeta}
+        style={mergeStyles(styles?.passwordStrengthMeta)}
       >
         {resolvedStrengthLabelContent}
         {resolvedStrengthEntropyContent}
@@ -208,8 +221,8 @@ export const PasswordStrength = ({
       <div
         data-fb-slot="strength-row"
         data-fb-strength-score={result.score}
-        className={classNames?.strengthRow}
-        style={mergeStyles(styles?.strengthRow)}
+        className={classNames?.passwordStrengthRow}
+        style={mergeStyles(styles?.passwordStrengthRow)}
       >
         {meta._strengthShowBar ? defaultStrengthBarContent : null}
         {defaultStrengthMetaContent}
@@ -235,8 +248,17 @@ export const PasswordStrength = ({
 
   return (
     <div
-      className={cx(extra?.className, classNames?.wrapper, wrapperPropsClassName as string)}
-      style={mergeStyles(extra?.style, styles?.wrapper, wrapperPropsStyle as CSSProperties)}
+      className={cx(
+        extra?.className,
+        classNames?.wrapper,
+        wrapperPropsClassName as string,
+      )}
+      style={mergeStyles(
+        defaultFieldRootStyle,
+        extra?.style,
+        styles?.wrapper,
+        wrapperPropsStyle as CSSProperties,
+      )}
       {...wrapperPropsRest}
     >
       {renderLabelSlot({
@@ -252,10 +274,10 @@ export const PasswordStrength = ({
         renderRequiredMark,
       })}
 
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', width: '100%', minWidth: 0 }}>
         <input
           ref={registerFocusable}
-          id={props.name}
+          id={id}
           name={props.name}
           type={show ? 'text' : 'password'}
           value={props.value || ''}
@@ -268,6 +290,11 @@ export const PasswordStrength = ({
           spellCheck={inputBehavior.spellCheck}
           inputMode={inputBehavior.inputMode}
           enterKeyHint={inputBehavior.enterKeyHint}
+          aria-invalid={hasError || undefined}
+          aria-required={required || undefined}
+          aria-readonly={inputBehavior.readOnly || undefined}
+          aria-describedby={describedBy}
+          aria-disabled={props.disabled || undefined}
           onChange={(event) => props.onChange(event.target.value)}
           onBlur={props.onBlur}
           onFocus={props.onFocus}
@@ -276,17 +303,24 @@ export const PasswordStrength = ({
           {...(result?.acceptable === false && props.value
             ? { 'data-fb-unacceptable': '' }
             : {})}
-          className={cx(classNames?.input, inputPropsClassName)}
-          style={mergeStyles(controlErrorStyle, styles?.input, inputPropsStyle)}
+          className={inputClassName}
+          style={mergeStyles(
+            defaultPasswordInputStyle,
+            controlErrorStyle,
+            styles?.textInput,
+            styles?.passwordInput,
+            inputPropsStyle,
+          )}
           {...inputPropsRest}
         />
 
         <button
           type="button"
           onClick={() => setShow((prev) => !prev)}
+          disabled={props.disabled}
           data-fb-slot="toggle"
-          className={classNames?.toggle}
-          style={mergeStyles(styles?.toggle)}
+          className={classNames?.passwordToggle}
+          style={mergeStyles(defaultPasswordToggleStyle, styles?.passwordToggle)}
           aria-label={show ? 'Hide password' : 'Show password'}
         >
           {resolvedToggleContent}
@@ -298,8 +332,8 @@ export const PasswordStrength = ({
       {shouldRenderRules && (
         <ul
           data-fb-slot="rules-list"
-          className={classNames?.rulesList}
-          style={mergeStyles(styles?.rulesList)}
+          className={classNames?.passwordRulesList}
+          style={mergeStyles(styles?.passwordRulesList)}
         >
           {result.rules.map((rule, index) => {
             const defaultRuleContent = (
@@ -307,16 +341,16 @@ export const PasswordStrength = ({
                 <span
                   data-fb-slot="rule-bullet"
                   {...(rule.passed ? { 'data-fb-passed': '' } : {})}
-                  className={classNames?.ruleBullet}
-                  style={mergeStyles(styles?.ruleBullet)}
+                  className={classNames?.passwordRuleBullet}
+                  style={mergeStyles(styles?.passwordRuleBullet)}
                 >
                   {rule.passed ? '✓' : ''}
                 </span>
                 <span
                   data-fb-slot="rule-text"
                   {...(rule.passed ? { 'data-fb-passed': '' } : {})}
-                  className={classNames?.ruleText}
-                  style={mergeStyles(styles?.ruleText)}
+                  className={classNames?.passwordRuleText}
+                  style={mergeStyles(styles?.passwordRuleText)}
                 >
                   {rule.label}
                 </span>
@@ -336,8 +370,8 @@ export const PasswordStrength = ({
                 key={rule.id}
                 data-fb-slot="rule-item"
                 {...(rule.passed ? { 'data-fb-passed': '' } : {})}
-                className={classNames?.ruleItem}
-                style={mergeStyles(styles?.ruleItem)}
+                className={classNames?.passwordRuleItem}
+                style={mergeStyles(styles?.passwordRuleItem)}
               >
                 {defaultRuleContent}
               </li>
@@ -350,8 +384,8 @@ export const PasswordStrength = ({
         error: props.error,
         hint: props.hint,
         name: props.name,
-        errorId: `${props.name}-error`,
-        hintId: `${props.name}-hint`,
+        errorId,
+        hintId,
         classNames: classNames as Record<string, string | undefined>,
         styles: styles as Record<string, React.CSSProperties | undefined>,
         errorProps: errorProps as Record<string, unknown>,

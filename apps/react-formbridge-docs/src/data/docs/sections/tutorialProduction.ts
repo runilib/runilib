@@ -1,5 +1,4 @@
 import type { LibraryDoc } from './../../../types/index';
-import { DOC_PREVIEWS } from '../constants';
 
 export const tutorialProductionSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial-production',
@@ -14,7 +13,6 @@ export const tutorialProductionSection: LibraryDoc['sections'][number] = {
     {
       filename: 'WizardRoute.web.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.wizard,
       code: `import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { FormSchema } from '@runilib/react-formbridge'
@@ -77,7 +75,6 @@ export function SignupWizardRoute() {
     {
       filename: 'WizardRoute.native.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.wizard,
       code: `import { useEffect } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import type { FormSchema } from '@runilib/react-formbridge'
@@ -133,7 +130,6 @@ export function SignupWizardScreen() {
         {
           filename: 'DynamicForm.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.dynamic,
           code: `import { useDynamicFormBridge } from '@runilib/react-formbridge'
 
 const definition = {
@@ -168,7 +164,6 @@ export function DynamicFeedback() {
         {
           filename: 'DynamicForm.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.dynamic,
           code: `import { ScrollView, Text, View } from 'react-native'
 import { useDynamicFormBridge } from '@runilib/react-formbridge'
 
@@ -208,7 +203,6 @@ export function RemoteDynamic({ url }: { url: string }) {
       code: {
         filename: 'ReadonlyReview.tsx',
         lang: 'tsx',
-        preview: DOC_PREVIEWS.readonly,
         code: `import { field, useFormBridgeReadonly } from '@runilib/react-formbridge'
 
 const schema = {
@@ -244,7 +238,6 @@ export function ReviewCard({ values, original }: { values: any; original?: any }
       code: {
         filename: 'AnalyticsTutorial.tsx',
         lang: 'tsx',
-        preview: DOC_PREVIEWS.analyticsWeb,
         code: `import {
   field,
   useFormBridge,

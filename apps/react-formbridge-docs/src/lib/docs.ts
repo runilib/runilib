@@ -79,14 +79,30 @@ function slugify(value: string) {
 function buildEntries() {
   const usedSlugs = new Set<string>();
   const groupById = new Map<string, { group: string; label: string }>();
+  const sectionsById = new Map(docs.sections.map((section) => [section.id, section]));
+  const orderedSections: DocSection[] = [];
+  const seenSectionIds = new Set<string>();
 
   for (const group of docs.sidebar) {
     for (const item of group.items) {
       groupById.set(item.id, { group: group.group, label: item.label });
+
+      const section = sectionsById.get(item.id);
+
+      if (section && !seenSectionIds.has(section.id)) {
+        orderedSections.push(section);
+        seenSectionIds.add(section.id);
+      }
     }
   }
 
-  return docs.sections.map((section, index) => {
+  for (const section of docs.sections) {
+    if (!seenSectionIds.has(section.id)) {
+      orderedSections.push(section);
+    }
+  }
+
+  return orderedSections.map((section, index) => {
     const resolvedSection = resolveSection(section);
     const preferredSlug = slugify(section.title);
     let slug = preferredSlug;
@@ -140,7 +156,8 @@ export function getFeaturedEntries() {
 
 export function getBuilderEntries() {
   const buildersGroup = docs.sidebar.find(
-    (group) => group.group === 'Available Field builders',
+    (group) =>
+      group.group === 'Available Field builders' || group.group === 'Field builders',
   );
 
   return (

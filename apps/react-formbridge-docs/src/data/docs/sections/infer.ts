@@ -10,9 +10,12 @@ export const inferSection: LibraryDoc['sections'][number] = {
 The same helper is also exported as \`inferFromObject(obj, overrides?)\` when you prefer a direct utility import.
 
 **How auto-detection works:**
-- **Key-based** — keys containing \`email\`, \`password\`, \`phone\`, \`url\`, \`bio\`, \`description\`, \`date\`, \`active\`, \`enabled\`, \`toggle\` etc. are mapped to their matching field type
-- **Value-based** — \`boolean\` → switch, \`number\` → number, \`Array\` → select, everything else → text
-- **Labels** — keys are prettified automatically (\`firstName\` → "First name", \`phone_number\` → "Phone number")
+
+| Strategy | Detection | Example |
+| --- | --- | --- |
+| Key-based | Keys containing \`email\`, \`password\`, \`phone\`, \`url\`, \`bio\`, \`description\`, \`date\`, \`active\`, \`enabled\`, \`toggle\`, … are mapped to their matching field type | \`email\` → \`field.email()\` |
+| Value-based | \`boolean\` → switch, \`number\` → number, \`Array\` → select, everything else → text | \`true\` → \`field.switch()\` |
+| Labels | Keys are prettified automatically | \`firstName\` → "First name", \`phone_number\` → "Phone number" |
 
 The returned schema can be spread and selectively overridden with explicit builders — inferred fields and hand-written fields mix freely.`,
   code: {

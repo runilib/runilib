@@ -10,7 +10,7 @@ export const tutorialSignupSection: LibraryDoc['sections'][number] = {
 - Conditional company fields stay in the builder instead of leaking into component branches`,
   codeTabs: [
     {
-      filename: 'SignupFlow.web.tsx',
+      filename: 'web.tsx',
       lang: 'tsx',
       code: `import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
@@ -53,7 +53,7 @@ export function SignupForm() {
 }`,
     },
     {
-      filename: 'SignupFlow.native.tsx',
+      filename: 'native.tsx',
       lang: 'tsx',
       code: `import { ScrollView, View } from 'react-native'
 import type { FormSchema } from '@runilib/react-formbridge'

@@ -68,13 +68,13 @@ export function PhoneVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => {
+    globalDefaults: () => {
       const baseUi = createNativeFormUi();
       const baseInputStyle =
         (baseUi.field?.styles &&
         typeof baseUi.field.styles === 'object' &&
-        'input' in baseUi.field.styles
-          ? baseUi.field.styles.input
+        'phoneInput' in baseUi.field.styles
+          ? baseUi.field.styles.phoneInput
           : undefined) ?? {};
 
       return {
@@ -87,39 +87,39 @@ export function PhoneVariantsExample() {
           ...baseUi.field,
           styles: {
             ...baseUi.field?.styles,
-            input: {
+            phoneInput: {
               ...(typeof baseInputStyle === 'object' ? baseInputStyle : {}),
               flex: 1,
               borderColor: 'rgba(96, 165, 250, 0.22)',
               backgroundColor: '#ffffff',
               color: '#10203a',
             },
-            countryFlag: {
+            phoneCountryFlag: {
               fontSize: 16,
             },
-            countryDial: {
+            phoneCountryDial: {
               color: '#93c5fd',
               fontSize: 12,
               fontWeight: '700',
             },
-            chevron: {
+            phoneChevron: {
               color: '#93c5fd',
               fontSize: 12,
             },
-            countryDivider: {
+            phoneCountryDivider: {
               backgroundColor: 'rgba(96, 165, 250, 0.16)',
             },
-            e164: {
+            phoneE164: {
               color: '#64748b',
               fontSize: 12,
             },
-            modalBackdrop: {
+            phoneModalBackdrop: {
               flex: 1,
               backgroundColor: 'rgba(2, 6, 23, 0.62)',
               justifyContent: 'center',
               padding: 18,
             },
-            modalCard: {
+            phoneModalCard: {
               maxHeight: '78%',
               borderRadius: 22,
               backgroundColor: '#ffffff',
@@ -128,7 +128,7 @@ export function PhoneVariantsExample() {
               padding: 14,
               gap: 12,
             },
-            searchInput: {
+            phoneSearchInput: {
               borderRadius: 14,
               borderWidth: 1,
               borderColor: 'rgba(148, 163, 184, 0.16)',
@@ -137,25 +137,25 @@ export function PhoneVariantsExample() {
               paddingHorizontal: 14,
               paddingVertical: 12,
             },
-            separator: {
+            phoneSeparator: {
               height: 1,
               marginVertical: 6,
               backgroundColor: 'rgba(148, 163, 184, 0.12)',
             },
-            countryRow: {
+            phoneCountryRow: {
               flexDirection: 'row',
               alignItems: 'center',
               gap: 10,
               paddingHorizontal: 12,
               paddingVertical: 12,
             },
-            countryName: {
+            phoneCountryName: {
               flex: 1,
               color: '#10203a',
               fontSize: 13,
               fontWeight: '700',
             },
-            emptyText: {
+            phoneEmptyText: {
               color: '#64748b',
               fontSize: 12,
               textAlign: 'center',
@@ -209,12 +209,12 @@ export function PhoneVariantsExample() {
         <fields.supportLine
           {...{
             styles: {
-              row: {
+              phoneRow: {
                 flexDirection: 'row',
                 alignItems: 'stretch',
                 gap: 12,
               },
-              countryButton: {
+              phoneCountryButton: {
                 minWidth: 128,
                 minHeight: 54,
                 paddingHorizontal: 14,
@@ -280,14 +280,14 @@ export function PhoneVariantsExample() {
         <fields.salesHotline
           {...{
             styles: {
-              row: {
+              phoneRow: {
                 borderColor: 'rgba(96, 165, 250, 0.22)',
                 backgroundColor: '#ffffff',
               },
-              countryButton: {
+              phoneCountryButton: {
                 minWidth: 122,
               },
-              input: {
+              phoneInput: {
                 color: '#10203a',
               },
             },
@@ -341,14 +341,14 @@ export function PhoneVariantsExample() {
         <fields.executiveDesk
           {...{
             styles: {
-              row: {
+              phoneRow: {
                 borderColor: 'rgba(148, 163, 184, 0.2)',
                 backgroundColor: '#ffffff',
               },
-              countryButton: {
+              phoneCountryButton: {
                 minWidth: 94,
               },
-              input: {
+              phoneInput: {
                 color: '#10203a',
               },
             },

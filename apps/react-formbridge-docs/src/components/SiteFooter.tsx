@@ -79,7 +79,7 @@ export function SiteFooter() {
           <FooterColumn>
             <FooterHeading>License</FooterHeading>
             <FooterMeta>MIT License</FooterMeta>
-            <FooterMeta>© 2026 FormBridge Engineering</FooterMeta>
+            <FooterMeta>© 2026 React FormBridge Engineering</FooterMeta>
           </FooterColumn>
         </FooterGrid>
       </FooterInner>

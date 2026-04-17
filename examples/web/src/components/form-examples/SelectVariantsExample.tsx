@@ -126,7 +126,7 @@ export function SelectVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createDemoFormUi(styles),
+    globalDefaults: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, watchAll } = form;

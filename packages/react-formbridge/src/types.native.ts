@@ -17,7 +17,7 @@ import type {
   SubmitButtonComponent as SharedSubmitButtonComponent,
   SubmitButtonProps as SharedSubmitButtonProps,
   UseFormBridgeReturn as SharedUseFormBridgeReturn,
-  UseFormOptions as SharedUseFormOptions,
+  UseFormBridgeOptions as SharedUseFormOptions,
 } from './types';
 
 export type {
@@ -86,8 +86,11 @@ export type SubmitButtonProps = SharedSubmitButtonProps<'native'>;
 export type SubmitButtonComponent = SharedSubmitButtonComponent<'native'>;
 export type FieldComponent<TProps = ExtraFieldProps> = SharedFieldComponent<TProps>;
 export type FieldComponents<S extends FormSchema> = SharedFieldComponents<S, 'native'>;
-export type FormBridgeOptions = SharedFormBridgeOptions<'native'>;
-export type UseFormOptions<S extends FormSchema> = SharedUseFormOptions<S, 'native'>;
+export type GlobaleDefaultsProps = SharedFormBridgeOptions<'native'>;
+export type UseFormBridgeOptions<S extends FormSchema> = SharedUseFormOptions<
+  S,
+  'native'
+>;
 export type FieldErrorProps<S extends FormSchema> = SharedErrorMessageProps<S, 'native'>;
 export type FieldLabelProps<S extends FormSchema> = SharedLabelProps<S, 'native'>;
 export type UseFormBridgeReturn<S extends FormSchema> = SharedUseFormBridgeReturn<

@@ -61,13 +61,13 @@ export function buildValidationResult<TData>(
   issues: ValidationIssue[],
 ): ValidationResult<TData> {
   const errorsByField: Record<string, string> = {};
-  const formErrors: string[] = [];
+  const formLevelErrors: string[] = [];
 
   for (const issue of issues) {
     const fieldKey = pathToFieldKey(issue.path);
 
     if (!fieldKey) {
-      formErrors.push(issue.message);
+      formLevelErrors.push(issue.message);
       continue;
     }
 
@@ -81,6 +81,6 @@ export function buildValidationResult<TData>(
     data: issues.length === 0 ? data : null,
     issues,
     errorsByField,
-    formErrors,
+    formLevelErrors,
   };
 }

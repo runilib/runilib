@@ -82,7 +82,7 @@ export function CustomerCheckoutExample() {
   const customerForm = useFormBridge(customerSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createNativeFormUi(),
+    globalDefaults: () => createNativeFormUi(),
     persist: {
       key: 'mobile-customer-checkout',
       storage: 'local',
@@ -181,7 +181,7 @@ export function CustomerCheckoutExample() {
           <fields.cardNumber
             {...{
               styles: {
-                input: {
+                textInput: {
                   letterSpacing: 1.8,
                 },
               },

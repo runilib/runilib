@@ -107,8 +107,8 @@ describe('WebFileField', () => {
         value: [value],
         extra: {
           styles: {
-            dropZoneAccept: { color: 'rgb(1, 2, 3)' },
-            dropZoneMaxSize: { color: 'rgb(4, 5, 6)' },
+            fileDropZoneAccept: { color: 'rgb(1, 2, 3)' },
+            fileDropZoneMaxSize: { color: 'rgb(4, 5, 6)' },
             fileInfo: { display: 'grid' },
           },
         },

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { field, ref, schema, useFormBridge } from '@runilib/react-formbridge';
+import { field, schema, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { createDemoFormUi, simulateSubmitDelay } from './shared';
@@ -24,10 +24,6 @@ const tripSchema = schema({
   .atLeastOne(
     ['email', 'phone'],
     'Provide at least an email or a phone number so we can reach you.',
-  )
-  .dateRange(
-    { start: ref('departureDate'), end: ref('returnDate') },
-    'Return date must be on or after departure.',
   )
   .superRefine((values, ctx) => {
     if (
@@ -65,11 +61,11 @@ export function SchemaRefinementExample() {
   const tripForm = useFormBridge(tripSchema, {
     validateOn: 'onTouched',
     revalidateOn: 'onChange',
-    globalConfigs: () => createDemoFormUi(styles),
+    globalDefaults: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, state } = tripForm;
-  const formLevelError = (state.errors as Record<string, string>).__form;
+  const formLevelError = state.formLevelError;
 
   return (
     <section className={`${styles.sectionCard} ${styles.customerSection}`}>
@@ -94,7 +90,7 @@ export function SchemaRefinementExample() {
               <strong>superRefine</strong> — password matches & avoids email handle
             </span>
             <span className={styles.point}>
-              Form-level errors surface under <code>state.errors.__form</code>
+              Form-level errors surface under <code>state.formLevelError</code>
             </span>
           </div>
         </aside>

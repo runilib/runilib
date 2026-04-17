@@ -340,12 +340,12 @@ export const NativePhoneInput: React.FC<Props> = ({
   const defaultCountryButtonContent = (
     <>
       {descriptor._phoneShowFlag && (
-        <Text style={sx(styles?.countryFlag)}>{currentCountry.flag}</Text>
+        <Text style={sx(styles?.phoneCountryFlag)}>{currentCountry.flag}</Text>
       )}
       {descriptor._phoneShowDialCode && (
-        <Text style={sx(styles?.countryDial)}>+{currentCountry.dial}</Text>
+        <Text style={sx(styles?.phoneCountryDial)}>+{currentCountry.dial}</Text>
       )}
-      <Text style={sx(styles?.chevron)}>▾</Text>
+      <Text style={sx(styles?.phoneChevron)}>▾</Text>
     </>
   );
   const resolvedCountryButtonContent =
@@ -386,7 +386,7 @@ export const NativePhoneInput: React.FC<Props> = ({
                 borderColor: defaultBorderColor(hasError, highlightOnError, '#d1d5db'),
               }
             : defaultDetachedRowStyle,
-          styles?.row,
+          styles?.phoneRow,
           integrated ? controlErrorStyle : undefined,
         )}
       >
@@ -404,7 +404,7 @@ export const NativePhoneInput: React.FC<Props> = ({
           style={sx(
             defaultCountryButtonStyle,
             integrated ? defaultIntegratedCountryButtonStyle : undefined,
-            styles?.countryButton,
+            styles?.phoneCountryButton,
           )}
           testID={inputBehavior.testID}
           accessibilityRole="button"
@@ -414,7 +414,7 @@ export const NativePhoneInput: React.FC<Props> = ({
         </Pressable>
 
         {integrated ? (
-          <View style={sx(defaultCountryDividerStyle, styles?.countryDivider)} />
+          <View style={sx(defaultCountryDividerStyle, styles?.phoneCountryDivider)} />
         ) : null}
 
         <TextInput
@@ -436,7 +436,7 @@ export const NativePhoneInput: React.FC<Props> = ({
           onFocus={props.onFocus}
           style={sx(
             integrated ? defaultIntegratedInputStyle : undefined,
-            styles?.input,
+            styles?.phoneInput,
             inputPropsStyle,
             integrated ? undefined : controlErrorStyle,
           )}
@@ -448,7 +448,7 @@ export const NativePhoneInput: React.FC<Props> = ({
         ? (renderE164?.({
             ...renderContext,
             defaultContent: (
-              <Text style={sx(styles?.e164)}>
+              <Text style={sx(styles?.phoneE164)}>
                 {resolveText(e164Text, normalizedValue.e164, {
                   ...renderContext,
                   e164: normalizedValue.e164,
@@ -457,7 +457,7 @@ export const NativePhoneInput: React.FC<Props> = ({
             ),
             e164: normalizedValue.e164,
           }) ?? (
-            <Text style={sx(styles?.e164)}>
+            <Text style={sx(styles?.phoneE164)}>
               {resolveText(e164Text, normalizedValue.e164, {
                 ...renderContext,
                 e164: normalizedValue.e164,
@@ -493,11 +493,11 @@ export const NativePhoneInput: React.FC<Props> = ({
         onRequestClose={() => setOpen(false)}
       >
         <Pressable
-          style={sx(styles?.modalBackdrop)}
+          style={sx(styles?.phoneModalBackdrop)}
           onPress={() => setOpen(false)}
         >
           <Pressable
-            style={sx(styles?.modalCard)}
+            style={sx(styles?.phoneModalCard)}
             onPress={(event) => event.stopPropagation()}
           >
             {descriptor._phoneSearchable && (
@@ -505,7 +505,7 @@ export const NativePhoneInput: React.FC<Props> = ({
                 value={search}
                 onChangeText={setSearch}
                 placeholder={resolvedSearchPlaceholder}
-                style={sx(styles?.searchInput, searchInputPropsStyle)}
+                style={sx(styles?.phoneSearchInput, searchInputPropsStyle)}
                 {...searchInputPropsRest}
               />
             )}
@@ -518,16 +518,20 @@ export const NativePhoneInput: React.FC<Props> = ({
                   {renderEmptySearchContent?.({
                     ...renderContext,
                     defaultContent: (
-                      <Text style={sx(styles?.emptyText)}>{resolvedEmptySearchText}</Text>
+                      <Text style={sx(styles?.phoneEmptyText)}>
+                        {resolvedEmptySearchText}
+                      </Text>
                     ),
                   }) ?? (
-                    <Text style={sx(styles?.emptyText)}>{resolvedEmptySearchText}</Text>
+                    <Text style={sx(styles?.phoneEmptyText)}>
+                      {resolvedEmptySearchText}
+                    </Text>
                   )}
                 </>
               )}
               renderItem={({ item }) => {
                 if ('separator' in item) {
-                  return <View style={sx(styles?.separator)} />;
+                  return <View style={sx(styles?.phoneSeparator)} />;
                 }
 
                 const index = filteredCountries.findIndex(
@@ -537,10 +541,10 @@ export const NativePhoneInput: React.FC<Props> = ({
                 const defaultCountryItemContent = (
                   <>
                     {descriptor._phoneShowFlag && (
-                      <Text style={sx(styles?.countryFlag)}>{item.flag}</Text>
+                      <Text style={sx(styles?.phoneCountryFlag)}>{item.flag}</Text>
                     )}
-                    <Text style={sx(styles?.countryName)}>{item.name}</Text>
-                    <Text style={sx(styles?.countryDial)}>+{item.dial}</Text>
+                    <Text style={sx(styles?.phoneCountryName)}>{item.name}</Text>
+                    <Text style={sx(styles?.phoneCountryDial)}>+{item.dial}</Text>
                   </>
                 );
                 const resolvedCountryItemContent =
@@ -555,7 +559,7 @@ export const NativePhoneInput: React.FC<Props> = ({
                 return (
                   <Pressable
                     onPress={() => selectCountry(item)}
-                    style={sx(styles?.countryRow)}
+                    style={sx(styles?.phoneCountryRow)}
                   >
                     {resolvedCountryItemContent}
                   </Pressable>

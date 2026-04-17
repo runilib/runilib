@@ -1,5 +1,43 @@
 import type { TextStyle, ViewStyle } from 'react-native';
 
+export const defaultInputStyle: TextStyle = {
+  minHeight: 44,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  backgroundColor: '#ffffff',
+  color: '#0f172a',
+  fontSize: 15,
+  lineHeight: 20,
+};
+
+export const defaultTextareaStyle: TextStyle = {
+  ...defaultInputStyle,
+  minHeight: 96,
+  paddingTop: 10,
+};
+
+export const defaultCheckboxRowStyle: ViewStyle = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 10,
+};
+
+export const defaultCheckboxBoxStyle: ViewStyle = {
+  width: 20,
+  height: 20,
+  borderWidth: 1,
+  borderColor: '#94a3b8',
+  backgroundColor: '#ffffff',
+};
+
+export const defaultSwitchRowStyle: ViewStyle = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 10,
+};
+
 export const defaultOptionModalBackdropStyle: ViewStyle = {
   flex: 1,
   justifyContent: 'center',
@@ -35,6 +73,9 @@ export const defaultOptionTriggerStyle: ViewStyle = {
   // borderRadius: 16,
   paddingHorizontal: 14,
   justifyContent: 'center',
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  backgroundColor: '#ffffff',
 };
 
 export const defaultOptionTriggerLabelStyle: TextStyle = {

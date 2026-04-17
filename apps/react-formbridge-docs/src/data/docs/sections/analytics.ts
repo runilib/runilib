@@ -3,7 +3,6 @@ import {
   ANALYTICS_HANDLERS_SURFACE,
   ANALYTICS_OPTIONS_SURFACE,
   ANALYTICS_TRACKER_SURFACE,
-  DOC_PREVIEWS,
 } from '../constants';
 
 export const analyticsSection: LibraryDoc['sections'][number] = {
@@ -20,7 +19,6 @@ export const analyticsSection: LibraryDoc['sections'][number] = {
     {
       filename: 'Analytics.web.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.analyticsWeb,
       code: `import {
   field,
   useFormBridge,
@@ -62,7 +60,6 @@ export function SignupWithAnalytics() {
     {
       filename: 'Analytics.native.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.analyticsNative,
       code: `import { ScrollView, View } from 'react-native'
 import {
   field,

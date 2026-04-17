@@ -14,6 +14,7 @@ export const libraryInfo = {
   githubUrl: 'https://github.com/runilib/react-formbridge',
   monorepoUrl: 'https://github.com/runilib/runilib/tree/main/packages/react-formbridge',
   repoIssuesUrl: 'https://github.com/runilib/runilib/issues',
+  discordUrl: 'https://discord.gg/runilib',
 };
 
 export const primaryKeywords = [

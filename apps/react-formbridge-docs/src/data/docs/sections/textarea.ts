@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   STRING_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -44,10 +45,40 @@ ${TEXTAREA_METHODS_TABLE}`,
     {
       id: 'fb-textarea-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase textarea-specific use cases:
-- Support ticket with minimum detail → \`field.textarea('Description').required().min(20).max(2000).hint('Describe the issue with as much detail as possible.')\`
-- Bio with character budget → \`field.textarea('Bio').max(280).trim().placeholder('Tell the community a bit about yourself')\`
-- Markdown-friendly notes → \`field.textarea('Release notes').max(5000).hint('Markdown is supported')\``,
+      content: `Patterns that showcase textarea-specific use cases.
+
+**Support ticket with minimum detail**
+
+${FENCE}tsx SupportTicket.tsx
+const schema = {
+  description: field.textarea('Description')
+    .required()
+    .min(20)
+    .max(2000)
+    .hint('Describe the issue with as much detail as possible.'),
+}
+${FENCE}
+
+**Bio with character budget**
+
+${FENCE}tsx Bio.tsx
+const schema = {
+  bio: field.textarea('Bio')
+    .max(280)
+    .trim()
+    .placeholder('Tell the community a bit about yourself'),
+}
+${FENCE}
+
+**Markdown-friendly notes**
+
+${FENCE}tsx ReleaseNotes.tsx
+const schema = {
+  releaseNotes: field.textarea('Release notes')
+    .max(5000)
+    .hint('Markdown is supported'),
+}
+${FENCE}`,
     },
   ],
 };

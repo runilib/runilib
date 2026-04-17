@@ -103,7 +103,7 @@ export function CustomerCheckoutExample() {
   const checkoutForm = useFormBridge(checkoutSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createDemoFormUi(styles),
+    globalDefaults: () => createDemoFormUi(styles),
     persist: {
       key: 'dashboard-customer-checkout',
       storage: 'local',

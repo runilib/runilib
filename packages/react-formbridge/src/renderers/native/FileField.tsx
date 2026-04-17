@@ -153,7 +153,7 @@ export const NativeFileField: React.FC<Props> = ({
     renderContext,
   );
   const defaultPickButtonContent = (
-    <Text style={sx(styles?.pickButtonText)}>
+    <Text style={sx(styles?.filePickButtonText)}>
       {loading ? resolvedLoadingText : resolvedPickButtonText}
     </Text>
   );
@@ -231,7 +231,7 @@ export const NativeFileField: React.FC<Props> = ({
         onPress={handlePick}
         disabled={descriptor._disabled || isReadOnly}
         testID={inputBehavior.testID}
-        style={sx(styles?.pickButton, controlErrorStyle)}
+        style={sx(styles?.filePickButton, controlErrorStyle)}
       >
         {renderPickButtonContent?.({
           ...renderContext,
@@ -262,7 +262,7 @@ export const NativeFileField: React.FC<Props> = ({
               </Text>
             );
             const defaultRemoveButtonContent = (
-              <Text style={sx(styles?.removeText)}>
+              <Text style={sx(styles?.fileRemoveText)}>
                 {resolveText(removeButtonText, '✕', itemRenderContext)}
               </Text>
             );
@@ -301,7 +301,7 @@ export const NativeFileField: React.FC<Props> = ({
 
                 <Pressable
                   onPress={() => removeFile(index)}
-                  style={sx(styles?.removeButton)}
+                  style={sx(styles?.fileRemoveButton)}
                 >
                   {renderRemoveButtonContent?.({
                     ...itemRenderContext,

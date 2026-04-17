@@ -39,7 +39,7 @@ export function StyleSheetStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createNativeFormUi(),
+    globalDefaults: () => createNativeFormUi(),
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -96,7 +96,7 @@ export function StyleSheetStylingExample() {
           <fields.department
             {...{
               styles: {
-                optionTrigger: {
+                selectTrigger: {
                   borderColor: '#f5bf67',
                 },
               },

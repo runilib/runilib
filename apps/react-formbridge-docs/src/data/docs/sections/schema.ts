@@ -6,9 +6,9 @@ export const schemaApiSection: LibraryDoc['sections'][number] = {
   content: `\`schema(shape)\` wraps a plain field-builder object and layers on a full, zero-dependency validation API cross-field rules, refinements, typed parsing. So you do not need Zod, Yup, Joi, or Valibot to get a production-grade form.
 
 - **The plain schema** describes what fields exist and how they render, default, and self-validate.
-- **\`schema(shape)\`** takes that same object and returns a wrapped value that *additionally* exposes a validation API (\`safeParse\`, \`refine\`, \`atLeastOne\`, etc.). The wrapped value is still accepted by \`useFormBridge\`, so you do not split rendering and validation across two objects.
-- **Autocomplete stays clean.** The wrapped value deliberately hides the field keys from direct autocomplete on the schema object — typing \`mySchema.\` suggests only the API methods. Field-level inference still flows through \`SchemaValues<typeof mySchema>\` and the generated \`fields.*\` components.
-- **Type inference is preserved.** \`const\` inference on the shape keeps every field's builder type, so refinements receive a fully typed \`values\` argument and errors are routed back to the right field.`,
+- **schema(shape)** takes that same object and returns a wrapped value that **additionally** exposes a validation API (\`safeParse\`, \`refine\`, \`atLeastOne\`, etc.). The wrapped value is still accepted by \`useFormBridge\`, so you do not split rendering and validation across two objects.
+- **Autocomplete stays clean:** The wrapped value deliberately hides the field keys from direct autocomplete on the schema object typing \`mySchema.\` suggests only the API methods. Field-level inference still flows through \`SchemaValues<typeof mySchema>\` and the generated \`fields.*\` components.
+- **Type inference is preserved:** \`const\` inference on the shape keeps every field's builder type, so refinements receive a fully typed \`values\` argument and errors are routed back to the right field.`,
   subsections: [
     {
       id: 'fb-schema-why',
@@ -22,7 +22,7 @@ export const schemaApiSection: LibraryDoc['sections'][number] = {
 - "If \`role === 'admin'\`, then \`managerApproval\` is required."
 - etc.
 
-Without \`schema()\` you would either scatter these checks across ad-hoc \`useEffect\` hooks, duplicate them in \`onSubmit\` handlers, or pull in an external resolver library (Zod, Yup, Joi, Valibot) just to express a handful of rules. \`schema()\` gives you a first-class, chainable place for those rules that runs through the same validation pipeline as every other field errors land in \`state.errors\`, touch/dirty tracking still works, and form-level errors surface under \`state.errors.__form\`.
+Without \`schema()\` you would either scatter these checks across ad-hoc \`useEffect\` hooks, duplicate them in \`onSubmit\` handlers, or pull in an external resolver library (Zod, Yup, Joi, Valibot) just to express a handful of rules. \`schema()\` gives you a first-class, chainable place for those rules that runs through the same validation pipeline as every other field errors land in \`state.errors\`, touch/dirty tracking still works, and form-level errors surface under \`state.formLevelError\`.
 
 The design goal is stated plainly: **FormBridge should be self-sufficient.** Built-in validation is the complete path, not a stepping stone to an external resolver.`,
     },
@@ -32,12 +32,12 @@ The design goal is stated plainly: **FormBridge should be self-sufficient.** Bui
       content: `Use \`schema()\` whenever any of the following apply:
 
 - You need **cross-field validation** (one field's validity depends on another's value).
-- You want **form-level errors** that are not attached to a specific field — \`schema()\` surfaces these under the synthetic \`__form\` key in \`state.errors\`.
-- You want to **parse** the submitted values to a fully-typed object via \`safeParse\` / \`validate\` — ideal inside server actions, tRPC procedures, or standalone utilities where you do not have a mounted form.
+- You want **form-level errors** that are not attached to a specific field — \`schema()\` surfaces these under \`state.formLevelError\`.
+- You want to **parse** the submitted values to a fully-typed object via \`safeParse\` / \`validate\` ideal inside server actions, tRPC procedures, or standalone utilities where you do not have a mounted form.
 - You want **async refinements** (e.g. username availability, server-side uniqueness checks) wired into the same validation pass as synchronous rules.
 - You want to **customise error messages globally** via \`errorMap\` instead of overriding each field.
 
-If your form has only independent field rules, the plain object form with \`satisfies FormSchema\` is enough. Wrap it in \`schema()\` the moment you need any of the behaviours above — the two forms are interchangeable at the \`useFormBridge\` call site.`,
+If your form has only independent field rules, the plain object form with \`satisfies FormSchema\` is enough. Wrap it in \`schema()\` the moment you need any of the behaviours above the two forms are interchangeable at the \`useFormBridge\` call site.`,
     },
     {
       id: 'fb-schema-quickstart',
@@ -46,23 +46,17 @@ If your form has only independent field rules, the plain object form with \`sati
       code: {
         filename: 'TripBookingForm.tsx',
         lang: 'tsx',
-        code: `import { field, ref, schema, useFormBridge } from '@runilib/react-formbridge'
+        code: `import { field, schema, useFormBridge } from '@runilib/react-formbridge'
 
 const tripSchema = schema({
   email: field.email().label('Email'),
   phone: field.phone('FR').label('Phone'),
-  departureDate: field.date('Departure').required(),
-  returnDate: field.date('Return').required(),
   password: field.password().required().min(8),
   confirmPassword: field.password().required(),
 })
   .atLeastOne(
     ['email', 'phone'],
     'Provide at least an email or a phone number.',
-  )
-  .dateRange(
-    { start: ref('departureDate'), end: ref('returnDate') },
-    'Return date must be on or after departure.',
   )
   .superRefine((values, ctx) => {
     if (values.password !== values.confirmPassword) {
@@ -80,18 +74,16 @@ export function TripBookingForm() {
     revalidateOn: 'onChange',
   })
 
-  // Form-level errors (no specific field) land under __form
-  const formError = (state.errors as Record<string, string>).__form
+  // Form-level errors (no specific field) land under state.formLevelError
+  const formLevelError = state.formLevelError
 
   return (
     <Form onSubmit={(values) => console.log(values)}>
       <fields.email />
       <fields.phone />
-      <fields.departureDate />
-      <fields.returnDate />
       <fields.password />
       <fields.confirmPassword />
-      {formError ? <p className="error">{formError}</p> : null}
+      {formLevelError ? <p className="error">{formLevelError}</p> : null}
       <Form.Submit>Book the trip</Form.Submit>
     </Form>
   )
@@ -114,13 +106,15 @@ safeParseAsync(values: Partial<SchemaValues<T>>): Promise<ValidationResult<Schem
 
 \`\`\`ts
 type ValidationResult<T> =
-  | { success: true;  data: T; issues: []; errorsByField: {}; formErrors: [] }
-  | { success: false; data: null; issues: ValidationIssue[]; errorsByField: Record<string, string>; formErrors: string[] }
+  | { success: true;  data: T; issues: []; errorsByField: {}; formLevelErrors: [] }
+  | { success: false; data: null; issues: ValidationIssue[]; errorsByField: Record<string, string>; formLevelErrors: string[] }
 \`\`\`
 
-- \`errorsByField\` - map keyed by field name, first error per field. Drop-in compatible with \`state.errors\`.
-- \`formErrors\` - array of messages that had no field path (form-level).
-- \`issues\` - the raw, ordered list of every issue (including duplicates), useful for analytics or custom grouping.
+| Field | Type | Description |
+| --- | --- | --- |
+| \`errorsByField\` | \`Record<string, string>\` | Map keyed by field name, first error per field. Drop-in compatible with \`state.errors\` |
+| \`formLevelErrors\` | \`string[]\` | Messages that had no field path (form-level) |
+| \`issues\` | \`ValidationIssue[]\` | Raw, ordered list of every issue (including duplicates) — useful for analytics or custom grouping |
 
 **When to use which**
 
@@ -143,7 +137,7 @@ export async function bookTrip(raw: unknown) {
   const result = await tripSchema.safeParseAsync(raw as Partial<SchemaValues<typeof tripSchema>>)
 
   if (!result.success) {
-    return { ok: false as const, errors: result.errorsByField, formErrors: result.formErrors }
+    return { ok: false as const, errors: result.errorsByField, formLevelErrors: result.formLevelErrors }
   }
 
   // result.data is fully typed from the schema shape
@@ -187,10 +181,10 @@ refineAsync(
 
 **Notes**
 
-- A bare string message creates a form-level error (no \`path\`), so it surfaces under \`state.errors.__form\`.
+- A bare string message creates a form-level error (no \`path\`), so it surfaces under \`state.formLevelError\`.
 - Pass an object to pin the error to a specific field: \`refine(p, { path: 'email', message: 'Taken' })\`.
 - \`refineAsync\` only runs inside \`safeParseAsync\` / \`validateAsync\`. Running it through the synchronous path throws.
-- Chain as many \`.refine()\` calls as you like — each returns the same wrapped schema so the chain is fluent.`,
+- Chain as many \`.refine()\` calls as you like each returns the same wrapped schema so the chain is fluent.`,
       code: {
         filename: 'refine-examples.ts',
         lang: 'ts',
@@ -212,7 +206,7 @@ refineAsync(
     {
       id: 'fb-schema-api-super-refine',
       title: 'superRefine',
-      content: `The **most flexible** refinement primitive. Instead of returning a boolean, you receive a \`ctx\` object with an \`addIssue\` method and can raise **multiple** issues — each routed to its own field — in a single pass.
+      content: `The **most flexible** refinement primitive. Instead of returning a boolean, you receive a \`ctx\` object with an \`addIssue\` method and can raise **multiple** issues each routed to its own field in a single pass.
 
 **Signature**
 
@@ -233,13 +227,13 @@ type ValidationIssueInput = {
 }
 \`\`\`
 
-**When to pick \`superRefine\` over \`refine\`**
+When to pick **superRefine** over **refine**
 
 - You need to raise errors on **several fields** from one cross-check.
 - You want to set a custom \`code\` and \`params\` for downstream logging or i18n.
 - You want to short-circuit further work inside the refinement based on shape (e.g. skip the check if a value is empty).
 
-\`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, and \`dateRange\` are all implemented internally as \`superRefine\` calls, so anything they can do, you can write by hand if you need custom behaviour.`,
+\`atLeastOne\`, \`exactlyOne\`, and \`allOrNone\` are all implemented internally as \`superRefine\` calls, so anything they can do, you can write by hand if you need custom behaviour.`,
       code: {
         filename: 'super-refine.ts',
         lang: 'ts',
@@ -270,7 +264,7 @@ type ValidationIssueInput = {
     {
       id: 'fb-schema-api-error-map',
       title: 'errorMap',
-      content: `Register a **global** transformer for validation messages. The mapper receives the raw issue and can return a new string (or \`null\` to use the default). This is the FormBridge-native equivalent of Zod's \`errorMap\` — ideal for i18n or for standardising error copy across a large form.
+      content: `Register a **global** transformer for validation messages. The mapper receives the raw issue and can return a new string (or \`null\` to use the default). This is the FormBridge-native equivalent of Zod's \`errorMap\` ideal for i18n or for standardising error copy across a large form.
 
 **Signature**
 
@@ -318,16 +312,16 @@ atLeastOne(
 
 **Default message**
 
-\`"At least one of <field1>, <field2>, ... is required."\` — override it by passing your own string.
+\`"At least one of <field1>, <field2>, ... is required."\`? You can override it by passing your own string.
 
 **Error routing**
 
-The error has no \`path\`, so it surfaces as a form-level error under \`state.errors.__form\`. Render it below the group of fields it governs.
+The error has no \`path\`, so it surfaces as a form-level error under \`state.formLevelError\`. Render it below the group of fields it governs.
 
 **Accepted field identifiers**
 
-- \`'email'\` — string key on the root schema
-- \`ref('profile.phone')\` — nested or dynamic path via the \`ref()\` helper`,
+- \`'email'\` string key on the root schema
+- \`ref('profile.phone')\` nested or dynamic path via the \`ref()\` helper`,
       code: {
         filename: 'at-least-one.ts',
         lang: 'ts',
@@ -373,7 +367,7 @@ exactlyOne(
     {
       id: 'fb-schema-api-all-or-none',
       title: 'allOrNone',
-      content: `Built-in helper: either **all** of the listed fields are provided, or **none** of them are. Triggers when the user has filled in some but not all of the group — perfect for optional-but-atomic sections like "billing address" or "emergency contact".
+      content: `Built-in helper: either **all** of the listed fields are provided, or **none** of them are. Triggers when the user has filled in some but not all of the group. Perfect for optional-but-atomic sections like "billing address" or "emergency contact".
 
 **Signature**
 
@@ -401,68 +395,34 @@ allOrNone(
       },
     },
     {
-      id: 'fb-schema-api-date-range',
-      title: 'dateRange',
-      content: `Built-in helper: ensure that an **end date is on or after a start date**. Accepts either plain keys or \`ref()\` paths for the \`start\` / \`end\` positions. The error is automatically attached to the \`end\` field so it shows up right next to the input the user most likely wants to fix.
-
-**Signature**
-
-\`\`\`ts
-dateRange(
-  config: {
-    start: keyof T | string | FieldReference
-    end:   keyof T | string | FieldReference
-  },
-  message?: string,
-): FormBridgeSchema<T>
-\`\`\`
-
-**Behaviour**
-
-- If either field is empty, the rule is a no-op — required-ness is the individual field's job.
-- Dates are parsed through FormBridge's internal \`parseDateValue\`, so \`Date\` instances, ISO strings, and timestamp numbers are all accepted.
-- The default message is \`"End date must be on or after the start date."\``,
-      code: {
-        filename: 'date-range.ts',
-        lang: 'ts',
-        code: `schema({
-  departureDate: field.date('Departure').required(),
-  returnDate: field.date('Return').required(),
-}).dateRange(
-  { start: ref('departureDate'), end: ref('returnDate') },
-  'Return date must be on or after departure.',
-)`,
-      },
-    },
-    {
       id: 'fb-schema-api-ref',
-      title: 'ref() — field references',
+      title: 'ref() - field references',
       content: `\`ref(path)\` produces a typed pointer to a field. It exists for two reasons:
 
 1. **Nested paths.** Plain string keys only work for top-level fields. \`ref('profile.phone')\` walks into a nested object during cross-field checks.
-2. **Self-documenting intent.** \`ref('returnDate')\` in a \`dateRange\` call reads unambiguously as "the returnDate field", while a bare string can look like a literal message.
+2. **Self-documenting intent.** \`ref('profile.phone')\` inside an \`atLeastOne\` or \`exactlyOne\` call reads unambiguously as "this field path", while a bare string can look like ordinary text.
 
-You can mix \`ref()\` and plain string keys freely inside \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, and \`dateRange\`. Under the hood the resolver uses \`getValueAtPath\` with dot-notation, so deeply nested schemas work transparently.`,
+You can mix \`ref()\` and plain string keys freely inside \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, and other custom validation logic. Under the hood the resolver uses \`getValueAtPath\` with dot-notation, so deeply nested schemas work transparently.`,
     },
     {
       id: 'fb-schema-error-routing',
       title: 'How errors reach the UI',
-      content: `Every issue produced by \`schema()\` — whether it comes from a field builder, a manual \`refine\`, a \`superRefine\`, or one of the built-in helpers — flows through the same pipeline:
+      content: `Every issue produced by \`schema()\` whether it comes from a field builder, a manual \`refine\`, a \`superRefine\`, or one of the built-in helpers flows through the same pipeline:
 
 1. **Normalised** into a \`ValidationIssue\` with \`{ path, code, message, params }\`.
 2. **Optionally rewritten** by your \`errorMap\` mapper, if one is registered.
-3. **Bucketed** into \`errorsByField\` (keyed by path) and \`formErrors\` (no path).
-4. **Merged** into the React form state, where \`errorsByField\` lands in \`state.errors\` and \`formErrors\` land in \`state.errors.__form\` (the synthetic form-level key).
+3. **Bucketed** into \`errorsByField\` (keyed by path) and \`formLevelErrors\` (no path).
+4. **Merged** into the React form state, where \`errorsByField\` lands in \`state.errors\` and the first \`formLevelErrors\` entry lands in \`state.formLevelError\`.
 
 Practical consequences:
 
-- Field-level UI (\`<fields.email />\`) automatically displays path-keyed issues — you do nothing.
-- To show form-level errors, read \`state.errors.__form\` explicitly and render it wherever makes sense (below the form, in a toast, etc.).
+- Field-level UI (\`<fields.email />\`) automatically displays path-keyed issues you do nothing.
+- To show form-level errors, read \`state.formLevelError\` and render it wherever makes sense (below the form, in a toast, etc.).
 - Duplicate issues on the same field are preserved in \`issues\` but \`errorsByField\` only keeps the **first** one, mirroring the usual "one message per field" convention.`,
     },
     {
       id: 'fb-schema-typing-tip',
-      title: 'Typing tip — satisfies vs schema()',
+      title: 'Typing tip - satisfies vs schema()',
       content: `If your form needs only field-level rules, keep the object form and annotate it with \`satisfies FormSchema\` so TypeScript preserves each field's precise type:
 
 \`\`\`tsx
@@ -474,7 +434,7 @@ const profileSchema = {
 } satisfies FormSchema
 \`\`\`
 
-The moment you need cross-field rules, a parse surface, or form-level errors, wrap it in \`schema()\` — nothing else in the call site has to change:
+The moment you need cross-field rules, a parse surface, or form-level errors, wrap it in \`schema()\` nothing else in the call site has to change:
 
 \`\`\`tsx
 const profileSchema = schema({

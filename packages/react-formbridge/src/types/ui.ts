@@ -83,7 +83,7 @@ export type ExtraFieldProps<
 };
 
 /**
- * Theming shape used by `globalConfigs` and similar "apply to every field"
+ * Theming shape used by `globalDefaults` and similar "apply to every field"
  * config points. Same building blocks as {@link FieldStyleProps} but no
  * per-field overrides (label/placeholder/hint) — those must stay local.
  *
@@ -100,10 +100,10 @@ export type FieldTheme<
 
 // ─── Platform form / submit overrides ───────────────────────────────────────────
 
-/** Cross-platform union of form-level UI overrides (`globalConfigs.form`). */
+/** Cross-platform union of form-level UI overrides (`globalDefaults.form`). */
 export type FormPropsOverrides = WebFormPropsOverrides | NativeFormPropsOverrides;
 
-/** Cross-platform union of submit-button UI overrides (`globalConfigs.submit`). */
+/** Cross-platform union of submit-button UI overrides (`globalDefaults.submit`). */
 export type SubmitPropsOverrides = WebSubmitPropsOverrides | NativeSubmitPropsOverrides;
 
 /**
@@ -122,7 +122,7 @@ export type PlatformSubmitPropsOverrides<TPlatform extends Platform> =
 
 /**
  * Global (applies to *every* field) override type resolved to a single
- * platform. Used by `globalConfigs.field`.
+ * platform. Used by `globalDefaults.field`.
  *
  * @typeParam TPlatform - `'web'` or `'native'`.
  */
@@ -245,7 +245,7 @@ export type FieldComponents<
 // ─── Global UI options ──────────────────────────────────────────────────────────
 
 /**
- * Shape returned by the `globalConfigs(state)` selector on `useFormBridge`
+ * Shape returned by the `globalDefaults(state)` selector on `useFormBridge`
  * options. Lets you theme *every* rendered field, the form wrapper, and the
  * submit button in one place, reactively from form state.
  *

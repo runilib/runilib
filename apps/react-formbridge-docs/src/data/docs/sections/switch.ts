@@ -1,5 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable, FENCE } from '../constants';
 
 const SWITCH_METHODS_TABLE = buildMethodsTable([
   [
@@ -48,10 +48,34 @@ ${SWITCH_METHODS_TABLE}`,
     {
       id: 'fb-switch-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase switch-specific use cases:
-- Notifications on by default → \`field.switch('Enable email notifications').defaultValue(true)\`
-- Profile visibility toggle → \`field.switch('Public profile').hint('Visible to other members')\`
-- Mandatory billing activation → \`field.switch('Enable billing').mustBeTrue('Billing must stay enabled for this plan.')\``,
+      content: `Patterns that showcase switch-specific use cases.
+
+**Notifications on by default**
+
+${FENCE}tsx Notifications.tsx
+const schema = {
+  emailNotifications: field.switch('Enable email notifications')
+    .defaultValue(true),
+}
+${FENCE}
+
+**Profile visibility toggle**
+
+${FENCE}tsx ProfileVisibility.tsx
+const schema = {
+  publicProfile: field.switch('Public profile')
+    .hint('Visible to other members'),
+}
+${FENCE}
+
+**Mandatory billing activation**
+
+${FENCE}tsx Billing.tsx
+const schema = {
+  billing: field.switch('Enable billing')
+    .mustBeTrue('Billing must stay enabled for this plan.'),
+}
+${FENCE}`,
     },
   ],
 };

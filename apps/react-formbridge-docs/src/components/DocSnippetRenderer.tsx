@@ -181,9 +181,12 @@ export const DocSnippetRenderer = ({
   interactive = false,
   snippet,
 }: DocSnippetRendererProps) => {
-  const runnableCode = interactive ? buildSnippetPlaygroundCode(snippet) : null;
+  const shouldRenderInteractive = interactive || Boolean(snippet.interactive);
+  const runnableCode = shouldRenderInteractive
+    ? buildSnippetPlaygroundCode(snippet)
+    : null;
 
-  if (interactive && runnableCode) {
+  if (shouldRenderInteractive && runnableCode) {
     return (
       <Playground
         activeFile="/App.tsx"

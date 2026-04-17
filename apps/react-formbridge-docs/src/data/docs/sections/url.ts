@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   STRING_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -46,10 +47,42 @@ ${URL_METHODS_TABLE}`,
     {
       id: 'fb-url-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase url-specific strengths:
-- HTTPS-only webhook → \`field.url('Webhook URL').required().format(/^https:\\/\\/.+$/, 'Use an HTTPS URL.')\`
-- OAuth callback with path check → \`field.url('Redirect URI').required().validate((v) => v.includes('/callback') ? null : 'URL must contain /callback path.')\`
-- Portfolio with hint → \`field.url('Portfolio').optional().trim().hint('Full URL including https://')\``,
+      content: `Patterns that showcase url-specific strengths.
+
+**HTTPS-only webhook**
+
+${FENCE}tsx Webhook.tsx
+const schema = {
+  webhookUrl: field.url('Webhook URL')
+    .required()
+    .format(/^https:\\/\\/.+$/, 'Use an HTTPS URL.'),
+}
+${FENCE}
+
+**OAuth callback with path check**
+
+${FENCE}tsx OAuthCallback.tsx
+const schema = {
+  redirectUri: field.url('Redirect URI')
+    .required()
+    .validate((value) =>
+      value.includes('/callback')
+        ? null
+        : 'URL must contain /callback path.',
+    ),
+}
+${FENCE}
+
+**Portfolio with hint**
+
+${FENCE}tsx Portfolio.tsx
+const schema = {
+  portfolio: field.url('Portfolio')
+    .optional()
+    .trim()
+    .hint('Full URL including https://'),
+}
+${FENCE}`,
     },
   ],
 };

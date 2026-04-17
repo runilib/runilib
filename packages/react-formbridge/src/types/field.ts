@@ -235,6 +235,19 @@ export interface FieldDescriptor<DV = unknown, FType extends FieldType = FieldTy
   _options?: SelectOption[];
   /** Digit count for OTP fields (e.g. `6` for a 6-digit code). */
   _otpLength?: number;
+  /**
+   * Renders each OTP cell with a masking character (e.g. `•`) while the real
+   * value stays in state. Leave unset to show the typed character as-is.
+   */
+  _otpMaskChar?: string;
+  /**
+   * Group sizes for the OTP layout, e.g. `[3, 2]` renders `___-__` with a
+   * non-editable separator inserted between each group. When set, the total
+   * length is the sum of the sizes.
+   */
+  _otpGroups?: number[];
+  /** Visible separator inserted between OTP groups. Defaults to `-`. */
+  _otpSeparator?: string;
   /** Enables the built-in "strong password" rule set. */
   _strongPassword?: boolean;
   /** Trim whitespace from the value before validation runs. */

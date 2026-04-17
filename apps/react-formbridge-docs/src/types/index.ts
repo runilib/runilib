@@ -12,6 +12,7 @@ export interface CodeSnippet {
   lang: 'tsx' | 'ts' | 'bash' | 'json';
   code: string;
   label?: string;
+  interactive?: boolean;
   maxHeight?: string;
   preview?: DocPreview;
 }

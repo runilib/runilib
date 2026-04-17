@@ -343,7 +343,7 @@ export function FileVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => {
+    globalDefaults: () => {
       const baseUi = createNativeFormUi();
 
       return {
@@ -359,7 +359,7 @@ export function FileVariantsExample() {
             wrapper: {
               gap: 8,
             },
-            pickButton: {
+            filePickButton: {
               minHeight: 54,
               borderWidth: 1.5,
               borderColor: 'rgba(96, 165, 250, 0.22)',
@@ -370,7 +370,7 @@ export function FileVariantsExample() {
               alignItems: 'center',
               justifyContent: 'center',
             },
-            pickButtonText: {
+            filePickButtonText: {
               color: '#10203a',
               fontSize: 14,
               fontWeight: '700',
@@ -410,7 +410,7 @@ export function FileVariantsExample() {
               fontSize: 12,
               lineHeight: 18,
             },
-            removeButton: {
+            fileRemoveButton: {
               minWidth: 44,
               minHeight: 40,
               borderRadius: 12,
@@ -421,7 +421,7 @@ export function FileVariantsExample() {
               justifyContent: 'center',
               paddingHorizontal: 10,
             },
-            removeText: {
+            fileRemoveText: {
               color: '#fecaca',
               fontSize: 12,
               fontWeight: '700',

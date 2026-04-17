@@ -32,7 +32,7 @@ export function EmployeeBadgeMaskExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createDemoFormUi(styles),
+    globalDefaults: () => createDemoFormUi(styles),
   });
 
   const { Form, fields, state, watchAll } = form;

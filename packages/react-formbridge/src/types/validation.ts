@@ -21,7 +21,7 @@ export interface ValidationResult<TData = Record<string, unknown>> {
   data: TData | null;
   issues: ValidationIssue[];
   errorsByField: Record<string, string>;
-  formErrors: string[];
+  formLevelErrors: string[];
 }
 
 export type ValidationErrorMap = (issue: ValidationIssue) => string | undefined;

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import type { FileValue } from '../core/field-builders/file/types';
 import type { PasswordRule, StrengthResult } from '../core/field-builders/password/types';
 import type { PhoneValue } from '../core/field-builders/phone/countries';
@@ -85,14 +87,10 @@ type NativeInputBehaviorProps = Pick<
 // keys you pass to `styles={{ … }}` on a native field to target each piece of
 // the rendered UI without subclassing the renderer.
 
-/** Slots every native field shares (wrapper, label, text input, hint, error). */
-type NativeSharedFieldSlot =
-  | 'wrapper'
-  | 'label'
-  | 'input'
-  | 'error'
-  | 'hint'
-  | 'requiredMark';
+/** Slots every native field shares (wrapper, label, hint, error). */
+type NativeSharedFieldSlot = 'wrapper' | 'label' | 'error' | 'hint' | 'requiredMark';
+/** Slots for single-line text-like inputs (text/email/number/tel/url/date). */
+type NativeTextFieldSlot = NativeSharedFieldSlot | 'textInput';
 /** Slots for the checkbox renderer (row + custom box + inline label). */
 type NativeCheckboxFieldSlot =
   | NativeSharedFieldSlot
@@ -105,84 +103,91 @@ type NativeCheckboxFieldSlot =
  */
 type NativeSelectFieldSlot =
   | NativeSharedFieldSlot
-  | 'optionTrigger'
-  | 'optionRow'
-  | 'optionLabel'
-  | 'modalBackdrop'
-  | 'modalCard';
+  | 'selectTrigger'
+  | 'selectTriggerLabel'
+  | 'selectOptionRow'
+  | 'selectOptionLabel'
+  | 'selectModalBackdrop'
+  | 'selectModalCard';
 /** Slots for the OTP renderer (one container + N digit inputs). */
-type NativeOtpFieldSlot = NativeSharedFieldSlot | 'otpContainer' | 'otpInput';
+type NativeOtpFieldSlot =
+  | NativeSharedFieldSlot
+  | 'otpContainer'
+  | 'otpInput'
+  | 'otpSeparator';
 /**
  * Slots for the password renderer — visibility toggle plus the optional
  * strength meter and rule list.
  */
 type NativePasswordFieldSlot =
   | NativeSharedFieldSlot
-  | 'strengthRow'
-  | 'strengthBar'
-  | 'strengthMeta'
-  | 'strengthFill'
-  | 'toggle'
-  | 'toggleText'
-  | 'strengthLabel'
-  | 'strengthEntropy'
-  | 'rulesList'
-  | 'ruleItem'
-  | 'ruleBullet'
-  | 'ruleText';
+  | 'passwordInput'
+  | 'passwordToggle'
+  | 'passwordToggleText'
+  | 'passwordStrengthRow'
+  | 'passwordStrengthBar'
+  | 'passwordStrengthMeta'
+  | 'passwordStrengthFill'
+  | 'passwordStrengthLabel'
+  | 'passwordStrengthEntropy'
+  | 'passwordRulesList'
+  | 'passwordRuleItem'
+  | 'passwordRuleBullet'
+  | 'passwordRuleText';
 /**
  * Slots for the phone renderer — country picker trigger, modal + list of
  * countries, and the E.164 preview.
  */
 type NativePhoneFieldSlot =
   | NativeSharedFieldSlot
-  | 'row'
-  | 'countryButton'
-  | 'countryFlag'
-  | 'countryDial'
-  | 'countryDivider'
-  | 'chevron'
-  | 'e164'
-  | 'modalBackdrop'
-  | 'modalCard'
-  | 'searchInput'
-  | 'separator'
-  | 'countryRow'
-  | 'countryName'
-  | 'emptyText';
+  | 'phoneInput'
+  | 'phoneRow'
+  | 'phoneCountryButton'
+  | 'phoneCountryFlag'
+  | 'phoneCountryDial'
+  | 'phoneCountryDivider'
+  | 'phoneChevron'
+  | 'phoneE164'
+  | 'phoneModalBackdrop'
+  | 'phoneModalCard'
+  | 'phoneSearchInput'
+  | 'phoneSeparator'
+  | 'phoneCountryRow'
+  | 'phoneCountryName'
+  | 'phoneEmptyText';
 /**
  * Slots for the file renderer — a single "Pick files" button plus the file
  * list with per-item metadata and a remove button.
  */
 type NativeFileFieldSlot =
   | NativeSharedFieldSlot
-  | 'pickButton'
-  | 'pickButtonText'
+  | 'filePickButton'
+  | 'filePickButtonText'
   | 'fileList'
   | 'fileItem'
   | 'fileIcon'
   | 'fileIconText'
   | 'fileName'
   | 'fileMeta'
-  | 'removeButton'
-  | 'removeText';
+  | 'fileRemoveButton'
+  | 'fileRemoveText';
 /**
  * Slots for the async-autocomplete renderer — uses a trigger + modal combobox
  * pattern (no inline listbox like web).
  */
 type NativeAsyncAutocompleteFieldSlot =
   | NativeSharedFieldSlot
-  | 'trigger'
-  | 'triggerValue'
-  | 'triggerPlaceholder'
-  | 'modalBackdrop'
-  | 'modalCard'
-  | 'searchInput'
-  | 'loadingRow'
-  | 'loadingText'
-  | 'optionRow'
-  | 'optionLabel'
-  | 'emptyText';
+  | 'autocompleteTrigger'
+  | 'autocompleteTriggerValue'
+  | 'autocompleteTriggerPlaceholder'
+  | 'autocompleteModalBackdrop'
+  | 'autocompleteModalCard'
+  | 'autocompleteSearchInput'
+  | 'autocompleteLoadingRow'
+  | 'autocompleteLoadingText'
+  | 'autocompleteOptionRow'
+  | 'autocompleteOptionLabel'
+  | 'autocompleteEmptyText';
 
 // ─── Exported composite slot type ───────────────────────────────────────────────
 
@@ -192,6 +197,7 @@ type NativeAsyncAutocompleteFieldSlot =
  */
 export type NativeFieldSlot =
   | NativeSharedFieldSlot
+  | NativeTextFieldSlot
   | NativeCheckboxFieldSlot
   | NativeSelectFieldSlot
   | NativeOtpFieldSlot
@@ -326,7 +332,7 @@ export interface NativePhoneFieldCountryItemRenderContext
 
 /**
  * "Catch-all" override shape that targets every native field in one go — used
- * for `globalConfigs.field`. Inherits the full base + slot union.
+ * for `globalDefaults.field`. Inherits the full base + slot union.
  */
 export interface NativeGlobalFieldPropsOverrides
   extends NativeFieldPropsBase<NativeFieldSlot> {}
@@ -338,7 +344,7 @@ export interface NativeGlobalFieldPropsOverrides
  * native — all single-line text-like fields share this shape.
  */
 export interface NativeTextFieldPropsOverrides
-  extends NativeFieldPropsBase<NativeSharedFieldSlot>,
+  extends NativeFieldPropsBase<NativeTextFieldSlot>,
     NativeInputBehaviorProps {
   /** Passthrough props for the underlying `TextInput`. */
   inputProps?: Record<string, unknown>;
@@ -360,7 +366,7 @@ export interface NativeSwitchFieldPropsOverrides
  * Radio fields reuse this shape because they share the modal picker.
  */
 export interface NativeSelectFieldPropsOverrides
-  extends NativeFieldPropsBase<NativeSelectFieldSlot | 'optionTriggerLabel'> {
+  extends NativeFieldPropsBase<NativeSelectFieldSlot> {
   /** Replace the whole picker UI — see {@link SelectPickerRenderContext}. */
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
@@ -583,7 +589,7 @@ export interface NativeAsyncAutocompleteFieldPropsOverrides
 /**
  * Catch-all override interface that surfaces *every* per-field override prop
  * from every native field type in one shape. Used by generic helpers and by
- * `globalConfigs.field` when you need to forward arbitrary props without
+ * `globalDefaults.field` when you need to forward arbitrary props without
  * narrowing by field type.
  *
  * Prefer the per-field interfaces (e.g. {@link NativeTextFieldPropsOverrides})
@@ -741,7 +747,7 @@ export interface NativeFieldPropsOverrides
 
 /**
  * Override shape for the `<Form>` wrapper `<View>` on native. Set via
- * `globalConfigs.form` on `useFormBridge` options.
+ * `globalDefaults.form` on `useFormBridge` options.
  */
 export interface NativeFormPropsOverrides {
   /** Style applied to the wrapper `<View>` wrapper. */
@@ -752,7 +758,7 @@ export interface NativeFormPropsOverrides {
 
 /**
  * Override shape for the `Form.Submit` button on native. Set via
- * `globalConfigs.submit` on `useFormBridge` options.
+ * `globalDefaults.submit` on `useFormBridge` options.
  */
 export interface NativeSubmitPropsOverrides {
   /** Style applied to the outer `TouchableOpacity`. */
@@ -763,8 +769,8 @@ export interface NativeSubmitPropsOverrides {
   textStyle?: NativeStyleValue;
   /** Color of the ActivityIndicator shown while submitting. */
   indicatorColor?: string;
-  /** Text shown next to the spinner while submitting. */
-  loadingText?: string;
+  /** Content shown next to the spinner while submitting. */
+  loadingText?: ReactNode;
   /** Passthrough props spread on the outer `TouchableOpacity`. */
   props?: Record<string, unknown>;
   /** Passthrough props spread on the inner content container `<View>`. */

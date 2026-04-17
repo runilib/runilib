@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 interface FeedbackRouteProps {
-  searchParams?: Promise<{
+  readonly searchParams?: Promise<{
     from?: string | string[];
   }>;
 }

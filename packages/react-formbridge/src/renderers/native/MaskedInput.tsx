@@ -24,6 +24,7 @@ import type {
   FocusableFieldHandle,
   NativeTextFieldPropsOverrides,
 } from '../../types';
+import { defaultInputStyle } from './default-styles';
 import {
   defaultErrorChromeStyle,
   defaultErrorTextStyle,
@@ -299,6 +300,7 @@ export const NativeMaskedInput = ({
         }
         secureTextEntry={inputBehavior.secureTextEntry}
         style={sx(
+          defaultInputStyle,
           autoLayout.compact
             ? {
                 width: autoLayout.nativeWidthPx,
@@ -309,7 +311,7 @@ export const NativeMaskedInput = ({
                 width: '100%',
                 alignSelf: 'stretch',
               },
-          styles?.input,
+          styles?.textInput,
           inputPropsStyle,
           controlErrorStyle,
         )}

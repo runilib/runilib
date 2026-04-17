@@ -1,6 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
 import {
-  DOC_PREVIEWS,
   GLOBAL_UI_SURFACE,
   HOST_HELPERS_SURFACE,
   NATIVE_SLOT_SURFACE,
@@ -14,14 +13,13 @@ export const webUiSection: LibraryDoc['sections'][number] = {
   content: `react-formbridge is intentionally styling-framework agnostic. The form runtime owns value, validation, visibility, and submit lifecycle. Your app stays free to style that runtime with CSS Modules, styled-components, Tailwind-style utilities, inline objects, React Native StyleSheet, NativeWind-friendly wrappers, or an in-house design system.
 
 - Put field-owned behavior metadata in the schema when it should travel with the field everywhere the schema is reused
-- Put styling in \`useFormBridge(schema, { globalConfigs })\` when one screen, one route, or one product area needs a shared visual language
-- Put styling on \`<fields.name ui={...} />\` when a single field needs a local exception, and let the generated field type decide which \`ui\` keys are available
+- Put styling in \`useFormBridge(schema, { globalDefaults })\` when one screen, one route, or one product area needs a shared visual language
+- Put styling directly on \`<fields.name classNames={...} styles={...} />\` when a single field needs a local exception, and let the generated field type decide which override props are available
 - Reach for \`form.fieldController(name)\` when a built-in field needs fully custom chrome; reach for \`field.custom(...).render(...)\` only when the value model itself is no longer one of the built-in field types`,
   codeTabs: [
     {
       filename: 'SharedTheme.web.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.stylingWeb,
       code: `import { field, useFormBridge } from '@runilib/react-formbridge'
 import styles from './Checkout.module.css'
 
@@ -35,13 +33,13 @@ const schema = {
     .required()
   launchNotes: field
     .textarea('Launch notes')
-    .hint('Textarea inherits the same ui theme.'),
+    .hint('Textarea inherits the same shared theme.'),
 }
 
 export function CheckoutForm() {
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalConfigs: () => ({
+    globalDefaults: () => ({
       form: { className: styles.form },
       submit: {
         className: styles.submit,
@@ -77,7 +75,6 @@ export function CheckoutForm() {
     {
       filename: 'SharedTheme.native.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.stylingNative,
       code: `import { ScrollView, StyleSheet, View } from 'react-native'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
@@ -115,12 +112,12 @@ const schema = {
     .required()
   launchNotes: field
     .textarea('Launch notes')
-    .hint('Textarea inherits the same ui theme.'),
+    .hint('Textarea inherits the same shared theme.'),
 }
 
 export function CheckoutScreen() {
   const form = useFormBridge(schema, {
-    globalConfigs: () => ({
+    globalDefaults: () => ({
       submit: {
         containerStyle: checkoutUi.submitButton,
         textStyle: checkoutUi.submitText,
@@ -162,43 +159,44 @@ export function CheckoutScreen() {
       id: 'fb-web-ui-layers',
       title: 'Choose the right layer',
       content: `
-1. Use \`useFormBridge(schema, { globalConfigs })\` when a whole screen or product area needs the same theme. This is the default recommendation for CSS Modules, StyleSheet, utility-class maps, or design-system-wide field chrome.
-2. Use local \`ui\` props on \`<fields.name />\` when one field needs a special variant without mutating the shared schema.
+1. Use \`useFormBridge(schema, { globalDefaults })\` when a whole screen or product area needs the same theme. This is the default recommendation for CSS Modules, StyleSheet, utility-class maps, or design-system-wide field chrome.
+2. Use local props on \`<fields.name classNames={...} />\` when one field needs a special variant without mutating the shared schema.
 3. Use \`form.fieldController(name)\` when a built-in field needs a fully custom trigger, shell, or modal while keeping the same schema contract. Use \`field.custom(defaultValue).render(...)\` only when the value model itself is custom.
 
-The public type surface guards these layers too: a text field does not expose textarea-only or select-only \`ui\` props, and native fields do not expose web-only props such as \`className\`.
+The public type surface guards these layers too: a text field does not expose textarea-only or select-only props, and native fields do not expose web-only props such as \`className\`.
 
-Merge order is predictable: builder \`behavior\` -> \`globalConfigs\` theme ui -> local field ui -> field controller or custom render layer.`,
+Merge order is predictable: builder \`behavior\` → \`globalDefaults\` → local field props → field controller or custom render layer.`,
     },
     {
       id: 'fb-web-ui-global-ui',
-      title: 'globalConfigs surface',
+      title: 'globalDefaults surface',
       content: `${GLOBAL_UI_SURFACE}`,
     },
     {
       id: 'fb-web-ui-typing',
       title: 'Typing rules',
-      content: `- Text-like fields use \`ui.inputProps\`
-- \`textarea\` fields use \`ui.textareaProps\` on web
-- \`select\` fields use \`ui.selectProps\` on web
-- Web fields can use wrapper-level \`className\`
-- Native fields intentionally do not expose \`className\`, \`ui.textareaProps\`, or \`ui.selectProps\``,
+      content: `| Field family | Override prop | Platform |
+| --- | --- | --- |
+| Text-like fields | \`inputProps\` | Web + Native |
+| \`textarea\` fields | \`textareaProps\` | Web only |
+| \`select\` fields | \`selectProps\` | Web only |
+| Web fields | wrapper-level \`className\` | Web only |
+| Native fields | \`className\`, \`textareaProps\`, \`selectProps\` | Not exposed |`,
     },
     {
       id: 'fb-web-ui-css-modules',
       title: 'Recipe: shared theme with CSS Modules or StyleSheet',
       content: `This is the most common production setup.
 
-- One \`ui\` object themes the form wrapper, every generated field, and the submit button
+- One \`globalDefaults\` object themes the form wrapper, every generated field, and the submit button
 - The schema stays reusable across pages because the visual system lives at the screen level
-- You still keep an escape hatch for one field with local \`ui\` overrides`,
+- You still keep an escape hatch for one field with local prop overrides`,
       codeTabs: [
         {
           filename: 'CssModulesTheme.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingWeb,
           code: `const form = useFormBridge(schema, {
-  globalConfigs: () => ({
+  globalDefaults: () => ({
     form: { className: styles.formShell },
     submit: {
       className: styles.submitButton,
@@ -231,9 +229,8 @@ Merge order is predictable: builder \`behavior\` -> \`globalConfigs\` theme ui -
         {
           filename: 'StyleSheetTheme.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingNative,
           code: `const form = useFormBridge(schema, {
-  globalConfigs: () => ({
+  globalDefaults: () => ({
     field: {
         styles: {
           wrapper: s.fieldRoot,
@@ -277,7 +274,6 @@ These helpers are especially useful with \`styled-components\`, \`styled-compone
         {
           filename: 'Hosts.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingStyledWeb,
           code: `import {
   FieldHost,
   FormHost,
@@ -294,9 +290,7 @@ const StyledForm = styled(FormHost)\`
 \`
 
 const EmailField = styled(FieldHost).attrs({
-  ui: {
-    inputProps: { autoComplete: 'email', inputMode: 'email' },
-  },
+  inputProps: { autoComplete: 'email', inputMode: 'email' },
 })\`
   & input {
     border-radius: 16px;
@@ -326,7 +320,6 @@ const form = useFormBridge({
         {
           filename: 'Hosts.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingStyledNative,
           code: `import {
   FieldHost,
   FormHost,
@@ -388,14 +381,13 @@ const form = useFormBridge({
 - Use the exported host helpers instead of rebuilding your own wrappers
 - Keep the styled shell stable and pass the generated field, submit button, or form through props
 - On web, normal CSS selectors can target \`label\`, \`input\`, \`textarea\`, and the other built-in elements
-- On native, use \`.attrs({ ui: { styles: ... } })\` to feed slot styles into the generated field
+- On native, use \`.attrs({ styles: { ... } })\` to feed slot styles into the generated field
 
 This stable-host pattern is the safest documented recipe because generated field components are runtime artifacts. It keeps styling ergonomic without forcing users to hand-build every field.`,
       codeTabs: [
         {
           filename: 'StyledComponents.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingStyledWeb,
           code: `import {
   FieldHost,
   FormHost,
@@ -412,9 +404,7 @@ const StudioForm = styled(FormHost)\`
 \`
 
 const EmailShell = styled(FieldHost).attrs({
-  ui: {
-    inputProps: { autoComplete: 'email', inputMode: 'email' },
-  },
+  inputProps: { autoComplete: 'email', inputMode: 'email' },
 })\`
   display: flex;
   flex-direction: column;
@@ -453,7 +443,6 @@ const form = useFormBridge({
         {
           filename: 'StyledComponents.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingStyledNative,
           code: `import {
   FieldHost,
   FormHost,
@@ -517,14 +506,13 @@ const form = useFormBridge({
       content: `This recipe is a strong fit for Tailwind, UnoCSS, Windi, or any class-based utility stack.
 
 - The global \`classNames\` map gives most of the form its look
-- Local \`ui.classNames\` and \`ui.inputProps\` cover one-off field variations
+- Local \`classNames\` and \`inputProps\` cover one-off field variations
 - The runtime stays the same because the generated field still owns value, validation, and events`,
       code: {
         filename: 'UtilityClasses.web.tsx',
         lang: 'tsx',
-        preview: DOC_PREVIEWS.stylingUtilityWeb,
         code: `const form = useFormBridge(schema, {
-  globalConfigs: () => ({
+  globalDefaults: () => ({
     form: { className: 'space-y-4' },
     submit: {
       className:
@@ -570,17 +558,16 @@ const form = useFormBridge({
       title: 'Recipe: local slot overrides with no extra styling library',
       content: `Use this when you want to prove the styling API quickly, or when one form needs a polished custom look without introducing a new styling dependency.
 
-- \`ui.styles\` targets the built-in slots directly on both web and native
+- \`styles\` targets the built-in slots directly on both web and native
 - \`renderHint\`, \`renderError\`, and \`renderRequiredMark\` cover the cases where plain styles are not enough
 - This is also a good recipe for incrementally migrating an existing screen to react-formbridge`,
       codeTabs: [
         {
           filename: 'SlotOverrides.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingSlotWeb,
           code: `const form = useFormBridge(schema, {
   validateOn: 'onTouched',
-  globalConfigs: () => ({
+  globalDefaults: () => ({
     submit: {
       loadingText: 'Saving inline theme...',
       style: {
@@ -641,10 +628,9 @@ const form = useFormBridge({
         {
           filename: 'FieldOverrides.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingSlotNative,
           code: `const form = useFormBridge(schema, {
   validateOn: 'onTouched',
-  globalConfigs: () => ({
+  globalDefaults: () => ({
     submit: {
       loadingText: 'Saving inline theme...',
       containerStyle: {
@@ -708,11 +694,11 @@ highlightOnError={false}
       content: `On web, the API is broad enough to work with CSS Modules, utility classes, styled-components, Emotion, or plain objects.
 
 - Root-level \`className\` and \`style\` theme the field container directly
-- \`globalConfigs.form\` and \`globalConfigs.submit\` style the generated form wrapper and submit button
-- \`ui.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
-- \`ui.wrapperProps\`, \`ui.labelProps\`, \`ui.hintProps\`, and \`ui.errorProps\` let you push DOM attributes without losing the generated renderer
-- \`ui.inputProps\` is available on text-like web fields, \`ui.textareaProps\` on textarea fields, and \`ui.selectProps\` on select fields
-- \`ui.renderLabel\`, \`ui.renderHint\`, \`ui.renderError\`, and \`ui.renderRequiredMark\` cover the cases where styling alone is not enough
+- \`globalDefaults.form\` and \`globalDefaults.submit\` style the generated form wrapper and submit button
+- \`highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
+- \`wrapperProps\`, \`labelProps\`, \`hintProps\`, and \`errorProps\` let you push DOM attributes without losing the generated renderer
+- \`inputProps\` is available on text-like web fields, \`textareaProps\` on textarea fields, and \`selectProps\` on select fields
+- \`renderLabel\`, \`renderHint\`, \`renderError\`, and \`renderRequiredMark\` cover the cases where styling alone is not enough
 
 ${WEB_SLOT_SURFACE}`,
     },
@@ -721,24 +707,24 @@ ${WEB_SLOT_SURFACE}`,
       title: 'Native styling surface',
       content: `On React Native, the same layering applies, but the override points stay React Native-friendly instead of DOM-specific.
 
-- Root-level \`style\` themes the field wrapper, while \`globalConfigs.form\` and \`globalConfigs.submit\` theme the form container and submit button
-- \`ui.highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
-- Renderer-specific extra keys are also supported in \`ui.styles\`, which is especially useful for inputs such as checkboxes, async selectors, or modal option lists
-- \`ui.wrapperProps\`, \`ui.labelProps\`, \`ui.inputProps\`, \`ui.hintProps\`, and \`ui.errorProps\` help with test IDs, accessibility, or integration with surrounding layout primitives
-- Native fields do not expose web-only props such as \`className\`, \`ui.textareaProps\`, or \`ui.selectProps\`
-- \`ui.renderLabel\`, \`ui.renderHint\`, \`ui.renderError\`, and \`ui.renderRequiredMark\` cover the cases where a simple style object is not enough
+- Root-level \`style\` themes the field wrapper, while \`globalDefaults.form\` and \`globalDefaults.submit\` theme the form container and submit button
+- \`highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
+- Renderer-specific extra keys are also supported in \`styles\`, which is especially useful for inputs such as checkboxes, async selectors, or modal option lists
+- \`wrapperProps\`, \`labelProps\`, \`inputProps\`, \`hintProps\`, and \`errorProps\` help with test IDs, accessibility, or integration with surrounding layout primitives
+- Native fields do not expose web-only props such as \`className\`, \`textareaProps\`, or \`selectProps\`
+- \`renderLabel\`, \`renderHint\`, \`renderError\`, and \`renderRequiredMark\` cover the cases where a simple style object is not enough
 
 ${NATIVE_SLOT_SURFACE}`,
     },
     {
       id: 'fb-web-ui-guidance',
       title: 'Use-case guide',
-      content: `- Use \`ui\` when a whole route, modal, onboarding flow, or checkout screen should share one visual system
-- Keep platform-specific differences inside the same \`ui\` object or at the screen-level \`globalConfigs\` theme
-- Use local \`ui\` props when one field needs a variant, a special helper text, or a different accent color on one screen
+      content: `- Use \`globalDefaults\` when a whole route, modal, onboarding flow, or checkout screen should share one visual system
+- Keep platform-specific differences inside the \`globalDefaults\` object at the screen level
+- Use local field props when one field needs a variant, a special helper text, or a different accent color on one screen
 - Use the stable host recipe for \`styled-components\` and \`styled-components/native\`
 - Use \`className\` and \`classNames\` slot maps for Tailwind-style utility frameworks on web
-- Use \`style\`, \`ui.styles\`, wrappers, or the stable host recipe for React Native styling systems such as StyleSheet, NativeWind-friendly wrappers, or in-house component kits
+- Use \`style\`, \`styles\`, wrappers, or the stable host recipe for React Native styling systems such as StyleSheet, NativeWind-friendly wrappers, or in-house component kits
 - Let the field type guide the override point: \`inputProps\` for text-like fields, \`textareaProps\` for textareas, \`selectProps\` for selects
 - The API stays agnostic on purpose, so the same schema can power web and native without forcing the same styling stack on both platforms
 

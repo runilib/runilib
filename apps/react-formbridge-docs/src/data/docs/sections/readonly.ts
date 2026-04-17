@@ -1,6 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
 import {
-  DOC_PREVIEWS,
   READONLY_FIELD_PROPS_SURFACE,
   READONLY_FIELD_STATE_SURFACE,
   READONLY_OPTIONS_SURFACE,
@@ -17,33 +16,81 @@ export const readonlySection: LibraryDoc['sections'][number] = {
 - It reuses the schema labels and option metadata, so your review UI stays aligned with your editing UI`,
   codeTabs: [
     {
-      filename: 'Readonly.tsx',
+      filename: 'ReadonlyPlayground.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.readonly,
-      code: `import { field, useFormBridgeReadonly } from '@runilib/react-formbridge'
+      code: `import { useState } from 'react'
+import { field, useFormBridgeReadonly } from '@runilib/react-formbridge'
 
 const schema = {
   fullName: field.text('Full name'),
   email: field.email('Email'),
-  country: field.select('Country').options(['FR','US','GB']),
+  country: field.select('Country').options(['FR', 'US', 'GB']),
 }
 
-export function ReviewCard({ values, original }: { values: any; original?: any }) {
+const originalValues = {
+  fullName: 'Ava Martin',
+  email: 'ava@runilib.dev',
+  country: 'FR',
+}
+
+const editedValues = {
+  fullName: 'Ava Martin',
+  email: 'ava.martin@runilib.dev',
+  country: 'GB',
+}
+
+const rowStyle = {
+  border: '1px solid #d6d9e0',
+  borderRadius: 12,
+  padding: 12,
+  background: '#fff',
+}
+
+export function ReadonlyPlayground() {
+  const [mode, setMode] = useState<'readonly' | 'diff'>('diff')
+  const [values, setValues] = useState(originalValues)
+
   const readonly = useFormBridgeReadonly(schema, {
+    mode,
     values,
-    originalValues: original,
-    mode: original ? 'diff' : 'readonly',
+    originalValues: originalValues,
   })
 
   const { ReadonlyFields, changedFields, hasChanges } = readonly
 
   return (
-    <section>
-      <ReadonlyFields.fullName />
-      <ReadonlyFields.email />
-      <ReadonlyFields.country />
-      {hasChanges ? <p>{changedFields.length} fields changed.</p> : null}
-    </section>
+    <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#f5f7fb' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+        <button type="button" onClick={() => setValues(editedValues)}>
+          Load edited values
+        </button>
+        <button type="button" onClick={() => setValues(originalValues)}>
+          Reset values
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            setMode((current) => (current === 'diff' ? 'readonly' : 'diff'))
+          }
+        >
+          Toggle mode
+        </button>
+      </div>
+
+      <p style={{ marginTop: 0, color: '#4b5563' }}>
+        Mode: <strong>{mode}</strong>
+        {' · '}
+        {hasChanges
+          ? \`\${changedFields.length} changed field(s): \${changedFields.join(', ')}\`
+          : 'No detected changes'}
+      </p>
+
+      <div style={{ display: 'grid', gap: 10 }}>
+        <ReadonlyFields.fullName style={rowStyle} />
+        <ReadonlyFields.email style={rowStyle} />
+        <ReadonlyFields.country style={rowStyle} />
+      </div>
+    </div>
   )
 }`,
     },

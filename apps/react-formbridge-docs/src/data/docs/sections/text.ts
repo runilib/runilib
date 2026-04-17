@@ -1,5 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
-import { buildMethodsTable } from '../constants';
+import { buildMethodsTable, FENCE } from '../constants';
 
 const TEXT_METHODS_TABLE = buildMethodsTable([
   [
@@ -116,10 +116,42 @@ ${TEXT_METHODS_TABLE}`,
     {
       id: 'fb-text-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase text-specific strengths:
-- Username with character constraints → \`field.text('Username').trim().min(3).max(20).pattern(/^[a-z0-9_]+$/i, 'Letters, numbers, and underscores only.')\`
-- SEO slug with transform → \`field.text('Slug').transform((value) => value.trim().toLowerCase().replace(/\\s+/g, '-')).pattern(/^[a-z0-9-]+$/)\`
-- Display name with whitespace cleanup → \`field.text('Display name').trim().min(1).max(50).transform((v) => v.replace(/\\s{2,}/g, ' '))\``,
+      content: `Patterns that showcase text-specific strengths.
+
+**Username with character constraints**
+
+${FENCE}tsx Username.tsx
+const schema = {
+  username: field.text('Username')
+    .required()
+    .trim()
+    .min(3)
+    .max(20)
+    .pattern(/^[a-z0-9_]+$/i, 'Letters, numbers, and underscores only.'),
+}
+${FENCE}
+
+**SEO slug with transform**
+
+${FENCE}tsx Slug.tsx
+const schema = {
+  slug: field.text('Slug')
+    .transform((value) => value.trim().toLowerCase().replace(/\\s+/g, '-'))
+    .pattern(/^[a-z0-9-]+$/, 'Letters, numbers, and dashes only.'),
+}
+${FENCE}
+
+**Display name with whitespace cleanup**
+
+${FENCE}tsx DisplayName.tsx
+const schema = {
+  displayName: field.text('Display name')
+    .trim()
+    .min(1)
+    .max(50)
+    .transform((value) => value.replace(/\\s{2,}/g, ' ')),
+}
+${FENCE}`,
     },
   ],
 };

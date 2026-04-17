@@ -32,8 +32,8 @@ import type {
   FormSchema,
   SchemaValues,
   SubmitButtonProps,
+  UseFormBridgeOptions,
   UseFormBridgeReturn,
-  UseFormOptions,
 } from '../types';
 import { FormBridgeProvider } from './shared/form-context';
 import { computeTransformedValues } from './shared/helpers';
@@ -51,9 +51,33 @@ type NativeSubmitExtraProps = {
   indicatorColor?: string;
 };
 
+function renderNativeSubmitLabel(
+  label: React.ReactNode,
+  textStyle: StyleProp<TextStyle>,
+) {
+  if (typeof label === 'string' || typeof label === 'number') {
+    return React.createElement(
+      Text,
+      {
+        style: [
+          {
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: '600',
+          },
+          textStyle,
+        ],
+      },
+      label,
+    );
+  }
+
+  return label;
+}
+
 export function useFormBridge<const S extends FormSchema>(
   schema: S,
-  options: UseFormOptions<S, 'native'> = {},
+  options: UseFormBridgeOptions<S, 'native'> = {},
 ): UseFormBridgeReturn<S, 'native'> {
   const core = useFormBridgeCore(schema, options);
 
@@ -79,8 +103,8 @@ export function useFormBridge<const S extends FormSchema>(
     focusField,
   } = core;
 
-  const globalConfigsRef = useRef(options.globalConfigs);
-  globalConfigsRef.current = options.globalConfigs;
+  const globalDefaultsRef = useRef(options.globalDefaults);
+  globalDefaultsRef.current = options.globalDefaults;
 
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
@@ -93,9 +117,9 @@ export function useFormBridge<const S extends FormSchema>(
   const schemaRef = useRef(schema);
   schemaRef.current = schema;
 
-  const resolveGlobalConfigs = useCallback(
+  const resolveglobalDefaults = useCallback(
     () =>
-      globalConfigsRef.current?.({
+      globalDefaultsRef.current?.({
         state: stateRef.current,
         schema: schemaRef.current,
         platform: 'native',
@@ -148,6 +172,7 @@ export function useFormBridge<const S extends FormSchema>(
         isSubmitSuccess: false,
         isSubmitError: false,
         submitCount: 0,
+        formLevelError: null,
         submitError: null,
       };
 
@@ -341,7 +366,7 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedProps = mergeNativeFormProps(resolveGlobalConfigs()?.form, style);
+      const mergedProps = mergeNativeFormProps(resolveglobalDefaults()?.form, style);
 
       return React.createElement(
         FormBridgeProvider,
@@ -376,7 +401,7 @@ export function useFormBridge<const S extends FormSchema>(
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
       const mergedProps = mergeNativeSubmitProps(
-        resolveGlobalConfigs()?.submit,
+        resolveglobalDefaults()?.submit,
         style,
         loadingText,
       );
@@ -425,21 +450,10 @@ export function useFormBridge<const S extends FormSchema>(
                 color: mergedProps.indicatorColor ?? rest.indicatorColor ?? '#fff',
               })
             : null,
-          React.createElement(
-            Text,
-            {
-              style: [
-                {
-                  color: '#fff',
-                  fontSize: 14,
-                  fontWeight: '600',
-                },
-                mergedProps.textStyle as StyleProp<TextStyle>,
-                rest.textStyle,
-              ],
-            },
-            label,
-          ),
+          renderNativeSubmitLabel(label, [
+            mergedProps.textStyle as StyleProp<TextStyle>,
+            rest.textStyle,
+          ]),
         ),
       );
     };
@@ -450,7 +464,7 @@ export function useFormBridge<const S extends FormSchema>(
       Submit as unknown as FormComponent<S, 'native'>['Submit'];
 
     return FormInner as unknown as FormComponent<S, 'native'>;
-  }, [stateRef, submit, submitConfigRef, resolveGlobalConfigs]);
+  }, [stateRef, submit, submitConfigRef, resolveglobalDefaults]);
 
   const FormProvider = useMemo(
     () =>
@@ -482,7 +496,7 @@ export function useFormBridge<const S extends FormSchema>(
 
         const mergedFieldProps = mergeFieldStyleProps(
           'native',
-          resolveGlobalConfigs()?.field,
+          resolveglobalDefaults()?.field,
           props,
         );
         const state = stateRef.current;
@@ -685,7 +699,7 @@ export function useFormBridge<const S extends FormSchema>(
     registerFocusable,
     stateRef,
     trackFieldFocus,
-    resolveGlobalConfigs,
+    resolveglobalDefaults,
   ]);
 
   const FieldError = useMemo(() => {

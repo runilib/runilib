@@ -17,8 +17,8 @@ import type {
   FormSchema,
   SchemaValues,
   SubmitButtonProps,
+  UseFormBridgeOptions,
   UseFormBridgeReturn,
-  UseFormOptions,
 } from '../types';
 import { FormBridgeProvider } from './shared/form-context';
 import { computeTransformedValues } from './shared/helpers';
@@ -32,7 +32,7 @@ import { useFormBridgeCore } from './shared/useFormBridgeCore';
 
 export function useFormBridge<const S extends FormSchema>(
   schema: S,
-  options: UseFormOptions<S, 'web'> = {},
+  options: UseFormBridgeOptions<S, 'web'> = {},
 ): UseFormBridgeReturn<S, 'web'> {
   const core = useFormBridgeCore(schema, options);
 
@@ -58,15 +58,15 @@ export function useFormBridge<const S extends FormSchema>(
     blurField,
   } = core;
 
-  const globalConfigsRef = useRef(options.globalConfigs);
-  globalConfigsRef.current = options.globalConfigs;
+  const globalDefaultsRef = useRef(options.globalDefaults);
+  globalDefaultsRef.current = options.globalDefaults;
 
   const schemaRef = useRef(schema);
   schemaRef.current = schema;
 
-  const resolveGlobalConfigs = useCallback(
+  const resolveglobalDefaults = useCallback(
     () =>
-      globalConfigsRef.current?.({
+      globalDefaultsRef.current?.({
         state: stateRef.current,
         schema: schemaRef.current,
         platform: 'web',
@@ -127,6 +127,7 @@ export function useFormBridge<const S extends FormSchema>(
         isSubmitError: false,
         isSubmitSuccess: false,
         submitCount: 0,
+        formLevelError: null,
         submitError: null,
       };
 
@@ -321,7 +322,7 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedUi = mergeWebFormProps(resolveGlobalConfigs()?.form, className, style);
+      const mergedUi = mergeWebFormProps(resolveglobalDefaults()?.form, className, style);
 
       const onPress = (event?: { preventDefault?: () => void }) => {
         event?.preventDefault?.();
@@ -362,7 +363,7 @@ export function useFormBridge<const S extends FormSchema>(
       const { status } = stateRef.current;
       const loading = status === 'submitting' || status === 'validating';
       const mergedUi = mergeWebSubmitProps(
-        resolveGlobalConfigs()?.submit,
+        resolveglobalDefaults()?.submit,
         className,
         style,
         loadingText,
@@ -389,7 +390,7 @@ export function useFormBridge<const S extends FormSchema>(
 
     (FormInner as unknown as FormComponent<S, 'web'>).Submit = Submit;
     return FormInner as unknown as FormComponent<S, 'web'>;
-  }, [handleSubmit, resolveGlobalConfigs, stateRef, submitConfigRef]);
+  }, [handleSubmit, resolveglobalDefaults, stateRef, submitConfigRef]);
 
   const FormProvider = useMemo(
     () =>
@@ -421,7 +422,7 @@ export function useFormBridge<const S extends FormSchema>(
 
         const mergedProps = mergeFieldStyleProps(
           'web',
-          resolveGlobalConfigs()?.field,
+          resolveglobalDefaults()?.field,
           props,
         );
         const state = stateRef.current;
@@ -585,7 +586,7 @@ export function useFormBridge<const S extends FormSchema>(
     registerFocusable,
     stateRef,
     trackFieldFocus,
-    resolveGlobalConfigs,
+    resolveglobalDefaults,
   ]);
 
   const FieldError = useMemo(() => {

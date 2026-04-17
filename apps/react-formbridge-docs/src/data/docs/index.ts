@@ -15,15 +15,15 @@ import { fieldLabelSection } from './sections/fieldLabel';
 import { fieldsSection } from './sections/fields';
 import { fileSection } from './sections/file';
 import { formSection } from './sections/form';
-import { globalConfigsSection } from './sections/globalConfigs';
+import { globalDefaultsSection } from './sections/globalDefaults';
 import { hostHelpersSection } from './sections/hostHelpers';
 import { inferSection } from './sections/infer';
 import { inferTypeSection } from './sections/inferType';
 import { installSection } from './sections/install';
+import { introductionSection } from './sections/introduction';
 import { maskedSection } from './sections/masked';
 import { numberSection } from './sections/number';
 import { otpSection } from './sections/otp';
-import { overviewSection } from './sections/overview';
 import { passwordSection } from './sections/password';
 import { persistenceSection } from './sections/persistence';
 import { phoneSection } from './sections/phone';
@@ -34,7 +34,6 @@ import { schemaApiSection } from './sections/schema';
 import { schemaMentalModelSection } from './sections/schemaMentalModel';
 import { selectSection } from './sections/select';
 import { stateSection } from './sections/state';
-import { submitSection } from './sections/submit';
 import { switchSection } from './sections/switch';
 import { telSection } from './sections/tel';
 import { textSection } from './sections/text';
@@ -43,6 +42,7 @@ import { tutorialSection } from './sections/tutorial';
 import { tutorialCheckoutSection } from './sections/tutorialCheckout';
 import { tutorialCustomUiSection } from './sections/tutorialCustomUi';
 import { tutorialProductionSection } from './sections/tutorialProduction';
+import { tutorialSchemaValidationSection } from './sections/tutorialSchemaValidation';
 import { tutorialSignupSection } from './sections/tutorialSignup';
 import { tutorialValidationSection } from './sections/tutorialValidation';
 import { urlSection } from './sections/url';
@@ -60,7 +60,7 @@ export const formbridgeDocs: LibraryDoc = {
   versions: ['1.0.0'],
   sidebar: docSidebar,
   sections: [
-    overviewSection,
+    introductionSection,
     installSection,
     quickstartSection,
     schemaMentalModelSection,
@@ -68,12 +68,12 @@ export const formbridgeDocs: LibraryDoc = {
     tutorialSignupSection,
     tutorialCheckoutSection,
     tutorialValidationSection,
+    tutorialSchemaValidationSection,
     tutorialCustomUiSection,
     tutorialProductionSection,
     useFormBridgeSection,
     schemaApiSection,
     formSection,
-    submitSection,
     fieldErrorSection,
     fieldLabelSection,
     fieldsSection,
@@ -82,7 +82,7 @@ export const formbridgeDocs: LibraryDoc = {
     stateSection,
     actionsSection,
     validationSection,
-    globalConfigsSection,
+    globalDefaultsSection,
     builderBasicsSection,
     baseFieldBuilderSection,
     textSection,

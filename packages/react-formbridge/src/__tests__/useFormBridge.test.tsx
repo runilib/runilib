@@ -287,6 +287,45 @@ describe('useForm — submit lifecycle', () => {
   });
 });
 
+describe('useForm — Form.Submit', () => {
+  it('renders a ReactNode loadingText while submitting', async () => {
+    let resolveSubmit: (() => void) | undefined;
+
+    function Harness() {
+      const form = useFormBridge({
+        name: field.text('Name'),
+      });
+
+      return (
+        <form.Form
+          onSubmit={() =>
+            new Promise<void>((resolve) => {
+              resolveSubmit = resolve;
+            })
+          }
+        >
+          <form.Form.Submit loadingText={<span data-testid="saving-node">Saving…</span>}>
+            Save
+          </form.Form.Submit>
+        </form.Form>
+      );
+    }
+
+    render(<Harness />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    });
+
+    expect(screen.getByTestId('saving-node')).toBeTruthy();
+    expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true);
+
+    await act(async () => {
+      resolveSubmit?.();
+    });
+  });
+});
+
 describe('useFormBridgeContext', () => {
   it('exposes the current form inside <form.Form>', () => {
     const schema = {

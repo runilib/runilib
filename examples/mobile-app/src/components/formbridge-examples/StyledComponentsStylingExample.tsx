@@ -17,7 +17,6 @@ const PreviewStack = styled.View`
   gap: 10px;
 `;
 
-
 const PreviewValue = styled.Text`
   font-size: 22px;
   font-weight: 800;
@@ -89,7 +88,7 @@ const StudioNameFieldShell = styled(FieldHost).attrs({
       letterSpacing: 0.7,
       textTransform: 'uppercase',
     },
-    input: {
+    textInput: {
       minHeight: 52,
       borderWidth: 1.5,
       borderColor: 'rgba(125, 211, 252, 0.18)',
@@ -131,7 +130,7 @@ const ContactEmailFieldShell = styled(FieldHost).attrs({
       letterSpacing: 0.7,
       textTransform: 'uppercase',
     },
-    input: {
+    textInput: {
       minHeight: 52,
       borderWidth: 1.5,
       borderColor: 'rgba(56, 189, 248, 0.28)',
@@ -173,7 +172,7 @@ const CityFieldShell = styled(FieldHost).attrs({
       letterSpacing: 0.7,
       textTransform: 'uppercase',
     },
-    input: {
+    textInput: {
       minHeight: 52,
       borderWidth: 1.5,
       borderColor: 'rgba(74, 222, 128, 0.24)',
@@ -211,7 +210,7 @@ const LaunchNotesFieldShell = styled(FieldHost).attrs({
       letterSpacing: 0.7,
       textTransform: 'uppercase',
     },
-    input: {
+    textInput: {
       minHeight: 112,
       borderWidth: 1.5,
       borderColor: 'rgba(125, 211, 252, 0.18)',

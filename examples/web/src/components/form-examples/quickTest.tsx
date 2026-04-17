@@ -1,16 +1,21 @@
 import { field, useFormBridge } from '@runilib/react-formbridge';
 
-import styles from './FormExamples.module.css';
-
 const schema = {
   email: field.email('Email').required(),
+  switch: field.switch('Switch').required(),
+  radio: field.radio('Radio').options(['Radio']),
+  text: field.text('Text'),
+  otp: field.otp('Otp'),
+  password: field.password('password'),
+  checkbox: field.checkbox('checkbox'),
+  file: field.file('file'),
 };
 
 export function QuickTestExample() {
   const form = useFormBridge(schema);
 
   return (
-    <section className={`${styles.sectionCard} ${styles.customerSection}`}>
+    <section>
       <form.Form onSubmit={(values) => console.log('save', values)}>
         <input
           name="email"
@@ -18,7 +23,15 @@ export function QuickTestExample() {
           onChange={(e) => form.setValue('email', e.target.value)}
           onBlur={() => form.fieldController('email').onBlur()}
         />
-        <form.FieldError name="email" />
+        <form.fields.email />
+        <form.fields.switch />
+        <form.fields.radio />
+        <form.fields.text />
+        <form.fields.otp />
+        <form.fields.file />
+        <form.fields.password />
+        <form.fields.checkbox />
+        {/* <form.FieldError name="email" /> */}
         <form.Form.Submit>Save</form.Form.Submit>
       </form.Form>
     </section>

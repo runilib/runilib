@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -23,6 +23,9 @@ import type {
   SelectPickerRenderContext,
 } from '../../types';
 import {
+  defaultCheckboxBoxStyle,
+  defaultCheckboxRowStyle,
+  defaultInputStyle,
   defaultOptionCheckStyle,
   defaultOptionHeaderStyle,
   defaultOptionLabelStyle,
@@ -33,6 +36,8 @@ import {
   defaultOptionTitleStyle,
   defaultOptionTriggerLabelStyle,
   defaultOptionTriggerStyle,
+  defaultSwitchRowStyle,
+  defaultTextareaStyle,
 } from './default-styles';
 import {
   defaultErrorChromeStyle,
@@ -82,6 +87,15 @@ const defaultOtpInputStyle: TextStyle = {
   fontWeight: '600',
 };
 
+const defaultOtpSeparatorStyle: TextStyle = {
+  alignSelf: 'center',
+  minWidth: 12,
+  color: '#94a3b8',
+  fontSize: 22,
+  fontWeight: '600',
+  textAlign: 'center',
+};
+
 const OptionPicker = ({
   visible,
   title,
@@ -111,12 +125,15 @@ const OptionPicker = ({
       <Pressable
         style={sx(
           defaultOptionModalBackdropStyle,
-          fieldPropsOverrides?.styles?.modalBackdrop,
+          fieldPropsOverrides?.styles?.selectModalBackdrop,
         )}
         onPress={onClose}
       >
         <Pressable
-          style={sx(defaultOptionModalCardStyle, fieldPropsOverrides?.styles?.modalCard)}
+          style={sx(
+            defaultOptionModalCardStyle,
+            fieldPropsOverrides?.styles?.selectModalCard,
+          )}
           onPress={(event) => event.stopPropagation()}
         >
           {hasTitle ? (
@@ -143,13 +160,13 @@ const OptionPicker = ({
                   }}
                   style={sx(
                     defaultOptionRowStyle,
-                    fieldPropsOverrides?.styles?.optionRow,
+                    fieldPropsOverrides?.styles?.selectOptionRow,
                   )}
                 >
                   <Text
                     style={sx(
                       defaultOptionLabelStyle,
-                      fieldPropsOverrides?.styles?.optionLabel,
+                      fieldPropsOverrides?.styles?.selectOptionLabel,
                     )}
                   >
                     {option.label}
@@ -411,7 +428,12 @@ export const NativeField: React.FC<Props> = ({
             placeholder={p.placeholder}
             multiline
             textAlignVertical="top"
-            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
+            style={sx(
+              defaultTextareaStyle,
+              styles?.textInput,
+              inputPropsStyle,
+              controlErrorStyle,
+            )}
             onChangeText={(value) => p.onChange(value)}
             {...commonInputProps}
           />
@@ -423,7 +445,7 @@ export const NativeField: React.FC<Props> = ({
             onPress={() => {
               if (!p.disabled && !isReadOnly) p.onChange(!p.value);
             }}
-            style={sx(styles?.checkboxRow)}
+            style={sx(defaultCheckboxRowStyle, styles?.checkboxRow)}
             accessibilityRole="checkbox"
             accessibilityLabel={labelText}
             accessibilityHint={helperText}
@@ -434,7 +456,9 @@ export const NativeField: React.FC<Props> = ({
               ...(hasError ? { invalid: true } : {}),
             }}
           >
-            <View style={sx(styles?.checkboxBox, controlErrorStyle)} />
+            <View
+              style={sx(defaultCheckboxBoxStyle, styles?.checkboxBox, controlErrorStyle)}
+            />
             <Text
               nativeID={labelId}
               style={sx(styles?.checkboxLabel)}
@@ -447,7 +471,7 @@ export const NativeField: React.FC<Props> = ({
 
       case 'switch':
         return (
-          <View style={sx(styles?.switchRow)}>
+          <View style={sx(defaultSwitchRowStyle, styles?.switchRow)}>
             <Switch
               value={Boolean(p.value)}
               onValueChange={(value) => {
@@ -484,7 +508,7 @@ export const NativeField: React.FC<Props> = ({
               onPress={openPicker}
               style={sx(
                 defaultOptionTriggerStyle,
-                styles?.optionTrigger,
+                styles?.selectTrigger,
                 controlErrorStyle,
               )}
               testID={inputBehavior.testID}
@@ -499,7 +523,7 @@ export const NativeField: React.FC<Props> = ({
               }}
             >
               <Text
-                style={sx(defaultOptionTriggerLabelStyle, styles?.optionTriggerLabel)}
+                style={sx(defaultOptionTriggerLabelStyle, styles?.selectTriggerLabel)}
               >
                 {getSelectedLabel(descriptor._options, p.value) ||
                   p.placeholder ||
@@ -523,24 +547,34 @@ export const NativeField: React.FC<Props> = ({
           </>
         );
       case 'otp': {
-        const length = descriptor._otpLength ?? 6;
+        const groups =
+          descriptor._otpGroups && descriptor._otpGroups.length > 0
+            ? descriptor._otpGroups
+            : [descriptor._otpLength ?? 6];
+        const separator = descriptor._otpSeparator ?? '-';
+        const maskChar = descriptor._otpMaskChar;
+        const length = groups.reduce((sum, size) => sum + size, 0);
         const chars = getStringValue(p.value).split('');
 
-        return (
-          <View style={sx(defaultOtpContainerStyle, styles?.otpContainer)}>
-            {Array.from({ length }, (_, index) => ({
-              key: `${id}-otp-${index}`,
-              index,
-            })).map(({ key, index }) => (
+        const cells: ReactNode[] = [];
+        let cellIndex = 0;
+
+        groups.forEach((size, groupIndex) => {
+          for (let i = 0; i < size; i++) {
+            const index = cellIndex;
+            const rawChar = chars[index] ?? '';
+            const displayChar = maskChar && rawChar ? maskChar : rawChar;
+
+            cells.push(
               <TextInput
-                key={key}
+                key={`${id}-otp-${index}`}
                 ref={(node) => {
                   otpRefs.current[index] = node;
                   if (index === 0) {
                     registerFocusable?.(node);
                   }
                 }}
-                value={chars[index] ?? ''}
+                value={displayChar}
                 maxLength={1}
                 keyboardType={
                   (inputBehavior.keyboardType as TextInputProps['keyboardType']) ??
@@ -565,11 +599,12 @@ export const NativeField: React.FC<Props> = ({
                     return;
                   }
 
+                  const typed = char.slice(-1);
                   const next = [...chars];
-                  next[index] = char.slice(-1);
+                  next[index] = typed === maskChar ? (chars[index] ?? '') : typed;
                   p.onChange(next.join(''));
 
-                  if (char && index < length - 1) {
+                  if (typed && index < length - 1) {
                     otpRefs.current[index + 1]?.focus();
                   }
                 }}
@@ -580,9 +615,25 @@ export const NativeField: React.FC<Props> = ({
                 }}
                 onBlur={p.onBlur}
                 onFocus={p.onFocus}
-              />
-            ))}
-          </View>
+              />,
+            );
+            cellIndex++;
+          }
+
+          if (groupIndex < groups.length - 1) {
+            cells.push(
+              <Text
+                key={`${id}-otp-sep-after-${cellIndex}`}
+                style={sx(defaultOtpSeparatorStyle, styles?.otpSeparator)}
+              >
+                {separator}
+              </Text>,
+            );
+          }
+        });
+
+        return (
+          <View style={sx(defaultOtpContainerStyle, styles?.otpContainer)}>{cells}</View>
         );
       }
 
@@ -593,7 +644,12 @@ export const NativeField: React.FC<Props> = ({
             ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder}
-            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
+            style={sx(
+              defaultInputStyle,
+              styles?.textInput,
+              inputPropsStyle,
+              controlErrorStyle,
+            )}
             keyboardType={
               (inputBehavior.keyboardType as TextInputProps['keyboardType']) ?? 'numeric'
             }
@@ -611,7 +667,12 @@ export const NativeField: React.FC<Props> = ({
             ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder ?? 'YYYY-MM-DD'}
-            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
+            style={sx(
+              defaultInputStyle,
+              styles?.textInput,
+              inputPropsStyle,
+              controlErrorStyle,
+            )}
             onChangeText={(value) => p.onChange(value)}
             {...commonInputProps}
           />
@@ -624,7 +685,12 @@ export const NativeField: React.FC<Props> = ({
             ref={registerFocusable}
             value={getStringValue(p.value)}
             placeholder={p.placeholder}
-            style={sx(styles?.input, inputPropsStyle, controlErrorStyle)}
+            style={sx(
+              defaultInputStyle,
+              styles?.textInput,
+              inputPropsStyle,
+              controlErrorStyle,
+            )}
             onChangeText={(value) => p.onChange(value)}
             autoCapitalize={descriptor._type === 'email' ? 'none' : 'sentences'}
             keyboardType={

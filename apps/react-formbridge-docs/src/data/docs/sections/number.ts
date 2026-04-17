@@ -1,5 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable, FENCE } from '../constants';
 
 const NUMBER_METHODS_TABLE = buildMethodsTable([
   [
@@ -65,7 +65,7 @@ const NUMBER_METHODS_TABLE = buildMethodsTable([
   [
     '`lowerThan(valueOrRef, message?)`',
     '`number | string | FieldReference`',
-    'Cross-field version of `lt()`. Accepts another field name or a `ref()` path, e.g. `ref(\'maxQuantity\')`.',
+    "Cross-field version of `lt()`. Accepts another field name or a `ref()` path, e.g. `ref('maxQuantity')`.",
   ],
   [
     '`step(stepValue, message?)`',
@@ -111,11 +111,56 @@ ${NUMBER_METHODS_TABLE}`,
     {
       id: 'fb-number-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase number-specific strengths:
-- Batch order in increments → \`field.number('Quantity').required().integer().positive().step(5, 'Order in multiples of 5')\`
-- Percentage slider → \`field.number('Discount %').min(0).max(100).nonNegative().defaultValue(0)\`
-- Seat limit with business rule → \`field.number('Seats').integer().positive().validate((v) => v <= 500 ? null : 'Maximum 500 seats per workspace.')\`
-- Price with two-decimal step → \`field.number('Unit price').nonNegative().step(0.01, 'Use two decimal places.')\``,
+      content: `Patterns that showcase number-specific strengths.
+
+**Batch order in increments**
+
+${FENCE}tsx BatchQuantity.tsx
+const schema = {
+  quantity: field.number('Quantity')
+    .required()
+    .integer()
+    .positive()
+    .step(5, 'Order in multiples of 5'),
+}
+${FENCE}
+
+**Percentage slider**
+
+${FENCE}tsx Discount.tsx
+const schema = {
+  discount: field.number('Discount %')
+    .min(0)
+    .max(100)
+    .nonNegative()
+    .defaultValue(0),
+}
+${FENCE}
+
+**Seat limit with business rule**
+
+${FENCE}tsx Seats.tsx
+const schema = {
+  seats: field.number('Seats')
+    .integer()
+    .positive()
+    .validate((value) =>
+      value <= 500
+        ? null
+        : 'Maximum 500 seats per workspace.',
+    ),
+}
+${FENCE}
+
+**Price with two-decimal step**
+
+${FENCE}tsx UnitPrice.tsx
+const schema = {
+  unitPrice: field.number('Unit price')
+    .nonNegative()
+    .step(0.01, 'Use two decimal places.'),
+}
+${FENCE}`,
     },
   ],
 };

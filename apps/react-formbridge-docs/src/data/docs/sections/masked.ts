@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   STRING_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -99,12 +100,67 @@ If you want the mask behavior but your own shell, prefix badge, trigger row, or 
     {
       id: 'fb-masked-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase mask-specific strengths:
-- Credit card with placeholder → \`field.masked(MASKS.CARD_16).label('Card number').required().showMaskInPlaceholder().validateComplete('Card number is incomplete.')\`
-- Expiry + CVV side by side → \`field.masked(MASKS.EXPIRY).label('Expiry')\` and \`field.masked(MASKS.CVV).label('CVV')\` — short masks auto-size
-- Raw backup code (strip separators) → \`field.masked('9999-9999').label('Backup code').storeRaw().validateComplete()\`
-- Custom plate with uppercase token → \`field.masked('LL-999-LL').label('Plate').tokens({ L: /[A-Z]/ }).uppercase()\`
-- French IBAN → \`field.masked(MASKS.IBAN_FR).label('IBAN').required().validateComplete('IBAN is incomplete.')\``,
+      content: `Patterns that showcase mask-specific strengths.
+
+**Credit card with placeholder**
+
+${FENCE}tsx CardNumber.tsx
+import { MASKS } from '@runilib/react-formbridge'
+
+const schema = {
+  cardNumber: field.masked(MASKS.CARD_16)
+    .label('Card number')
+    .required()
+    .showMaskInPlaceholder()
+    .validateComplete('Card number is incomplete.'),
+}
+${FENCE}
+
+**Expiry + CVV side by side**
+
+${FENCE}tsx ExpiryCvv.tsx
+import { MASKS } from '@runilib/react-formbridge'
+
+const schema = {
+  expiry: field.masked(MASKS.EXPIRY).label('Expiry').required(),
+  cvv: field.masked(MASKS.CVV).label('CVV').required(),
+}
+${FENCE}
+
+**Raw backup code (strip separators)**
+
+${FENCE}tsx BackupCode.tsx
+const schema = {
+  backupCode: field.masked('9999-9999')
+    .label('Backup code')
+    .storeRaw()
+    .validateComplete(),
+}
+${FENCE}
+
+**Custom plate with uppercase token**
+
+${FENCE}tsx LicensePlate.tsx
+const schema = {
+  plate: field.masked('LL-999-LL')
+    .label('Plate')
+    .tokens({ L: /[A-Z]/ })
+    .uppercase(),
+}
+${FENCE}
+
+**French IBAN**
+
+${FENCE}tsx IbanFr.tsx
+import { MASKS } from '@runilib/react-formbridge'
+
+const schema = {
+  iban: field.masked(MASKS.IBAN_FR)
+    .label('IBAN')
+    .required()
+    .validateComplete('IBAN is incomplete.'),
+}
+${FENCE}`,
     },
     {
       id: 'fb-masked-tokens',

@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   STRING_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -63,10 +64,51 @@ ${EMAIL_METHODS_TABLE}`,
     {
       id: 'fb-email-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase email-specific strengths:
-- Block personal providers → \`field.email('Work email').trim().lowercase().excludeEmailDomains(['gmail.com', 'yahoo.com', 'hotmail.com'], 'Use your company email.')\`
-- Domain-locked guard → \`field.email('Partner email').validate((value) => value.endsWith('@partner.io') ? null : 'Use your @partner.io address.')\`
-- Enterprise login with polished field copy → \`field.email('Email').required().trim().lowercase().placeholder('you@company.com').hint('Use your work address.')\``,
+      content: `Patterns that showcase email-specific strengths.
+
+**Block personal providers**
+
+${FENCE}tsx WorkEmail.tsx
+const schema = {
+  workEmail: field.email('Work email')
+    .required()
+    .trim()
+    .lowercase()
+    .excludeEmailDomains(
+      ['gmail.com', 'yahoo.com', 'hotmail.com'],
+      'Use your company email.',
+    ),
+}
+${FENCE}
+
+**Domain-locked guard**
+
+${FENCE}tsx PartnerEmail.tsx
+const schema = {
+  partnerEmail: field.email('Partner email')
+    .required()
+    .trim()
+    .lowercase()
+    .validate((value) =>
+      value.endsWith('@partner.io')
+        ? null
+        : 'Use your @partner.io address.',
+    ),
+}
+${FENCE}
+
+**Enterprise login with polished field copy**
+
+${FENCE}tsx EnterpriseLogin.tsx
+const schema = {
+  email: field.email('Email')
+    .required()
+    .trim()
+    .lowercase()
+    .placeholder('you@company.com')
+    .hint('Use your work address.'),
+}
+${FENCE}`,
     },
   ],
 };

@@ -1,5 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable, FENCE } from '../constants';
 
 const PHONE_METHODS_TABLE = buildMethodsTable([
   ['`defaultCountry(code)`', '`code: string`', 'Sets the initial selected country.'],
@@ -78,11 +78,54 @@ ${PHONE_METHODS_TABLE}`,
     {
       id: 'fb-phone-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase phone-specific strengths:
-- International signup → \`field.phone('Phone').defaultCountry('FR').preferredCountries(['FR', 'US', 'GB']).searchable().showFlag(true).showDialCode(true)\`
-- API-ready E.164 output → \`field.phone('Phone').storeE164().required().validateFormat(true)\`
-- US-only customer support → \`field.phone('Phone').defaultCountry('US').preferredCountries(['US']).showDialCode(false).validateFormat()\`
-- Disabled display field → \`field.phone('Support line').defaultCountry('US').disabled().hint('Managed by your account team')\``,
+      content: `Patterns that showcase phone-specific strengths.
+
+**International signup**
+
+${FENCE}tsx InternationalSignup.tsx
+const schema = {
+  phone: field.phone('Phone')
+    .defaultCountry('FR')
+    .preferredCountries(['FR', 'US', 'GB'])
+    .searchable()
+    .showFlag(true)
+    .showDialCode(true),
+}
+${FENCE}
+
+**API-ready E.164 output**
+
+${FENCE}tsx E164Phone.tsx
+const schema = {
+  phone: field.phone('Phone')
+    .storeE164()
+    .required()
+    .validateFormat(true),
+}
+${FENCE}
+
+**US-only customer support**
+
+${FENCE}tsx UsSupport.tsx
+const schema = {
+  phone: field.phone('Phone')
+    .defaultCountry('US')
+    .preferredCountries(['US'])
+    .showDialCode(false)
+    .validateFormat(),
+}
+${FENCE}
+
+**Disabled display field**
+
+${FENCE}tsx SupportLine.tsx
+const schema = {
+  supportLine: field.phone('Support line')
+    .defaultCountry('US')
+    .disabled()
+    .hint('Managed by your account team'),
+}
+${FENCE}`,
     },
   ],
 };

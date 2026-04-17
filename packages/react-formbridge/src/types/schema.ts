@@ -153,7 +153,7 @@ export type SchemaValues<S extends FormSchema> = {
 
 /**
  * The complete public state of a form. Returned by `useFormBridge` as the
- * `state` object and passed to selectors like `globalConfigs(state)`.
+ * `state` object and passed to selectors like `globalDefaults(state)`.
  *
  * All boolean flags (`isValid`, `isDirty`, …) are derived from the raw maps
  * (`errors`, `dirty`, `touched`, `status`) and kept in sync automatically — do
@@ -214,6 +214,12 @@ export interface FormState<Schema extends FormSchema> {
    * Use it as a signal that the user has tried to submit at least once.
    */
   submitCount: number;
+  /**
+   * Form-level validation error produced by cross-field rules (e.g. `refine()`
+   * / `superRefine()` in a `schema()` pipeline). `null` when there is no
+   * form-level validation issue.
+   */
+  formLevelError: string | null;
   /**
    * Error message produced by the most recent failed `onSubmit` call — for
    * example an API/network error. `null` when the last submission succeeded or

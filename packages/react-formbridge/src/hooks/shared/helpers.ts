@@ -23,6 +23,7 @@ export const makeInitialState = <S extends FormSchema>(
     isSubmitSuccess: false,
     isSubmitError: false,
     submitCount: 0,
+    formLevelError: null,
     submitError: null,
   };
 };

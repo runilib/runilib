@@ -401,7 +401,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
     classNames?.wrapper,
     wrapperPropsClassName as string,
   );
-  const inputClassName = cx(classNames?.input, inputPropsClassName);
+  const inputClassName = cx(classNames?.autocompleteInput, inputPropsClassName);
 
   return (
     <div
@@ -453,26 +453,26 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             data-fb-slot="select-trigger"
             data-fb-selected={selectedOptionFromOptions ? '' : undefined}
             onClick={handleFocus}
-            className={cx(inputClassName, classNames?.select)}
+            className={cx(inputClassName, classNames?.autocompleteSelect)}
             style={mergeStyles(
               controlErrorStyle,
-              styles?.input,
-              styles?.select,
+              styles?.autocompleteInput,
+              styles?.autocompleteSelect,
               inputPropsStyle,
             )}
           >
             <span
               data-fb-slot="select-value"
-              className={classNames?.selectValue}
-              style={mergeStyles(styles?.selectValue)}
+              className={classNames?.autocompleteSelectValue}
+              style={mergeStyles(styles?.autocompleteSelectValue)}
             >
               {pickerContext.triggerLabel}
             </span>
             <span
               aria-hidden="true"
               data-fb-slot="select-arrow"
-              className={classNames?.selectArrow}
-              style={mergeStyles(styles?.selectArrow)}
+              className={classNames?.autocompleteSelectArrow}
+              style={mergeStyles(styles?.autocompleteSelectArrow)}
             >
               ▼
             </span>
@@ -520,7 +520,11 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
             }}
             data-fb-slot="input"
             className={inputClassName}
-            style={mergeStyles(controlErrorStyle, styles?.input, inputPropsStyle)}
+            style={mergeStyles(
+              controlErrorStyle,
+              styles?.autocompleteInput,
+              inputPropsStyle,
+            )}
             {...inputPropsRest}
           />
 
@@ -529,22 +533,22 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
               id={listboxId}
               role="listbox"
               data-fb-slot="listbox"
-              className={classNames?.listbox}
-              style={mergeStyles(defaultListboxStyle, styles?.listbox)}
+              className={classNames?.autocompleteListbox}
+              style={mergeStyles(defaultListboxStyle, styles?.autocompleteListbox)}
             >
               {loading ? (
                 <div
                   data-fb-slot="loading"
-                  className={classNames?.loading}
-                  style={mergeStyles(defaultStatusStyle, styles?.loading)}
+                  className={classNames?.autocompleteLoading}
+                  style={mergeStyles(defaultStatusStyle, styles?.autocompleteLoading)}
                 >
                   {renderLoading?.() ?? 'Loading...'}
                 </div>
               ) : options.length === 0 ? (
                 <div
                   data-fb-slot="empty"
-                  className={classNames?.empty}
-                  style={mergeStyles(defaultStatusStyle, styles?.empty)}
+                  className={classNames?.autocompleteEmpty}
+                  style={mergeStyles(defaultStatusStyle, styles?.autocompleteEmpty)}
                 >
                   {renderEmpty?.() ?? 'No results'}
                 </div>
@@ -565,9 +569,9 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                       {...(active ? { 'data-fb-active': '' } : {})}
                       {...(selected ? { 'data-fb-selected': '' } : {})}
                       className={cx(
-                        classNames?.option,
-                        active && classNames?.optionActive,
-                        selected && classNames?.optionSelected,
+                        classNames?.autocompleteOption,
+                        active && classNames?.autocompleteOptionActive,
+                        selected && classNames?.autocompleteOptionSelected,
                       )}
                       onMouseDown={(event) => {
                         event.preventDefault();
@@ -576,14 +580,17 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                       onMouseEnter={() => setHighlightedIndex(index)}
                       style={mergeStyles(
                         defaultOptionStyle,
-                        styles?.option,
+                        styles?.autocompleteOption,
                         active
-                          ? mergeStyles(defaultOptionActiveStyle, styles?.optionActive)
+                          ? mergeStyles(
+                              defaultOptionActiveStyle,
+                              styles?.autocompleteOptionActive,
+                            )
                           : undefined,
                         selected
                           ? mergeStyles(
                               defaultOptionSelectedStyle,
-                              styles?.optionSelected,
+                              styles?.autocompleteOptionSelected,
                             )
                           : undefined,
                       )}

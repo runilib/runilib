@@ -1,6 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
 import {
-  DOC_PREVIEWS,
   WIZARD_EVENT_SURFACE,
   WIZARD_OPTIONS_SURFACE,
   WIZARD_RETURN_SURFACE,
@@ -18,10 +17,11 @@ export const wizardSection: LibraryDoc['sections'][number] = {
 - Pass \`stepId\` + \`onStepChange\` to let a router or native navigator own cross-page / cross-screen navigation while the wizard keeps the state machine`,
   codeTabs: [
     {
-      filename: 'Wizard.tsx',
+      filename: 'WizardPlayground.tsx',
+      interactive: true,
       lang: 'tsx',
-      preview: DOC_PREVIEWS.wizard,
-      code: `import type { FormSchema } from '@runilib/react-formbridge'
+      code: `import { useState } from 'react'
+import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridgeWizard } from '@runilib/react-formbridge'
 
 const steps = [
@@ -50,10 +50,15 @@ const steps = [
   },
 ]
 
-export function SignupWizard() {
+export function WizardPlayground() {
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+
   const wizard = useFormBridgeWizard(steps, {
-    persist: { key: 'signup-wizard' },
-    onSubmit: (allValues) => api.save(allValues),
+    validateOn: 'onBlur',
+    revalidateOn: 'onChange',
+    onSubmit: async (allValues) => {
+      setSubmitted(allValues)
+    },
   })
 
   if (!wizard.step) return null
@@ -61,17 +66,77 @@ export function SignupWizard() {
   const { Form, fields } = wizard.currentStep
 
   return (
-    <div>
-      <p>Step {wizard.currentStepIndex + 1} / {wizard.totalSteps}</p>
-      <Form onSubmit={wizard.next}>
+    <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#f5f7fb' }}>
+      <p style={{ marginTop: 0, color: '#4b5563' }}>
+        Step <strong>{wizard.currentStepIndex + 1}</strong> / {wizard.totalSteps}
+        {' · '}
+        {wizard.step.label}
+        {' · '}
+        Progress: {wizard.progress}%
+      </p>
+
+      <p style={{ color: '#4b5563' }}>
+        Visible steps: {wizard.visibleSteps.map((step) => step.id).join(' → ')}
+      </p>
+
+      <Form
+        onSubmit={async () => {
+          if (wizard.isLastStep) await wizard.submit()
+          else await wizard.next()
+        }}
+      >
         {'email' in fields && <fields.email />}
         {'password' in fields && <fields.password />}
         {'firstName' in fields && <fields.firstName />}
         {'country' in fields && <fields.country />}
-        <Form.Submit>{wizard.isLastStep ? 'Finish' : 'Next'}</Form.Submit>
+        {wizard.step.id === 'review' ? (
+          <pre
+            style={{
+              marginTop: 0,
+              padding: 12,
+              borderRadius: 12,
+              border: '1px solid #d6d9e0',
+              background: '#fff',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {JSON.stringify(wizard.allValues, null, 2)}
+          </pre>
+        ) : null}
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {!wizard.isFirstStep && (
+            <button type="button" onClick={wizard.prev}>
+              Back
+            </button>
+          )}
+          {wizard.step.optional ? (
+            <button type="button" onClick={() => wizard.skip()}>
+              Skip optional step
+            </button>
+          ) : null}
+          <Form.Submit>{wizard.isLastStep ? 'Finish' : 'Next'}</Form.Submit>
+        </div>
       </Form>
-      {!wizard.isFirstStep && <button onClick={wizard.prev}>Back</button>}
-      {wizard.isLastStep && <button onClick={wizard.submit}>Submit</button>}
+
+      <div
+        style={{
+          marginTop: 16,
+          border: '1px solid #d6d9e0',
+          borderRadius: 12,
+          padding: 12,
+          background: '#fff',
+        }}
+      >
+        <strong>Completed steps</strong>
+        <p style={{ marginBottom: 8 }}>
+          {Array.from(wizard.completedSteps).join(', ') || 'None yet'}
+        </p>
+        <strong>Last submit</strong>
+        <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(submitted, null, 2)}
+        </pre>
+      </div>
     </div>
   )
 }`,
@@ -79,7 +144,6 @@ export function SignupWizard() {
     {
       filename: 'WizardRoute.web.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.wizard,
       code: `import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import type { FormSchema } from '@runilib/react-formbridge'

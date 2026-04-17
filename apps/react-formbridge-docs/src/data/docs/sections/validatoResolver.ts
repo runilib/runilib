@@ -1,6 +1,5 @@
 import type { LibraryDoc } from '../../../types/index';
 import {
-  DOC_PREVIEWS,
   RESOLVER_LIBRARY_OPTIONS_SURFACE,
   RESOLVER_SHARED_OPTIONS_SURFACE,
 } from '../constants';
@@ -19,7 +18,6 @@ export const adaptersSection: LibraryDoc['sections'][number] = {
     {
       filename: 'zod-resolver.ts',
       lang: 'ts',
-      preview: DOC_PREVIEWS.resolver,
       code: `import { z } from 'zod'
 import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge'
 
@@ -40,7 +38,6 @@ const form = useFormBridge(schema, {
     {
       filename: 'yup-resolver.ts',
       lang: 'ts',
-      preview: DOC_PREVIEWS.resolver,
       code: `import * as yup from 'yup'
 import { field, useFormBridge, yupResolver } from '@runilib/react-formbridge'
 
@@ -61,7 +58,6 @@ const form = useFormBridge(schema, {
     {
       filename: 'joi-resolver.ts',
       lang: 'ts',
-      preview: DOC_PREVIEWS.resolver,
       code: `import Joi from 'joi'
 import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge'
 
@@ -82,7 +78,6 @@ const form = useFormBridge(schema, {
     {
       filename: 'valibot-resolver.ts',
       lang: 'ts',
-      preview: DOC_PREVIEWS.resolver,
       code: `import * as v from 'valibot'
 import {
   field,
@@ -115,7 +110,6 @@ ${RESOLVER_SHARED_OPTIONS_SURFACE}`,
       code: {
         filename: 'resolver-options.ts',
         lang: 'ts',
-        preview: DOC_PREVIEWS.resolver,
         code: `import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge'
 import Joi from 'joi'
 
@@ -159,12 +153,14 @@ ${RESOLVER_LIBRARY_OPTIONS_SURFACE}
     {
       id: 'fb-adapter-tips',
       title: 'Tips',
-      content: `- The resolver must return \`{ values, errors }\`
-- The built-in adapters already handle this contract for you; customize them before writing a custom resolver from scratch
-- Root errors default to \`'_root'\`, which is useful for banner-level or submit-level failures
-- A resolver works with the same \`useFormBridge()\` API on web and native
-- Prefer resolvers when business validation already exists elsewhere; prefer builder rules when the validation belongs to the field itself
-- \`valibotResolver\` expects \`valibot\` to be installed in the consumer app, or passed explicitly via \`module: v\``,
+      content: `| Tip | Details |
+| --- | --- |
+| Resolver contract | Must return \`{ values, errors }\` — the built-in adapters already handle this for you |
+| Prefer built-ins | Customize an existing adapter before writing a custom resolver from scratch |
+| Root errors | Default to \`'_root'\` — useful for banner-level or submit-level failures |
+| Cross-platform | A resolver works with the same \`useFormBridge()\` API on web and native |
+| When to reach for a resolver | Business validation already exists elsewhere — otherwise prefer builder rules |
+| Valibot specifics | Expects \`valibot\` installed in the consumer app, or passed explicitly via \`module: v\` |`,
     },
   ],
 };

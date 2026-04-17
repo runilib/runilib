@@ -1,5 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable, FENCE } from '../constants';
 
 const CHECKBOX_METHODS_TABLE = buildMethodsTable([
   [
@@ -49,10 +49,35 @@ ${CHECKBOX_METHODS_TABLE}`,
     {
       id: 'fb-checkbox-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase checkbox-specific use cases:
-- Legal gate → \`field.checkbox('I accept the Terms of Service').mustBeTrue('You must accept the terms to continue.')\`
-- GDPR consent with hint → \`field.checkbox('Allow data processing').mustBeTrue().hint('Required by EU regulation')\`
-- Optional newsletter opt-in → \`field.checkbox('Send me product updates').hint('You can unsubscribe any time')\``,
+      content: `Patterns that showcase checkbox-specific use cases.
+
+**Legal gate**
+
+${FENCE}tsx TermsGate.tsx
+const schema = {
+  terms: field.checkbox('I accept the Terms of Service')
+    .mustBeTrue('You must accept the terms to continue.'),
+}
+${FENCE}
+
+**GDPR consent with hint**
+
+${FENCE}tsx GdprConsent.tsx
+const schema = {
+  dataProcessing: field.checkbox('Allow data processing')
+    .mustBeTrue()
+    .hint('Required by EU regulation'),
+}
+${FENCE}
+
+**Optional newsletter opt-in**
+
+${FENCE}tsx Newsletter.tsx
+const schema = {
+  productUpdates: field.checkbox('Send me product updates')
+    .hint('You can unsubscribe any time'),
+}
+${FENCE}`,
     },
   ],
 };

@@ -38,10 +38,13 @@ await form.clearDraft()`,
 ${PERSIST_OPTIONS_SURFACE}
 
 Draft helpers exposed through \`useFormBridge()\`:
-- \`isLoadingDraft\`
-- \`hasDraft\`
-- \`saveDraftNow()\`
-- \`clearDraft()\``,
+
+| Helper | Description |
+| --- | --- |
+| \`isLoadingDraft\` | \`true\` while the runtime is rehydrating a saved draft on mount |
+| \`hasDraft\` | \`true\` once a draft was found and applied for this form key |
+| \`saveDraftNow()\` | Force-flush the current values to storage (bypasses debounce) |
+| \`clearDraft()\` | Delete the stored draft for this form key |`,
     },
   ],
 };

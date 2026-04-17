@@ -1,5 +1,4 @@
 import type { LibraryDoc } from './../../../types/index';
-import { DOC_PREVIEWS } from '../constants';
 
 export const tutorialCustomUiSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial-custom-ui',
@@ -8,7 +7,7 @@ export const tutorialCustomUiSection: LibraryDoc['sections'][number] = {
 
 - Use \`fieldController(name)\` when the value model is still one of the built-in field types and you only want custom UI
 - Use \`field.custom(defaultValue)\` when the field needs a new value model
-- Keep styling in global ui overrides, local field overrides, or host components so the schema stays focused on behavior`,
+- Keep styling in \`globalDefaults\`, local field overrides, or host components so the schema stays focused on behavior`,
   codeTabs: [
     {
       filename: 'CustomRenderedMask.web.tsx',
@@ -137,7 +136,6 @@ export function MissionControlScreen() {
         {
           filename: 'StyledRecipe.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingStyledWeb,
           code: `import styled from 'styled-components'
 import {
   FieldHost,
@@ -153,9 +151,7 @@ const Shell = styled(FormHost)\`
 \`
 
 const EmailField = styled(FieldHost).attrs({
-  ui: {
-    inputProps: { autoComplete: 'email', inputMode: 'email' },
-  },
+  inputProps: { autoComplete: 'email', inputMode: 'email' },
 })\`
   & input {
     border-radius: 8px;
@@ -189,7 +185,6 @@ export function StyledRecipe() {
         {
           filename: 'StyledRecipe.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.stylingStyledNative,
           code: `import styled from 'styled-components/native'
 import {
   FieldHost,

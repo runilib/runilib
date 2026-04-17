@@ -20,6 +20,10 @@ import type { MaskedDescriptor } from '../../core/field-builders/mask/types';
 import type { FocusableFieldHandle } from '../../types';
 import type { WebTextFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
+import {
+  defaultMaskedFieldWrapperStyle,
+  defaultMaskedInputStyle,
+} from './default-styles';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultErrorChromeStyle,
@@ -27,21 +31,6 @@ import {
   resolveWebInputBehavior,
   shouldHighlightOnError,
 } from './shared';
-
-const defaultMaskedFieldWrapperStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'stretch',
-  gap: 5,
-  minWidth: 0,
-};
-
-const defaultMaskedInputStyle: CSSProperties = {
-  display: 'flex',
-  boxSizing: 'border-box',
-  lineHeight: 1.25,
-  fontVariantNumeric: 'tabular-nums',
-};
 
 interface Props extends FieldRenderProps<string> {
   descriptor: MaskedDescriptor<string> & {
@@ -302,7 +291,7 @@ export const MaskedInput: React.FC<Props> = ({
     [firstEditablePos, resolveMaxCaretPos],
   );
 
-  const inputClassName = cx(classNames?.input, inputPropsClassName);
+  const inputClassName = cx(classNames?.textInput, inputPropsClassName);
   const wrapperClassName = cx(
     extra?.className,
     classNames?.wrapper,
@@ -381,13 +370,13 @@ export const MaskedInput: React.FC<Props> = ({
         onKeyDown={handleKeyDown}
         style={mergeStyles(
           {
-            width: `${autoLayout.webWidthCh}ch`,
-            minWidth: 0,
+            width: '100%',
+            minWidth: `${autoLayout.webWidthCh}ch`,
             maxWidth: '100%',
           },
           defaultMaskedInputStyle,
           controlErrorStyle,
-          styles?.input,
+          styles?.textInput,
           inputPropsStyle,
         )}
         {...inputPropsRest}

@@ -1,7 +1,6 @@
 import type {
   FieldPropsOverrides,
-  // FormBridgeOptions,
-  FormBridgePropsOptions,
+  GlobaleDefaultsProps,
   OptionsFetcherContext,
   SelectOption,
 } from '@runilib/react-formbridge';
@@ -101,7 +100,7 @@ function createBaseDemoFieldUi(styles: Record<string, string>): FieldPropsOverri
     classNames: {
       wrapper: styles.formField,
       label: styles.formLabel,
-      input: styles.formInput,
+      textInput: styles.formInput,
     },
     styles: {
       wrapper: {
@@ -122,7 +121,7 @@ function createBaseDemoFieldUi(styles: Record<string, string>): FieldPropsOverri
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
       },
-      input: {
+      textInput: {
         background: '#ffffff',
         border: '1.5px solid rgba(37, 99, 235, 0.16)',
         borderRadius: 6,
@@ -149,8 +148,8 @@ export function createDemoFieldUi(styles: Record<string, string>): {
       ...baseFieldUi,
       styles: {
         ...baseFieldUi.styles,
-        input: {
-          ...baseFieldUi.styles?.input,
+        textInput: {
+          ...baseFieldUi.styles?.textInput,
           letterSpacing: '0.08em',
         },
       },
@@ -158,7 +157,7 @@ export function createDemoFieldUi(styles: Record<string, string>): {
   } as const;
 }
 
-export function createDemoFormUi(styles: Record<string, string>): FormBridgePropsOptions {
+export function createDemoFormUi(styles: Record<string, string>): GlobaleDefaultsProps {
   const baseFieldUi = createBaseDemoFieldUi(styles);
 
   return {
@@ -172,8 +171,8 @@ export function createDemoFormUi(styles: Record<string, string>): FormBridgeProp
       },
       styles: {
         ...baseFieldUi.styles,
-        input: {
-          ...baseFieldUi.styles?.input,
+        textInput: {
+          ...baseFieldUi.styles?.textInput,
           borderRadius: 5,
         },
         select: {

@@ -336,12 +336,14 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
         onPress={openPicker}
         disabled={descriptor._disabled || isReadOnly}
         testID={inputBehavior.testID}
-        style={sx(defaultTriggerStyle, styles?.trigger, controlErrorStyle)}
+        style={sx(defaultTriggerStyle, styles?.autocompleteTrigger, controlErrorStyle)}
       >
         <Text
           style={sx(
             selectedOption ? defaultTriggerValueStyle : defaultTriggerPlaceholderStyle,
-            selectedOption ? styles?.triggerValue : styles?.triggerPlaceholder,
+            selectedOption
+              ? styles?.autocompleteTriggerValue
+              : styles?.autocompleteTriggerPlaceholder,
           )}
         >
           {selectedOption?.label || descriptor._placeholder || `Select ${label}`}
@@ -378,11 +380,11 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
           onRequestClose={closePicker}
         >
           <Pressable
-            style={sx(defaultModalBackdropStyle, styles?.modalBackdrop)}
+            style={sx(defaultModalBackdropStyle, styles?.autocompleteModalBackdrop)}
             onPress={closePicker}
           >
             <Pressable
-              style={sx(defaultModalCardStyle, styles?.modalCard)}
+              style={sx(defaultModalCardStyle, styles?.autocompleteModalCard)}
               onPress={(event) => event.stopPropagation()}
             >
               <TextInput
@@ -390,7 +392,11 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                 onChangeText={setSearch}
                 placeholder={`Search ${label}...`}
                 autoFocus
-                style={sx(defaultSearchInputStyle, styles?.searchInput, inputPropsStyle)}
+                style={sx(
+                  defaultSearchInputStyle,
+                  styles?.autocompleteSearchInput,
+                  inputPropsStyle,
+                )}
                 autoComplete={
                   inputBehavior.autoComplete as TextInputProps['autoComplete']
                 }
@@ -402,9 +408,11 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
               />
 
               {loading ? (
-                <View style={sx(defaultLoadingRowStyle, styles?.loadingRow)}>
+                <View style={sx(defaultLoadingRowStyle, styles?.autocompleteLoadingRow)}>
                   <ActivityIndicator size="small" />
-                  <Text style={sx(defaultLoadingTextStyle, styles?.loadingText)}>
+                  <Text
+                    style={sx(defaultLoadingTextStyle, styles?.autocompleteLoadingText)}
+                  >
                     Loading...
                   </Text>
                 </View>
@@ -425,7 +433,7 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                 keyboardShouldPersistTaps="handled"
                 renderItem={({ item }) => (
                   <Pressable
-                    style={sx(defaultOptionRowStyle, styles?.optionRow)}
+                    style={sx(defaultOptionRowStyle, styles?.autocompleteOptionRow)}
                     onPress={() => {
                       onChange(String(item.value));
                       clearSearch();
@@ -433,14 +441,18 @@ export const AsyncAutocompleteField: React.FC<Props> = ({
                       onBlur();
                     }}
                   >
-                    <Text style={sx(defaultOptionLabelStyle, styles?.optionLabel)}>
+                    <Text
+                      style={sx(defaultOptionLabelStyle, styles?.autocompleteOptionLabel)}
+                    >
                       {item.label}
                     </Text>
                   </Pressable>
                 )}
                 ListEmptyComponent={
                   loading === false ? (
-                    <Text style={sx(defaultEmptyTextStyle, styles?.emptyText)}>
+                    <Text
+                      style={sx(defaultEmptyTextStyle, styles?.autocompleteEmptyText)}
+                    >
                       No results.
                     </Text>
                   ) : null

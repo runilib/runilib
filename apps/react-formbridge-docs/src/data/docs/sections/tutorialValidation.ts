@@ -1,5 +1,4 @@
 import type { LibraryDoc } from './../../../types/index';
-import { DOC_PREVIEWS } from '../constants';
 
 export const tutorialValidationSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial-validation',
@@ -50,7 +49,6 @@ const form = useFormBridge(schema, {
         {
           filename: 'zod-resolver.ts',
           lang: 'ts',
-          preview: DOC_PREVIEWS.resolver,
           code: `import { z } from 'zod'
 import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge'
 
@@ -71,7 +69,6 @@ const form = useFormBridge(schema, {
         {
           filename: 'yup-resolver.ts',
           lang: 'ts',
-          preview: DOC_PREVIEWS.resolver,
           code: `import * as yup from 'yup'
 import { field, useFormBridge, yupResolver } from '@runilib/react-formbridge'
 
@@ -92,7 +89,6 @@ const form = useFormBridge(schema, {
         {
           filename: 'joi-resolver.ts',
           lang: 'ts',
-          preview: DOC_PREVIEWS.resolver,
           code: `import Joi from 'joi'
 import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge'
 
@@ -113,7 +109,6 @@ const form = useFormBridge(schema, {
         {
           filename: 'valibot-resolver.ts',
           lang: 'ts',
-          preview: DOC_PREVIEWS.resolver,
           code: `
 import * as v from 'valibot'
 import { field, useFormBridge, valibotResolver } from '@runilib/react-formbridge'
@@ -137,22 +132,51 @@ const form = useFormBridge(schema, {
     {
       id: 'fb-tutorial-validation-async',
       title: 'Async lookups and remote options',
-      content: `Remote search belongs in a different lane than validation, but in real products they often meet in the same field.`,
+      content: `Remote search belongs in a different lane than validation, but in real products they often meet in the same field.
+
+- The interactive examples below use mocked city data so the playground behaves like a real lookup flow without depending on an unavailable demo API`,
       codeTabs: [
         {
           filename: 'AsyncCity.web.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.asyncWeb,
           code: `
+import { useState } from 'react'
 import { useAsyncOptions } from '@runilib/react-formbridge'
 
-const cityFetcher = async ({ search, deps, signal }) => {
-  const res = await fetch('/api/cities?country=' + deps.country + '&q=' + encodeURIComponent(search), { signal })
-  const data = await res.json()
-  return data.map((city: { id: string; name: string }) => ({ value: city.id, label: city.name }))
+const CITY_DB = {
+  FR: ['Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Lille'],
+  US: ['New York', 'San Francisco', 'Chicago', 'Seattle', 'Austin'],
+  GB: ['London', 'Manchester', 'Bristol', 'Leeds', 'Edinburgh'],
 }
 
-export function CitySelect({ country }: { country: string }) {
+const cityFetcher = async ({ search, deps, signal }) => {
+  await new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(resolve, 450)
+
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timeoutId)
+        reject(new DOMException('Aborted', 'AbortError'))
+      },
+      { once: true },
+    )
+  })
+
+  const allCities = CITY_DB[deps.country] ?? []
+  const normalized = search.trim().toLowerCase()
+
+  return allCities
+    .filter((city) => city.toLowerCase().includes(normalized))
+    .map((city) => ({
+      value: city.toLowerCase().replace(/\\s+/g, '-'),
+      label: city,
+    }))
+}
+
+export function CitySelect() {
+  const [country, setCountry] = useState('FR')
+
   const cities = useAsyncOptions({
     key: 'cities',
     fetch: cityFetcher,
@@ -161,19 +185,56 @@ export function CitySelect({ country }: { country: string }) {
     minChars: 2,
     fetchOnMount: false,
     cacheTtl: 5 * 60_000,
+    keepPreviousOptions: true,
   }, { country })
+
   const canSearch = cities.search.trim().length >= 2
+  const loadingLabel = canSearch && cities.loading
+    ? cities.options.length > 0
+      ? 'Refreshing results...'
+      : 'Loading...'
+    : null
 
   return (
-    <div>
+    <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#f5f7fb' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+        {['FR', 'US', 'GB'].map((nextCountry) => (
+          <button
+            key={nextCountry}
+            type="button"
+            onClick={() => setCountry(nextCountry)}
+            style={{ fontWeight: country === nextCountry ? 700 : 500 }}
+          >
+            {nextCountry}
+          </button>
+        ))}
+      </div>
+
+      <p style={{ marginTop: 0, color: '#4b5563' }}>
+        Country: <strong>{country}</strong>
+      </p>
+
       <input
         placeholder="Type at least 2 characters"
         value={cities.search}
         onChange={(e) => cities.setSearch(e.target.value)}
+        style={{
+          width: '100%',
+          maxWidth: 320,
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid #cbd5e1',
+          marginBottom: 12,
+        }}
       />
       {!canSearch ? <p>Type at least 2 characters</p> : null}
-      {canSearch && cities.loading ? <p>Loading...</p> : null}
-      <ul>{cities.options.map((option) => <li key={option.value}>{option.label}</li>)}</ul>
+      {loadingLabel ? <p>{loadingLabel}</p> : null}
+      {cities.error ? <p>{cities.error}</p> : null}
+      <ul style={{ margin: 0, paddingLeft: 18 }}>
+        {cities.options.map((option) => (
+          <li key={option.value}>{option.label}</li>
+        ))}
+      </ul>
     </div>
   )
 }`,
@@ -181,34 +242,75 @@ export function CitySelect({ country }: { country: string }) {
         {
           filename: 'AsyncCity.native.tsx',
           lang: 'tsx',
-          preview: DOC_PREVIEWS.asyncNative,
           code: `
+import { useState } from 'react'
 import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useAsyncOptions } from '@runilib/react-formbridge'
 
-export function CityPicker({ country }: { country: string }) {
+const CITY_DB = {
+  FR: ['Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Lille'],
+  US: ['New York', 'San Francisco', 'Chicago', 'Seattle', 'Austin'],
+  GB: ['London', 'Manchester', 'Bristol', 'Leeds', 'Edinburgh'],
+}
+
+export function CityPicker() {
+  const [country, setCountry] = useState('FR')
+
   const cities = useAsyncOptions({
-    key: 'cities',
-    fetch: async ({ search, deps }) => {
-      const res = await fetch('https://example.com/cities?country=' + deps.country + '&q=' + search)
-      const data = await res.json()
-      return data.map((city: any) => ({ value: city.id, label: city.name }))
+    key: 'cities-tutorial',
+    fetch: async ({ search, deps, signal }) => {
+      await new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(resolve, 450)
+
+        signal.addEventListener(
+          'abort',
+          () => {
+            clearTimeout(timeoutId)
+            reject(new Error('aborted'))
+          },
+          { once: true },
+        )
+      })
+
+      return (CITY_DB[deps.country] ?? [])
+        .filter((city) => city.toLowerCase().includes(search.trim().toLowerCase()))
+        .map((city) => ({
+          value: city.toLowerCase().replace(/\\s+/g, '-'),
+          label: city,
+        }))
     },
     dependsOn: ['country'],
+    debounce: 250,
     minChars: 2,
     fetchOnMount: false,
+    keepPreviousOptions: true,
   }, { country })
+
   const canSearch = cities.search.trim().length >= 2
+  const loadingLabel = canSearch && cities.loading
+    ? cities.options.length > 0
+      ? 'Refreshing results...'
+      : 'Loading...'
+    : null
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 8, padding: 16 }}>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {['FR', 'US', 'GB'].map((nextCountry) => (
+          <TouchableOpacity key={nextCountry} onPress={() => setCountry(nextCountry)}>
+            <Text>{country === nextCountry ? '[' + nextCountry + ']' : nextCountry}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <Text>Country: {country}</Text>
       <TextInput
         placeholder="Type at least 2 characters"
         value={cities.search}
         onChangeText={cities.setSearch}
       />
       {!canSearch ? <Text>Type at least 2 characters</Text> : null}
-      {canSearch && cities.loading ? <Text>Loading…</Text> : null}
+      {loadingLabel ? <Text>{loadingLabel}</Text> : null}
+      {cities.error ? <Text>{cities.error}</Text> : null}
       <FlatList
         data={cities.options}
         keyExtractor={(item) => String(item.value)}

@@ -39,6 +39,10 @@
       "outputs": []
     },
 
+    "check:fix": {
+      "outputs": []
+    },
+
     // Typecheck
     "typecheck": {
       "cache": false,

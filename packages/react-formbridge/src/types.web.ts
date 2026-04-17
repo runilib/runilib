@@ -13,7 +13,7 @@ import type {
   SubmitButtonComponent as SharedSubmitButtonComponent,
   SubmitButtonProps as SharedSubmitButtonProps,
   UseFormBridgeReturn as SharedUseFormBridgeReturn,
-  UseFormOptions as SharedUseFormOptions,
+  UseFormBridgeOptions as SharedUseFormOptions,
   WebFieldPropsOverrides,
   WebFormPropsOverrides,
   WebGlobalFieldPropsOverrides,
@@ -86,8 +86,8 @@ export type SubmitButtonProps = SharedSubmitButtonProps<'web'>;
 export type SubmitButtonComponent = SharedSubmitButtonComponent<'web'>;
 export type FieldComponent<TProps = ExtraFieldProps> = SharedFieldComponent<TProps>;
 export type FieldComponents<S extends FormSchema> = SharedFieldComponents<S, 'web'>;
-export type FormBridgePropsOptions = SharedFormBridgeOptions<'web'>;
-export type UseFormOptions<S extends FormSchema> = SharedUseFormOptions<S, 'web'>;
+export type GlobaleDefaultsProps = SharedFormBridgeOptions<'web'>;
+export type UseFormBridgeOptions<S extends FormSchema> = SharedUseFormOptions<S, 'web'>;
 export type FieldErrorProps<S extends FormSchema> = SharedErrorMessageProps<S, 'web'>;
 export type FieldLabelProps<S extends FormSchema> = SharedLabelProps<S, 'web'>;
 export type UseFormBridgeReturn<S extends FormSchema> = SharedUseFormBridgeReturn<

@@ -47,7 +47,7 @@ export const useFormBridgeSection: LibraryDoc['sections'][number] = {
   formKey: 'checkout-step-1',
   initialValues: { quantity: 2 },
   analytics,
-  globalConfigs: (state) => ({
+  globalDefaults: (state) => ({
     submit: {
       loadingText: state.isSubmitting ? 'Saving...' : 'Save',
     },

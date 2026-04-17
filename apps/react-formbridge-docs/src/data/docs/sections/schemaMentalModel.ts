@@ -5,7 +5,7 @@ export const schemaMentalModelSection: LibraryDoc['sections'][number] = {
   title: 'Schema mental model',
   content: `A schema is a plain object where each key becomes a field name and each value is a builder.
 
-- The builder defines the field type, default value, label, validation, visibility conditions, and platform hints.
+- The builder defines the field type, default value, label, validation, visibility conditions and more.
 - \`SchemaValues<typeof schema>\` gives you the submitted values shape automatically.
 - Because the schema is just data, the same object can drive editing forms, wizards, readonly reviews, analytics, and even dynamic rendering.
 - The practical rule of thumb: if a behavior belongs to the field itself, keep it in the builder instead of scattering it across components.`,
@@ -13,10 +13,12 @@ export const schemaMentalModelSection: LibraryDoc['sections'][number] = {
     {
       id: 'fb-schema-mental-model-shape',
       title: 'What the schema controls',
-      content: `- Rendering: text input, select, radio, phone, file, OTP, custom renderer, and more
-- Validation: required rules, length/number constraints, async validators, cross-field checks
-- UX metadata: labels, placeholders, hints, web overrides
-- Runtime conditions: visible, required, disabled, resetFields/clear/keep on hide`,
+      content: `| Concern | What the schema controls |
+| --- | --- |
+| Rendering | Text input, select, radio, phone, file, OTP, custom renderer, and more |
+| Validation | Required rules, length/number constraints, async validators, cross-field checks |
+| UX metadata | Labels, placeholders, hints, error messages... |
+| Runtime conditions | Visible, required, disabled, resetFields/clear/keep on hide |`,
     },
     {
       id: 'fb-schema-mental-model-typing-tip',

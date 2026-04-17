@@ -1,6 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
 import {
-  DOC_PREVIEWS,
   DYNAMIC_JSON_SURFACE,
   DYNAMIC_OPTIONS_SURFACE,
   DYNAMIC_RETURN_SURFACE,
@@ -18,44 +17,144 @@ export const dynamicSection: LibraryDoc['sections'][number] = {
 - A very practical pattern is “one dynamic step per route” for cross-page wizards whose step definitions come from a backend`,
   codeTabs: [
     {
-      filename: 'DynamicForm.web.tsx',
+      filename: 'DynamicFormPlayground.web.tsx',
+      interactive: true,
       lang: 'tsx',
-      preview: DOC_PREVIEWS.dynamic,
-      code: `import { useDynamicFormBridge } from '@runilib/react-formbridge'
+      code: `import { useMemo, useState } from 'react'
+import { useDynamicFormBridge } from '@runilib/react-formbridge'
 
-const definition = {
-  title: 'Feedback',
-  fields: [
-    { type: 'text', name: 'fullName', label: 'Full name', required: true },
-    { type: 'email', name: 'email', label: 'Email', required: true },
-    { type: 'textarea', name: 'comment', label: 'Comment', max: 400 },
-  ],
+const DEFINITIONS = {
+  feedback: {
+    id: 'feedback',
+    title: 'Product feedback',
+    submitLabel: 'Send feedback',
+    fields: [
+      { type: 'text', name: 'fullName', label: 'Full name', required: true },
+      { type: 'email', name: 'email', label: 'Email', required: true },
+      {
+        type: 'select',
+        name: 'topic',
+        label: 'Topic',
+        options: ['UX', 'Performance', 'Bug report'],
+        required: true,
+      },
+      { type: 'textarea', name: 'comment', label: 'Comment', min: 10, max: 400 },
+    ],
+  },
+  callback: {
+    id: 'callback',
+    title: 'Request a callback',
+    submitLabel: 'Book callback',
+    fields: [
+      { type: 'text', name: 'fullName', label: 'Full name', required: true },
+      { type: 'tel', name: 'phone', label: 'Phone', required: true },
+      {
+        type: 'select',
+        name: 'bestTime',
+        label: 'Best time',
+        options: ['Morning', 'Afternoon', 'Evening'],
+        required: true,
+      },
+      { type: 'checkbox', name: 'hasOrder', label: 'I already have an order' },
+      {
+        type: 'text',
+        name: 'orderNumber',
+        label: 'Order number',
+        showWhen: { field: 'hasOrder', value: true },
+      },
+    ],
+  },
 }
 
-export function DynamicFeedback() {
-  const { form, fieldOrder, isLoading, loadError } = useDynamicFormBridge(definition, {
-    validateOn: 'onSubmit',
-    defaultValues: { fullName: 'Ava Stone' },
-  })
+export function DynamicFormPlayground() {
+  const [kind, setKind] = useState<'feedback' | 'callback'>('feedback')
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+  const definition = useMemo(() => DEFINITIONS[kind], [kind])
 
-  if (!form) return isLoading ? <p>Loading…</p> : <p>Error: {loadError}</p>
+  const { form, fieldOrder, meta, isVisible, isLoading, loadError } = useDynamicFormBridge(
+    definition,
+    {
+      formKey: kind,
+      validateOn: 'onBlur',
+      defaultValues:
+        kind === 'feedback'
+          ? { fullName: 'Ava Stone', topic: 'UX' }
+          : { fullName: 'Ava Stone', bestTime: 'Morning' },
+    },
+  )
 
-  const { Form, fields } = form
+  if (!form) {
+    return (
+      <p>{isLoading ? 'Loading…' : 'Error: ' + String(loadError ?? 'Unknown error')}</p>
+    )
+  }
+
+  const { Form, fields, state } = form
+
   return (
-    <Form onSubmit={(values) => api.send(values)}>
-      {fieldOrder.map((name) => {
-        const Field = fields[name]
-        return <Field key={name} />
-      })}
-      <Form.Submit>Send</Form.Submit>
-    </Form>
+    <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#f5f7fb' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+        <button type="button" onClick={() => setKind('feedback')}>
+          Feedback form
+        </button>
+        <button type="button" onClick={() => setKind('callback')}>
+          Callback form
+        </button>
+      </div>
+
+      <p style={{ marginTop: 0, color: '#4b5563' }}>
+        Current definition: <strong>{meta.title ?? 'Untitled form'}</strong>
+      </p>
+
+      <Form
+        onSubmit={async (values) => {
+          setSubmitted(values)
+        }}
+      >
+        {fieldOrder.filter((name) => isVisible(name)).map((name) => {
+          const Field = fields[name]
+          return <Field key={name} />
+        })}
+
+        <Form.Submit>{meta.submitLabel ?? 'Submit'}</Form.Submit>
+      </Form>
+
+      <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Live values</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+            {JSON.stringify(state.values, null, 2)}
+          </pre>
+        </div>
+
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Last submit</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+            {JSON.stringify(submitted, null, 2)}
+          </pre>
+        </div>
+      </div>
+    </div>
   )
 }`,
     },
     {
       filename: 'Dynamic.native.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.dynamic,
       code: `import { ScrollView, View, Text } from 'react-native'
 import { useDynamicFormBridge } from '@runilib/react-formbridge'
 
@@ -89,7 +188,6 @@ export function RemoteDynamic({ url }: { url: string }) {
     {
       filename: 'DynamicWizardStep.web.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.dynamic,
       code: `import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDynamicFormBridge } from '@runilib/react-formbridge'
@@ -157,7 +255,6 @@ export function DynamicSignupStepRoute() {
     {
       filename: 'DynamicWizardStep.native.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.dynamic,
       code: `import { ScrollView, Text, View } from 'react-native'
 import { useMemo } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'

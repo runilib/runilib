@@ -42,9 +42,8 @@ const checkoutSchema = schema({
     .label('CVV')
     .required('CVV is required')
     .showMaskInPlaceholder()
-    .visibleWhen((values) => values.cardNumber === '')
     .validateComplete('Complete the CVV.'),
-  code: field.otp('Enter code').required().length(5).digitsOnly(),
+  code: field.otp('Enter code').required().digitsOnly().groups([3, 3, 2], '-'),
   dateDeNaissance: field.date('DATE DE NAISSANCE').required(),
 });
 
@@ -57,8 +56,9 @@ export function BrutTestExample() {
   const checkoutForm = useFormBridge(checkoutSchema, {
     validateOn: 'onTouched',
     revalidateOn: 'onChange',
-    globalConfigs: () => ({
+    globalDefaults: () => ({
       ...createDemoFormUi(styles),
+      field: { styles: {} },
     }),
   });
 
@@ -132,9 +132,8 @@ export function BrutTestExample() {
             className={styles.formColumn}
             onSubmit={async (values) => {
               setLastSubmission(values);
+              console.log('FDDFDDSQD', values);
             }}
-            aria-atomic="true"
-            aria-label="rrrrr"
           >
             <div className={styles.formRow}>
               <fields.firstName styles={{ wrapper: {} }} />
@@ -177,7 +176,6 @@ export function BrutTestExample() {
               </Form.Submit>
             </div>
           </Form>
-
           <QuickTestExample />
         </div>
       </div>

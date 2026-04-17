@@ -32,7 +32,7 @@ Ce noyau P0 est le plus urgent.
   - `data`
   - `issues`
   - `errorsByField`
-  - `formErrors`
+  - `formLevelErrors`
 - [x] `schema.safeParse(values)`
 - [x] `schema.safeParseAsync(values)`
 
@@ -268,7 +268,7 @@ Si on devait l'implémenter en vrai dans le bon ordre :
   - `data`
   - `issues`
   - `errorsByField`
-  - `formErrors`
+  - `formLevelErrors`
 - [x] `ctx.addIssue(issue)`
 - [ ] `ctx.addWarning(issue)`
 - [ ] `ctx.abort()`

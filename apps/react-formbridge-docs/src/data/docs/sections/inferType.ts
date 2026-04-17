@@ -10,9 +10,12 @@ export const inferTypeSection: LibraryDoc['sections'][number] = {
 The same helper is also exported as \`inferFromType<T>(fields)\` when you prefer a direct utility import.
 
 This is useful when:
-- You don't have an existing object to infer from (e.g. a creation form)
-- You want the schema to be statically typed against a specific interface
-- You need to define default values explicitly per field`,
+
+| Use case | Why |
+| --- | --- |
+| Creation form | You don't have an existing object to infer from |
+| Type-first schema | You want the schema to be statically typed against a specific interface |
+| Explicit defaults | You need to define default values explicitly per field |`,
   code: {
     filename: 'InferType.ts',
     lang: 'ts',
@@ -44,9 +47,11 @@ ${INFER_OPTIONS_SURFACE}
 
 If \`defaultValue\` is omitted, a sensible default is derived from the field type:
 
-- \`number\` → \`0\`
-- \`checkbox\` / \`switch\` → \`false\`
-- Everything else → \`''\` (empty string)`,
+| Field type | Auto-derived default |
+| --- | --- |
+| \`number\` | \`0\` |
+| \`checkbox\` / \`switch\` | \`false\` |
+| Everything else | \`''\` (empty string) |`,
       code: {
         filename: 'InferTypeDefaults.ts',
         lang: 'ts',

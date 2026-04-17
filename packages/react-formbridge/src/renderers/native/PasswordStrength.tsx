@@ -172,7 +172,7 @@ export const NativePasswordStrength = ({
   const resolvedShowPasswordText = resolveText(showPasswordText, 'Show', renderContext);
   const resolvedHidePasswordText = resolveText(hidePasswordText, 'Hide', renderContext);
   const defaultToggleContent = (
-    <Text style={sx(defaultToggleTextStyle, styles?.toggleText)}>
+    <Text style={sx(defaultToggleTextStyle, styles?.passwordToggleText)}>
       {visible ? resolvedHidePasswordText : resolvedShowPasswordText}
     </Text>
   );
@@ -190,7 +190,7 @@ export const NativePasswordStrength = ({
             minHeight: descriptor._strengthBarHeight,
             overflow: 'hidden',
           },
-          styles?.strengthBar,
+          styles?.passwordStrengthBar,
         )}
       >
         <View
@@ -201,7 +201,7 @@ export const NativePasswordStrength = ({
               minHeight: descriptor._strengthBarHeight,
               width: `${result.percent}%`,
             },
-            styles?.strengthFill,
+            styles?.passwordStrengthFill,
           )}
         />
       </View>
@@ -213,7 +213,7 @@ export const NativePasswordStrength = ({
           {
             color: result.color,
           },
-          styles?.strengthLabel,
+          styles?.passwordStrengthLabel,
         )}
       >
         {result.label}
@@ -229,7 +229,7 @@ export const NativePasswordStrength = ({
       : null;
   const defaultStrengthEntropyContent =
     descriptor._strengthShowEntropy && result ? (
-      <Text style={sx(styles?.strengthEntropy)}>{result.entropy} bits</Text>
+      <Text style={sx(styles?.passwordStrengthEntropy)}>{result.entropy} bits</Text>
     ) : null;
   const resolvedStrengthEntropyContent =
     result && defaultStrengthEntropyContent
@@ -241,14 +241,14 @@ export const NativePasswordStrength = ({
       : null;
   const defaultStrengthMetaContent =
     resolvedStrengthLabelContent || resolvedStrengthEntropyContent ? (
-      <View style={sx(styles?.strengthMeta)}>
+      <View style={sx(styles?.passwordStrengthMeta)}>
         {resolvedStrengthLabelContent}
         {resolvedStrengthEntropyContent}
       </View>
     ) : null;
   const defaultStrengthRowContent =
     result && (defaultStrengthBarContent || defaultStrengthMetaContent) ? (
-      <View style={sx(styles?.strengthRow)}>
+      <View style={sx(styles?.passwordStrengthRow)}>
         {defaultStrengthBarContent}
         {defaultStrengthMetaContent}
       </View>
@@ -315,7 +315,7 @@ export const NativePasswordStrength = ({
           onFocus={p.onFocus}
           style={sx(
             defaultPasswordInputStyle,
-            styles?.input,
+            styles?.passwordInput,
             inputPropsStyle,
             controlErrorStyle,
           )}
@@ -324,7 +324,7 @@ export const NativePasswordStrength = ({
 
         <Pressable
           onPress={() => setVisible((prev) => !prev)}
-          style={sx(defaultToggleStyle, styles?.toggle)}
+          style={sx(defaultToggleStyle, styles?.passwordToggle)}
         >
           {resolvedToggleContent}
         </Pressable>
@@ -333,12 +333,14 @@ export const NativePasswordStrength = ({
       {resolvedStrengthRowContent}
 
       {shouldRenderRules ? (
-        <View style={sx(styles?.rulesList)}>
+        <View style={sx(styles?.passwordRulesList)}>
           {result.rules.map((rule, index) => {
             const defaultRuleContent = (
               <>
-                <Text style={sx(styles?.ruleBullet)}>{rule.passed ? '✓' : ''}</Text>
-                <Text style={sx(styles?.ruleText)}>{rule.label}</Text>
+                <Text style={sx(styles?.passwordRuleBullet)}>
+                  {rule.passed ? '✓' : ''}
+                </Text>
+                <Text style={sx(styles?.passwordRuleText)}>{rule.label}</Text>
               </>
             );
             const customRule = renderStrengthRule?.({
@@ -351,17 +353,19 @@ export const NativePasswordStrength = ({
             return customRule ? (
               <View
                 key={rule.id}
-                style={sx(styles?.ruleItem)}
+                style={sx(styles?.passwordRuleItem)}
               >
                 {customRule}
               </View>
             ) : (
               <View
                 key={rule.id}
-                style={sx(styles?.ruleItem)}
+                style={sx(styles?.passwordRuleItem)}
               >
-                <Text style={sx(styles?.ruleBullet)}>{rule.passed ? '✓' : ''}</Text>
-                <Text style={sx(styles?.ruleText)}>{rule.label}</Text>
+                <Text style={sx(styles?.passwordRuleBullet)}>
+                  {rule.passed ? '✓' : ''}
+                </Text>
+                <Text style={sx(styles?.passwordRuleText)}>{rule.label}</Text>
               </View>
             );
           })}

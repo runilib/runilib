@@ -1,8 +1,12 @@
 import type { LibraryDoc } from './../../../types/index';
-import { buildMethodsTable } from '../constants';
+import { buildMethodsTable, FENCE } from '../constants';
 
 const FILE_METHODS_TABLE = buildMethodsTable([
-  ['`label(text)`', '`text: string`', 'Sets the field label rendered above the uploader.'],
+  [
+    '`label(text)`',
+    '`text: string`',
+    'Sets the field label rendered above the uploader.',
+  ],
   [
     '`required(message?)`',
     '`message?: string`',
@@ -169,12 +173,64 @@ Base-builder relationship:
     {
       id: 'fb-file-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase file-specific strengths:
-- Avatar with preview → \`field.file('Avatar').accept(['image/jpeg', 'image/png']).maxSize(5 * 1024 * 1024).preview(120).required('Please upload a photo.')\`
-- Mobile document capture → \`field.file('Identity card').accept(['image/jpeg', 'image/png', 'application/pdf']).source('documents').withBase64().maxSize(10 * 1024 * 1024)\`
-- Multi-attachment with drag zone → \`field.file('Attachments').multiple(5).accept(['application/pdf', 'image/png']).dragLabel('Drop files here or click to browse')\`
-- Optimized product media → \`field.file('Product photos').accept(['image/jpeg', 'image/png', 'video/mp4']).resize(1600, 1600, 0.85).allowVideo().multiple(10)\`
-- Click-only (no drag) → \`field.file('Documents').accept(['application/pdf']).noDragDrop()\``,
+      content: `Patterns that showcase file-specific strengths.
+
+**Avatar with preview**
+
+${FENCE}tsx Avatar.tsx
+const schema = {
+  avatar: field.file('Avatar')
+    .accept(['image/jpeg', 'image/png'])
+    .maxSize(5 * 1024 * 1024)
+    .preview(120)
+    .required('Please upload a photo.'),
+}
+${FENCE}
+
+**Mobile document capture**
+
+${FENCE}tsx IdentityCard.tsx
+const schema = {
+  identityCard: field.file('Identity card')
+    .accept(['image/jpeg', 'image/png', 'application/pdf'])
+    .source('documents')
+    .withBase64()
+    .maxSize(10 * 1024 * 1024),
+}
+${FENCE}
+
+**Multi-attachment with drag zone**
+
+${FENCE}tsx Attachments.tsx
+const schema = {
+  attachments: field.file('Attachments')
+    .multiple(5)
+    .accept(['application/pdf', 'image/png'])
+    .dragLabel('Drop files here or click to browse'),
+}
+${FENCE}
+
+**Optimized product media**
+
+${FENCE}tsx ProductMedia.tsx
+const schema = {
+  productPhotos: field.file('Product photos')
+    .accept(['image/jpeg', 'image/png', 'video/mp4'])
+    .resize(1600, 1600, 0.85)
+    .allowVideo()
+    .multiple(10),
+}
+${FENCE}
+
+**Click-only (no drag)**
+
+${FENCE}tsx DocumentsOnly.tsx
+const schema = {
+  documents: field.file('Documents')
+    .accept(['application/pdf'])
+    .noDragDrop(),
+}
+${FENCE}`,
     },
   ],
 };

@@ -15,6 +15,7 @@ export function YupResolverExample() {
       companyName: field.text().label('Company name').placeholder('Runilib Studio'),
       website: field.url().label('Website').placeholder('https://runilib.dev'),
       monthlyBudget: field.text().label('Monthly budget').placeholder('2500'),
+      code: field.otp(), // TODO add .mask() to be able to replace the displayed value as * or other and as https://www.npmjs.com/package/input-otp
       acceptsPilot: field
         .checkbox()
         .label('Approve pilot terms')
@@ -50,7 +51,7 @@ export function YupResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createDemoFormUi(styles),
+    globalDefaults: () => createDemoFormUi(styles),
     validatorResolver: resolver,
   });
 

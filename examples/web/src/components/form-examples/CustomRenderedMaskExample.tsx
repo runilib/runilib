@@ -170,7 +170,7 @@ export function CustomRenderedMaskExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createDemoFormUi(styles),
+    globalDefaults: () => createDemoFormUi(styles),
   });
 
   const { Form, fieldController, fields, state, watchAll } = form;

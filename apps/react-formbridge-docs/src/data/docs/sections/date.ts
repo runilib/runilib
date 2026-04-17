@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   STRING_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -19,7 +20,7 @@ const DATE_METHODS_TABLE = buildMethodsTable([
   [
     '`before(date, message?)`',
     '`Date | string | FieldReference`',
-    'Requires the value to be **strictly before** another date. Accepts a literal date or a `ref()` to another date field — great for `startDate.before(ref(\'endDate\'))` style rules.',
+    "Requires the value to be **strictly before** another date. Accepts a literal date or a `ref()` to another date field — great for `startDate.before(ref('endDate'))` style rules.",
   ],
   [
     '`after(date, message?)`',
@@ -96,11 +97,51 @@ ${DATE_METHODS_TABLE}`,
     {
       id: 'fb-date-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase date-specific strengths:
-- Future-only booking → \`field.date('Start date').required().minDate(new Date(), 'Choose a future date.')\`
-- Age gate (18+) → \`field.date('Date of birth').maxDate('2008-01-01', 'You must be at least 18 years old.')\`
-- Windowed campaign → \`field.date('Campaign end').minDate('2026-04-01').maxDate('2026-12-31')\`
-- Cross-field date range → \`field.date('End date').validate((v, all) => v > all.startDate ? null : 'End date must be after start date.')\``,
+      content: `Patterns that showcase date-specific strengths.
+
+**Future-only booking**
+
+${FENCE}tsx BookingDate.tsx
+const schema = {
+  startDate: field.date('Start date')
+    .required()
+    .minDate(new Date(), 'Choose a future date.'),
+}
+${FENCE}
+
+**Age gate (18+)**
+
+${FENCE}tsx AgeGate.tsx
+const schema = {
+  dateOfBirth: field.date('Date of birth')
+    .maxDate('2008-01-01', 'You must be at least 18 years old.'),
+}
+${FENCE}
+
+**Windowed campaign**
+
+${FENCE}tsx CampaignWindow.tsx
+const schema = {
+  campaignEnd: field.date('Campaign end')
+    .minDate('2026-04-01')
+    .maxDate('2026-12-31'),
+}
+${FENCE}
+
+**Cross-field date range**
+
+${FENCE}tsx DateRange.tsx
+const schema = {
+  startDate: field.date('Start date').required(),
+  endDate: field.date('End date')
+    .required()
+    .validate((value, allValues) =>
+      value > allValues.startDate
+        ? null
+        : 'End date must be after start date.',
+    ),
+}
+${FENCE}`,
     },
   ],
 };

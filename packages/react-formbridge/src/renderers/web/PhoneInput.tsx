@@ -20,6 +20,20 @@ import type { CountryInfo } from '../../core/field-builders/phone/types';
 import type { FocusableFieldHandle } from '../../types';
 import type { WebPhoneFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
+import {
+  defaultCountryButtonStyle,
+  defaultCountryDividerStyle,
+  defaultCountryItemStyle,
+  defaultCountryListStyle,
+  defaultCountryScrollStyle,
+  defaultCountrySearchInputStyle,
+  defaultCountrySearchWrapperStyle,
+  defaultCountrySeparatorStyle,
+  defaultDetachedRowStyle,
+  defaultIntegratedCountryButtonStyle,
+  defaultIntegratedInputStyle,
+  defaultIntegratedRowStyle,
+} from './default-styles';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';
 import {
   defaultBorderColor,
@@ -55,139 +69,6 @@ interface Props extends FieldRenderProps<PhoneValue | string | null> {
   extra?: ExtraFieldProps<WebPhoneFieldPropsOverrides>;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
 }
-
-const defaultDetachedRowStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'auto minmax(0, 1fr)',
-  gap: 12,
-  alignItems: 'stretch',
-};
-
-const defaultIntegratedRowStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'auto minmax(0, 1fr)',
-  alignItems: 'stretch',
-  minHeight: 52,
-  boxSizing: 'border-box',
-  border: '1px solid #d1d5db',
-  // borderRadius: 14,
-  background: '#ffffff',
-};
-
-const defaultCountryButtonStyle: CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 8,
-  minHeight: 52,
-  minWidth: 88,
-  padding: '0 12px',
-  boxSizing: 'border-box',
-  border: '1px solid #d1d5db',
-  // borderRadius: 14,
-  background: '#ffffff',
-  color: '#111827',
-  fontSize: 14,
-  fontWeight: 600,
-  whiteSpace: 'nowrap',
-  cursor: 'pointer',
-};
-
-const defaultIntegratedCountryButtonStyle: CSSProperties = {
-  minHeight: '100%',
-  minWidth: 92,
-  padding: '0 14px',
-  border: 'none',
-  // borderRadius: 0,
-  background: 'transparent',
-  color: 'inherit',
-};
-
-const defaultCountryDividerStyle: CSSProperties = {
-  position: 'absolute',
-  top: 8,
-  bottom: 8,
-  right: 0,
-  width: 1,
-  background: '#e5e7eb',
-  pointerEvents: 'none',
-};
-
-const defaultCountryListStyle: CSSProperties = {
-  position: 'absolute',
-  top: '100%',
-  left: 0,
-  zIndex: 50,
-  marginTop: 8,
-  minWidth: 280,
-  background: '#ffffff',
-  border: '1px solid #e5e7eb',
-  // borderRadius: 14,
-  boxShadow: '0 18px 50px rgba(15, 23, 42, 0.14)',
-  overflow: 'hidden',
-};
-
-const defaultCountrySearchWrapperStyle: CSSProperties = {
-  padding: '12px 12px 0',
-};
-
-const defaultCountrySearchInputStyle: CSSProperties = {
-  width: '100%',
-  boxSizing: 'border-box',
-  padding: '10px 12px',
-  border: '1px solid #e5e7eb',
-  // borderRadius: 10,
-  background: '#f8fafc',
-  color: '#111827',
-  fontSize: 13,
-  outline: 'none',
-};
-
-const defaultCountryScrollStyle: CSSProperties = {
-  maxHeight: 260,
-  overflowY: 'auto',
-  display: 'grid',
-  padding: '8px 0',
-};
-
-const defaultCountryItemStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: '24px minmax(0, 1fr) auto',
-  gap: 10,
-  alignItems: 'center',
-  padding: '10px 14px',
-  border: 'none',
-  background: 'transparent',
-  color: '#111827',
-  fontSize: 13,
-  textAlign: 'left',
-  cursor: 'pointer',
-  width: '100%',
-};
-
-const defaultCountrySeparatorStyle: CSSProperties = {
-  height: 1,
-  margin: '4px 12px',
-  background: '#e5e7eb',
-};
-
-const defaultIntegratedInputStyle: CSSProperties = {
-  minWidth: 0,
-  width: '100%',
-  minHeight: '100%',
-  padding: '0 14px',
-  boxSizing: 'border-box',
-  border: 'none',
-  // borderRadius: 0,
-  borderTopLeftRadius: 0,
-  borderBottomLeftRadius: 0,
-  outline: 'none',
-  background: 'transparent',
-  boxShadow: 'none',
-  color: 'inherit',
-  font: 'inherit',
-  lineHeight: 1.35,
-};
 
 export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: Props) => {
   const defaultCountry =
@@ -423,8 +304,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
       {descriptor._phoneShowFlag && (
         <span
           data-fb-slot="country-flag"
-          className={classNames?.countryFlag}
-          style={mergeStyles(styles?.countryFlag)}
+          className={classNames?.phoneCountryFlag}
+          style={mergeStyles(styles?.phoneCountryFlag)}
         >
           {currentCountry.flag}
         </span>
@@ -433,8 +314,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
       {descriptor._phoneShowDialCode && (
         <span
           data-fb-slot="country-dial"
-          className={classNames?.countryDial}
-          style={mergeStyles(styles?.countryDial)}
+          className={classNames?.phoneCountryDial}
+          style={mergeStyles(styles?.phoneCountryDial)}
         >
           +{currentCountry.dial}
         </span>
@@ -443,8 +324,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
       <span
         data-fb-slot="chevron"
         aria-hidden="true"
-        className={classNames?.chevron}
-        style={mergeStyles(styles?.chevron)}
+        className={classNames?.phoneChevron}
+        style={mergeStyles(styles?.phoneChevron)}
       >
         ▾
       </span>
@@ -458,8 +339,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
   const defaultEmptySearchContent = (
     <p
       data-fb-slot="empty-text"
-      className={classNames?.emptyText}
-      style={mergeStyles(styles?.emptyText)}
+      className={classNames?.phoneEmptyText}
+      style={mergeStyles(styles?.phoneEmptyText)}
     >
       {resolvedEmptySearchText}
     </p>
@@ -477,8 +358,16 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
       data-fb-layout={countryLayout}
       {...(hasError ? { 'data-fb-error': '' } : {})}
       {...(props.disabled ? { 'data-fb-disabled': '' } : {})}
-      className={cx(extra?.className, classNames?.wrapper, wrapperPropsClassName as string)}
-      style={mergeStyles(extra?.style, styles?.wrapper, wrapperPropsStyle as CSSProperties)}
+      className={cx(
+        extra?.className,
+        classNames?.wrapper,
+        wrapperPropsClassName as string,
+      )}
+      style={mergeStyles(
+        extra?.style,
+        styles?.wrapper,
+        wrapperPropsStyle as CSSProperties,
+      )}
       {...wrapperPropsRest}
     >
       {renderLabelSlot({
@@ -497,7 +386,7 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
       <div
         data-fb-slot="row"
         data-fb-layout={countryLayout}
-        className={classNames?.row}
+        className={classNames?.phoneRow}
         style={mergeStyles(
           integrated
             ? {
@@ -508,7 +397,7 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                 ...defaultDetachedRowStyle,
               },
           integrated ? defaultErrorChromeStyle(hasError, highlightOnError) : undefined,
-          styles?.row,
+          styles?.phoneRow,
         )}
       >
         <div
@@ -527,11 +416,11 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
             disabled={props.disabled}
             data-fb-slot="country-button"
             {...(open ? { 'data-fb-open': '' } : {})}
-            className={classNames?.countryButton}
+            className={classNames?.phoneCountryButton}
             style={mergeStyles(
               defaultCountryButtonStyle,
               integrated ? defaultIntegratedCountryButtonStyle : undefined,
-              styles?.countryButton,
+              styles?.phoneCountryButton,
             )}
             aria-label={resolvedCountryButtonAriaLabel}
             aria-expanded={open}
@@ -542,24 +431,24 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
           {integrated ? (
             <div
               data-fb-slot="country-divider"
-              className={classNames?.countryDivider}
-              style={mergeStyles(defaultCountryDividerStyle, styles?.countryDivider)}
+              className={classNames?.phoneCountryDivider}
+              style={mergeStyles(defaultCountryDividerStyle, styles?.phoneCountryDivider)}
             />
           ) : null}
 
           {open && (
             <div
               data-fb-slot="country-list"
-              className={classNames?.countryList}
-              style={mergeStyles(defaultCountryListStyle, styles?.countryList)}
+              className={classNames?.phoneCountryList}
+              style={mergeStyles(defaultCountryListStyle, styles?.phoneCountryList)}
             >
               {descriptor._phoneSearchable && (
                 <div
                   data-fb-slot="country-search-wrapper"
-                  className={classNames?.countrySearchWrapper}
+                  className={classNames?.phoneSearchWrapper}
                   style={mergeStyles(
                     defaultCountrySearchWrapperStyle,
-                    styles?.countrySearchWrapper,
+                    styles?.phoneSearchWrapper,
                   )}
                 >
                   <input
@@ -568,12 +457,12 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                     placeholder={resolvedSearchPlaceholder}
                     data-fb-slot="country-search-input"
                     className={cx(
-                      classNames?.countrySearchInput,
+                      classNames?.phoneSearchInput,
                       searchInputPropsClassName,
                     )}
                     style={mergeStyles(
                       defaultCountrySearchInputStyle,
-                      styles?.countrySearchInput,
+                      styles?.phoneSearchInput,
                       searchInputPropsStyle,
                     )}
                     {...searchInputPropsRest}
@@ -583,8 +472,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
 
               <div
                 data-fb-slot="country-scroll"
-                className={classNames?.countryScroll}
-                style={mergeStyles(defaultCountryScrollStyle, styles?.countryScroll)}
+                className={classNames?.phoneCountryScroll}
+                style={mergeStyles(defaultCountryScrollStyle, styles?.phoneCountryScroll)}
               >
                 {filteredCountries.map((item, index) => {
                   if ('separator' in item) {
@@ -592,8 +481,11 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                       <div
                         key={item.key}
                         data-fb-slot="separator"
-                        className={classNames?.separator}
-                        style={mergeStyles(defaultCountrySeparatorStyle, styles?.separator)}
+                        className={classNames?.phoneSeparator}
+                        style={mergeStyles(
+                          defaultCountrySeparatorStyle,
+                          styles?.phoneSeparator,
+                        )}
                       />
                     );
                   }
@@ -604,8 +496,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                       {descriptor._phoneShowFlag && (
                         <span
                           data-fb-slot="country-flag"
-                          className={classNames?.countryFlag}
-                          style={mergeStyles(styles?.countryFlag)}
+                          className={classNames?.phoneCountryFlag}
+                          style={mergeStyles(styles?.phoneCountryFlag)}
                         >
                           {item.flag}
                         </span>
@@ -613,16 +505,16 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
 
                       <span
                         data-fb-slot="country-name"
-                        className={classNames?.countryName}
-                        style={mergeStyles(styles?.countryName)}
+                        className={classNames?.phoneCountryName}
+                        style={mergeStyles(styles?.phoneCountryName)}
                       >
                         {item.name}
                       </span>
 
                       <span
                         data-fb-slot="country-dial"
-                        className={classNames?.countryDial}
-                        style={mergeStyles(styles?.countryDial)}
+                        className={classNames?.phoneCountryDial}
+                        style={mergeStyles(styles?.phoneCountryDial)}
                       >
                         +{item.dial}
                       </span>
@@ -644,8 +536,11 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
                       onClick={() => selectCountry(item)}
                       data-fb-slot="country-item"
                       {...(isSelected ? { 'data-fb-selected': '' } : {})}
-                      className={classNames?.countryItem}
-                      style={mergeStyles(defaultCountryItemStyle, styles?.countryItem)}
+                      className={classNames?.phoneCountryItem}
+                      style={mergeStyles(
+                        defaultCountryItemStyle,
+                        styles?.phoneCountryItem,
+                      )}
                     >
                       {resolvedCountryItemContent}
                     </button>
@@ -681,11 +576,11 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
           aria-readonly={isReadOnly || undefined}
           aria-describedby={describedBy}
           data-fb-slot="input"
-          className={cx(classNames?.input, inputPropsClassName)}
+          className={cx(classNames?.phoneInput, inputPropsClassName)}
           style={mergeStyles(
             integrated ? defaultIntegratedInputStyle : undefined,
             integrated ? undefined : controlErrorStyle,
-            styles?.input,
+            styles?.phoneInput,
             inputPropsStyle,
           )}
           inputMode={inputBehavior.inputMode ?? 'tel'}
@@ -714,8 +609,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
           defaultContent: (
             <span
               data-fb-slot="e164"
-              className={classNames?.e164}
-              style={mergeStyles(styles?.e164)}
+              className={classNames?.phoneE164}
+              style={mergeStyles(styles?.phoneE164)}
             >
               {resolveText(e164Text, normalizedValue.e164, {
                 ...renderContext,
@@ -727,8 +622,8 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
         }) ?? (
           <span
             data-fb-slot="e164"
-            className={classNames?.e164}
-            style={mergeStyles(styles?.e164)}
+            className={classNames?.phoneE164}
+            style={mergeStyles(styles?.phoneE164)}
           >
             {resolveText(e164Text, normalizedValue.e164, {
               ...renderContext,

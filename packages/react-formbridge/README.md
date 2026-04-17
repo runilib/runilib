@@ -51,9 +51,9 @@ export function SignUpForm() {
 }
 ```
 
-## Type-safe UI overrides
+## Type-safe field overrides
 
-Generated fields now expose only the UI props that make sense for their platform and field type.
+Generated fields expose only the override props that make sense for their platform and field type.
 
 ```tsx
 <fields.email inputProps={{ autoComplete: 'email', inputMode: 'email' }} />
@@ -61,12 +61,12 @@ Generated fields now expose only the UI props that make sense for their platform
 <fields.country selectProps={{ size: 5  }} />
 ```
 
-- Text-like fields expose `ui.inputProps`
-- `textarea` fields expose `ui.textareaProps` on web
-- `select` fields expose `ui.selectProps` on web
+- Text-like fields expose `inputProps`
+- `textarea` fields expose `textareaProps` on web
+- `select` fields expose `selectProps` on web
 - Native fields do not expose web-only props such as `className`, `textareaProps`, or `selectProps`
 
-When you need to annotate a schema, prefer `satisfies FormSchema` over `: FormSchema` so TypeScript keeps the exact field types and the right `ui` autocomplete for each generated field.
+When you need to annotate a schema, prefer `satisfies FormSchema` over `: FormSchema` so TypeScript keeps the exact field types and the right autocomplete for each generated field.
 
 ## React Native TypeScript
 

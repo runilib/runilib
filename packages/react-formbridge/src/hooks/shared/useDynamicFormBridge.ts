@@ -6,14 +6,14 @@ import type {
   FieldDescriptor,
   FormSchema,
   Platform,
+  UseFormBridgeOptions,
   UseFormBridgeReturn,
-  UseFormOptions,
 } from '../../types';
 
 export interface UseDynamicFormOptions<
   S extends FormSchema,
   TPlatform extends Platform = Platform,
-> extends UseFormOptions<S, TPlatform> {
+> extends UseFormBridgeOptions<S, TPlatform> {
   /**
    * Default values injected after parsing the dynamic schema.
    */
@@ -62,7 +62,7 @@ const EMPTY_SCHEMA: FormSchema = {};
 
 type UseFormBridgeHook<TPlatform extends Platform> = <S extends FormSchema>(
   schema: S,
-  options?: UseFormOptions<S, TPlatform>,
+  options?: UseFormBridgeOptions<S, TPlatform>,
 ) => UseFormBridgeReturn<S, TPlatform>;
 
 /**

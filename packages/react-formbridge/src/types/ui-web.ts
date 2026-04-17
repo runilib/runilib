@@ -107,7 +107,7 @@ type WebInputBehaviorProps = Pick<
 /** Slots every web field shares (wrapper, label, helper/error spans). */
 type WebSharedFieldSlot = 'wrapper' | 'label' | 'hint' | 'error' | 'requiredMark';
 /** Slots for single-line text-like inputs (text/email/number/tel/url/date). */
-type WebTextFieldSlot = WebSharedFieldSlot | 'input';
+type WebTextFieldSlot = WebSharedFieldSlot | 'textInput';
 /** Slots for the textarea renderer. */
 type WebTextareaFieldSlot = WebSharedFieldSlot | 'textarea';
 /** Slots for the checkbox renderer (row + input + inline label). */
@@ -134,80 +134,83 @@ type WebRadioFieldSlot =
   | 'radioInput'
   | 'radioLabel';
 /** Slots for the OTP renderer (one wrapper + N individual digit inputs). */
-type WebOtpFieldSlot = WebSharedFieldSlot | 'otpContainer' | 'otpInput';
+type WebOtpFieldSlot = WebSharedFieldSlot | 'otpContainer' | 'otpInput' | 'otpSeparator';
 /**
  * Slots for the password renderer, including the visibility toggle and the
  * optional strength meter + rule list.
  */
 type WebPasswordFieldSlot =
-  | WebTextFieldSlot
-  | 'toggle'
-  | 'strengthRow'
-  | 'strengthBar'
-  | 'strengthMeta'
-  | 'strengthFill'
-  | 'strengthLabel'
-  | 'strengthEntropy'
-  | 'rulesList'
-  | 'ruleItem'
-  | 'ruleBullet'
-  | 'ruleText';
+  | WebSharedFieldSlot
+  | 'passwordInput'
+  | 'passwordToggle'
+  | 'passwordStrengthRow'
+  | 'passwordStrengthBar'
+  | 'passwordStrengthMeta'
+  | 'passwordStrengthFill'
+  | 'passwordStrengthLabel'
+  | 'passwordStrengthEntropy'
+  | 'passwordRulesList'
+  | 'passwordRuleItem'
+  | 'passwordRuleBullet'
+  | 'passwordRuleText';
 /**
  * Slots for the phone renderer (country picker button, country list, E.164
  * preview, etc.).
  */
 type WebPhoneFieldSlot =
-  | WebTextFieldSlot
-  | 'row'
-  | 'countryButton'
-  | 'countryFlag'
-  | 'countryDivider'
-  | 'chevron'
-  | 'countrySearchInput'
-  | 'countrySearchWrapper'
-  | 'countryList'
-  | 'countryScroll'
-  | 'countryItem'
-  | 'separator'
-  | 'countryName'
-  | 'countryDial'
-  | 'e164'
-  | 'emptyText';
+  | WebSharedFieldSlot
+  | 'phoneInput'
+  | 'phoneRow'
+  | 'phoneCountryButton'
+  | 'phoneCountryFlag'
+  | 'phoneCountryDivider'
+  | 'phoneChevron'
+  | 'phoneSearchInput'
+  | 'phoneSearchWrapper'
+  | 'phoneCountryList'
+  | 'phoneCountryScroll'
+  | 'phoneCountryItem'
+  | 'phoneSeparator'
+  | 'phoneCountryName'
+  | 'phoneCountryDial'
+  | 'phoneE164'
+  | 'phoneEmptyText';
 /**
  * Slots for the file renderer (drop zone, browse button, preview list,
  * per-item chrome, etc.).
  */
 type WebFileFieldSlot =
   | WebSharedFieldSlot
-  | 'dropZone'
-  | 'dropZoneIcon'
-  | 'dropZoneText'
-  | 'dropZoneAccept'
-  | 'dropZoneMaxSize'
-  | 'browseButton'
-  | 'list'
-  | 'listItem'
-  | 'previewImage'
+  | 'fileDropZone'
+  | 'fileDropZoneIcon'
+  | 'fileDropZoneText'
+  | 'fileDropZoneAccept'
+  | 'fileDropZoneMaxSize'
+  | 'fileBrowseButton'
+  | 'fileList'
+  | 'fileListItem'
+  | 'filePreviewImage'
   | 'fileIcon'
   | 'fileInfo'
   | 'fileName'
   | 'fileMeta'
-  | 'removeButton'
-  | 'addMoreButton';
+  | 'fileRemoveButton'
+  | 'fileAddMoreButton';
 /**
  * Slots for the async autocomplete renderer (combobox with a listbox popup).
  */
 type WebAsyncAutocompleteFieldSlot =
-  | WebTextFieldSlot
-  | 'select'
-  | 'selectValue'
-  | 'selectArrow'
-  | 'listbox'
-  | 'option'
-  | 'optionActive'
-  | 'optionSelected'
-  | 'empty'
-  | 'loading';
+  | WebSharedFieldSlot
+  | 'autocompleteInput'
+  | 'autocompleteSelect'
+  | 'autocompleteSelectValue'
+  | 'autocompleteSelectArrow'
+  | 'autocompleteListbox'
+  | 'autocompleteOption'
+  | 'autocompleteOptionActive'
+  | 'autocompleteOptionSelected'
+  | 'autocompleteEmpty'
+  | 'autocompleteLoading';
 
 // ─── Exported composite slot type ───────────────────────────────────────────────
 
@@ -358,7 +361,7 @@ export interface WebPhoneFieldCountryItemRenderContext
 
 /**
  * "Catch-all" override shape that targets every web field in one go — used
- * for `globalConfigs.field`. Inherits the full base + slot union.
+ * for `globalDefaults.field`. Inherits the full base + slot union.
  */
 export interface WebGlobalFieldPropsOverrides extends WebFieldPropsBase<WebFieldSlot> {}
 
@@ -841,7 +844,7 @@ export interface WebFieldPropsOverrides
 
 /**
  * Theme overrides applied to the `<Form>` wrapper element on web. Attach via
- * `globalConfigs(state).form`.
+ * `globalDefaults(state).form`.
  */
 export interface WebFormPropsOverrides {
   /** className added to the `<form>` element. */
@@ -860,15 +863,15 @@ export interface WebFormPropsOverrides {
 
 /**
  * Theme overrides applied to the `Form.Submit` button on web. Attach via
- * `globalConfigs(state).submit`.
+ * `globalDefaults(state).submit`.
  */
 export interface WebSubmitPropsOverrides {
   /** className added to the `<button>`. */
   className?: string;
   /** Inline style merged onto the `<button>`. */
   style?: CSSProperties;
-  /** Label shown while submitting. Defaults to `"Please wait…"`. */
-  loadingText?: string;
+  /** Content shown while submitting. Defaults to `"Please wait…"`. */
+  loadingText?: ReactNode;
   /**
    * Passthrough attributes spread onto the `<button>` (minus FB-owned ones:
    * children, type, disabled, className, style).

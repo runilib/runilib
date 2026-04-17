@@ -2,32 +2,60 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   ASYNC_OPTIONS_CONFIG_SURFACE,
   ASYNC_OPTIONS_FETCHER_SURFACE,
-  DOC_PREVIEWS,
+  ASYNC_OPTIONS_RETURN_SURFACE,
 } from '../constants';
 
 export const useAsyncOptionsSection: LibraryDoc['sections'][number] = {
   id: 'fb-use-async-options',
 
   title: 'useAsyncOptions()',
-  content: `Standalone hook for remote option lists.
+  content: `Experimental low-level hook for remote option lists.
 
-- Use it directly when you want to build your own async autocomplete or picker UI
-- Use it indirectly through \`field.select().optionsFrom(...)\` when a generated field is enough
-- The hook handles debounce, caching, cancellation, dependency keys, and refreshes for you`,
+- In v1, prefer \`field.select().optionsFrom(...)\` as the stable public path for async option loading
+- Use \`useAsyncOptions()\` directly only when you need a fully custom async autocomplete or picker UI
+- The hook handles debounce, caching, cancellation, dependency keys, and refreshes for you
+- Because it is experimental, the low-level contract may still evolve before it is treated as stable`,
   codeTabs: [
     {
-      filename: 'AsyncCity.web.tsx',
+      filename: 'AsyncCityPlayground.web.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.asyncWeb,
-      code: `import { field, useAsyncOptions } from '@runilib/react-formbridge'
+      code: `import { useState } from 'react'
+import { useAsyncOptions } from '@runilib/react-formbridge'
 
-const cityFetcher = async ({ search, deps, signal }) => {
-  const res = await fetch('/api/cities?country=' + deps.country + '&q=' + encodeURIComponent(search), { signal })
-  const data = await res.json()
-  return data.map((city: { id: string; name: string }) => ({ value: city.id, label: city.name }))
+const CITY_DB = {
+  FR: ['Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Lille'],
+  US: ['New York', 'San Francisco', 'Chicago', 'Seattle', 'Austin'],
+  GB: ['London', 'Manchester', 'Bristol', 'Leeds', 'Edinburgh'],
 }
 
-export function CitySelect({ country }: { country: string }) {
+const cityFetcher = async ({ search, deps, signal }) => {
+  await new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(resolve, 450)
+
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timeoutId)
+        reject(new DOMException('Aborted', 'AbortError'))
+      },
+      { once: true },
+    )
+  })
+
+  const allCities = CITY_DB[deps.country] ?? []
+  const normalized = search.trim().toLowerCase()
+
+  return allCities
+    .filter((city) => city.toLowerCase().includes(normalized))
+    .map((city) => ({
+      value: city.toLowerCase().replace(/\\s+/g, '-'),
+      label: city,
+    }))
+}
+
+export function AsyncCityPlayground() {
+  const [country, setCountry] = useState('FR')
+
   const asyncCity = useAsyncOptions({
     key: 'cities',
     fetch: cityFetcher,
@@ -38,19 +66,50 @@ export function CitySelect({ country }: { country: string }) {
     fetchOnMount: false,
     keepPreviousOptions: true,
   }, { country })
+
   const canSearch = asyncCity.search.trim().length >= 2
 
   return (
-    <div>
+    <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#f5f7fb' }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+        {['FR', 'US', 'GB'].map((nextCountry) => (
+          <button
+            key={nextCountry}
+            type="button"
+            onClick={() => setCountry(nextCountry)}
+            style={{
+              fontWeight: country === nextCountry ? 700 : 500,
+            }}
+          >
+            {nextCountry}
+          </button>
+        ))}
+        <button type="button" onClick={() => asyncCity.refresh()}>
+          Refresh
+        </button>
+      </div>
+
+      <p style={{ marginTop: 0, color: '#4b5563' }}>
+        Country: <strong>{country}</strong>
+      </p>
+
       <input
         placeholder="Type at least 2 characters"
         value={asyncCity.search}
         onChange={(e) => asyncCity.setSearch(e.target.value)}
+        style={{
+          width: '100%',
+          maxWidth: 320,
+          padding: '10px 12px',
+          borderRadius: 10,
+          border: '1px solid #cbd5e1',
+          marginBottom: 12,
+        }}
       />
       {!canSearch ? <p>Type at least 2 characters</p> : null}
       {canSearch && asyncCity.loading ? <p>Loading...</p> : null}
       {asyncCity.error ? <p>{asyncCity.error}</p> : null}
-      <ul>
+      <ul style={{ margin: 0, paddingLeft: 18 }}>
         {asyncCity.options.map((opt) => (
           <li key={opt.value}>{opt.label}</li>
         ))}
@@ -60,28 +119,57 @@ export function CitySelect({ country }: { country: string }) {
 }`,
     },
     {
-      filename: 'AsyncSelect.native.tsx',
+      filename: 'AsyncSelectPlayground.native.tsx',
       lang: 'tsx',
-      preview: DOC_PREVIEWS.asyncNative,
-      code: `import { useAsyncOptions } from '@runilib/react-formbridge'
+      code: `import { useState } from 'react'
+import { useAsyncOptions } from '@runilib/react-formbridge'
 import { FlatList, TextInput, TouchableOpacity, Text, View } from 'react-native'
 
-export function CityPickerNative({ country }: { country: string }) {
+const CITY_DB = {
+  FR: ['Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Lille'],
+  US: ['New York', 'San Francisco', 'Chicago', 'Seattle', 'Austin'],
+  GB: ['London', 'Manchester', 'Bristol', 'Leeds', 'Edinburgh'],
+}
+
+export function AsyncSelectPlayground() {
+  const [country, setCountry] = useState('FR')
+
   const cities = useAsyncOptions({
     key: 'cities',
-    fetch: async ({ search, deps }) => {
-      const res = await fetch('https://example.com/cities?country=' + deps.country + '&q=' + search)
-      const data = await res.json()
-      return data.map((c: any) => ({ value: c.id, label: c.name }))
+    fetch: async ({ search, deps, signal }) => {
+      await new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(resolve, 450)
+
+        signal.addEventListener(
+          'abort',
+          () => {
+            clearTimeout(timeoutId)
+            reject(new Error('aborted'))
+          },
+          { once: true },
+        )
+      })
+
+      return (CITY_DB[deps.country] ?? [])
+        .filter((city) => city.toLowerCase().includes(search.trim().toLowerCase()))
+        .map((city) => ({ value: city.toLowerCase(), label: city }))
     },
     dependsOn: ['country'],
     minChars: 2,
     fetchOnMount: false,
   }, { country })
+
   const canSearch = cities.search.trim().length >= 2
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 8, padding: 16 }}>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {['FR', 'US', 'GB'].map((nextCountry) => (
+          <TouchableOpacity key={nextCountry} onPress={() => setCountry(nextCountry)}>
+            <Text>{country === nextCountry ? '[' + nextCountry + ']' : nextCountry}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       <TextInput
         placeholder="Type at least 2 characters"
         value={cities.search}
@@ -114,14 +202,7 @@ ${ASYNC_OPTIONS_FETCHER_SURFACE}
     {
       id: 'fb-async-return',
       title: 'Return',
-      content: `Complete return surface:
-- \`options: SelectOption[]\`
-- \`loading: boolean\`
-- \`error: string | null\`
-- \`search: string\`
-- \`setSearch(next: string)\`
-- \`clearSearch()\`
-- \`refresh()\` — clears the current cache entry and refetches`,
+      content: ASYNC_OPTIONS_RETURN_SURFACE,
     },
   ],
 };

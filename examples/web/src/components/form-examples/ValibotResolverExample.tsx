@@ -57,8 +57,8 @@ export function ValibotResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createDemoFormUi(styles),
-    validatorResolver:resolver,
+    globalDefaults: () => createDemoFormUi(styles),
+    validatorResolver: resolver,
   });
 
   const { Form, fields, state, watchAll } = form;

@@ -1,5 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
-import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable } from '../constants';
+import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable, FENCE } from '../constants';
 
 const CUSTOM_METHODS_TABLE = buildMethodsTable([
   [
@@ -53,10 +53,12 @@ const { Form, fields } = useFormBridge(schema)
       title: 'Defaults, inheritance & field methods',
       content: `\`field.custom(defaultValue)\` returns a typed \`BaseFieldBuilder\` — no extra methods, just the shared base surface (see Builder basics).
 
-- defaultValue is required and stays typed through the generated field
-- label is optional at construction and is usually added with \`label('...')\`
-- The main escape hatch is \`render(fn)\`, which keeps the form runtime while replacing the UI
-- If you need custom UI for a built-in field type (\`select\`, \`masked\`, \`phone\`), prefer \`form.fieldController(name)\` instead
+| Key | Description |
+| --- | --- |
+| \`defaultValue\` | Required — stays typed through the generated field |
+| \`label\` | Optional at construction, usually added with \`label('...')\` |
+| \`render(fn)\` | Main escape hatch — keeps the form runtime while replacing the UI |
+| \`fieldController\` | If you need custom UI for a built-in field type (\`select\`, \`masked\`, \`phone\`), prefer \`form.fieldController(name)\` instead |
 
 \`render(fn)\` receives: \`name\`, \`label\`, \`value\`, \`placeholder\`, \`error\`, \`touched\`, \`dirty\`, \`validating\`, \`disabled\`, \`hint\`, \`options\`, \`otpLength\`, \`onChange\`, \`onBlur\`, \`onFocus\`, \`allValues\`
 
@@ -68,11 +70,65 @@ ${CUSTOM_METHODS_TABLE}`,
     {
       id: 'fb-custom-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase custom-specific strengths:
-- Star rating widget → \`field.custom(0).label('Rating').render(({ value, onChange }) => <Stars value={value} onChange={onChange} />).validate((v) => v > 0 ? null : 'Pick a rating')\`
-- Date range picker → \`field.custom({ start: null, end: null }).label('Date range').render((props) => <DateRangePicker {...props} />)\`
-- Color picker → \`field.custom('#000000').label('Brand color').render(({ value, onChange }) => <ColorWheel value={value} onChange={onChange} />)\`
-- When to use fieldController instead → if the value model is a built-in type (select, masked, phone) and you only need different UI, use \`form.fieldController(name)\` to keep original field semantics`,
+      content: `Patterns that showcase custom-specific strengths.
+
+**Star rating widget**
+
+${FENCE}tsx StarRating.tsx
+const schema = {
+  rating: field.custom(0)
+    .label('Rating')
+    .render(({ value, onChange }) => (
+      <Stars value={value} onChange={onChange} />
+    ))
+    .validate((value) => (value > 0 ? null : 'Pick a rating')),
+}
+${FENCE}
+
+**Trip window picker**
+
+${FENCE}tsx TripWindow.tsx
+const schema = {
+  travelWindow: field
+    .custom<{ start: Date | null; end: Date | null }>({
+      start: null,
+      end: null,
+    })
+    .label('Date range')
+    .render((props) => <DateRangePicker {...props} />),
+}
+${FENCE}
+
+**Color picker**
+
+${FENCE}tsx ColorPicker.tsx
+const schema = {
+  brandColor: field.custom('#000000')
+    .label('Brand color')
+    .render(({ value, onChange }) => (
+      <ColorWheel value={value} onChange={onChange} />
+    )),
+}
+${FENCE}
+
+**When to use fieldController instead**
+
+If the value model is already a built-in type (\`select\`, \`masked\`, \`phone\`, …) and you only need a different UI, keep the schema field as-is and drive the UI through \`form.fieldController(name)\`:
+
+${FENCE}tsx FieldControllerAlternative.tsx
+const schema = {
+  plan: field.select('Plan').options(PLAN_OPTIONS).required(),
+}
+
+const form = useFormBridge(schema)
+const plan = form.fieldController('plan')
+
+<MyCustomSegmentedControl
+  value={plan.value}
+  options={plan.options}
+  onChange={plan.setValue}
+/>
+${FENCE}`,
     },
   ],
 };

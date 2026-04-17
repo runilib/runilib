@@ -26,6 +26,11 @@ interface SchemaValidationMeta<TSchema extends FormSchema> {
   errorMap?: ValidationErrorMap;
 }
 
+type SchemaDateRangeConfig<TSchema extends FormSchema> = {
+  start: keyof TSchema | string | FieldReference;
+  end: keyof TSchema | string | FieldReference;
+};
+
 export interface FormBridgeSchemaApi<TSchema extends FormSchema> {
   safeParse(
     values: Partial<SchemaValues<TSchema>>,
@@ -59,13 +64,6 @@ export interface FormBridgeSchemaApi<TSchema extends FormSchema> {
     fields: Array<keyof TSchema | string | FieldReference>,
     message?: string,
   ): FormBridgeSchema<TSchema>;
-  dateRange(
-    config: {
-      start: keyof TSchema | string | FieldReference;
-      end: keyof TSchema | string | FieldReference;
-    },
-    message?: string,
-  ): FormBridgeSchema<TSchema>;
 }
 
 /**
@@ -97,6 +95,7 @@ export class FormBridgeSchemaValidationError<
 }
 
 const FORM_BRIDGE_SCHEMA_META = Symbol('formbridge-schema-meta');
+const FORM_BRIDGE_SCHEMA_DISABLED_HELPERS = Symbol('formbridge-schema-disabled-helpers');
 
 function normalizeIssueInput(message?: RefinementMessage): ValidatorResult {
   if (!message) {
@@ -280,6 +279,52 @@ export function schema<const TSchema extends FormSchema>(
     refinements: [],
   };
 
+  // Temporarily kept internal so we can re-enable the public helper later
+  // without having to rebuild its implementation from scratch.
+  const disabledHelpers = {
+    dateRange(config: SchemaDateRangeConfig<TSchema>, message?: string) {
+      return api.superRefine((values, context) => {
+        const startValue = resolveReferenceValue(
+          config.start as string | FieldReference,
+          values as Record<string, unknown>,
+        );
+        const endValue = resolveReferenceValue(
+          config.end as string | FieldReference,
+          values as Record<string, unknown>,
+        );
+
+        if (!startValue || !endValue) {
+          return;
+        }
+
+        const startDate = parseDateValue(startValue);
+        const endDate = parseDateValue(endValue);
+
+        if (!startDate || !endDate) {
+          return;
+        }
+
+        if (startDate > endDate) {
+          const endPath = isFieldReference(config.end)
+            ? config.end.path
+            : String(config.end);
+
+          context.addIssue({
+            code: 'date_range',
+            path: endPath,
+            message: message ?? 'End date must be on or after the start date.',
+            params: {
+              start: isFieldReference(config.start)
+                ? config.start.path
+                : String(config.start),
+              end: endPath,
+            },
+          });
+        }
+      });
+    },
+  };
+
   const api: FormBridgeSchemaApi<TSchema> = {
     safeParse(values) {
       const descriptors = buildDescriptors(enhanced);
@@ -441,53 +486,17 @@ export function schema<const TSchema extends FormSchema>(
         }
       });
     },
-
-    dateRange(config, message) {
-      return api.superRefine((values, context) => {
-        const startValue = resolveReferenceValue(
-          config.start as string | FieldReference,
-          values as Record<string, unknown>,
-        );
-        const endValue = resolveReferenceValue(
-          config.end as string | FieldReference,
-          values as Record<string, unknown>,
-        );
-
-        if (!startValue || !endValue) {
-          return;
-        }
-
-        const startDate = parseDateValue(startValue);
-        const endDate = parseDateValue(endValue);
-
-        if (!startDate || !endDate) {
-          return;
-        }
-
-        if (startDate > endDate) {
-          const endPath = isFieldReference(config.end)
-            ? config.end.path
-            : String(config.end);
-
-          context.addIssue({
-            code: 'date_range',
-            path: endPath,
-            message: message ?? 'End date must be on or after the start date.',
-            params: {
-              start: isFieldReference(config.start)
-                ? config.start.path
-                : String(config.start),
-              end: endPath,
-            },
-          });
-        }
-      });
-    },
   };
 
   Object.defineProperties(enhanced, {
     [FORM_BRIDGE_SCHEMA_META]: {
       value: meta,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    },
+    [FORM_BRIDGE_SCHEMA_DISABLED_HELPERS]: {
+      value: disabledHelpers,
       enumerable: false,
       configurable: false,
       writable: false,
@@ -534,10 +543,6 @@ export function schema<const TSchema extends FormSchema>(
     },
     allOrNone: {
       value: api.allOrNone,
-      enumerable: false,
-    },
-    dateRange: {
-      value: api.dateRange,
       enumerable: false,
     },
   });

@@ -83,7 +83,7 @@ export interface AnalyticsHandlers {
   /**
    * Called when submit is attempted but validation fails.
    */
-  onFormError?: (errors: Record<string, string>, submitCount: number) => void;
+  onFormLevelError?: (errors: Record<string, string>, submitCount: number) => void;
 
   /**
    * Called each time a field changes.
@@ -363,7 +363,7 @@ export class FormBridgeAnalyticsTracker {
       Object.entries(errors).filter(([key]) => !this.exclude.has(key)),
     );
 
-    this.handlers.onFormError?.(filtered, submitCount);
+    this.handlers.onFormLevelError?.(filtered, submitCount);
   }
 
   /**

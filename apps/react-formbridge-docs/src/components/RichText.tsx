@@ -13,7 +13,7 @@ type RichTextProps = {
 };
 
 type RichTextBlock =
-  | { type: 'code'; lang?: string; code: string }
+  | { type: 'code'; lang?: string; filename?: string; code: string }
   | { type: 'text'; lines: string[] };
 
 type TextSegment =
@@ -32,19 +32,36 @@ function isMarkdownTableDivider(line: string): boolean {
     return false;
   }
 
-  return line
-    .trim()
-    .slice(1, -1)
-    .split('|')
-    .every((cell) => /^:?-{3,}:?$/.test(cell.trim()));
+  return parseMarkdownTableCells(line).every((cell) => /^:?-{3,}:?$/.test(cell));
 }
 
 function parseMarkdownTableCells(line: string): string[] {
-  return line
-    .trim()
-    .slice(1, -1)
-    .split('|')
-    .map((cell) => cell.trim());
+  const trimmed = line.trim().slice(1, -1);
+  const cells: string[] = [];
+  let current = '';
+
+  for (let index = 0; index < trimmed.length; index += 1) {
+    const char = trimmed[index];
+    const nextChar = trimmed[index + 1];
+
+    if (char === '\\' && nextChar === '|') {
+      current += '|';
+      index += 1;
+      continue;
+    }
+
+    if (char === '|') {
+      cells.push(current.trim());
+      current = '';
+      continue;
+    }
+
+    current += char;
+  }
+
+  cells.push(current.trim());
+
+  return cells.map((cell) => cell.replaceAll('&#124;', '|').replaceAll('&vert;', '|'));
 }
 
 function renderInlineText(text: string): React.ReactNode[] {
@@ -96,6 +113,7 @@ function parseRichTextBlocks(content: string): RichTextBlock[] {
   let textBuffer: string[] = [];
   let codeBuffer: string[] = [];
   let codeLang: string | undefined;
+  let codeFilename: string | undefined;
   let inCodeBlock = false;
 
   const flushText = () => {
@@ -107,9 +125,15 @@ function parseRichTextBlocks(content: string): RichTextBlock[] {
   };
 
   const flushCode = () => {
-    blocks.push({ type: 'code', lang: codeLang, code: codeBuffer.join('\n').trimEnd() });
+    blocks.push({
+      type: 'code',
+      lang: codeLang,
+      filename: codeFilename,
+      code: codeBuffer.join('\n').trimEnd(),
+    });
     codeBuffer = [];
     codeLang = undefined;
+    codeFilename = undefined;
   };
 
   for (const line of lines) {
@@ -121,7 +145,15 @@ function parseRichTextBlocks(content: string): RichTextBlock[] {
         inCodeBlock = false;
       } else {
         flushText();
-        codeLang = trimmed.slice(3).trim() || undefined;
+        const info = trimmed.slice(3).trim();
+        if (info) {
+          const [lang, ...rest] = info.split(/\s+/);
+          codeLang = lang || undefined;
+          codeFilename = rest.length > 0 ? rest.join(' ') : undefined;
+        } else {
+          codeLang = undefined;
+          codeFilename = undefined;
+        }
         inCodeBlock = true;
       }
       continue;
@@ -298,6 +330,9 @@ function normalizeInlineSnippetLang(lang?: string): CodeSnippet['lang'] {
 function renderRichText(content: string, interactiveCode = false): React.ReactNode {
   return parseRichTextBlocks(content).map((block, index) => {
     if (block.type === 'code') {
+      const lang = normalizeInlineSnippetLang(block.lang);
+      const filename = block.filename ?? `InlineExample-${index.toString()}.${lang}`;
+
       return (
         <div
           className="doc-content__block"
@@ -307,10 +342,8 @@ function renderRichText(content: string, interactiveCode = false): React.ReactNo
             interactive={interactiveCode}
             snippet={{
               code: block.code,
-              filename: `InlineExample-${index.toString()}.${normalizeInlineSnippetLang(
-                block.lang,
-              )}`,
-              lang: normalizeInlineSnippetLang(block.lang),
+              filename,
+              lang,
             }}
           />
         </div>

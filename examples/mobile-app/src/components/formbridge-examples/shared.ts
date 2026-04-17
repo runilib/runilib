@@ -1,5 +1,5 @@
 import type {
-  FormBridgeOptions,
+  GlobaleDefaultsProps,
   OptionsFetcherContext,
   SelectOption,
 } from '@runilib/react-formbridge';
@@ -95,52 +95,46 @@ export async function searchCityDirectory({
   );
 }
 
+const NATIVE_FIELD_STYLES = {
+  wrapper: s.fieldRoot,
+  label: s.fieldLabel,
+  textInput: s.fieldInput,
+  passwordInput: s.fieldInput,
+  phoneInput: s.fieldInput,
+  error: s.fieldError,
+  hint: s.fieldHint,
+  checkboxRow: s.checkboxRow,
+  checkboxBox: s.checkboxBox,
+  checkboxLabel: s.checkboxLabel,
+  selectTrigger: s.fieldInput,
+  selectOptionRow: s.optionRow,
+  selectOptionLabel: s.optionLabel,
+  selectModalBackdrop: s.optionModalBackdrop,
+  selectModalCard: s.optionModalCard,
+  autocompleteTrigger: s.fieldInput,
+  autocompleteOptionRow: s.optionRow,
+  autocompleteOptionLabel: s.optionLabel,
+  autocompleteSearchInput: s.fieldInput,
+  autocompleteLoadingText: s.fieldHint,
+  autocompleteEmptyText: s.fieldHint,
+  autocompleteModalBackdrop: s.optionModalBackdrop,
+  autocompleteModalCard: s.optionModalCard,
+  phoneSearchInput: s.fieldInput,
+  phoneEmptyText: s.fieldHint,
+  phoneModalBackdrop: s.optionModalBackdrop,
+  phoneModalCard: s.optionModalCard,
+} as const;
+
 export function createNativeFieldProps() {
   return {
-    styles: {
-      wrapper: s.fieldRoot,
-      label: s.fieldLabel,
-      input: s.fieldInput,
-      error: s.fieldError,
-      hint: s.fieldHint,
-      checkboxRow: s.checkboxRow,
-      checkboxBox: s.checkboxBox,
-      checkboxLabel: s.checkboxLabel,
-      optionTrigger: s.fieldInput,
-      trigger: s.fieldInput,
-      optionRow: s.optionRow,
-      optionLabel: s.optionLabel,
-      searchInput: s.fieldInput,
-      loadingText: s.fieldHint,
-      emptyText: s.fieldHint,
-      modalBackdrop: s.optionModalBackdrop,
-      modalCard: s.optionModalCard,
-    },
+    styles: NATIVE_FIELD_STYLES,
   };
 }
 
-export function createNativeFormUi(): FormBridgeOptions {
+export function createNativeFormUi(): GlobaleDefaultsProps {
   return {
     field: {
-      styles: {
-        wrapper: s.fieldRoot,
-        label: s.fieldLabel,
-        input: s.fieldInput,
-        error: s.fieldError,
-        hint: s.fieldHint,
-        checkboxRow: s.checkboxRow,
-        checkboxBox: s.checkboxBox,
-        checkboxLabel: s.checkboxLabel,
-        optionTrigger: s.fieldInput,
-        trigger: s.fieldInput,
-        optionRow: s.optionRow,
-        optionLabel: s.optionLabel,
-        searchInput: s.fieldInput,
-        loadingText: s.fieldHint,
-        emptyText: s.fieldHint,
-        modalBackdrop: s.optionModalBackdrop,
-        modalCard: s.optionModalCard,
-      },
+      styles: NATIVE_FIELD_STYLES,
     },
     submit: {
       containerStyle: s.submitButton,

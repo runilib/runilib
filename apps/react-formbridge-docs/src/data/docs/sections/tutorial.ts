@@ -10,7 +10,7 @@ export const tutorialSection: LibraryDoc['sections'][number] = {
 - The same ideas apply to React web and React Native, so each milestone shows both render targets`,
   codeTabs: [
     {
-      filename: 'TutorialResult.web.tsx',
+      filename: 'web.tsx',
       lang: 'tsx',
       code: `import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
@@ -50,7 +50,7 @@ export function TutorialResult() {
 }`,
     },
     {
-      filename: 'TutorialResult.native.tsx',
+      filename: 'native.tsx',
       lang: 'tsx',
       code: `import { ScrollView, View } from 'react-native'
 import type { FormSchema } from '@runilib/react-formbridge'
@@ -196,7 +196,7 @@ The important idea is that the schema owns the field behavior, while the compone
       content: `We always start with the smallest useful form. A one-field newsletter signup is enough to learn the relationship between the schema, the generated field, and the submit wrapper.`,
       codeTabs: [
         {
-          filename: 'NewsletterSignup.web.tsx',
+          filename: 'web.tsx',
           lang: 'tsx',
           code: `import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
@@ -219,7 +219,7 @@ export function NewsletterSignup() {
 }`,
         },
         {
-          filename: 'NewsletterSignup.native.tsx',
+          filename: 'native.tsx',
           lang: 'tsx',
           code: `import { ScrollView, View } from 'react-native'
 import type { FormSchema } from '@runilib/react-formbridge'

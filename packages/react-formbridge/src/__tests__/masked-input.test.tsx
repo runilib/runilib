@@ -1,10 +1,16 @@
+import type React from 'react';
+
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { field } from '../core/field-builders/field';
 import type { MaskedDescriptor } from '../core/field-builders/mask/types';
 import { MaskedInput } from '../renderers/web/MaskedInput';
 
-function renderMaskedInput(descriptor: MaskedDescriptor<string>, value = '') {
+function renderMaskedInput(
+  descriptor: MaskedDescriptor<string>,
+  value = '',
+  overrides?: Partial<React.ComponentProps<typeof MaskedInput>>,
+) {
   const view = render(
     <MaskedInput
       descriptor={descriptor}
@@ -21,6 +27,7 @@ function renderMaskedInput(descriptor: MaskedDescriptor<string>, value = '') {
       onBlur={vi.fn()}
       onFocus={vi.fn()}
       allValues={{}}
+      {...overrides}
     />,
   );
 
@@ -58,5 +65,41 @@ describe('web masked input', () => {
     expect(Number(longInput.getAttribute('size'))).toBeGreaterThan(
       Number(shortInput.getAttribute('size')),
     );
+  });
+
+  it('uses the same minimal chrome as standard text inputs by default', () => {
+    const input = renderMaskedInput(field.masked('99/99')._build());
+
+    expect(input.style.width).toBe('100%');
+    expect(input.style.padding).toBe('8px 12px');
+    expect(input.style.backgroundColor).toBe('rgb(255, 255, 255)');
+    expect(input.style.borderWidth).toBe('1px');
+    expect(input.style.borderStyle).toBe('solid');
+  });
+
+  it('lets consumers fully override the masked input chrome', () => {
+    const input = renderMaskedInput(field.masked('99/99')._build(), '', {
+      extra: {
+        styles: {
+          textInput: {
+            width: '22ch',
+            minWidth: '22ch',
+            padding: '2px 3px',
+            borderRadius: 12,
+          },
+        },
+        inputProps: {
+          style: {
+            backgroundColor: 'rgb(1, 2, 3)',
+          },
+        },
+      },
+    });
+
+    expect(input.style.width).toBe('22ch');
+    expect(input.style.minWidth).toBe('22ch');
+    expect(input.style.padding).toBe('2px 3px');
+    expect(input.style.borderRadius).toBe('12px');
+    expect(input.style.backgroundColor).toBe('rgb(1, 2, 3)');
   });
 });

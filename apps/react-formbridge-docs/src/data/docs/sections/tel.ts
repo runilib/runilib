@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   STRING_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -50,10 +51,39 @@ ${TEL_METHODS_TABLE}`,
     {
       id: 'fb-tel-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase tel-specific use cases:
-- Internal extension number → \`field.tel('Extension').pattern(/^\\d{3,5}$/, 'Enter a 3-5 digit extension.').placeholder('e.g. 4201')\`
-- Freeform with country code hint → \`field.tel('Support phone').required().hint('Include country code, e.g. +33 1 23 45 67 89')\`
-- Custom format enforcement → \`field.tel('Fax').pattern(/^\\+\\d{1,3}\\s?\\d{4,14}$/, 'Use international format: +XX XXXXXXXXXX')\``,
+      content: `Patterns that showcase tel-specific use cases.
+
+**Internal extension number**
+
+${FENCE}tsx Extension.tsx
+const schema = {
+  extension: field.tel('Extension')
+    .pattern(/^\\d{3,5}$/, 'Enter a 3-5 digit extension.')
+    .placeholder('e.g. 4201'),
+}
+${FENCE}
+
+**Freeform with country code hint**
+
+${FENCE}tsx SupportPhone.tsx
+const schema = {
+  supportPhone: field.tel('Support phone')
+    .required()
+    .hint('Include country code, e.g. +33 1 23 45 67 89'),
+}
+${FENCE}
+
+**Custom format enforcement**
+
+${FENCE}tsx Fax.tsx
+const schema = {
+  fax: field.tel('Fax')
+    .pattern(
+      /^\\+\\d{1,3}\\s?\\d{4,14}$/,
+      'Use international format: +XX XXXXXXXXXX',
+    ),
+}
+${FENCE}`,
     },
   ],
 };

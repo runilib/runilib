@@ -6,8 +6,8 @@ import type {
   FormSchema,
   Platform,
   SchemaValues,
+  UseFormBridgeOptions,
   UseFormBridgeReturn,
-  UseFormOptions,
 } from '../../types';
 
 export interface WizardStep<
@@ -19,7 +19,7 @@ export interface WizardStep<
   schema: S;
   optional?: boolean;
   condition?: (allValues: Record<string, unknown>) => boolean;
-  formOptions?: Partial<UseFormOptions<S, TPlatform>>;
+  formOptions?: Partial<UseFormBridgeOptions<S, TPlatform>>;
 }
 
 export type WizardStepChangeReason =
@@ -43,8 +43,8 @@ export interface UseFormWizardOptions<TPlatform extends Platform = Platform> {
   onSubmit: (allValues: Record<string, unknown>) => void | Promise<void>;
   onSubmitError?: (error: unknown) => string;
   persist?: Omit<PersistOptions, 'key'> & { key: string };
-  validateOn?: UseFormOptions<FormSchema, TPlatform>['validateOn'];
-  revalidateOn?: UseFormOptions<FormSchema, TPlatform>['revalidateOn'];
+  validateOn?: UseFormBridgeOptions<FormSchema, TPlatform>['validateOn'];
+  revalidateOn?: UseFormBridgeOptions<FormSchema, TPlatform>['revalidateOn'];
   stepId?: string;
   initialStepId?: string;
   onStepChange?: (event: WizardStepChangeEvent<TPlatform>) => void;
@@ -79,7 +79,7 @@ const EMPTY_SCHEMA: FormSchema = {};
 
 type UseFormBridgeHook<TPlatform extends Platform> = <S extends FormSchema>(
   schema: S,
-  options?: UseFormOptions<S, TPlatform>,
+  options?: UseFormBridgeOptions<S, TPlatform>,
 ) => UseFormBridgeReturn<S, TPlatform>;
 
 function pickValuesForSchema<S extends FormSchema>(
@@ -304,7 +304,7 @@ export function createUseFormBridgeWizard<TPlatform extends Platform>(
       validatorResolver: stepFormOptions?.validatorResolver,
       persist: stepPersist,
       analytics: stepFormOptions?.analytics,
-      globalConfigs: stepFormOptions?.globalConfigs,
+      globalDefaults: stepFormOptions?.globalDefaults,
     });
 
     const liveAllValues = step

@@ -31,7 +31,7 @@ export function FieldOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalConfigs: () => ({
+    globalDefaults: () => ({
       submit: {
         loadingText: 'Saving inline theme...',
         containerStyle: {
@@ -58,7 +58,7 @@ export function FieldOverridesStylingExample() {
             textTransform: 'uppercase',
             color: '#30415d',
           },
-          input: {
+          textInput: {
             minHeight: 52,
             borderWidth: 1.5,
             borderColor: 'rgba(251, 191, 36, 0.18)',
@@ -138,7 +138,7 @@ export function FieldOverridesStylingExample() {
               <fields.postalCode
                 {...{
                   styles: {
-                    input: {
+                    textInput: {
                       textAlign: 'center',
                       letterSpacing: 2,
                     },

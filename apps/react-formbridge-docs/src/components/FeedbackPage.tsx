@@ -2,7 +2,12 @@
 
 import { type CSSProperties, useCallback, useMemo, useState } from 'react';
 
-import { field, type SchemaValues, useFormBridge } from '@runilib/react-formbridge';
+import {
+  field,
+  type GlobaleDefaultsProps,
+  type SchemaValues,
+  useFormBridge,
+} from '@runilib/react-formbridge';
 import {
   FEEDBACK_TYPE_OPTIONS,
   type FeedbackSubmissionValues,
@@ -80,7 +85,7 @@ const FEEDBACK_SCHEMA = {
 
 type FeedbackFormValues = SchemaValues<typeof FEEDBACK_SCHEMA>;
 
-function getFeedbackFieldStyles(theme: DefaultTheme) {
+function getFeedbackFieldStyles(theme: DefaultTheme): GlobaleDefaultsProps {
   const errorColor = theme.mode === 'dark' ? '#ff9fb0' : '#d1435b';
   const wrapper: CSSProperties = {
     display: 'grid',
@@ -96,10 +101,10 @@ function getFeedbackFieldStyles(theme: DefaultTheme) {
     color: theme.accent,
     fontWeight: 800,
   };
-  const input: CSSProperties = {
+  const textInput: CSSProperties = {
     background: theme.surfaceSoft,
     border: `1px solid ${theme.border}`,
-    borderRadius: '10px',
+    borderRadius: '5px',
     boxSizing: 'border-box',
     color: theme.text,
     fontSize: '14px',
@@ -111,7 +116,7 @@ function getFeedbackFieldStyles(theme: DefaultTheme) {
   const textarea: CSSProperties = {
     background: theme.surfaceSoft,
     border: `1px solid ${theme.border}`,
-    borderRadius: '10px',
+    borderRadius: '5px',
     boxSizing: 'border-box',
     color: theme.text,
     fontSize: '14px',
@@ -124,7 +129,7 @@ function getFeedbackFieldStyles(theme: DefaultTheme) {
   const select: CSSProperties = {
     background: theme.surfaceSoft,
     border: `1px solid ${theme.border}`,
-    borderRadius: '10px',
+    borderRadius: '5px',
     boxSizing: 'border-box',
     color: theme.text,
     fontSize: '14px',
@@ -164,17 +169,21 @@ function getFeedbackFieldStyles(theme: DefaultTheme) {
   };
 
   return {
-    checkboxInput,
-    checkboxLabel,
-    checkboxRow,
-    error,
-    hint,
-    input,
-    label,
-    requiredMark,
-    wrapper,
-    select,
-    textarea,
+    field: {
+      styles: {
+        checkboxInput,
+        checkboxLabel,
+        checkboxRow,
+        error,
+        hint,
+        textInput,
+        label,
+        requiredMark,
+        wrapper,
+        select,
+        textarea,
+      },
+    },
   };
 }
 
@@ -206,9 +215,9 @@ export const FeedbackPage = ({
   );
 
   const feedbackForm = useFormBridge(FEEDBACK_SCHEMA, {
-    globalConfigs: (state) => ({
+    globalDefaults: (state) => ({
       field: {
-        styles: getFeedbackFieldStyles(theme),
+        ...getFeedbackFieldStyles(theme).field,
       },
       form: {
         style: {

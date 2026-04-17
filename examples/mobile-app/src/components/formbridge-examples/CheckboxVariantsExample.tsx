@@ -36,7 +36,7 @@ export function CheckboxVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createNativeFormUi(),
+    globalDefaults: () => createNativeFormUi(),
   });
 
   const { Form, fields, watchAll } = form;

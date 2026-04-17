@@ -7,8 +7,8 @@ export const quickstartSection: LibraryDoc['sections'][number] = {
 
 - Web and native can share the same schema.
 - The generated \`fields\` map is fully typed from the schema keys.
-- The generated \`field\` prop is also typed from the exact field type, so text fields, textareas, and selects do not expose the same override surface.
-- \`Form.Submit\` automatically follows submit state and can be disabled from \`state.isValid\`.`,
+- The generated \`field\` prop is also typed from the exact field type, so text fields, textareas, or selects for example do not expose the same override surface.
+- \`Form.Submit\` automatically follows submit state.`,
   codeTabs: [
     {
       filename: 'web.tsx',

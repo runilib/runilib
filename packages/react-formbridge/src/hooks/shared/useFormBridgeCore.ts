@@ -15,7 +15,7 @@ import type {
   FormState,
   SchemaShape,
   SchemaValues,
-  UseFormOptions,
+  UseFormBridgeOptions,
 } from '../../types';
 import {
   applyCommittedTransforms,
@@ -78,7 +78,7 @@ function isDevelopmentRuntime(): boolean {
 
 export function useFormBridgeCore<const S extends FormSchema>(
   schema: S,
-  options: UseFormOptions<S> = {},
+  options: UseFormBridgeOptions<S> = {},
 ) {
   const {
     validateOn = 'onBlur',
@@ -361,6 +361,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
   const runAllValidation = useCallback(async (): Promise<{
     errors: Record<string, string>;
+    formLevelError: string | null;
     resolvedValues: Record<string, unknown> | null;
   }> => {
     const values = stateRef.current.values;
@@ -384,6 +385,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
       return {
         errors,
+        formLevelError: null,
         resolvedValues: result.values,
       };
     }
@@ -403,12 +405,9 @@ export function useFormBridgeCore<const S extends FormSchema>(
         }
       }
 
-      if (result.formErrors.length) {
-        errors.__form = result.formErrors[0];
-      }
-
       return {
         errors,
+        formLevelError: result.formLevelErrors.length ? result.formLevelErrors[0] : null,
         resolvedValues: result.success ? (result.data as Record<string, unknown>) : null,
       };
     }
@@ -434,6 +433,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
     return {
       errors,
+      formLevelError: null,
       resolvedValues: null,
     };
   }, [
@@ -447,9 +447,12 @@ export function useFormBridgeCore<const S extends FormSchema>(
   const validate = useCallback(
     async (names?: keyof S | Array<keyof S>): Promise<boolean> => {
       let nextErrors: Record<string, string>;
+      let nextFormLevelError: string | null = stateRef.current.formLevelError;
 
       if (names === undefined) {
-        nextErrors = (await runAllValidation()).errors;
+        const result = await runAllValidation();
+        nextErrors = result.errors;
+        nextFormLevelError = result.formLevelError;
       } else {
         const fieldNames = (Array.isArray(names) ? names : [names]) as string[];
         nextErrors = { ...(stateRef.current.errors as Record<string, string>) };
@@ -468,18 +471,21 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
       const previousErrors = stateRef.current.errors;
       const normalizedNextErrors = nextErrors;
-      const nextIsValid = Object.keys(nextErrors).length === 0;
+      const nextIsValid =
+        Object.keys(nextErrors).length === 0 && nextFormLevelError === null;
       const currentIsValid = stateRef.current.isValid;
 
       const sameErrors = shallowEqualErrors(previousErrors, normalizedNextErrors);
       const sameIsValid = currentIsValid === nextIsValid;
+      const sameFormLevelError = stateRef.current.formLevelError === nextFormLevelError;
 
       emitErrorsDiffAnalytics(analyticsRef.current, previousErrors, normalizedNextErrors);
 
-      if (!sameErrors || !sameIsValid) {
+      if (!sameErrors || !sameIsValid || !sameFormLevelError) {
         setRuntimeState((current) => ({
           ...current,
           errors: nextErrors as FormState<S>['errors'],
+          formLevelError: nextFormLevelError,
           isValid: nextIsValid,
         }));
       }
@@ -758,6 +764,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
       isSubmitting: false,
       isSubmitSuccess: false,
       isSubmitError: false,
+      formLevelError: null,
       submitError: null,
       submitCount: current.submitCount + 1,
     }));
@@ -778,7 +785,11 @@ export function useFormBridgeCore<const S extends FormSchema>(
       false,
     );
 
-    const { errors: rawErrors, resolvedValues } = await runAllValidation();
+    const {
+      errors: rawErrors,
+      formLevelError,
+      resolvedValues,
+    } = await runAllValidation();
 
     const previousErrors = stateRef.current.errors;
     const nextErrorsForAnalytics = rawErrors;
@@ -789,20 +800,23 @@ export function useFormBridgeCore<const S extends FormSchema>(
       Object.keys(descriptors).map((key) => [key, true]),
     );
 
+    const hasErrors = Object.keys(rawErrors).length > 0 || formLevelError !== null;
+
     setRuntimeState(
       (current) => ({
         ...current,
         errors: rawErrors as FormState<S>['errors'],
+        formLevelError,
         touched: {
           ...current.touched,
           ...allTouched,
         },
-        isValid: Object.keys(rawErrors).length === 0,
+        isValid: !hasErrors,
       }),
       false,
     );
 
-    if (Object.keys(rawErrors).length > 0) {
+    if (hasErrors) {
       setRuntimeState((current) => ({
         ...current,
         status: 'idle',

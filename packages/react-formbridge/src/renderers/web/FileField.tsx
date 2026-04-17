@@ -317,8 +317,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
   const defaultDropZoneContent = loading ? (
     <div
       data-fb-slot="drop-zone-text"
-      className={classNames?.dropZoneText}
-      style={mergeStyles(styles?.dropZoneText)}
+      className={classNames?.fileDropZoneText}
+      style={mergeStyles(styles?.fileDropZoneText)}
     >
       ⟳ {resolvedLoadingText}
     </div>
@@ -326,16 +326,16 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
     <>
       <div
         data-fb-slot="drop-zone-icon"
-        className={classNames?.dropZoneIcon}
-        style={mergeStyles(styles?.dropZoneIcon)}
+        className={classNames?.fileDropZoneIcon}
+        style={mergeStyles(styles?.fileDropZoneIcon)}
       >
         {resolvedDropZoneIcon}
       </div>
 
       <p
         data-fb-slot="drop-zone-text"
-        className={classNames?.dropZoneText}
-        style={mergeStyles(styles?.dropZoneText)}
+        className={classNames?.fileDropZoneText}
+        style={mergeStyles(styles?.fileDropZoneText)}
       >
         {dragging ? resolvedDragActiveText : resolvedDropZoneText}
       </p>
@@ -343,8 +343,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
       {resolvedAcceptedText ? (
         <p
           data-fb-slot="drop-zone-accept"
-          className={classNames?.dropZoneAccept}
-          style={mergeStyles(styles?.dropZoneAccept)}
+          className={classNames?.fileDropZoneAccept}
+          style={mergeStyles(styles?.fileDropZoneAccept)}
         >
           {resolvedAcceptedText}
         </p>
@@ -353,8 +353,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
       {resolvedMaxSizeText ? (
         <p
           data-fb-slot="drop-zone-max-size"
-          className={classNames?.dropZoneMaxSize}
-          style={mergeStyles(styles?.dropZoneMaxSize)}
+          className={classNames?.fileDropZoneMaxSize}
+          style={mergeStyles(styles?.fileDropZoneMaxSize)}
         >
           {resolvedMaxSizeText}
         </p>
@@ -409,8 +409,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
           data-fb-slot="drop-zone"
           {...(dragging ? { 'data-fb-dragging': '' } : {})}
           {...(loading ? { 'data-fb-loading': '' } : {})}
-          className={classNames?.dropZone}
-          style={mergeStyles(controlErrorStyle, styles?.dropZone)}
+          className={classNames?.fileDropZone}
+          style={mergeStyles(controlErrorStyle, styles?.fileDropZone)}
           onClick={() =>
             !descriptor._disabled && !isReadOnly && inputRef.current?.click()
           }
@@ -438,8 +438,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
         <button
           type="button"
           data-fb-slot="browse-button"
-          className={classNames?.browseButton}
-          style={mergeStyles(controlErrorStyle, styles?.browseButton)}
+          className={classNames?.fileBrowseButton}
+          style={mergeStyles(controlErrorStyle, styles?.fileBrowseButton)}
           onClick={() =>
             !descriptor._disabled && !isReadOnly && inputRef.current?.click()
           }
@@ -472,8 +472,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
       {currentFiles.length > 0 && (
         <ul
           data-fb-slot="file-list"
-          className={classNames?.list}
-          style={mergeStyles(styles?.list)}
+          className={classNames?.fileList}
+          style={mergeStyles(styles?.fileList)}
         >
           {currentFiles.map((file, index) => {
             const rawDefaultIcon = getDefaultFileIcon(file);
@@ -504,16 +504,16 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
               <li
                 key={`${file.uri}-${file.name}-${index.toString()}`}
                 data-fb-slot="file-item"
-                className={classNames?.listItem}
-                style={mergeStyles(styles?.listItem)}
+                className={classNames?.fileListItem}
+                style={mergeStyles(styles?.fileListItem)}
               >
                 {descriptor._filePreview && file.type.startsWith('image/') ? (
                   <img
                     src={file.uri}
                     alt={file.name}
                     data-fb-slot="preview-image"
-                    className={classNames?.previewImage}
-                    style={mergeStyles(styles?.previewImage)}
+                    className={classNames?.filePreviewImage}
+                    style={mergeStyles(styles?.filePreviewImage)}
                   />
                 ) : (
                   <div
@@ -546,8 +546,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
                 <button
                   type="button"
                   data-fb-slot="remove-button"
-                  className={classNames?.removeButton}
-                  style={mergeStyles(styles?.removeButton)}
+                  className={classNames?.fileRemoveButton}
+                  style={mergeStyles(styles?.fileRemoveButton)}
                   onClick={() => removeFile(index)}
                   aria-label={`Remove ${file.name}`}
                 >
@@ -568,8 +568,8 @@ export const FileField = ({ descriptor, extra, ...props }: Props) => {
           <button
             type="button"
             data-fb-slot="add-more-button"
-            className={classNames?.addMoreButton}
-            style={mergeStyles(controlErrorStyle, styles?.addMoreButton)}
+            className={classNames?.fileAddMoreButton}
+            style={mergeStyles(controlErrorStyle, styles?.fileAddMoreButton)}
             onClick={() => !isReadOnly && inputRef.current?.click()}
             disabled={isReadOnly}
           >

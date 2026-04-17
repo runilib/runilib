@@ -370,7 +370,7 @@ export function SelectVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => createNativeFormUi(),
+    globalDefaults: () => createNativeFormUi(),
   });
 
   const { Form, fieldController, fields, watchAll } = form;

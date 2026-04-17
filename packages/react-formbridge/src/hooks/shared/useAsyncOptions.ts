@@ -20,6 +20,12 @@ export type OptionsFetcher<TDeps extends AsyncDependencyShape = Record<string, n
   context: OptionsFetcherContext<TDeps>,
 ) => Promise<SelectOption[]>;
 
+/**
+ * @experimental
+ * Low-level async options config used by `useAsyncOptions()` and by
+ * `field.select().optionsFrom(...)` under the hood.
+ * Prefer `optionsFrom(...)` as the stable v1 public path when a generated field is enough.
+ */
 export interface AsyncOptionsConfig<
   TDeps extends AsyncDependencyShape = Record<string, never>,
 > {
@@ -35,6 +41,10 @@ export interface AsyncOptionsConfig<
   preserveOnError?: boolean;
 }
 
+/**
+ * @experimental
+ * Return shape for the low-level `useAsyncOptions()` hook.
+ */
 export interface UseAsyncOptionsReturn {
   options: SelectOption[];
   loading: boolean;
@@ -97,6 +107,11 @@ function buildDepsFingerprint<TDeps extends AsyncDependencyShape>(
   return JSON.stringify(dependsOn.map((key) => [key, depValues[key] ?? null]));
 }
 
+/**
+ * @experimental
+ * Low-level headless primitive for custom async autocomplete or picker UIs.
+ * Prefer `field.select().optionsFrom(...)` in v1 unless you explicitly need a custom UI layer.
+ */
 export function useAsyncOptions<TDeps extends AsyncDependencyShape>(
   config: AsyncOptionsConfig<TDeps>,
   depValues: Record<string, unknown> = {},

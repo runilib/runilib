@@ -95,13 +95,13 @@ export function PasswordVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => {
+    globalDefaults: () => {
       const baseUi = createNativeFormUi();
       const baseInputStyle =
         (baseUi.field?.styles &&
         typeof baseUi.field.styles === 'object' &&
-        'input' in baseUi.field.styles
-          ? baseUi.field.styles.input
+        'passwordInput' in baseUi.field.styles
+          ? baseUi.field.styles.passwordInput
           : undefined) ?? {};
       const baseRootStyle =
         (baseUi.field?.styles &&
@@ -120,7 +120,7 @@ export function PasswordVariantsExample() {
           ...baseUi.field,
           styles: {
             ...baseUi.field?.styles,
-            input: {
+            passwordInput: {
               ...(typeof baseInputStyle === 'object' ? baseInputStyle : {}),
               paddingRight: 110,
               color: '#10203a',
@@ -131,7 +131,7 @@ export function PasswordVariantsExample() {
               ...(typeof baseRootStyle === 'object' ? baseRootStyle : {}),
               gap: 8,
             },
-            toggle: {
+            passwordToggle: {
               position: 'absolute',
               right: 10,
               top: 10,
@@ -144,43 +144,43 @@ export function PasswordVariantsExample() {
               alignItems: 'center',
               justifyContent: 'center',
             },
-            toggleText: {
+            passwordToggleText: {
               color: '#10203a',
               fontSize: 12,
               fontWeight: '700',
             },
-            strengthRow: {
+            passwordStrengthRow: {
               gap: 10,
               marginTop: 2,
             },
-            strengthBar: {
+            passwordStrengthBar: {
               minHeight: 6,
               borderRadius: 999,
               backgroundColor: 'rgba(148, 163, 184, 0.18)',
             },
-            strengthFill: {
+            passwordStrengthFill: {
               minHeight: 6,
               borderRadius: 999,
             },
-            strengthMeta: {
+            passwordStrengthMeta: {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
               gap: 10,
             },
-            strengthLabel: {
+            passwordStrengthLabel: {
               fontSize: 12,
               fontWeight: '700',
             },
-            strengthEntropy: {
+            passwordStrengthEntropy: {
               fontSize: 11,
               color: '#64748b',
             },
-            rulesList: {
+            passwordRulesList: {
               gap: 8,
             },
-            ruleItem: {
+            passwordRuleItem: {
               flexDirection: 'row',
               alignItems: 'center',
               gap: 10,
@@ -191,7 +191,7 @@ export function PasswordVariantsExample() {
               borderColor: 'rgba(148, 163, 184, 0.14)',
               backgroundColor: '#ffffff',
             },
-            ruleBullet: {
+            passwordRuleBullet: {
               width: 22,
               height: 22,
               borderRadius: 999,
@@ -204,7 +204,7 @@ export function PasswordVariantsExample() {
               fontWeight: '800',
               paddingTop: 4,
             },
-            ruleText: {
+            passwordRuleText: {
               flex: 1,
               color: '#20304b',
               fontSize: 12,

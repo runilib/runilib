@@ -8,18 +8,30 @@ export const formSection: LibraryDoc['sections'][number] = {
 
 - On web, it behaves like a smart \`<form>\`
 - On native, it behaves like a smart wrapper you can place inside your layout
-- \`Form.Submit\` is coupled to the same runtime, so loading and disabled states stay aligned with the form`,
+- \`Form\` also accepts the native props of that underlying platform element, so things like \`id\`, \`method\`, \`autoComplete\`, \`aria-*\`, \`testID\`, or \`accessibilityLabel\` can be passed directly at the call site
+- \`Form.Submit\` is coupled to the same runtime, so loading and disabled states stay aligned with the form, and it likewise extends the native button / pressable props of the platform`,
   codeTabs: [
     {
       filename: 'Form.tsx',
       lang: 'tsx',
       code: `<Form
+  id="profile-form"
+  name="profile-form"
+  method="post"
+  aria-label="Profile form"
   onSubmit={saveProfile}
   onError={(errors) => console.log(errors)}
   onSubmitError={(error) => console.log(error)}
 >
   {/* fields... */}
-  <Form.Submit loadingText="Saving...">Save</Form.Submit>
+  <Form.Submit
+    type="submit"
+    name="intent"
+    value="save-profile"
+    loadingText="Saving..."
+  >
+    Save
+  </Form.Submit>
 </Form>`,
     },
   ],

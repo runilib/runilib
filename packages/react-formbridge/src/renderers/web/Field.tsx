@@ -4,6 +4,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -17,10 +18,25 @@ import type {
 } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
 import {
+  defaultCheckboxInputStyle,
+  defaultCheckboxLabelStyle,
+  defaultCheckboxRowStyle,
   defaultControlStyle,
   defaultFieldRootStyle,
   defaultOtpContainerStyle,
   defaultOtpInputStyle,
+  defaultOtpSeparatorStyle,
+  defaultRadioGroupStyle,
+  defaultRadioInputStyle,
+  defaultRadioLabelStyle,
+  defaultRadioOptionStyle,
+  defaultSelectStyle,
+  defaultSelectTriggerStyle,
+  defaultSwitchButtonStyle,
+  defaultSwitchLabelStyle,
+  defaultSwitchRootStyle,
+  defaultSwitchThumbStyle,
+  defaultSwitchTrackStyle,
   defaultTextareaStyle,
 } from './default-styles';
 import {
@@ -213,7 +229,7 @@ const renderInput = (
     onFocus: restProps.onFocus,
   };
 
-  const inputClassName = cx(classNames?.input, inputPropsClassName);
+  const inputClassName = cx(classNames?.textInput, inputPropsClassName);
   const renderPicker = ctx.extra?.renderPicker ?? fieldProps.renderPicker;
   const controlErrorStyle = defaultErrorChromeStyle(ctx.hasError, ctx.highlightOnError);
 
@@ -244,7 +260,13 @@ const renderInput = (
         <label
           data-fb-slot="checkbox-row"
           className={classNames?.checkboxRow}
-          style={mergeStyles(styles?.checkboxRow)}
+          style={mergeStyles(
+            defaultCheckboxRowStyle,
+            {
+              cursor: restProps.disabled || isReadOnly ? 'not-allowed' : 'pointer',
+            },
+            styles?.checkboxRow,
+          )}
         >
           <input
             {...commonInputProps}
@@ -252,7 +274,12 @@ const renderInput = (
             type="checkbox"
             checked={Boolean(restProps.value)}
             className={cx(classNames?.checkboxInput, inputPropsClassName)}
-            style={mergeStyles(controlErrorStyle, styles?.checkboxInput, inputPropsStyle)}
+            style={mergeStyles(
+              defaultCheckboxInputStyle,
+              controlErrorStyle,
+              styles?.checkboxInput,
+              inputPropsStyle,
+            )}
             onChange={(e) => {
               if (restProps.disabled || isReadOnly) {
                 return;
@@ -265,7 +292,7 @@ const renderInput = (
           <span
             data-fb-slot="checkbox-label"
             className={classNames?.checkboxLabel}
-            style={mergeStyles(styles?.checkboxLabel)}
+            style={mergeStyles(defaultCheckboxLabelStyle, styles?.checkboxLabel)}
           >
             {restProps.label}
           </span>
@@ -277,15 +304,7 @@ const renderInput = (
         <div
           data-fb-slot="switch-wrapper"
           className={classNames?.switchRoot}
-          style={mergeStyles(
-            {
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              minWidth: 0,
-            },
-            styles?.switchRoot,
-          )}
+          style={mergeStyles(defaultSwitchRootStyle, styles?.switchRoot)}
         >
           <button
             type="button"
@@ -305,55 +324,35 @@ const renderInput = (
             disabled={restProps.disabled}
             data-fb-slot="switch-button"
             className={classNames?.switchButton}
-            style={{
-              ...mergeStyles(
-                {
-                  appearance: 'none',
-                  border: 0,
-                  background: 'transparent',
-                  padding: 0,
-                  margin: 0,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  cursor: restProps.disabled ? 'not-allowed' : 'pointer',
-                  flexShrink: 0,
-                },
-                styles?.switchButton,
-              ),
-            }}
+            style={mergeStyles(
+              defaultSwitchButtonStyle,
+              {
+                cursor: restProps.disabled ? 'not-allowed' : 'pointer',
+              },
+              styles?.switchButton,
+            )}
           >
             <div
               data-fb-slot="switch-track"
               data-fb-checked={restProps.value ? '' : undefined}
               className={classNames?.switchTrack}
               style={mergeStyles(
+                defaultSwitchTrackStyle,
                 {
-                  position: 'relative',
-                  width: 44,
-                  height: 24,
-                  borderRadius: 999,
                   background: restProps.value ? '#22c55e' : 'rgba(148, 163, 184, 0.4)',
-                  transition: 'background-color 160ms ease',
                   opacity: restProps.disabled ? 0.6 : 1,
                 },
-                styles?.switchTrack,
                 controlErrorStyle,
+                styles?.switchTrack,
               )}
             >
               <div
                 data-fb-slot="switch-thumb"
                 className={classNames?.switchThumb}
                 style={mergeStyles(
+                  defaultSwitchThumbStyle,
                   {
-                    position: 'absolute',
-                    top: 2,
                     left: restProps.value ? 22 : 2,
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    background: '#ffffff',
-                    boxShadow: '0 1px 4px rgba(15, 23, 42, 0.28)',
-                    transition: 'left 160ms ease',
                   },
                   styles?.switchThumb,
                 )}
@@ -372,14 +371,7 @@ const renderInput = (
           <span
             data-fb-slot="switch-label"
             className={classNames?.switchLabel}
-            style={mergeStyles(
-              {
-                color: 'inherit',
-                fontSize: 14,
-                lineHeight: 1.4,
-              },
-              styles?.switchLabel,
-            )}
+            style={mergeStyles(defaultSwitchLabelStyle, styles?.switchLabel)}
           >
             {restProps.label}
           </span>
@@ -404,49 +396,22 @@ const renderInput = (
 
       const selectedOption = resolveSelectedOption(descriptor._options, restProps.value);
       const hasSelectedValue = Boolean(selectedOption);
-      const selectValue = hasSelectedValue
-        ? normalizeOptionValue(selectedOption?.value)
-        : '';
-      const placeholderLabel = restProps.placeholder ?? `Select ${restProps.label}`;
-
       return (
-        <select
-          {...commonInputProps}
-          data-fb-slot="select"
-          ref={ctx.registerFocusable}
-          value={selectValue}
-          className={cx(inputClassName, classNames?.select)}
-          style={mergeStyles(
-            defaultControlStyle,
-            controlErrorStyle,
-            styles?.select,
-            selectPropsStyle,
-          )}
-          onChange={(e) => {
-            if (isReadOnly) {
-              return;
-            }
-
-            const matchedOption = resolveSelectedOption(
-              descriptor._options,
-              e.target.value,
-            );
-            restProps.onChange(matchedOption?.value ?? e.target.value);
-          }}
-          {...selectPropsRest}
-        >
-          {hasSelectedValue === false ? (
-            <option value="">{placeholderLabel}</option>
-          ) : null}
-          {descriptor._options?.map((o) => (
-            <option
-              key={String(o.value)}
-              value={String(o.value)}
-            >
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <NativeSelectField
+          commonInputProps={commonInputProps}
+          descriptor={descriptor}
+          hasSelectedValue={hasSelectedValue}
+          inputClassName={inputClassName}
+          isReadOnly={isReadOnly}
+          registerFocusable={ctx.registerFocusable}
+          restProps={restProps}
+          selectPropsClassName={selectPropsClassName}
+          selectPropsRest={selectPropsRest}
+          selectPropsStyle={selectPropsStyle}
+          styles={styles}
+          controlErrorStyle={controlErrorStyle}
+          classNames={classNames}
+        />
       );
     }
 
@@ -464,15 +429,23 @@ const renderInput = (
       ) : (
         <div
           data-fb-slot="radio-group"
-          className={classNames?.radioGroup ?? classNames?.checkboxRow}
-          style={mergeStyles(styles?.radioGroup, styles?.checkboxRow)}
+          className={cx(classNames?.checkboxRow, classNames?.radioGroup)}
+          style={mergeStyles(
+            defaultRadioGroupStyle,
+            styles?.checkboxRow,
+            styles?.radioGroup,
+          )}
         >
           {descriptor._options?.map((o) => (
             <label
               key={String(o.value)}
               data-fb-slot="radio-option"
-              className={classNames?.radioOption ?? classNames?.checkboxRow}
-              style={mergeStyles(styles?.radioOption, styles?.checkboxRow)}
+              className={cx(classNames?.checkboxRow, classNames?.radioOption)}
+              style={mergeStyles(
+                defaultRadioOptionStyle,
+                styles?.checkboxRow,
+                styles?.radioOption,
+              )}
             >
               <input
                 {...commonInputProps}
@@ -482,12 +455,15 @@ const renderInput = (
                 value={String(o.value)}
                 checked={String(restProps.value ?? '') === String(o.value)}
                 className={cx(
-                  classNames?.radioInput ?? classNames?.checkboxInput,
+                  classNames?.checkboxInput,
+                  classNames?.radioInput,
                   inputPropsClassName,
                 )}
                 style={mergeStyles(
+                  defaultRadioInputStyle,
                   controlErrorStyle,
-                  styles?.radioInput ?? styles?.checkboxInput,
+                  styles?.checkboxInput,
+                  styles?.radioInput,
                   inputPropsStyle,
                 )}
                 onChange={() => {
@@ -501,8 +477,12 @@ const renderInput = (
               />
               <span
                 data-fb-slot="radio-label"
-                className={classNames?.radioLabel ?? classNames?.checkboxLabel}
-                style={mergeStyles(styles?.radioLabel, styles?.checkboxLabel)}
+                className={cx(classNames?.checkboxLabel, classNames?.radioLabel)}
+                style={mergeStyles(
+                  defaultRadioLabelStyle,
+                  styles?.checkboxLabel,
+                  styles?.radioLabel,
+                )}
               >
                 {o.label}
               </span>
@@ -512,19 +492,40 @@ const renderInput = (
       );
 
     case 'otp': {
-      const len = descriptor._otpLength ?? 6;
+      const groups =
+        descriptor._otpGroups && descriptor._otpGroups.length > 0
+          ? descriptor._otpGroups
+          : [descriptor._otpLength ?? 6];
+      const separator = descriptor._otpSeparator ?? '-';
+      const maskChar = descriptor._otpMaskChar;
+      const len = groups.reduce((sum, size) => sum + size, 0);
       const chars = String(restProps.value ?? '').split('');
 
-      return (
-        <div
-          data-fb-slot="otp-container"
-          className={classNames?.otpContainer}
-          style={mergeStyles(defaultOtpContainerStyle, styles?.otpContainer)}
-        >
-          {Array.from({ length: len }, (_, index) => ({
-            key: `${id}-otp-${index}`,
-            index,
-          })).map(({ key, index: i }) => (
+      const focusByIndex = (target: HTMLElement, delta: number) => {
+        const container = target.closest('[data-fb-slot="otp-container"]');
+        const currentIndex = Number(
+          (target as HTMLInputElement).dataset.fbOtpIndex ?? '-1',
+        );
+        const nextIndex = currentIndex + delta;
+
+        const nextEl = container?.querySelector<HTMLInputElement>(
+          `[data-fb-otp-index="${nextIndex}"]`,
+        );
+
+        nextEl?.focus();
+      };
+
+      const cells: React.ReactNode[] = [];
+      let cellIndex = 0;
+
+      groups.forEach((size, groupIndex) => {
+        for (let offset = 0; offset < size; offset += 1) {
+          const i = cellIndex;
+          const key = `${id}-otp-${i}`;
+          const rawChar = chars[i] ?? '';
+          const displayChar = maskChar && rawChar ? maskChar : rawChar;
+
+          cells.push(
             <input
               key={key}
               id={i === 0 ? id : undefined}
@@ -537,7 +538,7 @@ const renderInput = (
               inputMode={inputBehavior.inputMode ?? 'numeric'}
               enterKeyHint={inputBehavior.enterKeyHint}
               maxLength={1}
-              value={chars[i] ?? ''}
+              value={displayChar}
               disabled={restProps.disabled}
               readOnly={isReadOnly}
               aria-label={`${restProps.label} ${i + 1}`}
@@ -545,24 +546,30 @@ const renderInput = (
               aria-describedby={ctx.describedBy}
               aria-readonly={isReadOnly || undefined}
               data-fb-slot="otp-input"
+              data-fb-otp-index={i}
               className={cx(classNames?.otpInput, inputPropsClassName)}
               onChange={(e) => {
                 if (isReadOnly) {
                   return;
                 }
 
+                const typed = e.target.value.slice(-1);
                 const next = [...chars];
-                next[i] = e.target.value.slice(-1);
-                restProps.onChange(next.join(''));
+                next[i] = typed === maskChar ? (chars[i] ?? '') : typed;
 
-                const sib = e.target.nextElementSibling as HTMLInputElement | null;
-                if (sib && e.target.value) sib.focus();
+                while (next.length < len) {
+                  next.push('');
+                }
+
+                restProps.onChange(next.slice(0, len).join(''));
+
+                if (typed) {
+                  focusByIndex(e.target, 1);
+                }
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Backspace' && !chars[i]) {
-                  const prev = (e.target as HTMLInputElement)
-                    .previousElementSibling as HTMLInputElement | null;
-                  if (prev) prev.focus();
+                  focusByIndex(e.target as HTMLElement, -1);
                 }
               }}
               onBlur={restProps.onBlur}
@@ -574,8 +581,35 @@ const renderInput = (
                 inputPropsStyle,
               )}
               {...inputPropsRest}
-            />
-          ))}
+            />,
+          );
+
+          cellIndex += 1;
+        }
+
+        if (groupIndex < groups.length - 1) {
+          const separatorKey = `${id}-otp-sep-after-${cellIndex}`;
+          cells.push(
+            <span
+              key={separatorKey}
+              aria-hidden="true"
+              data-fb-slot="otp-separator"
+              className={classNames?.otpSeparator}
+              style={mergeStyles(defaultOtpSeparatorStyle, styles?.otpSeparator)}
+            >
+              {separator}
+            </span>,
+          );
+        }
+      });
+
+      return (
+        <div
+          data-fb-slot="otp-container"
+          className={classNames?.otpContainer}
+          style={mergeStyles(defaultOtpContainerStyle, styles?.otpContainer)}
+        >
+          {cells}
           <input
             type="hidden"
             name={restProps.name}
@@ -606,7 +640,7 @@ const renderInput = (
           style={mergeStyles(
             defaultControlStyle,
             controlErrorStyle,
-            styles?.input,
+            styles?.textInput,
             inputPropsStyle,
           )}
           onChange={(e) => {
@@ -630,7 +664,7 @@ const renderInput = (
           style={mergeStyles(
             defaultControlStyle,
             controlErrorStyle,
-            styles?.input,
+            styles?.textInput,
             inputPropsStyle,
           )}
           onChange={(e) => restProps.onChange(e.target.value)}
@@ -655,7 +689,7 @@ const renderInput = (
           style={mergeStyles(
             defaultControlStyle,
             controlErrorStyle,
-            styles?.input,
+            styles?.textInput,
             inputPropsStyle,
           )}
           onChange={(e) => restProps.onChange(e.target.value)}
@@ -674,6 +708,118 @@ type PickerSelectFieldType = {
   describedBy?: string;
   readOnly?: boolean;
   registerFocusable?: (target: FocusableFieldHandle | null) => void;
+};
+
+type NativeSelectFieldProps = {
+  commonInputProps: Record<string, unknown>;
+  descriptor: Props['descriptor'];
+  hasSelectedValue: boolean;
+  inputClassName?: string;
+  isReadOnly: boolean;
+  registerFocusable?: (target: FocusableFieldHandle | null) => void;
+  restProps: FieldRenderProps<unknown>;
+  selectPropsClassName?: string;
+  selectPropsRest: Record<string, unknown>;
+  selectPropsStyle?: CSSProperties;
+  styles?: ExtraFieldProps<WebFieldPropsOverrides>['styles'];
+  controlErrorStyle?: CSSProperties;
+  classNames?: ExtraFieldProps<WebFieldPropsOverrides>['classNames'];
+};
+
+const NativeSelectField = ({
+  commonInputProps,
+  descriptor,
+  hasSelectedValue,
+  inputClassName,
+  isReadOnly,
+  registerFocusable,
+  restProps,
+  selectPropsClassName,
+  selectPropsRest,
+  selectPropsStyle,
+  styles,
+  controlErrorStyle,
+  classNames,
+}: NativeSelectFieldProps) => {
+  const selectRef = useRef<HTMLSelectElement | null>(null);
+  const selectValue = hasSelectedValue
+    ? normalizeOptionValue(
+        resolveSelectedOption(descriptor._options, restProps.value)?.value,
+      )
+    : '';
+  const placeholderLabel = restProps.placeholder ?? `Select ${restProps.label}`;
+
+  useEffect(() => {
+    const select = selectRef.current;
+    if (!select) {
+      return;
+    }
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (document.activeElement !== select) {
+        return;
+      }
+
+      const target = event.target;
+
+      if (target instanceof Node && select.contains(target)) {
+        return;
+      }
+
+      // Native select popovers can swallow the first outside click while keeping
+      // focus on the control. Blur it on the same interaction so onBlur
+      // validation and error messages are not delayed until a second click.
+      window.setTimeout(() => {
+        if (document.activeElement === select) {
+          select.blur();
+        }
+      }, 0);
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, []);
+
+  return (
+    <select
+      {...commonInputProps}
+      data-fb-slot="select"
+      ref={(node) => {
+        selectRef.current = node;
+        registerFocusable?.(node);
+      }}
+      value={selectValue}
+      className={cx(inputClassName, classNames?.select, selectPropsClassName)}
+      style={mergeStyles(
+        defaultSelectStyle,
+        controlErrorStyle,
+        styles?.select,
+        selectPropsStyle,
+      )}
+      onChange={(e) => {
+        if (isReadOnly) {
+          return;
+        }
+
+        const matchedOption = resolveSelectedOption(descriptor._options, e.target.value);
+        restProps.onChange(matchedOption?.value ?? e.target.value);
+      }}
+      {...selectPropsRest}
+    >
+      {hasSelectedValue === false ? <option value="">{placeholderLabel}</option> : null}
+      {descriptor._options?.map((o) => (
+        <option
+          key={String(o.value)}
+          value={String(o.value)}
+        >
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
 };
 
 const PickerSelectField = ({
@@ -829,8 +975,13 @@ const PickerSelectField = ({
         data-fb-slot="select-trigger"
         data-fb-selected={selectedOption ? '' : undefined}
         onClick={openPicker}
-        className={cx(classNames?.input, classNames?.select, selectPropsClassName)}
-        style={mergeStyles(controlErrorStyle, styles?.select, selectPropsStyle)}
+        className={cx(classNames?.textInput, classNames?.select, selectPropsClassName)}
+        style={mergeStyles(
+          defaultSelectTriggerStyle,
+          controlErrorStyle,
+          styles?.select,
+          selectPropsStyle,
+        )}
         {...selectTriggerProps}
       >
         <span

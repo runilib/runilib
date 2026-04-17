@@ -37,6 +37,11 @@ const FIELD_LABEL_PROPS_TABLE = buildMethodsTable([
     '`CSSProperties | StyleProp<TextStyle>`',
     'Inline style — `CSSProperties` on web, `StyleProp<TextStyle>` on native.',
   ],
+  [
+    '`render(...)` for extra native attrs',
+    '`(ctx) => ReactNode`',
+    'If you need custom DOM/native attributes beyond the focused built-in surface, render the label element yourself via `render` and attach whatever your platform needs there.',
+  ],
 ]);
 
 export const fieldLabelSection: LibraryDoc['sections'][number] = {
@@ -47,7 +52,8 @@ export const fieldLabelSection: LibraryDoc['sections'][number] = {
 - Label text comes from \`field.x('Label text')\` in the schema — the component stays in sync automatically, so you don't duplicate strings in JSX
 - Required mark is driven by \`.required()\` on the builder. Flip the schema and the asterisk appears/disappears everywhere
 - \`htmlFor\` defaults to the field \`name\`, which matches the id emitted by the generated fields — click the label, the input focuses, accessibility wired for free
-- Use it when you render inputs through \`form.fieldController(name)\` or when your design-system row layout keeps label / input / error as separate slots`,
+- Use it when you render inputs through \`form.fieldController(name)\` or when your design-system row layout keeps label / input / error as separate slots
+- Unlike \`Form\` and \`Form.Submit\`, \`FieldLabel\` keeps a deliberately focused API today instead of mirroring every native label attribute; if you need total control over the wrapper element, use \`render\``,
   codeTabs: [
     {
       filename: 'FieldLabel.web.tsx',

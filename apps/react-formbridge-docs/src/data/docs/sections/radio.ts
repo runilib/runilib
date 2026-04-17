@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   SELECT_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -84,10 +85,43 @@ ${RADIO_METHODS_TABLE}`,
     {
       id: 'fb-radio-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase radio-specific use cases:
-- Billing cadence toggle → \`field.radio('Billing').options([{ label: 'Monthly — $9/mo', value: 'month' }, { label: 'Yearly — $90/yr', value: 'year' }]).defaultSelected('month')\`
-- Role picker → \`field.radio('Role').options(['Admin', 'Editor', 'Viewer']).required()\`
-- Yes/No confirmation → \`field.radio('Confirm deletion').options([{ label: 'Yes, delete', value: true }, { label: 'No, keep', value: false }]).required()\``,
+      content: `Patterns that showcase radio-specific use cases.
+
+**Billing cadence toggle**
+
+${FENCE}tsx Billing.tsx
+const schema = {
+  billing: field.radio('Billing')
+    .options([
+      { label: 'Monthly — $9/mo', value: 'month' },
+      { label: 'Yearly — $90/yr', value: 'year' },
+    ])
+    .defaultSelected('month'),
+}
+${FENCE}
+
+**Role picker**
+
+${FENCE}tsx Role.tsx
+const schema = {
+  role: field.radio('Role')
+    .options(['Admin', 'Editor', 'Viewer'])
+    .required(),
+}
+${FENCE}
+
+**Yes/No confirmation**
+
+${FENCE}tsx Confirmation.tsx
+const schema = {
+  confirmDeletion: field.radio('Confirm deletion')
+    .options([
+      { label: 'Yes, delete', value: true },
+      { label: 'No, keep', value: false },
+    ])
+    .required(),
+}
+${FENCE}`,
     },
   ],
 };

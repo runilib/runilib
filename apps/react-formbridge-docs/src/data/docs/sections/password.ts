@@ -2,6 +2,7 @@ import type { LibraryDoc } from './../../../types/index';
 import {
   BASE_FIELD_BUILDER_REFERENCE,
   buildMethodsTable,
+  FENCE,
   STRING_FIELD_BUILDER_REFERENCE,
 } from '../constants';
 
@@ -61,10 +62,49 @@ ${PASSWORD_METHODS_TABLE}`,
     {
       id: 'fb-password-recipes',
       title: 'Recipes',
-      content: `Patterns that showcase password-specific strengths:
-- Signup with strength bar → \`field.password('Password').required().strong().withStrengthIndicator({ showBar: true, showRules: true, blockWeak: true })\`
-- Confirmation field → \`field.password('Confirm password').required().sameAs('password', 'Passwords must match.')\`
-- Password rotation (reject reuse) → \`field.password('New password').required().strong().validate((value, allValues) => value !== allValues.currentPassword ? null : 'Choose a different password.')\``,
+      content: `Patterns that showcase password-specific strengths.
+
+**Signup with strength bar**
+
+${FENCE}tsx SignupPassword.tsx
+const schema = {
+  password: field.password('Password')
+    .required()
+    .strong()
+    .withStrengthIndicator({
+      showBar: true,
+      showRules: true,
+      blockWeak: true,
+    }),
+}
+${FENCE}
+
+**Confirmation field**
+
+${FENCE}tsx ConfirmPassword.tsx
+const schema = {
+  password: field.password('Password').required().strong(),
+  confirmPassword: field.password('Confirm password')
+    .required()
+    .sameAs('password', 'Passwords must match.'),
+}
+${FENCE}
+
+**Password rotation (reject reuse)**
+
+${FENCE}tsx PasswordRotation.tsx
+const schema = {
+  currentPassword: field.password('Current password').required(),
+  newPassword: field.password('New password')
+    .required()
+    .strong()
+    .validate((value, allValues) =>
+      value !== allValues.currentPassword
+        ? null
+        : 'Choose a different password.',
+    ),
+}
+${FENCE}`,
     },
   ],
 };

@@ -84,7 +84,7 @@ export function FileVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalConfigs: () => {
+    globalDefaults: () => {
       const baseUi = createDemoFormUi(styles);
 
       return {
@@ -101,7 +101,7 @@ export function FileVariantsExample() {
               ...baseUi.field?.styles?.wrapper,
               gap: 8,
             },
-            dropZone: {
+            fileDropZone: {
               minHeight: 148,
               display: 'flex',
               flexDirection: 'column',
@@ -117,7 +117,7 @@ export function FileVariantsExample() {
               textAlign: 'left',
               cursor: 'pointer',
             },
-            browseButton: {
+            fileBrowseButton: {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -130,7 +130,7 @@ export function FileVariantsExample() {
               color: '#dbeafe',
               fontWeight: 700,
             },
-            addMoreButton: {
+            fileAddMoreButton: {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -142,7 +142,7 @@ export function FileVariantsExample() {
               color: '#10203a',
               fontWeight: 700,
             },
-            list: {
+            fileList: {
               listStyle: 'none',
               padding: 0,
               margin: 0,
@@ -150,7 +150,7 @@ export function FileVariantsExample() {
               flexDirection: 'column',
               gap: 10,
             },
-            listItem: {
+            fileListItem: {
               display: 'grid',
               gridTemplateColumns: '72px minmax(0, 1fr) auto',
               gap: 14,
@@ -160,7 +160,7 @@ export function FileVariantsExample() {
               border: '1px solid rgba(148, 163, 184, 0.14)',
               background: '#ffffff',
             },
-            previewImage: {
+            filePreviewImage: {
               width: 72,
               height: 72,
               objectFit: 'cover',
@@ -189,7 +189,7 @@ export function FileVariantsExample() {
               fontSize: 12,
               lineHeight: 1.5,
             },
-            removeButton: {
+            fileRemoveButton: {
               border: '1px solid rgba(248, 113, 113, 0.18)',
               borderRadius: 12,
               background: 'rgba(127, 29, 29, 0.22)',

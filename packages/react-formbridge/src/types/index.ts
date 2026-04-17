@@ -47,12 +47,12 @@ export type {
   UseFormBridgeReturn,
 } from './form';
 export type {
-  GlobalConfigsContext,
+  globalDefaultsContext,
   OptionsFetcher,
   OptionsFetcherContext,
   ResolverResult,
   SchemaValidatorResolver,
-  UseFormOptions,
+  UseFormBridgeOptions,
   ValidationTrigger,
 } from './options';
 export type {

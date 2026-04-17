@@ -16,17 +16,17 @@ import type { FormBridgeOptions } from './ui';
  */
 export type ValidationTrigger = 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched';
 
-// ─── useForm options ────────────────────────────────────────────────────────────
+// ─── useFormBridge options ────────────────────────────────────────────────────────────
 
 /**
  * The options bag passed to `useFormBridge(schema, options)`. Controls
  * validation timing, schema resolvers, draft persistence, analytics, and
- * global UI overrides.
+ * global Config overrides.
  *
  * @typeParam S - The form schema.
  * @typeParam TPlatform - Target platform (inferred from the hook variant).
  */
-export interface UseFormOptions<
+export interface UseFormBridgeOptions<
   S extends FormSchema,
   TPlatform extends Platform = Platform,
 > {
@@ -108,28 +108,28 @@ export interface UseFormOptions<
 
   /**
    * Global UI layer applied to every rendered field, form wrapper, and
-   * submit button. Receives a read-only {@link GlobalConfigsContext} so you
+   * submit button. Receives a read-only {@link globalDefaultsContext} so you
    * can theme reactively based on the live form state, branch on field
    * metadata via the compiled `schema`, or switch on the target `platform`.
    *
    * Local field props still win over these defaults.
    */
-  globalConfigs?(
-    context: GlobalConfigsContext<S, TPlatform>,
+  globalDefaults?(
+    context: globalDefaultsContext<S, TPlatform>,
   ): FormBridgeOptions<TPlatform>;
 }
 
-// ─── globalConfigs context ──────────────────────────────────────────────────────
+// ─── globalDefaults context ──────────────────────────────────────────────────────
 
 /**
- * Read-only context handed to the `globalConfigs` selector on every render.
+ * Read-only context handed to the `globalDefaults` selector on every render.
  * Lets the theme branch on live form state, schema metadata, and the target
  * platform without reaching for mutation APIs.
  *
  * @typeParam S - The form schema.
  * @typeParam TPlatform - Target platform (inferred from the hook variant).
  */
-export interface GlobalConfigsContext<
+export interface globalDefaultsContext<
   S extends FormSchema,
   TPlatform extends Platform = Platform,
 > {
