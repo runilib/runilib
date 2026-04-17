@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface GitHubIssue {
   tag: string;
@@ -113,6 +113,9 @@ export function useGitHubIssues({
   );
   const [loading, setLoading] = useState(() => getCached(cacheKey) === null);
 
+  const fallbackRef = useRef(fallback);
+  fallbackRef.current = fallback;
+
   useEffect(() => {
     const cached = getCached(cacheKey);
     if (cached) {
@@ -188,7 +191,7 @@ export function useGitHubIssues({
           setIssues(mapped);
           setCache(cacheKey, mapped);
         } else {
-          setIssues(fallback);
+          setIssues(fallbackRef.current);
           sessionStorage.removeItem(cacheKey);
         }
       })
@@ -202,7 +205,7 @@ export function useGitHubIssues({
     return () => {
       cancelled = true;
     };
-  }, [cacheKey, fallback, normalizedLabelList, normalizedRepoList, perPage]);
+  }, [cacheKey, normalizedLabelList, normalizedRepoList, perPage]);
 
   return { issues, loading };
 }
