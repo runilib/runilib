@@ -152,6 +152,11 @@ jobs:
             exit 1
           fi
 
+          git config --local --unset-all http.https://github.com/.extraheader || true
+          git config --global --unset-all http.https://github.com/.extraheader || true
+          git config --local --unset-all credential.helper || true
+          git config --global --unset-all credential.helper || true
+
           git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror mirror-pr-branch:"mirror/pr-${PR_NUMBER}" --force
 
@@ -300,6 +305,11 @@ jobs:
             echo "::error::Use a PAT or GitHub App installation token with write access to the mirror repositories."
             exit 1
           fi
+
+          git config --local --unset-all http.https://github.com/.extraheader || true
+          git config --global --unset-all http.https://github.com/.extraheader || true
+          git config --local --unset-all credential.helper || true
+          git config --global --unset-all credential.helper || true
 
           git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror --delete "mirror/pr-${PR_NUMBER}" || true

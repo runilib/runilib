@@ -74,6 +74,7 @@ jobs:
 
       - name: Push subtree to mirror repository
         env:
+          GH_TOKEN: ${{ secrets.mirror_push_token }}
           TARGET_REPO: ${{ inputs.target_repo }}
           TARGET_BRANCH: ${{ inputs.target_branch }}
           MIRROR_PUSH_TOKEN: ${{ secrets.mirror_push_token }}
@@ -83,6 +84,15 @@ jobs:
             echo "::error::MIRROR_PUSH_TOKEN secret is empty"
             exit 1
           fi
+          viewer_permission="$(gh repo view "$TARGET_REPO" --json viewerPermission --jq '.viewerPermission' 2>/dev/null || true)"
+          if [ -z "$viewer_permission" ] || [ "$viewer_permission" = "READ" ] || [ "$viewer_permission" = "TRIAGE" ]; then
+            echo "::error::MIRROR_PUSH_TOKEN cannot write to ${TARGET_REPO} (viewerPermission=${viewer_permission:-unknown})."
+            exit 1
+          fi
+          git config --local --unset-all http.https://github.com/.extraheader || true
+          git config --global --unset-all http.https://github.com/.extraheader || true
+          git config --local --unset-all credential.helper || true
+          git config --global --unset-all credential.helper || true
           git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror mirror-branch:${TARGET_BRANCH} --force
 
