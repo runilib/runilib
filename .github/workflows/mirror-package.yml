@@ -77,7 +77,12 @@ jobs:
           TARGET_BRANCH: ${{ inputs.target_branch }}
           MIRROR_PUSH_TOKEN: ${{ secrets.mirror_push_token }}
         run: |
-          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          echo "Token length: ${#MIRROR_PUSH_TOKEN}"
+          if [ -z "$MIRROR_PUSH_TOKEN" ]; then
+            echo "::error::MIRROR_PUSH_TOKEN secret is empty"
+            exit 1
+          fi
+          git remote add mirror "https://${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror mirror-branch:${TARGET_BRANCH} --force
 
       - name: Cleanup local branch

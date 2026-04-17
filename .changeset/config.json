@@ -10,5 +10,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["apps/*", "examples/*"]
+  "ignore": ["runilib-landing", "react-formbridge-docs", "@examples/mobile", "@examples/web"]
 }
