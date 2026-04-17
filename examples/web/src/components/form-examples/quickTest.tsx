@@ -31,7 +31,6 @@ export function QuickTestExample() {
         <form.fields.file />
         <form.fields.password />
         <form.fields.checkbox />
-        {/* <form.FieldError name="email" /> */}
         <form.Form.Submit>Save</form.Form.Submit>
       </form.Form>
     </section>
