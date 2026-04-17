@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://runilib.dev/docs/react-formbridge
+    about: Read the docs before opening an issue — your question might already be answered.
+  - name: Contribute code
+    url: https://github.com/runilib/runilib
+    about: Source code lives in the monorepo. Open pull requests there, not on this mirror.
+  - name: Discussions
+    url: https://github.com/runilib/runilib/discussions
+    about: For open-ended questions and ideas.
