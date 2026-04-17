@@ -137,7 +137,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror mirror-pr-branch:"mirror/pr-${PR_NUMBER}" --force
 
       - name: Create or update mirror pull request
@@ -266,5 +266,5 @@ jobs:
         run: |
           set -euo pipefail
 
-          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror --delete "mirror/pr-${PR_NUMBER}" || true
