@@ -132,11 +132,25 @@ jobs:
       - name: Push subtree branch to mirror repository
         if: steps.subtree.outputs.has_branch == 'true'
         env:
+          GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
           TARGET_REPO: ${{ matrix.target_repo }}
           MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+
+          if [ -z "${MIRROR_PUSH_TOKEN:-}" ]; then
+            echo "::error::MIRROR_PUSH_TOKEN secret is empty."
+            exit 1
+          fi
+
+          viewer_permission="$(gh repo view "$TARGET_REPO" --json viewerPermission --jq '.viewerPermission' 2>/dev/null || true)"
+
+          if [ -z "$viewer_permission" ] || [ "$viewer_permission" = "READ" ] || [ "$viewer_permission" = "TRIAGE" ]; then
+            echo "::error::MIRROR_PUSH_TOKEN cannot write to ${TARGET_REPO} (viewerPermission=${viewer_permission:-unknown})."
+            echo "::error::Use a PAT or GitHub App installation token with at least contents:write and pull-requests:write on the mirror repositories."
+            exit 1
+          fi
 
           git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror mirror-pr-branch:"mirror/pr-${PR_NUMBER}" --force
@@ -238,6 +252,11 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::MIRROR_PUSH_TOKEN secret is empty."
+            exit 1
+          fi
+
           mirror_branch="mirror/pr-${PR_NUMBER}"
 
           existing_number="$(gh pr list \
@@ -262,11 +281,25 @@ jobs:
 
       - name: Delete mirror branch from target repository
         env:
+          GH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
           TARGET_REPO: ${{ matrix.target_repo }}
           MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+
+          if [ -z "${MIRROR_PUSH_TOKEN:-}" ]; then
+            echo "::error::MIRROR_PUSH_TOKEN secret is empty."
+            exit 1
+          fi
+
+          viewer_permission="$(gh repo view "$TARGET_REPO" --json viewerPermission --jq '.viewerPermission' 2>/dev/null || true)"
+
+          if [ -z "$viewer_permission" ] || [ "$viewer_permission" = "READ" ] || [ "$viewer_permission" = "TRIAGE" ]; then
+            echo "::error::MIRROR_PUSH_TOKEN cannot delete branches in ${TARGET_REPO} (viewerPermission=${viewer_permission:-unknown})."
+            echo "::error::Use a PAT or GitHub App installation token with write access to the mirror repositories."
+            exit 1
+          fi
 
           git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror --delete "mirror/pr-${PR_NUMBER}" || true
