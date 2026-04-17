@@ -1,4 +1,4 @@
-name: Deploy Landing to Vercel
+name: Deploy Landing
 
 on:
   workflow_dispatch:

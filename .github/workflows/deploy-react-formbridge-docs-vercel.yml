@@ -1,4 +1,4 @@
-name: Deploy React FormBridge Docs to Vercel
+name: Deploy React-FormBridge Docs
 
 on:
   workflow_dispatch:
