@@ -6,6 +6,8 @@ on:
       - opened
       - edited
       - reopened
+      - labeled
+      - unlabeled
       - closed
 
 permissions:
@@ -50,12 +52,59 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_LABELS_JSON: ${{ toJson(github.event.issue.labels.*.name) }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
           EXISTING_MONOREPO_ISSUE: ${{ steps.resolve.outputs.number }}
         run: |
           set -euo pipefail
 
           test -n "${GH_TOKEN:-}" || { echo "Missing MONOREPO_SYNC_TOKEN secret"; exit 1; }
+
+          label_color() {
+            case "$1" in
+              bug) echo "d73a4a" ;;
+              docs|documentation) echo "0075ca" ;;
+              enhancement) echo "a2eeef" ;;
+              "good first issue") echo "7057ff" ;;
+              "help wanted") echo "008672" ;;
+              *) echo "ededed" ;;
+            esac
+          }
+
+          ensure_label_exists() {
+            local label="$1"
+            local encoded
+
+            encoded="$(jq -rn --arg value "$label" '$value | @uri')"
+
+            if gh api "repos/${MONOREPO_REPO}/labels/${encoded}" > /dev/null 2>&1; then
+              return 0
+            fi
+
+            gh api "repos/${MONOREPO_REPO}/labels" \
+              -X POST \
+              -f name="$label" \
+              -f color="$(label_color "$label")" > /dev/null
+          }
+
+          sync_issue_labels() {
+            local issue_number="$1"
+            local labels_json
+            local payload_file
+
+            labels_json="$(printf '%s' "${ISSUE_LABELS_JSON:-[]}" | jq -c 'map(select(type == "string" and length > 0)) | unique')"
+
+            while IFS= read -r label; do
+              [ -n "${label:-}" ] || continue
+              ensure_label_exists "$label"
+            done < <(printf '%s' "$labels_json" | jq -r '.[]')
+
+            payload_file="$(mktemp)"
+            jq -n --argjson labels "$labels_json" '{labels: $labels}' > "$payload_file"
+
+            gh api -X PATCH "repos/${MONOREPO_REPO}/issues/${issue_number}" \
+              --input "$payload_file" > /dev/null
+          }
 
           body_file="$(mktemp)"
 
@@ -100,6 +149,8 @@ jobs:
               --body-file "$body_file")"
             monorepo_issue_number="${monorepo_issue_url##*/}"
           fi
+
+          sync_issue_labels "${monorepo_issue_number}"
 
           echo "number=${monorepo_issue_number}" >> "$GITHUB_OUTPUT"
 

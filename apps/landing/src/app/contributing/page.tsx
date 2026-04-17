@@ -97,11 +97,11 @@ export default function Contributing() {
 
   const fallbackIssues = c.goodFirstIssues.items.map((item) => ({
     ...item,
-    url: 'https://github.com/runilib/runilib/issues',
+    url: 'https://github.com/issues?q=is%3Aopen+repo%3Arunilib%2Freact-formbridge+repo%3Arunilib%2Freact-walkit+label%3A%22good+first+issue%22',
   }));
 
   const { issues, loading } = useGitHubIssues({
-    repo: 'runilib/runilib',
+    repos: ['runilib/react-formbridge', 'runilib/react-walkit'],
     labels: ['good first issue', 'help wanted', 'docs'],
     perPage: 6,
     fallback: fallbackIssues,
@@ -119,7 +119,7 @@ export default function Contributing() {
             <HeroSub>{c.hero.subtitle}</HeroSub>
             <HeroCTAs>
               <PrimaryAnchor
-                href="https://github.com/runilib/runilib/issues?q=is%3Aopen+label%3A%22good+first+issue%22"
+                href="https://github.com/issues?q=is%3Aopen+repo%3Arunilib%2Freact-formbridge+repo%3Arunilib%2Freact-walkit+label%3A%22good+first+issue%22"
                 target="_blank"
                 rel="noopener"
               >
