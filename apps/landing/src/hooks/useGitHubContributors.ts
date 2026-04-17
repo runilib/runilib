@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface GitHubContributor {
   handle: string;
@@ -79,6 +79,9 @@ export function useGitHubContributors({
   );
   const [loading, setLoading] = useState(() => getCached(cacheKey) === null);
 
+  const fallbackRef = useRef(fallback);
+  fallbackRef.current = fallback;
+
   useEffect(() => {
     const cached = getCached(cacheKey);
     if (cached) {
@@ -142,7 +145,7 @@ export function useGitHubContributors({
           setContributors(mapped);
           setCache(cacheKey, mapped);
         } else {
-          setContributors(fallback);
+          setContributors(fallbackRef.current);
           sessionStorage.removeItem(cacheKey);
         }
       })
@@ -156,7 +159,7 @@ export function useGitHubContributors({
     return () => {
       cancelled = true;
     };
-  }, [cacheKey, fallback, normalizedRepoList, perPage]);
+  }, [cacheKey, normalizedRepoList, perPage]);
 
   return { contributors, loading };
 }

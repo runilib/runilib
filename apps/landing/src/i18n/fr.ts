@@ -9,11 +9,11 @@ export const fr: Translations = {
     github: 'GitHub',
   },
   hero: {
-    badge: 'React Universal Libs · Open Source · MIT',
-    title: 'Librairies React & React Native.',
+    badge: 'Une collection qui grandit · Open Source · MIT',
+    title: 'Une petite bande de librairies React & React Native.',
     titleAccent: 'Un seul code. Web et Native.',
     subtitle:
-      'RUNILIB est un écosystème open source pour React et React Native, conçu pour éviter de dupliquer le travail entre le web et le mobile grâce à des APIs partagées, des packages composables et une DX TypeScript solide.',
+      'RUNILIB est une collection open source de petites librairies composables pour React et React Native. Des APIs partagées, une vraie DX TypeScript, et zéro travail dupliqué entre web et mobile.',
     cta: 'Démarrer maintenant',
     ctaSecondary: 'Voir les librairies',
     stats: {

@@ -408,7 +408,7 @@ export default function Home() {
         </Section>
 
         {/* ── CODE DEMO ── */}
-        <Section>
+        {/* <Section>
           <SLabel>{t.code.label}</SLabel>
           <STitle>{t.code.title}</STitle>
           <SSub>{t.code.subtitle}</SSub>
@@ -430,7 +430,7 @@ export default function Home() {
               filename={snippet.filename}
             />
           </DemoWrap>
-        </Section>
+        </Section> */}
 
         {/* ── FAQ ── */}
         <Section>
@@ -500,7 +500,7 @@ const Wrap = styled.div`padding-top: 64px;`;
 const Section = styled.section`
   max-width: 1240px;
   margin: 0 auto;
-  padding: 88px 24px;
+  padding: 40px 24px;
 `;
 const SLabel = styled.div`
   font-family: 'DM Mono', monospace;
