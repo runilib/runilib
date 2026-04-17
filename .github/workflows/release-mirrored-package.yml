@@ -47,6 +47,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Configure Git
         env:
@@ -118,7 +119,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          git remote add mirror "https://x-access-token:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
+          git remote add mirror "https://oauth2:${MIRROR_PUSH_TOKEN}@github.com/${TARGET_REPO}.git"
           git push mirror mirror-release-branch:"${TARGET_BRANCH}" --force
 
       - name: Ensure release tag exists in mirror repository
