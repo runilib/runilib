@@ -45,6 +45,7 @@
 
     // Typecheck
     "typecheck": {
+      "dependsOn": ["^build"],
       "cache": false,
       "outputs": []
     },
