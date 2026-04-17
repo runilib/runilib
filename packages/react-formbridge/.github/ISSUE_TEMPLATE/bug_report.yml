@@ -1,0 +1,85 @@
+name: Bug report
+description: Report something that isn't working as expected in `@runilib/react-formbridge`.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Fill out the sections below so we can reproduce and fix it quickly.
+
+        Issues opened here are automatically mirrored to the [runilib monorepo](https://github.com/runilib/runilib).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: When I do X, Y happens instead of Z.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal steps (or a link to a reproduction repo/sandbox) to reproduce the bug.
+      placeholder: |
+        1. Render `<Form />` with schema …
+        2. Call `form.submit()`
+        3. Observe …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: Output of `npm list @runilib/react-formbridge` (or from your `package.json`).
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - Web (React)
+        - React Native (iOS)
+        - React Native (Android)
+        - Expo
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: React version, Node version, bundler, browser, OS — anything relevant.
+      placeholder: |
+        - React: 19.0.0
+        - Node: 22.11.0
+        - Bundler: Vite 6
+        - Browser: Chrome 131 / iOS 18 simulator
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste any relevant console output or screenshots here.
+      render: shell
+    validations:
+      required: false

@@ -1,6 +1,6 @@
-# Contributing to `@runilib/react-walkit`
+# Contributing to `@runilib/react-formbridge`
 
-Thanks for your interest in improving `@runilib/react-walkit`.
+Thanks for your interest in improving `@runilib/react-formbridge`.
 
 > **This repository is a read-only mirror.** All source code lives in the [runilib monorepo](https://github.com/runilib/runilib). Code changes pushed here will be overwritten by the next sync.
 
@@ -8,16 +8,16 @@ Thanks for your interest in improving `@runilib/react-walkit`.
 
 | Task | Where |
 | --- | --- |
-| Report a bug | [Open an issue here](https://github.com/runilib/react-walkit/issues/new/choose) |
-| Request a feature | [Open an issue here](https://github.com/runilib/react-walkit/issues/new/choose) |
-| Ask a question | [Open an issue here](https://github.com/runilib/react-walkit/issues/new/choose) |
+| Report a bug | [Open an issue here](https://github.com/runilib/react-formbridge/issues/new/choose) |
+| Request a feature | [Open an issue here](https://github.com/runilib/react-formbridge/issues/new/choose) |
+| Ask a question | [Open an issue here](https://github.com/runilib/react-formbridge/issues/new/choose) |
 | Submit a code change | [Open a PR on the monorepo](https://github.com/runilib/runilib) |
 
 Issues opened here are automatically mirrored to the monorepo and tracked there.
 
 ## Good first issues
 
-Looking to make your first contribution? Check the [`good first issue`](https://github.com/runilib/react-walkit/labels/good%20first%20issue) label.
+Looking to make your first contribution? Check the [`good first issue`](https://github.com/runilib/react-formbridge/labels/good%20first%20issue) label.
 
 ## Submitting code changes
 
@@ -34,10 +34,10 @@ yarn install
 
 ### 2. Work on the package
 
-Source lives in `packages/react-walkit/`.
+Source lives in `packages/react-formbridge/`.
 
 ```bash
-cd packages/react-walkit
+cd packages/react-formbridge
 yarn build
 yarn typecheck
 yarn lint
@@ -65,8 +65,8 @@ Pick the impacted packages and the right bump type (`patch` for fixes, `minor` f
 ### 5. Open a PR on the monorepo
 
 - Base: `main`
-- Convention: use a branch name like `fix/walkit-…`, `feat/walkit-…`, `docs/walkit-…`
-- Commit messages follow conventional commits (`feat(react-walkit): …`, `fix(react-walkit): …`)
+- Convention: use a branch name like `fix/formbridge-…`, `feat/formbridge-…`, `docs/formbridge-…`
+- Commit messages follow conventional commits (`feat(react-formbridge): …`, `fix(react-formbridge): …`)
 
 ## PR checklist
 
@@ -85,7 +85,7 @@ Before requesting review:
 When your PR is merged into the monorepo's `main`:
 
 1. The `Mirror Packages` workflow runs
-2. `packages/react-walkit/` is force-pushed to this mirror repository
+2. `packages/react-formbridge/` is force-pushed to this mirror repository
 3. Any open PRs on this mirror are overwritten
 
 This is why direct PRs here are not accepted — they would be lost at the next sync.

@@ -1,0 +1,61 @@
+name: Feature request
+description: Suggest a new feature or improvement for `@runilib/react-formbridge`.
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement. Fill out the sections below so we can evaluate the idea.
+
+        Issues opened here are automatically mirrored to the [runilib monorepo](https://github.com/runilib/runilib).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem are you trying to solve? What's currently painful or impossible?
+      placeholder: "Today I cannot … because …"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like this to work? API sketch, code example, or description.
+      placeholder: |
+        ```tsx
+        <fields.date range />
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you've tried or considered.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Which platforms should this target?
+      multiple: true
+      options:
+        - Web (React)
+        - React Native
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Any other context, links, screenshots, or references.
+    validations:
+      required: false
