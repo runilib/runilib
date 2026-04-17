@@ -3,6 +3,10 @@
 import styled, { css, keyframes } from 'styled-components';
 import { CodeBlock } from '../../components/CodeBlock';
 import { useApp } from '../../context/AppContext';
+import {
+  type GitHubContributor,
+  useGitHubContributors,
+} from '../../hooks/useGitHubContributors';
 import { useGitHubIssues } from '../../hooks/useGitHubIssues';
 
 // ── Animations ─────────────────────────────────────────────────────────────
@@ -27,10 +31,10 @@ const checkPop = keyframes`
 
 // ── Setup code snippets ─────────────────────────────────────────────────────
 
-const SETUP_CODE = `# 1. Install yarn globally if you don't have it
-npm install -g yarn
+const SETUP_CODE = `# 1. Enable Corepack to use the pinned Yarn 4 version
+corepack enable
 
-# 2. Fork RUNILIB on GitHub, then clone your fork
+# 2. Fork runilib/runilib on GitHub, then clone your fork
 git clone https://github.com/YOUR_USERNAME/runilib.git
 cd runilib
 
@@ -38,24 +42,24 @@ cd runilib
 yarn install
 
 # 4. Start everything in dev mode (Turborepo)
-yarn run dev
+yarn dev
 
-# Each package individually
-cd packages/react-formbridge && yarn run dev
-cd packages/react-walkit && yarn run dev
+# Or target a specific workspace
+yarn workspace @runilib/react-formbridge dev
+yarn workspace @runilib/react-walkit dev
 `;
 
 const QUALITY_CODE = `# Type check the entire monorepo
-yarn run typecheck
+yarn typecheck
 
 # Run all tests (web + native)
-yarn run test
+yarn test
 
 # Lint
-yarn run lint or yarn run lint:fix
+yarn lint        # or: yarn lint:fix
 
 # Run everything at once before pushing
-yarn run typecheck && yarn run lint:fix && yarn run test`;
+yarn typecheck && yarn lint:fix && yarn test`;
 
 const COMMIT_CODE = `# ✅ Good commit messages
 feat(formbridge): add field.phone() with country selector
@@ -80,6 +84,19 @@ git checkout -b feat/formbridge-valibot-resolver
 git checkout -b fix/walkit-ios-scroll-crash
 git checkout -b docs/contributing-guide
 git checkout -b chore/update-styled-components-v6`;
+
+// ── Contributors ────────────────────────────────────────────────────────────
+// Fallback shown when the GitHub API is unreachable or rate-limited.
+// The live list is fetched from the monorepo + mirror repos at render time.
+const FALLBACK_CONTRIBUTORS: GitHubContributor[] = [
+  {
+    handle: 'akladekouassi',
+    name: 'Aklade Kouassi Sosthène',
+    avatarUrl: 'https://avatars.githubusercontent.com/akladekouassi?s=104',
+    profileUrl: 'https://github.com/akladekouassi',
+    contributions: 1,
+  },
+];
 
 // ── TAG color mapping ───────────────────────────────────────────────────────
 
@@ -107,6 +124,12 @@ export default function Contributing() {
     fallback: fallbackIssues,
   });
 
+  const { contributors } = useGitHubContributors({
+    repos: ['runilib/runilib', 'runilib/react-formbridge', 'runilib/react-walkit'],
+    perPage: 30,
+    fallback: FALLBACK_CONTRIBUTORS,
+  });
+
   return (
     <PageWrap>
       {/* ── HERO ── */}
@@ -126,7 +149,7 @@ export default function Contributing() {
                 <GithubIcon /> {c.cta.primary}
               </PrimaryAnchor>
               <SecondaryAnchor
-                href="https://github.com/runilib/runilib/blob/main/CONTRIBUTING.md"
+                href="https://github.com/runilib/runilib#contributing"
                 target="_blank"
                 rel="noopener"
               >
@@ -366,18 +389,24 @@ export default function Contributing() {
         <SectionTitle>{c.recognition.title}</SectionTitle>
         <RecogSub>{c.recognition.subtitle}</RecogSub>
 
-        {/* Placeholder avatars — in a real app, fetched from GitHub API */}
         <ContributorsWall>
-          {[...Array(10)].map((_, i) => (
+          {contributors.map((contributor) => (
             <ContribAvatar
-              key={i.toString()}
-              $seed={i}
-              href="https://github.com/akladekouassi"
+              key={contributor.handle}
+              href={contributor.profileUrl}
               target="_blank"
               rel="noopener"
-              title={`Contributor #${i + 1}`}
+              title={`@${contributor.handle} — ${contributor.contributions} contribution${
+                contributor.contributions > 1 ? 's' : ''
+              }`}
             >
-              {String.fromCodePoint(0x1f600 + i)}
+              <ContribImg
+                src={`${contributor.avatarUrl}${contributor.avatarUrl.includes('?') ? '&' : '?'}s=104`}
+                alt={contributor.name}
+                loading="lazy"
+                width={52}
+                height={52}
+              />
             </ContribAvatar>
           ))}
           <ContribYou
@@ -411,14 +440,14 @@ export default function Contributing() {
           <CTADesc>{c.cta.desc}</CTADesc>
           <CTAButtons>
             <PrimaryAnchor
-              href="https://github.com/runilib/runilib/issues?q=is%3Aopen+label%3A%22good+first+issue%22"
+              href="https://github.com/issues?q=is%3Aopen+repo%3Arunilib%2Freact-formbridge+repo%3Arunilib%2Freact-walkit+label%3A%22good+first+issue%22"
               target="_blank"
               rel="noopener"
             >
               <GithubIcon /> {c.cta.primary}
             </PrimaryAnchor>
             <SecondaryAnchor
-              href="https://github.com/runilib/runilib/blob/main/CONTRIBUTING.md"
+              href="https://github.com/runilib/runilib#contributing"
               target="_blank"
               rel="noopener"
             >
@@ -1096,7 +1125,7 @@ const ContributorsWall = styled.div`
   align-items: center;
   margin-bottom: 20px;
 `;
-const ContribAvatar = styled.a<{ $seed: number }>`
+const ContribAvatar = styled.a`
   width: 52px; height: 52px;
   border-radius: 50%;
   background: ${({ theme }) => theme.bgCard};
@@ -1104,7 +1133,7 @@ const ContribAvatar = styled.a<{ $seed: number }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  overflow: hidden;
   text-decoration: none;
   transition: all 0.2s;
   cursor: pointer;
@@ -1113,6 +1142,12 @@ const ContribAvatar = styled.a<{ $seed: number }>`
     border-color: ${({ theme }) => theme.teal};
     box-shadow: 0 4px 16px ${({ theme }) => theme.teal}33;
   }
+`;
+const ContribImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 `;
 const PulsingDot = styled.div`
   width: 8px; height: 8px;
