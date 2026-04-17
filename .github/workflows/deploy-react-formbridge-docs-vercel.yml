@@ -66,7 +66,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS }}
-        working-directory: apps/react-formbridge-docs
         run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
 
       - name: Build preview deployment
@@ -74,7 +73,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS }}
-        working-directory: apps/react-formbridge-docs
         run: vercel build --token="$VERCEL_TOKEN"
 
       - name: Deploy preview
@@ -83,7 +81,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS }}
-        working-directory: apps/react-formbridge-docs
         run: |
           url="$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")"
           echo "preview_url=${url}" >> "$GITHUB_OUTPUT"
@@ -129,7 +126,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS }}
-        working-directory: apps/react-formbridge-docs
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build production deployment
@@ -137,7 +133,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS }}
-        working-directory: apps/react-formbridge-docs
         run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy production
@@ -145,5 +140,4 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REACT_FORMBRIDGE_DOCS }}
-        working-directory: apps/react-formbridge-docs
         run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
