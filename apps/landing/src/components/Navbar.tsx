@@ -50,7 +50,7 @@ export function Navbar() {
   }
   const socialLinks = [
     {
-      href: 'https://github.com/runilib',
+      href: 'https://github.com/runilib/runilib',
       label: 'GitHub',
       title: 'GitHub',
       icon: <GithubSvg />,

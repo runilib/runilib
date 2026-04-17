@@ -329,7 +329,7 @@ export default function Contributing() {
                 icon: <GithubIcon />,
                 name: 'GitHub',
                 desc: 'Issues, PRs, discussions and the source code.',
-                href: 'https://github.com/runilib',
+                href: 'https://github.com/runilib/runilib',
                 color: 'teal',
                 cta: 'Open GitHub',
               },
@@ -393,7 +393,7 @@ export default function Contributing() {
         <ContribNote>
           Contributor avatars are pulled from the GitHub API.
           <ContribLink
-            href="https://github.com/runilib"
+            href="https://github.com/runilib/runilib"
             target="_blank"
             rel="noopener"
           >

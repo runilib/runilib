@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     'shared TypeScript API',
     'cross-platform npm packages',
   ],
-  authors: [{ name: 'RUNILIB', url: 'https://github.com/runilib' }],
+  authors: [{ name: 'RUNILIB', url: 'https://github.com/runilib/runilib' }],
   creator: 'RUNILIB',
   publisher: 'RUNILIB',
   category: 'technology',
@@ -119,7 +119,7 @@ function JsonLd() {
     name: 'RUNILIB',
     url: BASE_URL,
     logo: `${BASE_URL}/brand/runilib-icon.svg`,
-    sameAs: ['https://github.com/runilib', 'https://www.npmjs.com/org/runilib'],
+    sameAs: ['https://github.com/runilib/runilib', 'https://www.npmjs.com/org/runilib'],
     description:
       'Open-source ecosystem of React and React Native libraries with shared APIs and packages built for web and mobile.',
   };
@@ -142,8 +142,8 @@ function JsonLd() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
     name: 'RUNILIB',
-    url: 'https://github.com/runilib',
-    codeRepository: 'https://github.com/runilib',
+    url: 'https://github.com/runilib/runilib',
+    codeRepository: 'https://github.com/runilib/runilib',
     programmingLanguage: ['TypeScript', 'React', 'React Native'],
     license: 'https://opensource.org/licenses/MIT',
     runtimePlatform: ['Node.js', 'Browser', 'React Native'],
