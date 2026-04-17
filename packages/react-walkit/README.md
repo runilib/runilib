@@ -56,6 +56,5 @@ export function App() {
 
 ## Documentation
 
-Test for pipeline
 - Docs and guides: https://runilib.dev/docs/react-walkit
 - API reference: https://runilib.dev/docs/react-walkit
