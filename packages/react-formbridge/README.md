@@ -1,5 +1,7 @@
 # @runilib/react-formbridge
 
+[![good first issues](https://img.shields.io/github/issues/runilib/react-formbridge/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-formbridge/labels/good%20first%20issue)
+
 Schema-first forms for React and React Native.
 
 `@runilib/react-formbridge` lets you define a form once and reuse the same API across web and native. It generates fields from a schema and handles validation, conditional logic, persistence, async options, and multi-step flows.
@@ -84,3 +86,11 @@ To make TypeScript and your IDE resolve the native type surface, enable the `rea
 
 - Docs and guides: https://react-formbridge.runilib.dev
 - API reference: https://react-formbridge.runilib.dev/docs
+
+## Contributing
+
+Bug reports and feature requests are welcome in [this repo's issues](https://github.com/runilib/react-formbridge/issues). They are mirrored to the monorepo where the work happens.
+
+Looking for something to start with? Browse [good first issues](https://github.com/runilib/react-formbridge/labels/good%20first%20issue).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.

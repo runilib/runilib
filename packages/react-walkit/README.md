@@ -1,5 +1,7 @@
 # @runilib/react-walkit
 
+[![good first issues](https://img.shields.io/github/issues/runilib/react-walkit/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-walkit/labels/good%20first%20issue)
+
 Cross-platform onboarding tours and guided walkthroughs for React and React Native.
 
 `@runilib/react-walkit` helps you highlight UI, attach contextual popovers, and run guided tours with the same API across web and native, including cross-page and cross-screen flows.
@@ -58,3 +60,11 @@ export function App() {
 
 - Docs and guides: https://runilib.dev/docs/react-walkit
 - API reference: https://runilib.dev/docs/react-walkit
+
+## Contributing
+
+Bug reports and feature requests are welcome in [this repo's issues](https://github.com/runilib/react-walkit/issues). They are mirrored to the monorepo where the work happens.
+
+Looking for something to start with? Browse [good first issues](https://github.com/runilib/react-walkit/labels/good%20first%20issue).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.

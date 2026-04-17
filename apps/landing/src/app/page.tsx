@@ -480,7 +480,7 @@ export default function Home() {
                 {t.cta.primary} <Arrow>→</Arrow>
               </PrimaryBtn>
               <SecondaryAnchor
-                href="https://github.com/runilib"
+                href="https://github.com/runilib/runilib"
                 target="_blank"
                 rel="noopener"
               >

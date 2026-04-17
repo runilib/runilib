@@ -197,7 +197,7 @@ export default function Ecosystem() {
             Get started
           </PrimaryBtn>
           <SecBtn
-            href="https://github.com/runilib"
+            href="https://github.com/runilib/runilib"
             target="_blank"
             rel="noopener"
           >

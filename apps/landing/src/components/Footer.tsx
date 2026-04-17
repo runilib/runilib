@@ -37,7 +37,7 @@ export function Footer() {
     {
       title: t.footer.cols.community,
       links: [
-        { label: 'GitHub', ext: 'https://github.com/runilib' },
+        { label: 'GitHub', ext: 'https://github.com/runilib/runilib' },
         { label: 'npm', ext: 'https://npmjs.com/~runilib' },
         { label: 'Twitter', ext: 'https://twitter.com/runilib' },
         { label: 'Discord', ext: '#' },
@@ -48,7 +48,7 @@ export function Footer() {
       links: [
         { label: 'Ecosystem', href: '/ecosystem' },
         { label: 'Roadmap', href: '/ecosystem' },
-        { label: 'Changelog', ext: 'https://github.com/runilib/releases' },
+        { label: 'Changelog', ext: 'https://github.com/runilib/runilib/releases' },
         { label: 'MIT License', ext: 'https://opensource.org/licenses/MIT' },
       ],
     },
