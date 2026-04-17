@@ -166,13 +166,13 @@ export const en: Translations = {
         {
           step: '01',
           title: 'Pick an issue',
-          desc: 'Browse open issues on GitHub. Look for issues tagged good first issue for an easy start, or help wanted for something more involved. If you have an idea, open an issue first to discuss it before coding.',
+          desc: 'Browse open issues on the mirror repos (runilib/react-formbridge, runilib/react-walkit). Look for good first issue for an easy start, or help wanted for something more involved. Issues are automatically mirrored to the runilib monorepo where the work happens. If you have a new idea, open an issue first to discuss it before coding.',
           note: 'Tip: comment "I\'d like to work on this" on the issue to let maintainers know.',
         },
         {
           step: '02',
           title: 'Fork & clone',
-          desc: 'Fork the repository on GitHub, then clone your fork locally. The project uses yarn workspaces — make sure you have yarn installed.',
+          desc: 'Fork the runilib/runilib monorepo on GitHub, then clone your fork locally. Pull requests are opened against the monorepo — the mirror repos are read-only for code. The project uses Yarn 4 workspaces with Corepack.',
         },
         {
           step: '03',
@@ -234,7 +234,7 @@ export const en: Translations = {
         },
         {
           title: 'Tests required',
-          desc: 'New features need tests. Bug fixes need a regression test. Run npm test before pushing.',
+          desc: 'New features need tests. Bug fixes need a regression test. Run yarn test before pushing.',
         },
         {
           title: 'Conventional commits',
@@ -250,13 +250,13 @@ export const en: Translations = {
       label: 'Before you submit',
       title: 'PR checklist',
       items: [
-        'Types compile — npm run typecheck passes with zero errors',
-        'Tests pass — npm test green on both web and native',
-        'Lint passes — npm run lint with no warnings',
+        'Types compile — yarn typecheck passes with zero errors',
+        'Tests pass — yarn test green on both web and native',
+        'Lint passes — yarn lint with no warnings',
         'No CSS files added — styling via styled-components only',
         'Cross-platform — tested or considered on React Native',
         'Docs updated — README or docs page updated if API changed',
-        'Changelog entry — added to CHANGELOG.md under [Unreleased]',
+        'Changeset added — yarn changeset for any user-facing package change',
         'PR description — filled in: what changed, why, how to test',
         'Issue linked — PR description contains "Closes #123"',
         'Single responsibility — PR does one thing only',

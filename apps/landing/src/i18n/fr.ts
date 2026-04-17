@@ -166,13 +166,13 @@ export const fr: Translations = {
         {
           step: '01',
           title: 'Choisir une issue',
-          desc: "Parcours les issues ouvertes sur GitHub. Cherche les tags good first issue pour commencer facilement, ou help wanted pour quelque chose de plus conséquent. Si tu as une idée, ouvre d'abord une issue pour en discuter avant de coder.",
+          desc: "Parcours les issues ouvertes sur les repos mirrors (runilib/react-formbridge, runilib/react-walkit). Cherche le tag good first issue pour commencer facilement, ou help wanted pour quelque chose de plus conséquent. Les issues sont automatiquement synchronisées vers le monorepo runilib où se fait le travail. Pour une nouvelle idée, ouvre d'abord une issue pour en discuter avant de coder.",
           note: 'Astuce : commente "Je voudrais travailler sur ça" pour prévenir les mainteneurs.',
         },
         {
           step: '02',
           title: 'Fork & clone',
-          desc: "Fork le dépôt sur GitHub, puis clone ton fork en local. Le projet utilise pnpm workspaces — assure-toi d'avoir pnpm installé.",
+          desc: 'Fork le monorepo runilib/runilib sur GitHub, puis clone ton fork en local. Les pull requests sont ouvertes sur le monorepo — les repos mirrors sont en lecture seule pour le code. Le projet utilise Yarn 4 workspaces avec Corepack.',
         },
         {
           step: '03',
@@ -234,7 +234,7 @@ export const fr: Translations = {
         },
         {
           title: 'Tests obligatoires',
-          desc: 'Les nouvelles features nécessitent des tests. Les correctifs nécessitent un test de régression. Lance npm test avant de pousser.',
+          desc: 'Les nouvelles features nécessitent des tests. Les correctifs nécessitent un test de régression. Lance yarn test avant de pousser.',
         },
         {
           title: 'Conventional commits',
@@ -250,13 +250,13 @@ export const fr: Translations = {
       label: 'Avant de soumettre',
       title: 'Checklist de PR',
       items: [
-        'Types compilent — npm run typecheck passe sans erreur',
-        'Tests passent — npm test vert sur web et native',
-        'Lint passe — npm run lint sans warning',
+        'Types compilent — yarn typecheck passe sans erreur',
+        'Tests passent — yarn test vert sur web et native',
+        'Lint passe — yarn lint sans warning',
         'Pas de fichier CSS ajouté — style via styled-components uniquement',
         'Cross-platform — testé ou pris en compte sur React Native',
         "Docs mises à jour — README ou page de doc mis à jour si l'API a changé",
-        'Entrée changelog — ajoutée dans CHANGELOG.md sous [Unreleased]',
+        'Changeset ajouté — yarn changeset pour toute modif visible des packages',
         'Description de PR — remplie : ce qui a changé, pourquoi, comment tester',
         'Issue liée — la description contient "Closes #123"',
         'Responsabilité unique — la PR fait une seule chose',
