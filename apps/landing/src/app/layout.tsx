@@ -129,7 +129,7 @@ function JsonLd() {
     '@type': 'WebSite',
     name: 'RUNILIB',
     url: BASE_URL,
-    inLanguage: ['en', 'fr'],
+    inLanguage: 'en',
     description:
       'Cross-platform collection of React and React Native libraries with one shared TypeScript API.',
     publisher: {
