@@ -231,7 +231,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <head>
+      <body>
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -246,8 +246,6 @@ export default function RootLayout({
           rel="stylesheet"
         />
         <JsonLd />
-      </head>
-      <body>
         <AppShell>{children}</AppShell>
       </body>
     </html>
