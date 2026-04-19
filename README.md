@@ -40,7 +40,7 @@ yarn install
 ### 2. Start everything in watch mode
 
 ```bash
-yarn dev
+yarn run dev
 ```
 
 Or target a specific workspace:
