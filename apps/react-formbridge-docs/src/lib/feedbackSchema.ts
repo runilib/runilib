@@ -46,24 +46,21 @@ export const FEEDBACK_SCHEMA = createSchema({
     .hint('The more concrete the context, the easier it is to act on.'),
   expectedBehavior: field
     .textarea('Expected behavior')
-    .visibleWhen('feedbackType', 'bug')
-    .requiredWhen('feedbackType', 'bug')
+    .visibleAndRequiredWhen('feedbackType', 'bug')
     .max(3000)
     .clearOnHide()
     .placeholder('What should have happened?')
     .hint('Keep it short and observable.'),
   actualBehavior: field
     .textarea('Actual behavior')
-    .visibleWhen('feedbackType', 'bug')
-    .requiredWhen('feedbackType', 'bug')
+    .visibleAndRequiredWhen('feedbackType', 'bug')
     .max(3000)
     .clearOnHide()
     .placeholder('What actually happened?')
     .hint('Include error copy, odd state, or incorrect result.'),
   reproductionSteps: field
     .textarea('Steps to reproduce')
-    .visibleWhen('feedbackType', 'bug')
-    .requiredWhen('feedbackType', 'bug')
+    .visibleAndRequiredWhen('feedbackType', 'bug')
     .max(3000)
     .clearOnHide()
     .placeholder('1. Go to...\n2. Click...\n3. Observe...')
@@ -71,13 +68,6 @@ export const FEEDBACK_SCHEMA = createSchema({
   contactConsent: field
     .checkbox('You can contact me if follow-up details would help.')
     .hint('Useful if you left a contact email above.'),
-}).superRefine((values, ctx) => {
-  if (values.feedbackType !== 'bug') return;
-  for (const key of ['expectedBehavior', 'actualBehavior', 'reproductionSteps']) {
-    if (!String((values as any)[key] ?? '').trim()) {
-      ctx.addIssue({ code: 'required', path: key, message: 'Required.' });
-    }
-  }
 });
 
 export type FeedbackFormValues = SchemaValues<typeof FEEDBACK_SCHEMA>;

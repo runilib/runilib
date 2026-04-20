@@ -76,6 +76,11 @@ function isDevelopmentRuntime(): boolean {
   return Boolean(maybeGlobalDev) || maybeNodeEnv !== 'production';
 }
 
+interface VisibilityUpdateResult<S extends FormSchema> {
+  changedFields: string[];
+  values: SchemaValues<S>;
+}
+
 export function useFormBridgeCore<const S extends FormSchema>(
   schema: S,
   options: UseFormBridgeOptions<S> = {},
@@ -270,18 +275,37 @@ export function useFormBridgeCore<const S extends FormSchema>(
   );
 
   const updateVisibility = useCallback(
-    (newValues: Record<string, unknown>) => {
-      if (Object.keys(conditionsMap).length === 0) return;
+    (newValues: Record<string, unknown>): VisibilityUpdateResult<S> => {
+      if (Object.keys(conditionsMap).length === 0) {
+        return {
+          changedFields: [],
+          values: newValues as SchemaValues<S>,
+        };
+      }
 
       const newVis = evaluateAllConditions(conditionsMap, newValues as SchemaValues<S>);
       const prev = prevVisibilityRef.current;
+      const changedFields: string[] = [];
 
       let changedValues = false;
       const updatedValues = { ...newValues };
 
-      for (const [fieldName, vis] of Object.entries(newVis)) {
-        const wasVisible = prev[fieldName]?.visible ?? true;
-        const nowVisible = vis.visible;
+      for (const [fieldName, currentVisibility] of Object.entries(newVis)) {
+        const previousState = prev[fieldName] ?? {
+          visible: true,
+          required: false,
+          disabled: false,
+        };
+        const wasVisible = previousState.visible;
+        const nowVisible = currentVisibility.visible;
+
+        if (
+          previousState.visible !== currentVisibility.visible ||
+          previousState.required !== currentVisibility.required ||
+          previousState.disabled !== currentVisibility.disabled
+        ) {
+          changedFields.push(fieldName);
+        }
 
         if (wasVisible && !nowVisible) {
           const onHide = conditionsMap[fieldName]?.onHide ?? 'reset';
@@ -302,12 +326,10 @@ export function useFormBridgeCore<const S extends FormSchema>(
         setVisibility(newVis);
       }
 
-      if (changedValues) {
-        stateRef.current = {
-          ...stateRef.current,
-          values: updatedValues as SchemaValues<S>,
-        };
-      }
+      return {
+        changedFields,
+        values: (changedValues ? updatedValues : newValues) as SchemaValues<S>,
+      };
     },
     [conditionsMap, defaultValues, descriptors],
   );
@@ -495,6 +517,61 @@ export function useFormBridgeCore<const S extends FormSchema>(
     [runAllValidation, runFieldValidation, setRuntimeState],
   );
 
+  const syncRuntimeValidationAfterVisibilityChange = useCallback(
+    async (changedFields: string[]) => {
+      if (changedFields.length === 0) {
+        return;
+      }
+
+      const currentState = stateRef.current;
+      const currentErrors = currentState.errors as Record<string, string>;
+      const hasActiveValidationState =
+        currentState.submitCount > 0 ||
+        Object.keys(currentErrors).length > 0 ||
+        currentState.formLevelError !== null;
+
+      if (!hasActiveValidationState) {
+        return;
+      }
+
+      const result = await runAllValidation();
+      const nextTouched = {
+        ...(currentState.touched as Record<string, boolean>),
+      };
+      let touchedChanged = false;
+
+      if (currentState.submitCount === 0) {
+        for (const fieldName of changedFields) {
+          if (result.errors[fieldName] && !nextTouched[fieldName]) {
+            nextTouched[fieldName] = true;
+            touchedChanged = true;
+          }
+        }
+      }
+
+      const nextIsValid =
+        Object.keys(result.errors).length === 0 && result.formLevelError === null;
+      const sameErrors = shallowEqualErrors(currentErrors, result.errors);
+      const sameFormLevelError = currentState.formLevelError === result.formLevelError;
+      const sameIsValid = currentState.isValid === nextIsValid;
+
+      emitErrorsDiffAnalytics(analyticsRef.current, currentErrors, result.errors);
+
+      if (!sameErrors || !sameFormLevelError || !sameIsValid || touchedChanged) {
+        setRuntimeState((current) => ({
+          ...current,
+          errors: result.errors as FormState<S>['errors'],
+          formLevelError: result.formLevelError,
+          touched: touchedChanged
+            ? (nextTouched as FormState<S>['touched'])
+            : current.touched,
+          isValid: nextIsValid,
+        }));
+      }
+    },
+    [runAllValidation, setRuntimeState],
+  );
+
   useEffect(() => {
     if (!draftValues) return;
     if (hasHydratedDraftRef.current) return;
@@ -523,6 +600,10 @@ export function useFormBridgeCore<const S extends FormSchema>(
       const descriptor = descriptors[name];
       const nextValue = applyImmediateTransforms(descriptor, rawValue);
       const isDirtyField = nextValue !== defaultValues[name];
+      let visibilityUpdate: VisibilityUpdateResult<S> = {
+        changedFields: [],
+        values: stateRef.current.values,
+      };
 
       setRuntimeState((current) => {
         const nextDirty = {
@@ -540,13 +621,26 @@ export function useFormBridgeCore<const S extends FormSchema>(
           isDirty: Object.values(nextDirty).some(Boolean),
         };
 
-        updateVisibility(nextState.values);
-        persistSave(nextState.values);
+        visibilityUpdate = updateVisibility(nextState.values);
+        persistSave(visibilityUpdate.values);
 
-        return nextState;
+        return {
+          ...nextState,
+          values: visibilityUpdate.values,
+        };
       }, false);
 
       const currentState = stateRef.current;
+      const shouldSyncRuntimeValidation =
+        visibilityUpdate.changedFields.length > 0 &&
+        (currentState.submitCount > 0 ||
+          Object.keys(currentState.errors as Record<string, string>).length > 0 ||
+          currentState.formLevelError !== null);
+
+      if (shouldSyncRuntimeValidation) {
+        await syncRuntimeValidationAfterVisibilityChange(visibilityUpdate.changedFields);
+      }
+
       const isTouched = Boolean(currentState.touched[name as keyof S]);
       const submitted = currentState.submitCount > 0;
 
@@ -615,6 +709,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
       revalidateOn,
       rerender,
       runFieldValidation,
+      syncRuntimeValidationAfterVisibilityChange,
       setRuntimeState,
       updateVisibility,
       validateOn,

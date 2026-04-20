@@ -86,6 +86,42 @@ describe('WebField', () => {
     expect(input.style.borderColor).toBe('rgb(239, 68, 68)');
   });
 
+  it('keeps tel field patterns valid for the native html pattern attribute', () => {
+    const descriptor = field
+      .text('Phone')
+      .format(/^[+\d\s()-]{6,20}$/, 'Please enter a valid phone number.')
+      ._build();
+    const resolvedDescriptor = {
+      ...descriptor,
+      fieldPropsFromClient: {},
+    } as React.ComponentProps<typeof Field>['descriptor'];
+
+    const { getByLabelText } = render(
+      <Field
+        descriptor={resolvedDescriptor}
+        name="phone"
+        value=""
+        label={descriptor._label ?? ''}
+        placeholder={descriptor._placeholder}
+        allValues={{}}
+        error={null}
+        touched={false}
+        dirty={false}
+        validating={false}
+        disabled={false}
+        required={Boolean(descriptor._required)}
+        hint={descriptor._hint}
+        onChange={() => {}}
+        onBlur={() => {}}
+        onFocus={() => {}}
+      />,
+    );
+
+    const input = getByLabelText('Phone') as HTMLInputElement;
+
+    expect(input.getAttribute('pattern')).toBe('^[+\\d\\s\\(\\)\\-]{6,20}$');
+  });
+
   it('can suppress the default red error chrome', () => {
     const { getByRole } = renderTextField(field.text().required(), {
       error: 'Required field',

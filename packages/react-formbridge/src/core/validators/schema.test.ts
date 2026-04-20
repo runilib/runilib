@@ -104,4 +104,51 @@ describe('createSchema()', () => {
       asyncSchema.validateAsync({ username: 'blocked' }),
     ).rejects.toBeInstanceOf(FormBridgeSchemaValidationError);
   });
+
+  it('honors conditional required fields in schema validation', () => {
+    const feedbackSchema = createSchema({
+      feedbackType: field
+        .select('Feedback type')
+        .options(['general', 'bug'])
+        .defaultValue('general')
+        .required(),
+      expectedBehavior: field
+        .textarea('Expected behavior')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+      actualBehavior: field
+        .textarea('Actual behavior')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+      reproductionSteps: field
+        .textarea('Steps to reproduce')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+    });
+
+    expect(
+      feedbackSchema.safeParse({
+        feedbackType: 'general',
+      }),
+    ).toMatchObject({
+      success: true,
+    });
+
+    const result = feedbackSchema.safeParse({
+      feedbackType: 'bug',
+      expectedBehavior: '',
+      actualBehavior: '',
+      reproductionSteps: '',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.errorsByField).toMatchObject({
+      expectedBehavior: 'This field is required.',
+      actualBehavior: 'This field is required.',
+      reproductionSteps: 'This field is required.',
+    });
+  });
 });
