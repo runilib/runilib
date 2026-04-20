@@ -12,7 +12,7 @@ export const validationSection: LibraryDoc['sections'][number] = {
 Every approach below flows through the same runtime and lands in the same \`state.errors\` bag. There are **five complementary ways** to validate, and you can combine any of them in the same form:
 
 1. **Field-level builder rules** - \`required\`, \`min\`, \`max\`, \`pattern/patterns\`, \`email\`, \`url\`, \`matches/sameAs\`, \`mustBeTrue\`, \`validate(fn)\`, number helpers, file limits, phone formatting, etc. Declared directly on each builder, they cover most everyday rules.
-2. **Schema-level cross-field validation** via \`schema()\` - the recommended path the moment you need rules that span multiple fields (\`refine\`, \`superRefine\`, \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, \`errorMap\`, async refinements, \`safeParse\` / \`validate\`). Zero external dependency required. See the dedicated [schema() API](/docs/schema-api) section.
+2. **Schema-level cross-field validation** via \`createSchema()\` - the recommended path the moment you need rules that span multiple fields (\`refine\`, \`superRefine\`, \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, \`errorMap\`, async refinements, \`safeParse\` / \`validate\`). Zero external dependency required. See the dedicated [createSchema() API](/docs/schema-api) section.
 3. **Imperative validation** from the runtime - \`validate(names?)\`, \`setError()\`, \`clearErrors()\` let you trigger checks on demand and merge server-side errors into the same bag.
 4. **Trigger configuration** - \`validateOn\` and \`revalidateOn\` control **when** validation runs (\`'onBlur'\`, \`'onChange'\`, \`'onSubmit'\`, \`'onTouched'\`). Defaults: \`validateOn='onBlur'\`, \`revalidateOn='onChange'\`.
 5. **External resolvers** (opt-in) - bring your own Zod / Yup / Joi / Valibot schema via \`validatorResolver\` when you already own a domain schema elsewhere in the app.
@@ -76,10 +76,11 @@ const signupSchema = {
     },
     {
       id: 'fb-validation-schema',
-      title: '2. Schema-level validation - schema() (recommended for cross-field rules)',
-      content: `Wrap your shape with \`schema()\` the moment you need rules that depend on **more than one field**, form-level errors, parsing utilities, async refinements, or global error message mapping. The wrapped value is still handed straight to \`useFormBridge\`, so you never split rendering and validation across two objects.
+      title:
+        '2. Schema-level validation - createSchema() (recommended for cross-field rules)',
+      content: `Wrap your shape with \`createSchema()\` the moment you need rules that depend on **more than one field**, form-level errors, parsing utilities, async refinements, or global error message mapping. The wrapped value is still handed straight to \`useFormBridge\`, so you never split rendering and validation across two objects.
 
-**Cross-field primitives exposed by \`schema()\`**
+**Cross-field primitives exposed by \`createSchema()\`**
 
 | Method | Signature | Description |
 | --- | --- | --- |
@@ -103,13 +104,15 @@ const signupSchema = {
 
 Form-level errors (any issue without a \`path\`) surface under \`state.formLevelError\`. Field-level issues land in \`state.errors[fieldName]\` like every other rule.
 
-**For the complete API reference, options, signatures and examples, see the dedicated [\`schema() API\`](/docs/schema-api) section.**`,
+If the schema object lives in a module that is also imported by server-side code, define that module with \`@runilib/react-formbridge/schema\` and keep \`useFormBridge\` imported from the main package in your client components.
+
+**For the complete API reference, options, signatures and examples, see the dedicated [\`createSchema() API\`](/docs/schema-api) section.**`,
       code: {
         filename: 'schema-validation.ts',
         lang: 'ts',
-        code: `import { field, schema } from '@runilib/react-formbridge'
+        code: `import { createSchema, field } from '@runilib/react-formbridge'
 
-export const tripSchema = schema({
+export const tripSchema = createSchema({
   email: field.email().label('Email'),
   phone: field.phone('FR').label('Phone'),
   password: field.password().required().min(8),
@@ -145,7 +148,7 @@ export const tripSchema = schema({
 | \`state.errors\` | \`Record<string, string>\` | Current error map (read from React) |
 | \`state.touched\` | \`Record<string, boolean>\` | Which fields have been blurred at least once |
 | \`state.dirty\` | \`Record<string, boolean>\` | Which fields differ from their initial value |
-| \`state.formLevelError\` | \`string \\| null\` | Form-level error produced by \`schema()\` refinements |
+| \`state.formLevelError\` | \`string \\| null\` | Form-level error produced by \`createSchema()\` refinements |
 
 This is also how you wire **server-side validation** into the same pipeline: call your API inside \`onSubmit\`, then \`setErrors(response.errorsByField)\` to surface any failures under the same field keys your users are already looking at.`,
       code: {
@@ -216,7 +219,7 @@ All resolvers share the same options surface documented in the [\`Schema adapter
 
 ${RESOLVER_SHARED_OPTIONS_SURFACE}
 
-> You do **not** need a resolver to get cross-field validation, async checks, or i18n - \`schema()\` covers all of that natively. Reach for a resolver only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
+> You do **not** need a resolver to get cross-field validation, async checks, or i18n - \`createSchema()\` covers all of that natively. Reach for a resolver only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
       code: {
         filename: 'resolver.tsx',
         lang: 'tsx',
@@ -241,7 +244,7 @@ const { Form, fields, state } = useFormBridge(formSchema, {
     {
       id: 'fb-validation-parse',
       title: 'Bonus - parsing outside the form (server actions, tests, utilities)',
-      content: `Because \`schema()\` exposes \`safeParse\` / \`safeParseAsync\` / \`validate\` / \`validateAsync\`, you can reuse the **exact same schema** outside of React - in server actions, tRPC procedures, background jobs, or tests - without mounting a form.
+      content: `Because \`createSchema()\` exposes \`safeParse\` / \`safeParseAsync\` / \`validate\` / \`validateAsync\`, you can reuse the **exact same schema** outside of React - in server actions, tRPC procedures, background jobs, or tests - without mounting a form.
 
 | Method | Signature | Description |
 | --- | --- | --- |
@@ -250,11 +253,23 @@ const { Form, fields, state } = useFormBridge(formSchema, {
 | \`validate\` | \`(values) => data\` | Strict variant - throws \`FormBridgeSchemaValidationError\` on failure |
 | \`validateAsync\` | \`(values) => Promise<data>\` | Async strict variant |
 
-The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formLevelErrors\` (array of form-level messages). See the [\`schema() API\`](/docs/schema-api) section for the full result shape.`,
+The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formLevelErrors\` (array of form-level messages). See the [\`createSchema() API\`](/docs/schema-api) section for the full result shape.
+
+If that schema module is imported by server code, define it with \`@runilib/react-formbridge/schema\` so only the non-React surface is pulled into the server module graph.`,
       code: {
-        filename: 'server-action.ts',
+        filename: 'tripSchema.ts + server-action.ts',
         lang: 'ts',
-        code: `'use server'
+        code: `// tripSchema.ts
+import { createSchema, field } from '@runilib/react-formbridge/schema'
+
+export const tripSchema = createSchema({
+  email: field.email('Email'),
+  phone: field.phone('FR').label('Phone'),
+})
+  .atLeastOne(['email', 'phone'], 'Provide at least an email or a phone.')
+
+// server-action.ts
+'use server'
 
 import { tripSchema } from './tripSchema'
 

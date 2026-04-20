@@ -152,7 +152,6 @@ export default function Home() {
             >
               {t.hero.cta} <Arrow>→</Arrow>
             </PrimaryBtn>
-            {/* <SecondaryBtn href="/libraries">{t.hero.ctaSecondary}</SecondaryBtn> */}
           </HeroCTAs>
           <StatsRow>
             {[
@@ -472,26 +471,6 @@ const PrimaryBtn = styled(Link)`
     transform: translateY(-2px);
     box-shadow: 0 8px 28px ${({ theme }) => theme.teal}50;
     ${Arrow} { transform: translateX(4px); }
-  }
-`;
-const SecondaryBtn = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'Sora', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 11px 22px;
-  border-radius: 10px;
-  text-decoration: none;
-  border: 1px solid ${({ theme }) => theme.border};
-  color: ${({ theme }) => theme.textSecondary};
-  background: transparent;
-  transition: all 0.2s;
-  &:hover {
-    border-color: ${({ theme }) => theme.teal};
-    color: ${({ theme }) => theme.teal};
-    background: ${({ theme }) => theme.tealDim};
   }
 `;
 const SecondaryAnchor = styled.a`

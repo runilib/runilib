@@ -131,7 +131,7 @@ globalDefaults?(state: FormState<S>): FormBridgeOptions<TPlatform>
 | --- | --- |
 | \`values\` | Current values, typed from the schema |
 | \`errors\` | Per-field error map |
-| \`formLevelError\` | Form-level error string produced by \`schema()\` refinements (\`null\` when none) |
+| \`formLevelError\` | Form-level error string produced by \`createSchema()\` refinements (\`null\` when none) |
 | \`touched\` / \`dirty\` | Per-field tracking bags |
 | \`isValid\` / \`isDirty\` / \`isSubmitting\` / \`isSubmitted\` / \`submitCount\` | Form-level flags |
 | \`submitError\` | String set by \`onSubmitError(error)\` when your \`onSubmit\` throws |

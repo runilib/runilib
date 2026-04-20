@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { field } from '../field-builders/field';
-import { FormBridgeSchemaValidationError, schema } from './schema';
+import { createSchema, FormBridgeSchemaValidationError } from './createSchema';
 
-describe('schema()', () => {
+describe('createSchema()', () => {
   it('returns structured field issues and supports errorMap()', () => {
-    const signupSchema = schema({
+    const signupSchema = createSchema({
       email: field.email('Email').required(),
       role: field.select('Role').disallowPlaceholder(),
     }).errorMap((issue) =>
@@ -23,7 +23,7 @@ describe('schema()', () => {
   });
 
   it('supports refine() and superRefine()', () => {
-    const contactSchema = schema({
+    const contactSchema = createSchema({
       email: field.text('Email'),
       phone: field.text('Phone'),
       coupon: field.text('Coupon'),
@@ -54,7 +54,7 @@ describe('schema()', () => {
   });
 
   it('supports cross-field helpers like exactlyOne and allOrNone', () => {
-    const checkoutSchema = schema({
+    const checkoutSchema = createSchema({
       primaryEmail: field.text('Primary email'),
       backupEmail: field.text('Backup email'),
       city: field.text('City'),
@@ -83,7 +83,7 @@ describe('schema()', () => {
   });
 
   it('supports async validators and async refinements', async () => {
-    const asyncSchema = schema({
+    const asyncSchema = createSchema({
       username: field.text('Username').validateAsync(async (value) => {
         await new Promise((resolve) => setTimeout(resolve, 5));
         return value === 'taken' ? 'Already taken.' : null;
@@ -103,5 +103,52 @@ describe('schema()', () => {
     await expect(
       asyncSchema.validateAsync({ username: 'blocked' }),
     ).rejects.toBeInstanceOf(FormBridgeSchemaValidationError);
+  });
+
+  it('honors conditional required fields in schema validation', () => {
+    const feedbackSchema = createSchema({
+      feedbackType: field
+        .select('Feedback type')
+        .options(['general', 'bug'])
+        .defaultValue('general')
+        .required(),
+      expectedBehavior: field
+        .textarea('Expected behavior')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+      actualBehavior: field
+        .textarea('Actual behavior')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+      reproductionSteps: field
+        .textarea('Steps to reproduce')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+    });
+
+    expect(
+      feedbackSchema.safeParse({
+        feedbackType: 'general',
+      }),
+    ).toMatchObject({
+      success: true,
+    });
+
+    const result = feedbackSchema.safeParse({
+      feedbackType: 'bug',
+      expectedBehavior: '',
+      actualBehavior: '',
+      reproductionSteps: '',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.errorsByField).toMatchObject({
+      expectedBehavior: 'This field is required.',
+      actualBehavior: 'This field is required.',
+      reproductionSteps: 'This field is required.',
+    });
   });
 });

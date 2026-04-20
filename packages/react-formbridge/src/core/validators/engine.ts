@@ -336,15 +336,25 @@ export async function validateAllDetailed(
   values: Record<string, unknown>,
   options: {
     errorMap?: ValidationErrorMap;
+    getDescriptor?: (
+      name: string,
+      descriptor: FieldDescriptor<unknown>,
+    ) => FieldDescriptor<unknown> | null;
   } = {},
 ): Promise<ValidationIssue[]> {
   const issues = await Promise.all(
-    Object.entries(descriptors).map(async ([name, descriptor]) =>
-      validateFieldDetailed(descriptor, values[name], values, {
+    Object.entries(descriptors).map(async ([name, descriptor]) => {
+      const nextDescriptor = options.getDescriptor?.(name, descriptor) ?? descriptor;
+
+      if (!nextDescriptor) {
+        return null;
+      }
+
+      return validateFieldDetailed(nextDescriptor, values[name], values, {
         path: [name],
         errorMap: options.errorMap,
-      }),
-    ),
+      });
+    }),
   );
 
   return issues.filter((issue): issue is ValidationIssue => issue !== null);
@@ -355,15 +365,25 @@ export function validateAllDetailedSync(
   values: Record<string, unknown>,
   options: {
     errorMap?: ValidationErrorMap;
+    getDescriptor?: (
+      name: string,
+      descriptor: FieldDescriptor<unknown>,
+    ) => FieldDescriptor<unknown> | null;
   } = {},
 ): ValidationIssue[] {
   return Object.entries(descriptors)
-    .map(([name, descriptor]) =>
-      validateFieldDetailedSync(descriptor, values[name], values, {
+    .map(([name, descriptor]) => {
+      const nextDescriptor = options.getDescriptor?.(name, descriptor) ?? descriptor;
+
+      if (!nextDescriptor) {
+        return null;
+      }
+
+      return validateFieldDetailedSync(nextDescriptor, values[name], values, {
         path: [name],
         errorMap: options.errorMap,
-      }),
-    )
+      });
+    })
     .filter((issue): issue is ValidationIssue => issue !== null);
 }
 

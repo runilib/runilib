@@ -2,17 +2,18 @@ import type { LibraryDoc } from '../../../types/index';
 
 export const schemaApiSection: LibraryDoc['sections'][number] = {
   id: 'fb-schema',
-  title: 'schema() API',
-  content: `\`schema(shape)\` wraps a plain field-builder object and layers on a full, zero-dependency validation API cross-field rules, refinements, typed parsing. So you do not need Zod, Yup, Joi, or Valibot to get a production-grade form.
+  title: 'createSchema() API',
+  content: `\`createSchema(shape)\` wraps a plain field-builder object and layers on a full, zero-dependency validation API cross-field rules, refinements, typed parsing. So you do not need Zod, Yup, Joi, or Valibot to get a production-grade form.
 
 - **The plain schema** describes what fields exist and how they render, default, and self-validate.
-- **schema(shape)** takes that same object and returns a wrapped value that **additionally** exposes a validation API (\`safeParse\`, \`refine\`, \`atLeastOne\`, etc.). The wrapped value is still accepted by \`useFormBridge\`, so you do not split rendering and validation across two objects.
+- **createSchema(shape)** takes that same object and returns a wrapped value that **additionally** exposes a validation API (\`safeParse\`, \`refine\`, \`atLeastOne\`, etc.). The wrapped value is still accepted by \`useFormBridge\`, so you do not split rendering and validation across two objects.
 - **Autocomplete stays clean:** The wrapped value deliberately hides the field keys from direct autocomplete on the schema object typing \`mySchema.\` suggests only the API methods. Field-level inference still flows through \`SchemaValues<typeof mySchema>\` and the generated \`fields.*\` components.
-- **Type inference is preserved:** \`const\` inference on the shape keeps every field's builder type, so refinements receive a fully typed \`values\` argument and errors are routed back to the right field.`,
+- **Type inference is preserved:** \`const\` inference on the shape keeps every field's builder type, so refinements receive a fully typed \`values\` argument and errors are routed back to the right field.
+- **Import surface stays flexible:** use the main \`@runilib/react-formbridge\` entry in client-only files; if the schema module is shared with strict server runtimes, author it from \`@runilib/react-formbridge/schema\` and import React APIs separately from the main package.`,
   subsections: [
     {
       id: 'fb-schema-why',
-      title: 'Why schema() exists',
+      title: 'Why createSchema() exists',
       content: `Field-level rules (\`required\`, \`min\`, \`email\`, \`matches\`, etc.) already run through the builder chain on each individual field. That covers most forms until you need a rule that depends on *multiple* fields at once:
 
 - "Provide at least an email **or** a phone number."
@@ -22,33 +23,33 @@ export const schemaApiSection: LibraryDoc['sections'][number] = {
 - "If \`role === 'admin'\`, then \`managerApproval\` is required."
 - etc.
 
-Without \`schema()\` you would either scatter these checks across ad-hoc \`useEffect\` hooks, duplicate them in \`onSubmit\` handlers, or pull in an external resolver library (Zod, Yup, Joi, Valibot) just to express a handful of rules. \`schema()\` gives you a first-class, chainable place for those rules that runs through the same validation pipeline as every other field errors land in \`state.errors\`, touch/dirty tracking still works, and form-level errors surface under \`state.formLevelError\`.
+Without \`createSchema()\` you would either scatter these checks across ad-hoc \`useEffect\` hooks, duplicate them in \`onSubmit\` handlers, or pull in an external resolver library (Zod, Yup, Joi, Valibot) just to express a handful of rules. \`createSchema()\` gives you a first-class, chainable place for those rules that runs through the same validation pipeline as every other field errors land in \`state.errors\`, touch/dirty tracking still works, and form-level errors surface under \`state.formLevelError\`.
 
 The design goal is stated plainly: **FormBridge should be self-sufficient.** Built-in validation is the complete path, not a stepping stone to an external resolver.`,
     },
     {
       id: 'fb-schema-when-to-use',
-      title: 'When to reach for schema()',
-      content: `Use \`schema()\` whenever any of the following apply:
+      title: 'When to reach for createSchema()',
+      content: `Use \`createSchema()\` whenever any of the following apply:
 
 - You need **cross-field validation** (one field's validity depends on another's value).
-- You want **form-level errors** that are not attached to a specific field - \`schema()\` surfaces these under \`state.formLevelError\`.
+- You want **form-level errors** that are not attached to a specific field - \`createSchema()\` surfaces these under \`state.formLevelError\`.
 - You want to **parse** the submitted values to a fully-typed object via \`safeParse\` / \`validate\` ideal inside server actions, tRPC procedures, or standalone utilities where you do not have a mounted form.
 - You want **async refinements** (e.g. username availability, server-side uniqueness checks) wired into the same validation pass as synchronous rules.
 - You want to **customise error messages globally** via \`errorMap\` instead of overriding each field.
 
-If your form has only independent field rules, the plain object form with \`satisfies FormSchema\` is enough. Wrap it in \`schema()\` the moment you need any of the behaviours above the two forms are interchangeable at the \`useFormBridge\` call site.`,
+If your form has only independent field rules, the plain object form with \`satisfies FormSchema\` is enough. Wrap it in \`createSchema()\` the moment you need any of the behaviours above the two forms are interchangeable at the \`useFormBridge\` call site.`,
     },
     {
       id: 'fb-schema-quickstart',
       title: 'Quick start',
-      content: `The wrapped schema is used exactly like a plain shape. Hand it to \`useFormBridge\`, render via \`fields.*\`, and chain cross-field rules on the result of \`schema()\`. Declare the schema at module scope (outside the component) so its identity stays stable across renders.`,
+      content: `The wrapped schema is used exactly like a plain shape. Hand it to \`useFormBridge\`, render via \`fields.*\`, and chain cross-field rules on the result of \`createSchema()\`. Declare the schema at module scope (outside the component) so its identity stays stable across renders. If that schema module is reused outside React, move the schema authoring imports to \`@runilib/react-formbridge/schema\`.`,
       code: {
         filename: 'TripBookingForm.tsx',
         lang: 'tsx',
-        code: `import { field, schema, useFormBridge } from '@runilib/react-formbridge'
+        code: `import { createSchema, field, useFormBridge } from '@runilib/react-formbridge'
 
-const tripSchema = schema({
+const tripSchema = createSchema({
   email: field.email().label('Email'),
   phone: field.phone('FR').label('Phone'),
   password: field.password().required().min(8),
@@ -87,6 +88,54 @@ export function TripBookingForm() {
       <Form.Submit>Book the trip</Form.Submit>
     </Form>
   )
+}`,
+      },
+    },
+    {
+      id: 'fb-schema-shared-modules',
+      title: 'Shared client/server schema modules',
+      content: `If a schema file is imported by both React code and server-side code, define that file with the server-safe \`@runilib/react-formbridge/schema\` subpath. That keeps schema authoring and parsing available without pulling hooks or UI helpers into the server module graph.
+
+Keep React-only APIs such as \`useFormBridge\` imported from the main \`@runilib/react-formbridge\` entry inside your client component files.`,
+      code: {
+        filename: 'bookingSchema.ts + BookingForm.tsx + actions.ts',
+        lang: 'ts',
+        code: `// bookingSchema.ts
+import { createSchema, field, type SchemaValues } from '@runilib/react-formbridge/schema'
+
+export const bookingSchema = createSchema({
+  email: field.email('Email').trim().lowercase(),
+  phone: field.phone('Phone').defaultCountry('FR'),
+}).atLeastOne(
+  ['email', 'phone'],
+  'Provide at least an email or a phone number.',
+)
+
+export type BookingValues = SchemaValues<typeof bookingSchema>
+
+// BookingForm.tsx
+import { useFormBridge } from '@runilib/react-formbridge'
+import { bookingSchema } from './bookingSchema'
+
+export function BookingForm() {
+  const { Form, fields } = useFormBridge(bookingSchema)
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <fields.email />
+      <fields.phone />
+      <Form.Submit>Continue</Form.Submit>
+    </Form>
+  )
+}
+
+// actions.ts
+'use server'
+
+import { bookingSchema, type BookingValues } from './bookingSchema'
+
+export async function submitBooking(raw: unknown) {
+  return bookingSchema.safeParseAsync(raw as Partial<BookingValues>)
 }`,
       },
     },
@@ -188,7 +237,7 @@ refineAsync(
       code: {
         filename: 'refine-examples.ts',
         lang: 'ts',
-        code: `const accountSchema = schema({
+        code: `const accountSchema = createSchema({
   password: field.password().required().min(8),
   confirmPassword: field.password().required(),
   username: field.text().required(),
@@ -237,7 +286,7 @@ When to pick **superRefine** over **refine**
       code: {
         filename: 'super-refine.ts',
         lang: 'ts',
-        code: `schema({
+        code: `createSchema({
   password: field.password().required().min(8),
   confirmPassword: field.password().required(),
   email: field.email().required(),
@@ -283,7 +332,7 @@ The mapper runs against **every** issue produced by field validators and refinem
         lang: 'ts',
         code: `import { t } from './i18n'
 
-const schemaFR = schema({
+const schemaFR = createSchema({
   email: field.email().required(),
   password: field.password().required().min(8),
 }).errorMap((issue, defaultMessage) => {
@@ -325,7 +374,7 @@ The error has no \`path\`, so it surfaces as a form-level error under \`state.fo
       code: {
         filename: 'at-least-one.ts',
         lang: 'ts',
-        code: `schema({
+        code: `createSchema({
   email: field.email().label('Email'),
   phone: field.phone('FR').label('Phone'),
 }).atLeastOne(
@@ -354,7 +403,7 @@ exactlyOne(
       code: {
         filename: 'exactly-one.ts',
         lang: 'ts',
-        code: `schema({
+        code: `createSchema({
   pickupAddress: field.text().label('Pick up in store'),
   homeDelivery: field.text().label('Home delivery address'),
   lockerCode: field.text().label('Parcel locker code'),
@@ -384,7 +433,7 @@ allOrNone(
       code: {
         filename: 'all-or-none.ts',
         lang: 'ts',
-        code: `schema({
+        code: `createSchema({
   billingStreet: field.text().label('Street'),
   billingCity: field.text().label('City'),
   billingZip: field.text().label('ZIP'),
@@ -407,7 +456,7 @@ You can mix \`ref()\` and plain string keys freely inside \`atLeastOne\`, \`exac
     {
       id: 'fb-schema-error-routing',
       title: 'How errors reach the UI',
-      content: `Every issue produced by \`schema()\` whether it comes from a field builder, a manual \`refine\`, a \`superRefine\`, or one of the built-in helpers flows through the same pipeline:
+      content: `Every issue produced by \`createSchema()\` whether it comes from a field builder, a manual \`refine\`, a \`superRefine\`, or one of the built-in helpers flows through the same pipeline:
 
 1. **Normalised** into a \`ValidationIssue\` with \`{ path, code, message, params }\`.
 2. **Optionally rewritten** by your \`errorMap\` mapper, if one is registered.
@@ -422,7 +471,7 @@ Practical consequences:
     },
     {
       id: 'fb-schema-typing-tip',
-      title: 'Typing tip - satisfies vs schema()',
+      title: 'Typing tip - satisfies vs createSchema()',
       content: `If your form needs only field-level rules, keep the object form and annotate it with \`satisfies FormSchema\` so TypeScript preserves each field's precise type:
 
 \`\`\`tsx
@@ -434,10 +483,10 @@ const profileSchema = {
 } satisfies FormSchema
 \`\`\`
 
-The moment you need cross-field rules, a parse surface, or form-level errors, wrap it in \`schema()\` nothing else in the call site has to change:
+The moment you need cross-field rules, a parse surface, or form-level errors, wrap it in \`createSchema()\` nothing else in the call site has to change:
 
 \`\`\`tsx
-const profileSchema = schema({
+const profileSchema = createSchema({
   bio: field.textarea('Bio'),
   country: field.select('Country').options(['FR', 'US']),
   altCountry: field.select('Alt country').options(['FR', 'US']),

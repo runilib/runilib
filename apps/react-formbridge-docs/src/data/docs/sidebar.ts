@@ -18,7 +18,10 @@ export const docSidebar: LibraryDoc['sidebar'] = [
       { id: 'fb-tutorial-signup', label: 'Signup form' },
       { id: 'fb-tutorial-checkout', label: 'Checkout flow' },
       { id: 'fb-tutorial-validation', label: 'Validation & resolvers' },
-      { id: 'fb-tutorial-schema-validation', label: 'schema() & strong validation' },
+      {
+        id: 'fb-tutorial-schema-validation',
+        label: 'createSchema() & strong validation',
+      },
       { id: 'fb-tutorial-custom-ui', label: 'Custom UI & styling' },
       { id: 'fb-tutorial-production', label: 'Advanced flows' },
     ],
@@ -27,7 +30,7 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     group: 'Core concepts',
     color: 'blue',
     items: [
-      { id: 'fb-schema', label: 'schema()' },
+      { id: 'fb-schema', label: 'createSchema()' },
       { id: 'fb-state', label: 'State' },
       { id: 'fb-actions', label: 'Actions & helpers' },
       { id: 'fb-builder-basics', label: 'Builder basics' },

@@ -1,6 +1,14 @@
-import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { field } from '../core/field-builders/field';
+import { createSchema } from '../core/validators/createSchema';
 import { useFormBridgeContext } from '../hooks/shared/form-context';
 import { useFormBridge } from '../hooks/useFormBridge.web';
 
@@ -102,6 +110,86 @@ describe('useForm - validate', () => {
     });
     expect(valid).toBe(false);
     expect(Object.keys(result.current.state.errors).length).toBeGreaterThan(0);
+  });
+
+  it('keeps conditional required validation aligned when using createSchema()', async () => {
+    const schema = createSchema({
+      feedbackType: field
+        .select('Feedback type')
+        .options(['general', 'bug'])
+        .defaultValue('general')
+        .required(),
+      expectedBehavior: field
+        .textarea('Expected behavior')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+      actualBehavior: field
+        .textarea('Actual behavior')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+      reproductionSteps: field
+        .textarea('Steps to reproduce')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+    });
+
+    const { result } = renderHook(() => useFormBridge(schema));
+
+    act(() => {
+      result.current.setValue('feedbackType', 'bug');
+    });
+
+    let valid = true;
+    await act(async () => {
+      valid = await result.current.validate();
+    });
+
+    expect(valid).toBe(false);
+    expect(result.current.state.errors).toMatchObject({
+      expectedBehavior: 'This field is required.',
+      actualBehavior: 'This field is required.',
+      reproductionSteps: 'This field is required.',
+    });
+  });
+
+  it('surfaces newly visible requiredWhen errors when the form already has active errors', async () => {
+    const schema = createSchema({
+      feedbackType: field
+        .select('Feedback type')
+        .options(['general', 'bug'])
+        .defaultValue('general')
+        .required(),
+      subject: field.text('Subject').required(),
+      expectedBehavior: field
+        .textarea('Expected behavior')
+        .visibleWhen('feedbackType', 'bug')
+        .requiredWhen('feedbackType', 'bug')
+        .clearOnHide(),
+    });
+
+    const { result } = renderHook(() => useFormBridge(schema));
+
+    await act(async () => {
+      result.current.fieldController('subject').onBlur();
+    });
+
+    expect(result.current.fieldController('subject').error).toBe(
+      'This field is required.',
+    );
+
+    await act(async () => {
+      result.current.setValue('feedbackType', 'bug');
+    });
+
+    await waitFor(() => {
+      expect(result.current.fieldController('expectedBehavior').visible).toBe(true);
+      expect(result.current.fieldController('expectedBehavior').error).toBe(
+        'This field is required.',
+      );
+    });
   });
 });
 

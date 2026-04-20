@@ -2,8 +2,11 @@ import {
   buildFeedbackEmailSubject,
   buildFeedbackEmailText,
   FEEDBACK_TO_EMAIL,
-  parseFeedbackSubmission,
+  type FeedbackSubmissionValues,
+  normalizeFeedbackType,
+  normalizeRelevantPage,
 } from '@/lib/feedback';
+import { FEEDBACK_SCHEMA } from '@/lib/feedbackSchema';
 
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
@@ -56,22 +59,53 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json().catch(() => null);
-  const parsed = parseFeedbackSubmission(body);
+  const body = (await request.json().catch(() => null)) as unknown;
 
-  if (!parsed.ok) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 });
+  if (!body || typeof body !== 'object') {
+    return NextResponse.json({ error: 'Invalid feedback payload.' }, { status: 400 });
   }
 
-  const replyTo =
-    parsed.values.contactConsent && parsed.values.email ? parsed.values.email : undefined;
+  const result = FEEDBACK_SCHEMA.safeParse(body as Record<string, unknown>);
+
+  if (!result.success) {
+    const firstFieldError = Object.values(result.errorsByField)[0];
+    const firstFormError = result.formLevelErrors[0];
+    return NextResponse.json(
+      {
+        error: firstFieldError ?? firstFormError ?? 'Invalid feedback payload.',
+        errors: result.errorsByField,
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!result.data) {
+    return NextResponse.json({ error: 'Invalid feedback payload.' }, { status: 400 });
+  }
+
+  const data = result.data;
+  const values: FeedbackSubmissionValues = {
+    actualBehavior: String(data.actualBehavior ?? ''),
+    area: String(data.area ?? ''),
+    contactConsent: data.contactConsent === true,
+    email: String(data.email ?? ''),
+    expectedBehavior: String(data.expectedBehavior ?? ''),
+    feedbackType: normalizeFeedbackType(String(data.feedbackType ?? 'general')),
+    message: String(data.message ?? ''),
+    name: String(data.name ?? ''),
+    relevantPage: normalizeRelevantPage(String(data.relevantPage ?? '')),
+    reproductionSteps: String(data.reproductionSteps ?? ''),
+    subject: String(data.subject ?? ''),
+  };
+
+  const replyTo = values.contactConsent && values.email ? values.email : undefined;
 
   try {
     await transportConfig.transport.sendMail({
       from: transportConfig.fromEmail,
       replyTo,
-      subject: buildFeedbackEmailSubject(parsed.values),
-      text: buildFeedbackEmailText(parsed.values),
+      subject: buildFeedbackEmailSubject(values),
+      text: buildFeedbackEmailText(values),
       to: FEEDBACK_TO_EMAIL,
     });
   } catch {

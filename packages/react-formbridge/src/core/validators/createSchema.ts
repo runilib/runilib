@@ -9,6 +9,11 @@ import type {
   ValidationResult,
   ValidatorResult,
 } from '../../types/validation';
+import {
+  evaluateAllConditions,
+  type FieldConditions,
+  type FieldVisibilityState,
+} from '../conditions/conditions';
 import { parseDateValue } from '../field-builders/common-utils';
 import { extractDefaults, validateAllDetailed, validateAllDetailedSync } from './engine';
 import { buildValidationResult, createValidationIssue, isPromiseLike } from './issues';
@@ -67,7 +72,7 @@ export interface FormBridgeSchemaApi<TSchema extends FormSchema> {
 }
 
 /**
- * Return type of `schema()`. Carries the underlying shape as a phantom (typed
+ * Return type of `createSchema()`. Carries the underlying shape as a phantom (typed
  * via {@link FB_SCHEMA_SHAPE}) so that direct autocomplete on a schema object
  * only surfaces the validation API - `safeParse`, `refine`, `atLeastOne`, etc.
  * - not the individual field keys. Field-level inference still flows through
@@ -149,6 +154,47 @@ function buildDescriptors<TSchema extends FormSchema>(
   }
 
   return descriptors;
+}
+
+const DEFAULT_RUNTIME_STATE: FieldVisibilityState = {
+  visible: true,
+  required: false,
+  disabled: false,
+};
+
+function buildConditionsMap<TSchema extends FormSchema>(
+  descriptors: Record<string, FieldDescriptor<unknown>>,
+): Record<string, FieldConditions<TSchema>> {
+  const conditionsMap: Record<string, FieldConditions<TSchema>> = {};
+
+  for (const [name, descriptor] of Object.entries(descriptors)) {
+    const conditions = (
+      descriptor as FieldDescriptor<unknown> & {
+        _conditions?: FieldConditions<TSchema>;
+      }
+    )._conditions;
+
+    if (conditions) {
+      conditionsMap[name] = conditions;
+    }
+  }
+
+  return conditionsMap;
+}
+
+function getValidationDescriptorForRuntime(
+  descriptor: FieldDescriptor<unknown>,
+  runtime: FieldVisibilityState,
+): FieldDescriptor<unknown> | null {
+  if (!runtime.visible) {
+    return null;
+  }
+
+  return {
+    ...descriptor,
+    _required: descriptor._required || runtime.required,
+    _disabled: descriptor._disabled || runtime.disabled,
+  };
 }
 
 function applySubmitTransforms(
@@ -268,7 +314,7 @@ export function getSchemaValidationApi<TSchema extends FormSchema>(
   return candidate as unknown as FormBridgeSchema<TSchema>;
 }
 
-export function schema<const TSchema extends FormSchema>(
+export function createSchema<const TSchema extends FormSchema>(
   shape: TSchema,
 ): FormBridgeSchema<TSchema> {
   const enhanced = { ...shape } as unknown as FormBridgeSchema<TSchema> & {
@@ -329,11 +375,20 @@ export function schema<const TSchema extends FormSchema>(
     safeParse(values) {
       const descriptors = buildDescriptors(enhanced);
       const parsedValues = buildParsedValues<TSchema>(descriptors, values);
+      const visibilityMap = evaluateAllConditions(
+        buildConditionsMap<TSchema>(descriptors),
+        parsedValues,
+      );
       const fieldIssues = validateAllDetailedSync(
         descriptors,
         parsedValues as Record<string, unknown>,
         {
           errorMap: meta.errorMap,
+          getDescriptor: (name, descriptor) =>
+            getValidationDescriptorForRuntime(
+              descriptor,
+              visibilityMap[name] ?? DEFAULT_RUNTIME_STATE,
+            ),
         },
       );
       const refinementIssues = runRefinementsSync(meta, parsedValues);
@@ -344,11 +399,20 @@ export function schema<const TSchema extends FormSchema>(
     async safeParseAsync(values) {
       const descriptors = buildDescriptors(enhanced);
       const parsedValues = buildParsedValues<TSchema>(descriptors, values);
+      const visibilityMap = evaluateAllConditions(
+        buildConditionsMap<TSchema>(descriptors),
+        parsedValues,
+      );
       const fieldIssues = await validateAllDetailed(
         descriptors,
         parsedValues as Record<string, unknown>,
         {
           errorMap: meta.errorMap,
+          getDescriptor: (name, descriptor) =>
+            getValidationDescriptorForRuntime(
+              descriptor,
+              visibilityMap[name] ?? DEFAULT_RUNTIME_STATE,
+            ),
         },
       );
       const refinementIssues = await runRefinementsAsync(meta, parsedValues);
