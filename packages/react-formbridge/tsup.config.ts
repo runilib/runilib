@@ -13,7 +13,11 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  splitting: false,
+  // We publish three ESM entrypoints (`index`, `index.native`, `schema`) that
+  // share a large amount of validation/builder code. Keeping splitting enabled
+  // lets tsup factor that shared runtime into chunks instead of duplicating it
+  // into every entry, which keeps the published package size under control.
+  splitting: true,
   treeshake: true,
   target: "es2019",
   outDir: 'dist',
