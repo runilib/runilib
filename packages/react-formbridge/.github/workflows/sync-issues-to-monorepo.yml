@@ -191,5 +191,7 @@ jobs:
             gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing_comment_id}" \
               -F body="$comment_body" > /dev/null
           else
-            gh issue comment "${ISSUE_NUMBER}" --body "$comment_body"
+            gh issue comment "${ISSUE_NUMBER}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --body "$comment_body"
           fi

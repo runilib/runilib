@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Documentation
-    url: https://runilib.dev/docs/react-formbridge
+    url: https://react-formbridge.runilib.dev/docs
     about: Read the docs before opening an issue - your question might already be answered.
   - name: Contribute code
     url: https://github.com/runilib/runilib

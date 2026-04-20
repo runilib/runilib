@@ -10,7 +10,7 @@ export const tutorialCustomUiSection: LibraryDoc['sections'][number] = {
 - Keep styling in \`globalDefaults\`, local field overrides, or host components so the schema stays focused on behavior`,
   codeTabs: [
     {
-      filename: 'CustomRenderedMask.web.tsx',
+      filename: 'web.tsx',
       lang: 'tsx',
       code: `const schema = {
   workspaceName: field.text('Workspace').required(),
@@ -53,7 +53,7 @@ export function MissionControlForm() {
 }`,
     },
     {
-      filename: 'CustomRenderedMask.native.tsx',
+      filename: 'native.tsx',
       lang: 'tsx',
       code: `import { Text, TextInput, TouchableOpacity, View } from 'react-native'
 
@@ -134,7 +134,7 @@ export function MissionControlScreen() {
       content: `The product shell can evolve without rewriting the field semantics. Keep styling in the UI layer and keep behavior in the schema.`,
       codeTabs: [
         {
-          filename: 'StyledRecipe.web.tsx',
+          filename: 'web.tsx',
           lang: 'tsx',
           code: `import styled from 'styled-components'
 import {
@@ -183,7 +183,7 @@ export function StyledRecipe() {
 }`,
         },
         {
-          filename: 'StyledRecipe.native.tsx',
+          filename: 'native.tsx',
           lang: 'tsx',
           code: `import styled from 'styled-components/native'
 import {
