@@ -9,10 +9,10 @@ import type { FormBridgeOptions } from './ui';
 /**
  * When FormBridge should re-run validation for a field.
  *
- * - `'onChange'`  — on every keystroke / value change.
- * - `'onBlur'`    — after the field loses focus (default).
- * - `'onSubmit'`  — only when the form is submitted.
- * - `'onTouched'` — after the first blur, then on every change (react-hook-form style).
+ * - `'onChange'`  - on every keystroke / value change.
+ * - `'onBlur'`    - after the field loses focus (default).
+ * - `'onSubmit'`  - only when the form is submitted.
+ * - `'onTouched'` - after the first blur, then on every change (react-hook-form style).
  */
 export type ValidationTrigger = 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched';
 
@@ -33,10 +33,10 @@ export interface UseFormBridgeOptions<
   /**
    * When validation runs for a field:
    *
-   * - `'onBlur'`    (default) — after field loses focus.
-   * - `'onChange'`  — on every keystroke.
-   * - `'onSubmit'`  — only on submit.
-   * - `'onTouched'` — after blur, then on every change.
+   * - `'onBlur'`    (default) - after field loses focus.
+   * - `'onChange'`  - on every keystroke.
+   * - `'onSubmit'`  - only on submit.
+   * - `'onTouched'` - after blur, then on every change.
    *
    * See {@link ValidationTrigger}.
    */
@@ -55,9 +55,9 @@ export interface UseFormBridgeOptions<
   /**
    * Show field errors inline immediately:
    *
-   * - `'submit'` (default) — only after the form is submitted once or the
+   * - `'submit'` (default) - only after the form is submitted once or the
    *   field is touched.
-   * - `'always'` — render errors from first render, no gating.
+   * - `'always'` - render errors from first render, no gating.
    */
   // showErrorsOn?: 'submit' | 'always';
 
@@ -95,7 +95,7 @@ export interface UseFormBridgeOptions<
 
   /**
    * Initial values applied when the form is created, or when {@link formKey}
-   * changes. Values can be partial — missing keys fall back to the field's
+   * changes. Values can be partial - missing keys fall back to the field's
    * `_defaultValue`.
    */
   initialValues?: Partial<SchemaValues<S>>;
@@ -134,7 +134,7 @@ export interface globalDefaultsContext<
   TPlatform extends Platform = Platform,
 > {
   /**
-   * Live form state — same object you'd read from `form.state`. Use it to
+   * Live form state - same object you'd read from `form.state`. Use it to
    * react to `isSubmitting`, `submitError`, `isDirty`, per-field `errors`,
    * etc.
    */
@@ -185,7 +185,7 @@ export type SchemaValidatorResolver = (
 // ─── Options fetcher ────────────────────────────────────────────────────────────
 
 /**
- * Context handed to an async options fetcher — everything needed to build a
+ * Context handed to an async options fetcher - everything needed to build a
  * cancelable, dependency-aware request.
  */
 export interface OptionsFetcherContext {
@@ -197,7 +197,7 @@ export interface OptionsFetcherContext {
    */
   deps: Record<string, unknown>;
   /**
-   * Abort signal — tied to the component lifecycle and dependency changes.
+   * Abort signal - tied to the component lifecycle and dependency changes.
    * Forward it to `fetch` / your HTTP client to cancel stale requests.
    */
   signal: AbortSignal;

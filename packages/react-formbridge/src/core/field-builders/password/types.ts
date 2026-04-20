@@ -51,7 +51,7 @@ export interface StrengthConfig {
 export interface StrengthRuleConfig {
   id: string;
   label: string;
-  /** Test function — return true if the rule passes */
+  /** Test function - return true if the rule passes */
   test: (password: string) => boolean;
   /** Points awarded when this rule passes (default: 1) */
   weight?: number;

@@ -13,7 +13,7 @@ import type { ValidatorResult } from './validation';
  * `'number'` enables numeric coercion).
  *
  * Use `'custom'` when you want to ship your own renderer via
- * `_customRender` — FormBridge still manages state, validation and events,
+ * `_customRender` - FormBridge still manages state, validation and events,
  * but hands the UI off to you.
  */
 export type FieldType =
@@ -95,7 +95,7 @@ export type SyncValidator<V = unknown> = (
 
 /**
  * Async validator. Same contract as {@link SyncValidator} but returns a
- * promise — typically used for server-side checks (username availability,
+ * promise - typically used for server-side checks (username availability,
  * coupon codes, …). FormBridge debounces calls via `_debounce`.
  *
  * @typeParam V - The validated field's value type.
@@ -135,7 +135,7 @@ export type SelectOption = ISelectOption & Record<string, unknown>;
 /**
  * Full context handed to custom select/radio picker renderers. Everything you
  * need to build a popover, bottom sheet, combobox, or custom radio list is in
- * here — no need to reach back into FormBridge state.
+ * here - no need to reach back into FormBridge state.
  */
 export interface SelectPickerRenderContext {
   /** The platform we're rendering on (for styling or behavior branching). */
@@ -178,7 +178,7 @@ export interface SelectPickerRenderContext {
   clearSearch: () => void;
   /**
    * Commits a selection. Accepts either a full `SelectOption` or just its
-   * `value` — whichever is more convenient at the call site.
+   * `value` - whichever is more convenient at the call site.
    */
   selectOption: (option: SelectOption | SelectOption['value']) => void;
 }
@@ -193,14 +193,14 @@ export interface SelectPickerRenderContext {
  * (`text()`, `number()`, …) rather than constructing a descriptor by hand, but
  * the type is exported for advanced custom fields.
  *
- * All property names are prefixed with `_` to signal "internal wire format" —
+ * All property names are prefixed with `_` to signal "internal wire format" -
  * they're meant to be produced by builders, not typed by end users.
  *
  * @typeParam DV - The field's value type (e.g. `string`, `number`, `File`).
  * @typeParam FType - The concrete {@link FieldType} variant.
  */
 export interface FieldDescriptor<DV = unknown, FType extends FieldType = FieldType> {
-  /** Field kind — used by the runtime to pick the correct renderer. */
+  /** Field kind - used by the runtime to pick the correct renderer. */
   _type: FType;
   /** Human-readable label rendered above/next to the input. */
   _label?: string;
@@ -284,7 +284,7 @@ export interface FieldDescriptor<DV = unknown, FType extends FieldType = FieldTy
   /** Accepted MIME types / extensions for file inputs (e.g. `['image/*']`). */
   _accept?: string[];
   /**
-   * Config for loading options asynchronously from a URL or function — see
+   * Config for loading options asynchronously from a URL or function - see
    * {@link AsyncOptionsConfig}. Applies to `select` and `radio` fields.
    */
   _asyncOptions?: AsyncOptionsConfig<Record<string, unknown>>;
@@ -299,7 +299,7 @@ export interface FieldDescriptor<DV = unknown, FType extends FieldType = FieldTy
 
 /**
  * Runtime state for a single field, as kept inside the form store. This is the
- * raw shape — renderers see the richer {@link FieldRenderState}.
+ * raw shape - renderers see the richer {@link FieldRenderState}.
  *
  * @typeParam V - The field's value type.
  */
@@ -355,7 +355,7 @@ export interface FieldRenderState<V = unknown> {
   options?: SelectOption[];
   /** OTP digit count (OTP fields only). */
   otpLength?: number;
-  /** Full values map — useful for cross-field logic in custom renderers. */
+  /** Full values map - useful for cross-field logic in custom renderers. */
   allValues: Record<string, unknown>;
   /** Initial/default value, stringified for uncontrolled inputs. */
   defaultValue?: string;
@@ -367,18 +367,18 @@ export interface FieldRenderState<V = unknown> {
  * @typeParam V - The field's value type.
  */
 export interface FieldRenderHandlers<V = unknown> {
-  /** Report a new value — triggers validation and re-render. */
+  /** Report a new value - triggers validation and re-render. */
   onChange: (value: V) => void;
-  /** Report that the field lost focus — flips `touched` and runs blur validation. */
+  /** Report that the field lost focus - flips `touched` and runs blur validation. */
   onBlur: () => void;
-  /** Report that the field gained focus — used by focus tracking/analytics. */
+  /** Report that the field gained focus - used by focus tracking/analytics. */
   onFocus: () => void;
 }
 
 // ─── Props passed to each rendered field ────────────────────────────────────────
 
 /**
- * The full prop bag passed to a field renderer — state + handlers.
+ * The full prop bag passed to a field renderer - state + handlers.
  * This is what `_customRender` receives.
  */
 export type FieldRenderProps<V = unknown> = FieldRenderState<V> & FieldRenderHandlers<V>;

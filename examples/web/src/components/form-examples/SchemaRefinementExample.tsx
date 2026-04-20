@@ -74,20 +74,20 @@ export function SchemaRefinementExample() {
           <span className={styles.customerEyebrow}>schema() refinements</span>
           <h2 className={styles.customerTitle}>Cross-field validation</h2>
           <p className={styles.customerIntro}>
-            Four built-in helpers — no Zod, no Yup, no resolver. Each one is a single
+            Four built-in helpers - no Zod, no Yup, no resolver. Each one is a single
             chain call on the value returned by <code>schema()</code>, and errors are
             routed to the right field automatically.
           </p>
 
           <div className={styles.points}>
             <span className={styles.point}>
-              <strong>atLeastOne</strong> — email or phone required
+              <strong>atLeastOne</strong> - email or phone required
             </span>
             <span className={styles.point}>
-              <strong>dateRange</strong> — return ≥ departure
+              <strong>dateRange</strong> - return ≥ departure
             </span>
             <span className={styles.point}>
-              <strong>superRefine</strong> — password matches & avoids email handle
+              <strong>superRefine</strong> - password matches & avoids email handle
             </span>
             <span className={styles.point}>
               Form-level errors surface under <code>state.formLevelError</code>

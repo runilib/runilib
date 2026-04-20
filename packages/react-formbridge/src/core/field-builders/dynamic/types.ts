@@ -46,7 +46,7 @@ export interface JsonFieldDescriptor {
   disabled?: boolean;
   /** Order (for rendering) */
   order?: number;
-  /** Condition — show only when another field has a certain value */
+  /** Condition - show only when another field has a certain value */
   showWhen?: { field: string; value: unknown } | { field: string; notValue: unknown };
   /** Validation rules as a JSON array */
   validate?: JsonValidationRule[];

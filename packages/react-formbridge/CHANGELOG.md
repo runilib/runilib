@@ -1,8 +1,8 @@
 # Changelog
 
-## [1.0.0] — 2026-03-20
+## [1.0.0] - 2026-03-20
 
-### Added — initial public release
+### Added - initial public release
 
 `@runilib/react-formbridge` is a schema-first form library for React and React Native. It lets you define a form once, then render generated fields, validation, and state with the same mental model on web and native.
 

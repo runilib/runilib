@@ -1,5 +1,5 @@
 /**
- * React Formbridge — Reactive Conditional Fields
+ * React Formbridge - Reactive Conditional Fields
  * ──────────────────────────────────────────
  * Declarative, reactive show/hide and required/not-required rules
  * that update automatically whenever form values change.
@@ -22,17 +22,17 @@ export type ConditionPredicate<Schema extends FormSchema> = (
 ) => boolean;
 
 type SimpleCondition<Schema extends FormSchema> =
-  | { type: 'eq'; field: string; value: unknown } // Equal — true when field === value
-  | { type: 'neq'; field: string; value: unknown } // Not equal — true when field !== value
-  | { type: 'gt'; field: string; value: number } // Greater than — true when field > value
-  | { type: 'gte'; field: string; value: number } // Greater or equal — true when field >= value
-  | { type: 'lt'; field: string; value: number } // Less than — true when field < value
-  | { type: 'lte'; field: string; value: number } // Less or equal — true when field <= value
-  | { type: 'truthy'; field: string } // Truthy — true when field has a non-falsy value
-  | { type: 'falsy'; field: string } // Falsy — true when field is falsy (null, '', 0, false, undefined)
-  | { type: 'in'; field: string; values: unknown[] } // In list — true when field value is in the array
-  | { type: 'notIn'; field: string; values: unknown[] } // Not in list — true when field value is NOT in the array
-  | { type: 'fn'; fn: ConditionPredicate<Schema> }; // Custom predicate — true when fn(allValues) returns true
+  | { type: 'eq'; field: string; value: unknown } // Equal - true when field === value
+  | { type: 'neq'; field: string; value: unknown } // Not equal - true when field !== value
+  | { type: 'gt'; field: string; value: number } // Greater than - true when field > value
+  | { type: 'gte'; field: string; value: number } // Greater or equal - true when field >= value
+  | { type: 'lt'; field: string; value: number } // Less than - true when field < value
+  | { type: 'lte'; field: string; value: number } // Less or equal - true when field <= value
+  | { type: 'truthy'; field: string } // Truthy - true when field has a non-falsy value
+  | { type: 'falsy'; field: string } // Falsy - true when field is falsy (null, '', 0, false, undefined)
+  | { type: 'in'; field: string; values: unknown[] } // In list - true when field value is in the array
+  | { type: 'notIn'; field: string; values: unknown[] } // Not in list - true when field value is NOT in the array
+  | { type: 'fn'; fn: ConditionPredicate<Schema> }; // Custom predicate - true when fn(allValues) returns true
 
 export type ConditionGroup<Schema extends FormSchema> =
   | { op: 'AND'; conditions: SimpleCondition<Schema>[] } // All conditions must pass
@@ -90,7 +90,7 @@ function evaluateCondition<Schema extends FormSchema>(
   return evaluateSimple(condition, values);
 }
 
-// ─── FieldConditions — stored per field ──────────────────────────────────────
+// ─── FieldConditions - stored per field ──────────────────────────────────────
 export interface FieldConditions<Schema extends FormSchema> {
   /** Field is visible only when ALL visibleWhen conditions pass */
   visible: Condition<Schema>[];

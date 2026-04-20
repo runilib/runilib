@@ -3,7 +3,7 @@ import type { LibraryDoc } from './../../../types/index';
 export const tutorialSchemaValidationSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial-schema-validation',
   title: 'Tutorial: schema() & strong validation',
-  content: `This tutorial builds a **real-world booking form** that pushes validation well beyond single-field rules. You will use \`schema()\` to express cross-field constraints, async checks, form-level errors, global error mapping, and server-side reuse — all without any external validation library.
+  content: `This tutorial builds a **real-world booking form** that pushes validation well beyond single-field rules. You will use \`schema()\` to express cross-field constraints, async checks, form-level errors, global error mapping, and server-side reuse - all without any external validation library.
 
 By the end you will have a form that:
 
@@ -120,7 +120,7 @@ export function BookingForm() {
     {
       filename: 'ServerReuse.ts',
       lang: 'ts',
-      code: `// The same schema works outside React — zero duplication.
+      code: `// The same schema works outside React - zero duplication.
 'use server'
 
 import { bookingSchema } from './bookingSchema'
@@ -155,13 +155,13 @@ export async function createBooking(raw: unknown) {
 | "Password must not contain the email handle" | Cannot express | \`.superRefine((v, ctx) => …)\` |
 | Async uniqueness check | \`validate(fn)\` (sync only) | \`.refineAsync(fn)\` |
 | Rewrite all error messages at once | One field at a time | \`.errorMap(fn)\` |
-| Server-side reuse | Mount a React component | \`.safeParse(values)\` — no React needed |
+| Server-side reuse | Mount a React component | \`.safeParse(values)\` - no React needed |
 
 \`schema()\` wraps the same shape object you already know. The wrapped value is still passed straight to \`useFormBridge\`, so nothing changes in your component tree.`,
     },
     {
       id: 'fb-tutorial-schema-validation-step1',
-      title: 'Step 1 — Start with a plain schema',
+      title: 'Step 1 - Start with a plain schema',
       content: `Begin with the field builders. Each field owns its own local rules. No \`schema()\` wrapper yet.`,
       code: {
         filename: '01-plain-schema.ts',
@@ -187,7 +187,7 @@ const bookingFields = {
     },
     {
       id: 'fb-tutorial-schema-validation-step2',
-      title: 'Step 2 — Wrap in schema() and add atLeastOne',
+      title: 'Step 2 - Wrap in schema() and add atLeastOne',
       content: `Wrap the shape in \`schema()\` and chain your first cross-field rule. \`atLeastOne\` ensures the user fills in at least one of the listed fields. The error is form-level (no \`path\`), so it surfaces under \`state.formLevelError\`.`,
       code: {
         filename: '02-at-least-one.ts',
@@ -210,7 +210,7 @@ const bookingSchema = schema({
     },
     {
       id: 'fb-tutorial-schema-validation-step3',
-      title: 'Step 3 — superRefine for temporal constraints',
+      title: 'Step 3 - superRefine for temporal constraints',
       content: `When a rule depends on **two date fields at once**, \`superRefine\` is the most direct option. Compare the two values and pin the error to \`returnDate\` so the user sees it exactly where the fix belongs.`,
       code: {
         filename: '03-date-order.ts',
@@ -244,7 +244,7 @@ const bookingSchema = schema({
     },
     {
       id: 'fb-tutorial-schema-validation-step4',
-      title: 'Step 4 — superRefine for richer multi-issue checks',
+      title: 'Step 4 - superRefine for richer multi-issue checks',
       content: `\`superRefine\` is the most powerful primitive. You receive the full values object and a \`ctx\` with \`addIssue()\`. You can raise **multiple errors on different fields** in a single pass.
 
 This is where you put rules that are too complex for a single boolean predicate: password confirmation, email-in-password detection, conditional business logic that touches three fields, etc.`,
@@ -280,7 +280,7 @@ This is where you put rules that are too complex for a single boolean predicate:
     },
     {
       id: 'fb-tutorial-schema-validation-step5',
-      title: 'Step 5 — refineAsync for server-side checks',
+      title: 'Step 5 - refineAsync for server-side checks',
       content: `\`refineAsync\` runs a promise-returning predicate. It fires during \`safeParseAsync\` and during form validation when the runtime uses the async pipeline.
 
 Pin the error to a specific field with \`path\` so the user sees the feedback exactly where it matters.`,
@@ -310,8 +310,8 @@ Pin the error to a specific field with \`path\` so the user sees the feedback ex
     },
     {
       id: 'fb-tutorial-schema-validation-step6',
-      title: 'Step 6 — errorMap for global message rewriting',
-      content: `\`errorMap\` receives every issue produced by the schema — field-level and refinement-level alike — and lets you rewrite or translate the message in one place. Return the new string to override, or \`defaultMessage\` to keep the original.
+      title: 'Step 6 - errorMap for global message rewriting',
+      content: `\`errorMap\` receives every issue produced by the schema - field-level and refinement-level alike - and lets you rewrite or translate the message in one place. Return the new string to override, or \`defaultMessage\` to keep the original.
 
 This is the FormBridge-native equivalent of Zod's \`errorMap\`. Use it for i18n, copy standardization, or to strip technical codes from user-facing messages.`,
       code: {
@@ -329,7 +329,7 @@ This is the FormBridge-native equivalent of Zod's \`errorMap\`. Use it for i18n,
       case 'password_mismatch':
         return 'The two passwords must be identical.'
       case 'username_taken':
-        return 'Pick a different username — this one is taken.'
+        return 'Pick a different username - this one is taken.'
       default:
         return defaultMessage
     }
@@ -341,7 +341,7 @@ This is the FormBridge-native equivalent of Zod's \`errorMap\`. Use it for i18n,
     },
     {
       id: 'fb-tutorial-schema-validation-step7',
-      title: 'Step 7 — Render the form',
+      title: 'Step 7 - Render the form',
       content: `The wrapped schema is passed to \`useFormBridge\` exactly like a plain shape. The only new thing in the component is reading \`state.formLevelError\` to show form-level errors produced by \`atLeastOne\`.`,
       code: {
         filename: '07-render.tsx',
@@ -383,8 +383,8 @@ export function BookingForm() {
     },
     {
       id: 'fb-tutorial-schema-validation-step8',
-      title: 'Step 8 — Reuse the schema on the server',
-      content: `Because \`schema()\` exposes \`safeParse\` and \`safeParseAsync\`, you can validate the exact same rules server-side — in a server action, a tRPC handler, an API route, or a test — without mounting React.
+      title: 'Step 8 - Reuse the schema on the server',
+      content: `Because \`schema()\` exposes \`safeParse\` and \`safeParseAsync\`, you can validate the exact same rules server-side - in a server action, a tRPC handler, an API route, or a test - without mounting React.
 
 The returned \`errorsByField\` is drop-in compatible with \`state.errors\`, so you can feed server errors straight back into the form via \`setErrors()\`.`,
       code: {
@@ -426,19 +426,19 @@ export async function createBooking(raw: unknown) {
 
 | Order | What runs | Stops on failure? |
 | --- | --- | --- |
-| 1 | Field-level rules (\`required\`, \`min\`, \`pattern\`, …) | No — all fields are validated |
-| 2 | \`refine\` / \`superRefine\` (sync) | No — all sync refinements run |
-| 3 | \`refineAsync\` (async) | No — all async refinements run |
-| 4 | \`errorMap\` rewrites every collected issue | N/A — post-processing |
+| 1 | Field-level rules (\`required\`, \`min\`, \`pattern\`, …) | No - all fields are validated |
+| 2 | \`refine\` / \`superRefine\` (sync) | No - all sync refinements run |
+| 3 | \`refineAsync\` (async) | No - all async refinements run |
+| 4 | \`errorMap\` rewrites every collected issue | N/A - post-processing |
 
-All issues are collected into a single \`ValidationResult\`. Nothing short-circuits by default — the user sees every problem at once, not one at a time.
+All issues are collected into a single \`ValidationResult\`. Nothing short-circuits by default - the user sees every problem at once, not one at a time.
 
 The chain itself is declarative. You can declare refinements in any order; FormBridge sorts them by kind internally.`,
     },
     {
       id: 'fb-tutorial-schema-validation-helpers',
       title: 'Built-in helpers cheat sheet',
-      content: `\`schema()\` ships with three high-level helpers built on top of \`superRefine\`. Use them before writing a custom refinement — they cover the most common cross-field patterns.
+      content: `\`schema()\` ships with three high-level helpers built on top of \`superRefine\`. Use them before writing a custom refinement - they cover the most common cross-field patterns.
 
 | Helper | What it checks | Error target |
 | --- | --- | --- |
@@ -475,7 +475,7 @@ const billingSchema = schema({
     },
     {
       id: 'fb-tutorial-schema-validation-tests',
-      title: 'Bonus — Testing validation without React',
+      title: 'Bonus - Testing validation without React',
       content: `Because \`safeParse\` / \`safeParseAsync\` run outside React, you can unit-test every validation rule without mounting a component. Assert directly on \`errorsByField\` and \`formLevelErrors\`.`,
       code: {
         filename: 'bookingSchema.test.ts',
@@ -576,7 +576,7 @@ describe('bookingSchema', () => {
 | --- | --- |
 | [schema() API reference](/docs/schema-api) | Full signatures, edge cases, and \`ValidationIssue\` shape |
 | [Validation overview](/docs/built-in-validation) | How field-level, schema-level, imperative, and resolver validation work together |
-| [Conditional logic](/docs/conditional-logic) | \`visibleWhen\`, \`requiredWhen\`, \`disabledWhen\` — rules that change form shape at runtime |
+| [Conditional logic](/docs/conditional-logic) | \`visibleWhen\`, \`requiredWhen\`, \`disabledWhen\` - rules that change form shape at runtime |
 | [Draft persistence](/docs/draft-persistence) | Save the form state across refreshes so strong validation never costs the user their input |
 | [Tutorial: advanced flows](/docs/advanced-flows) | Wizards, dynamic forms, readonly review, and analytics |`,
     },

@@ -21,7 +21,7 @@ Special cases:
 | --- | --- | --- |
 | \`field.select()\` / \`field.radio()\` | \`options(...)\`, \`optionsFrom(...)\`, \`searchable(...)\` | Picker-style builders |
 | \`field.phone()\` | \`defaultCountry()\`, \`storeE164()\`, country-aware phone helpers | Extends base directly |
-| \`field.file()\` | Upload-focused surface | Main exception — does **not** expose \`render()\`, \`transform()\`, or the conditional helpers from \`BaseFieldBuilder\` |`,
+| \`field.file()\` | Upload-focused surface | Main exception - does **not** expose \`render()\`, \`transform()\`, or the conditional helpers from \`BaseFieldBuilder\` |`,
   subsections: [
     {
       id: 'fb-builder-basics-behavior',
@@ -30,7 +30,7 @@ Special cases:
 | --- | --- |
 | Business rules & reusable field behavior | On the builder itself |
 | Shared visual theme | \`useFormBridge(schema, { globalDefaults })\` |
-| One-off styling exceptions | Rendered field component — \`className\`, \`style\`, \`ui\` on web; \`style\`, \`ui\` on native |`,
+| One-off styling exceptions | Rendered field component - \`className\`, \`style\`, \`ui\` on web; \`style\`, \`ui\` on native |`,
     },
     {
       id: 'fb-builder-basics-recipes',

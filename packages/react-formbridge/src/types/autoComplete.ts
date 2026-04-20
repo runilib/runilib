@@ -1,6 +1,6 @@
 /**
  * Internal: autofill tokens that pair with a contact-method prefix
- * (`home`, `work`, `mobile`, `fax`, `pager`) — e.g. `home tel`, `work email`.
+ * (`home`, `work`, `mobile`, `fax`, `pager`) - e.g. `home tel`, `work email`.
  *
  * See the WHATWG autofill spec for the exhaustive list:
  * {@link https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill}
@@ -20,7 +20,7 @@ type FieldAutoCompleteContactToken =
 
 /**
  * Internal: autofill tokens that pair with an address-group prefix
- * (`billing`, `shipping`) and with section names (`section-foo …`) — covers
+ * (`billing`, `shipping`) and with section names (`section-foo …`) - covers
  * names, addresses, and credit-card fields.
  */
 type FieldAutoCompleteGroupedToken =

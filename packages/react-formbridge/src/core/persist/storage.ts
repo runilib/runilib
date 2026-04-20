@@ -1,5 +1,5 @@
 /**
- * react-formbridge — Storage Adapters
+ * react-formbridge - Storage Adapters
  * ──────────────────────────────
  * Unified storage interface across:
  *   - web localStorage

@@ -1,5 +1,5 @@
 /**
- * react-formbridge — Password Strength Engine
+ * react-formbridge - Password Strength Engine
  * ──────────────────────────────────────
  * Scores a password from 0 to 4 based on multiple criteria.
  * Fully customizable: rules, labels, colors, feedback messages.

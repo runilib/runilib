@@ -24,7 +24,7 @@ const VALUES = {
   password: 'secret123',
 };
 
-describe('useFormBridgeReadonlyBridge — readonly mode', () => {
+describe('useFormBridgeReadonlyBridge - readonly mode', () => {
   it('returns all non-hidden fields', () => {
     const { result } = renderHook(() =>
       useFormBridgeReadonly(SCHEMA, { mode: 'readonly', values: VALUES }),
@@ -62,14 +62,14 @@ describe('useFormBridgeReadonlyBridge — readonly mode', () => {
     expect(result.current.fields.password.display).toBe('••••••••');
   });
 
-  it('formats empty/null values as —', () => {
+  it('formats empty/null values as -', () => {
     const { result } = renderHook(() =>
       useFormBridgeReadonly(SCHEMA, {
         mode: 'readonly',
         values: { ...VALUES, name: '' },
       }),
     );
-    expect(result.current.fields.name.display).toBe('—');
+    expect(result.current.fields.name.display).toBe('-');
   });
 
   it('hasChanges is false in readonly mode', () => {
@@ -80,7 +80,7 @@ describe('useFormBridgeReadonlyBridge — readonly mode', () => {
   });
 });
 
-describe('useFormBridgeReadonly — diff mode', () => {
+describe('useFormBridgeReadonly - diff mode', () => {
   const ORIGINAL = {
     name: 'Old Name',
     email: 'old@email.com',

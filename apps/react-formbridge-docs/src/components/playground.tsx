@@ -93,25 +93,25 @@ type PlaygroundFile = {
 };
 
 type PlaygroundProps = {
-  /** Single-file shorthand — rendered as /App.tsx (web) or App.js (native) */
+  /** Single-file shorthand - rendered as /App.tsx (web) or App.js (native) */
   readonly code?: string;
 
-  /** Multi-file map — keys are file paths like '/App.tsx' */
+  /** Multi-file map - keys are file paths like '/App.tsx' */
   readonly files?: Record<string, string | PlaygroundFile>;
 
   /** NPM dependencies added to the sandbox */
   readonly dependencies?: Record<string, string>;
 
-  /** Sandpack starter template — only used for web (default: 'react-ts') */
+  /** Sandpack starter template - only used for web (default: 'react-ts') */
   readonly template?: 'react-ts' | 'react' | 'vanilla-ts' | 'vanilla';
 
   /** Editor / iframe height in pixels (default: 550) */
   readonly height?: number;
 
-  /** Show the browser preview pane (default: true) — web only */
+  /** Show the browser preview pane (default: true) - web only */
   readonly showPreview?: boolean;
 
-  /** Show URL navigator bar in preview (default: false) — web only */
+  /** Show URL navigator bar in preview (default: false) - web only */
   readonly showNavigator?: boolean;
 
   /** Show file tabs (default: true) */
@@ -120,7 +120,7 @@ type PlaygroundProps = {
   /** Show line numbers (default: true) */
   readonly showLineNumbers?: boolean;
 
-  /** Show the console panel (default: false) — web only */
+  /** Show the console panel (default: false) - web only */
   readonly showConsole?: boolean;
 
   /** Make all files read-only (default: false) */
@@ -129,13 +129,13 @@ type PlaygroundProps = {
   /** Which file to open by default (e.g. '/App.tsx') */
   readonly activeFile?: string;
 
-  /** Override the theme — by default follows the site's dark/light mode */
+  /** Override the theme - by default follows the site's dark/light mode */
   readonly theme?: 'dark' | 'light';
 
   /** Target platform (default: 'web') */
   readonly platform?: 'web' | 'native';
 
-  /** Device preview for native — which simulator to show (default: 'ios') */
+  /** Device preview for native - which simulator to show (default: 'ios') */
   readonly nativePreview?: 'ios' | 'android' | 'web';
 
   /** Snack name shown in the Expo Snack header (default: 'Example') */

@@ -104,7 +104,7 @@ const ALL_TASKS = [
   },
   {
     id: 8,
-    title: 'Code review — PR #42',
+    title: 'Code review - PR #42',
     priority: 'Medium',
     due: 'Today',
     project: 'Mobile App',

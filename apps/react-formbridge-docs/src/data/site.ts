@@ -52,7 +52,7 @@ export const homeFeatures: FeatureCard[] = [
   {
     title: 'Validation included',
     description:
-      'Every field carries its own fluent validation rules. No external library required — everything ships with the package.',
+      'Every field carries its own fluent validation rules. No external library required - everything ships with the package.',
   },
   {
     title: 'Production patterns included',

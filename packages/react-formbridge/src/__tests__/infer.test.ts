@@ -62,17 +62,17 @@ describe('inferFromObject', () => {
     expect(schema.vat_number._label).toBe('Vat Number');
   });
 
-  it('applies overrides — required', () => {
+  it('applies overrides - required', () => {
     const schema = inferFromObject({ email: '' }, { email: { required: true } });
     expect(schema.email._required).toBe(true);
   });
 
-  it('applies overrides — custom label', () => {
+  it('applies overrides - custom label', () => {
     const schema = inferFromObject({ email: '' }, { email: { label: 'Work email' } });
     expect(schema.email._label).toBe('Work email');
   });
 
-  it('applies overrides — type override', () => {
+  it('applies overrides - type override', () => {
     const schema = inferFromObject(
       { role: '' },
       { role: { type: 'select', options: ['admin', 'user'] } },
@@ -81,13 +81,13 @@ describe('inferFromObject', () => {
     expect(schema.role._options).toHaveLength(2);
   });
 
-  it('applies overrides — min/max', () => {
+  it('applies overrides - min/max', () => {
     const schema = inferFromObject({ age: 0 }, { age: { min: 18, max: 100 } });
     expect(schema.age._min).toBe(18);
     expect(schema.age._max).toBe(100);
   });
 
-  it('applies overrides — disabled + hidden', () => {
+  it('applies overrides - disabled + hidden', () => {
     const schema = inferFromObject(
       { id: 'abc', secret: '' },
       { id: { disabled: true }, secret: { hidden: true } },

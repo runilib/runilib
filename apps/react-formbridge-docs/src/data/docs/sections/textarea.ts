@@ -8,8 +8,8 @@ import {
 
 const TEXTAREA_METHODS_TABLE = buildMethodsTable([
   [
-    '`—`',
-    '`—`',
+    '`-`',
+    '`-`',
     '`field.textarea()` does not add methods beyond the shared string-builder surface; it mainly swaps the renderer to a multiline input.',
   ],
 ]);
@@ -19,7 +19,7 @@ export const textareaSection: LibraryDoc['sections'][number] = {
   title: 'field.textarea()',
   content: `Multiline string builder. Renders a resizable text area instead of a single-line input.
 
-- Same API as \`field.text()\` — only the rendered input type changes
+- Same API as \`field.text()\` - only the rendered input type changes
 - Best suited for bios, comments, issue descriptions, feedback, and any input where line breaks matter
 - Pair with \`min()\` / \`max()\` to set clear length boundaries`,
   codeTabs: [

@@ -6,7 +6,7 @@ import {
 } from '../core/field-builders/password/constant';
 import { scorePassword } from '../core/field-builders/password/strength';
 
-describe('scorePassword — default config', () => {
+describe('scorePassword - default config', () => {
   it('returns score 0 for empty string', () => {
     const r = scorePassword('');
     expect(r.score).toBe(0);
@@ -86,7 +86,7 @@ describe('scorePassword — default config', () => {
   });
 });
 
-describe('scorePassword — STRICT config', () => {
+describe('scorePassword - STRICT config', () => {
   it('requires 12+ chars for full score', () => {
     const r = scorePassword('MyP@ss1', STRENGTH_CONFIG_STRICT);
     const lenRule = r.rules.find((rule) => rule.id === 'length');
@@ -105,7 +105,7 @@ describe('scorePassword — STRICT config', () => {
   });
 });
 
-describe('scorePassword — SIMPLE config', () => {
+describe('scorePassword - SIMPLE config', () => {
   it('accepts simpler passwords', () => {
     const r = scorePassword('Hello123', STRENGTH_CONFIG_SIMPLE);
     expect(r.acceptable).toBe(true);
@@ -117,7 +117,7 @@ describe('scorePassword — SIMPLE config', () => {
   });
 });
 
-describe('scorePassword — FRENCH config', () => {
+describe('scorePassword - FRENCH config', () => {
   it('returns French labels', () => {
     const r = scorePassword('', STRENGTH_CONFIG_FR);
     expect(r.label).toBe('Très faible');
@@ -129,7 +129,7 @@ describe('scorePassword — FRENCH config', () => {
   });
 });
 
-describe('scorePassword — custom config', () => {
+describe('scorePassword - custom config', () => {
   it('uses custom rules', () => {
     const r = scorePassword('test', {
       rules: [

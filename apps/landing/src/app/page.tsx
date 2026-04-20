@@ -310,7 +310,7 @@ export default function Home() {
         <QuoteInner>
           <QuoteMark>"</QuoteMark>
           <QuoteText>The best code is the code you don't have to write twice.</QuoteText>
-          <QuoteBy>— RUNILIB founding principle</QuoteBy>
+          <QuoteBy>- RUNILIB founding principle</QuoteBy>
         </QuoteInner>
       </QuoteSection>
 

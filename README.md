@@ -108,7 +108,7 @@ Each published package has a read-only mirror repository for discoverability and
 - [runilib/react-formbridge](https://github.com/runilib/react-formbridge)
 - [runilib/react-walkit](https://github.com/runilib/react-walkit)
 
-Issues opened on a mirror are automatically synced to this monorepo. Pull requests must be opened here — the mirrors do not accept code changes.
+Issues opened on a mirror are automatically synced to this monorepo. Pull requests must be opened here - the mirrors do not accept code changes.
 
 ## Contributing
 

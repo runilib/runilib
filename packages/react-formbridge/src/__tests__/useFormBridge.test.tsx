@@ -16,7 +16,7 @@ function setup() {
   return renderHook(() => useFormBridge(schema, { validateOn: 'onBlur' }));
 }
 
-describe('useForm — initial state', () => {
+describe('useForm - initial state', () => {
   it('starts with idle status', () => {
     const { result } = setup();
     expect(result.current.state.status).toBe('idle');
@@ -40,7 +40,7 @@ describe('useForm — initial state', () => {
   });
 });
 
-describe('useForm — setValue / getValue', () => {
+describe('useForm - setValue / getValue', () => {
   it('setValue updates the value', () => {
     const { result } = setup();
     act(() => {
@@ -70,7 +70,7 @@ describe('useForm — setValue / getValue', () => {
   });
 });
 
-describe('useForm — validate', () => {
+describe('useForm - validate', () => {
   it('returns false when required field is empty', async () => {
     const { result } = setup();
     let valid = true;
@@ -105,7 +105,7 @@ describe('useForm — validate', () => {
   });
 });
 
-describe('useForm — setError / clearErrors', () => {
+describe('useForm - setError / clearErrors', () => {
   it('setError adds custom error', () => {
     const { result } = setup();
     act(() => {
@@ -142,7 +142,7 @@ describe('useForm — setError / clearErrors', () => {
   });
 });
 
-describe('useForm — resetFields', () => {
+describe('useForm - resetFields', () => {
   it('resets all values to defaults', () => {
     const { result } = setup();
     act(() => {
@@ -169,7 +169,7 @@ describe('useForm — resetFields', () => {
   });
 });
 
-describe('useForm — watch', () => {
+describe('useForm - watch', () => {
   it('watch returns current value', () => {
     const { result } = setup();
     act(() => {
@@ -179,7 +179,7 @@ describe('useForm — watch', () => {
   });
 });
 
-describe('useForm — fieldController', () => {
+describe('useForm - fieldController', () => {
   it('exposes reactive field state', async () => {
     const { result } = setup();
 
@@ -219,7 +219,7 @@ describe('useForm — fieldController', () => {
   });
 });
 
-describe('useForm — file builder conditions', () => {
+describe('useForm - file builder conditions', () => {
   it('supports conditional visibility and required state for file fields', () => {
     const { result } = renderHook(() =>
       useFormBridge({
@@ -252,7 +252,7 @@ describe('useForm — file builder conditions', () => {
   });
 });
 
-describe('useForm — submit lifecycle', () => {
+describe('useForm - submit lifecycle', () => {
   it('sets status to submitting then success', async () => {
     const { result } = setup();
     act(() => {
@@ -269,7 +269,7 @@ describe('useForm — submit lifecycle', () => {
       await result.current.submit();
     });
 
-    // Form needs the onSubmit from Form component — test via validate instead
+    // Form needs the onSubmit from Form component - test via validate instead
     await act(async () => {
       const valid = await result.current.validate();
       expect(valid).toBe(true);
@@ -287,7 +287,7 @@ describe('useForm — submit lifecycle', () => {
   });
 });
 
-describe('useForm — Form.Submit', () => {
+describe('useForm - Form.Submit', () => {
   it('renders a ReactNode loadingText while submitting', async () => {
     let resolveSubmit: (() => void) | undefined;
 
@@ -396,7 +396,7 @@ describe('useFormBridgeContext', () => {
   });
 });
 
-describe('useForm — field builder integration', () => {
+describe('useForm - field builder integration', () => {
   it('field.number() stores number values', () => {
     const { result } = setup();
     act(() => {

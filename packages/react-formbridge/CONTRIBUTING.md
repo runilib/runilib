@@ -88,7 +88,7 @@ When your PR is merged into the monorepo's `main`:
 2. `packages/react-formbridge/` is force-pushed to this mirror repository
 3. Any open PRs on this mirror are overwritten
 
-This is why direct PRs here are not accepted — they would be lost at the next sync.
+This is why direct PRs here are not accepted - they would be lost at the next sync.
 
 ## Getting in touch
 

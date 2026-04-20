@@ -47,7 +47,7 @@ const FILE_METHODS_TABLE = buildMethodsTable([
   [
     '`withBase64()`',
     '`() => this`',
-    'Requests base64 encoding alongside the file payload — needed for upload APIs that expect inline payloads instead of multipart streams.',
+    'Requests base64 encoding alongside the file payload - needed for upload APIs that expect inline payloads instead of multipart streams.',
   ],
   [
     '`resize(maxWidth, maxHeight, quality = 0.9)`',
@@ -72,7 +72,7 @@ const FILE_METHODS_TABLE = buildMethodsTable([
   [
     '`visibleWhen(field, value?) / visibleWhenNot / visibleWhenTruthy / visibleWhenFalsy / visibleWhenAny`',
     '`field | predicate`',
-    'Conditional visibility rules. Same shape as the BaseFieldBuilder helpers — show the uploader only when another field matches a value, is truthy/falsy, or matches any of several pairs.',
+    'Conditional visibility rules. Same shape as the BaseFieldBuilder helpers - show the uploader only when another field matches a value, is truthy/falsy, or matches any of several pairs.',
   ],
   [
     '`requiredWhen(field, value?) / requiredWhenAny`',
@@ -121,7 +121,7 @@ export const fileSection: LibraryDoc['sections'][number] = {
 
 - Has its own upload-focused fluent API: \`accept()\`, \`maxSize()\`, \`multiple()\`, \`preview()\`, \`source()\`, \`resize()\`
 - \`render()\`, \`transform()\`, and the conditional helpers from \`BaseFieldBuilder\` are not available on this builder
-- Platform differences are handled by the renderer — the schema keeps the business contract`,
+- Platform differences are handled by the renderer - the schema keeps the business contract`,
   codeTabs: [
     {
       filename: 'File.web.tsx',
@@ -162,7 +162,7 @@ Defaults:
 File-builder methods:
 ${FILE_METHODS_TABLE}
 
-Static presets — shortcuts that pre-configure common upload flows:
+Static presets - shortcuts that pre-configure common upload flows:
 ${FILE_PRESETS_TABLE}
 
 Base-builder relationship:

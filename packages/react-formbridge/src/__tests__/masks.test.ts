@@ -40,7 +40,7 @@ describe('parsePattern', () => {
   });
 });
 
-describe('applyMask — card number', () => {
+describe('applyMask - card number', () => {
   const PATTERN = MASKS.CARD_16;
 
   it('formats 16 digits', () => {
@@ -74,7 +74,7 @@ describe('applyMask — card number', () => {
   });
 });
 
-describe('applyMask — date', () => {
+describe('applyMask - date', () => {
   it('formats DD/MM/YYYY', () => {
     const { display, complete } = applyMask('31122025', MASKS.DATE_DMY);
     expect(display).toBe('31/12/2025');
@@ -87,14 +87,14 @@ describe('applyMask — date', () => {
   });
 });
 
-describe('applyMask — IBAN', () => {
+describe('applyMask - IBAN', () => {
   it('formats French IBAN', () => {
     const { display } = applyMask('FR7630006000011234567890189', MASKS.IBAN_FR);
     expect(display).toBe('FR76 3000 6000 0112 3456 7890 189');
   });
 });
 
-describe('applyMask — placeholder', () => {
+describe('applyMask - placeholder', () => {
   it('shows placeholder chars for empty slots', () => {
     const { display } = applyMask('4111', MASKS.CARD_16, {
       showPlaceholder: true,

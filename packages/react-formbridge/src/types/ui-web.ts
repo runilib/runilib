@@ -66,7 +66,7 @@ type WebFieldPropsBase<TSlots extends string> = FieldRenderersProps & {
   highlightOnError?: boolean;
   /** Marks the input as read-only. */
   readOnly?: boolean;
-  /** Typed autofill hint — see {@link FieldAutoComplete}. */
+  /** Typed autofill hint - see {@link FieldAutoComplete}. */
   autoComplete?: FieldAutoComplete;
   /** Move focus into this field on mount. */
   autoFocus?: boolean;
@@ -215,7 +215,7 @@ type WebAsyncAutocompleteFieldSlot =
 // ─── Exported composite slot type ───────────────────────────────────────────────
 
 /**
- * Union of every slot name declared by web field renderers — useful as the
+ * Union of every slot name declared by web field renderers - useful as the
  * key type for global `classNames`/`styles` maps that target any field.
  */
 export type WebFieldSlot =
@@ -360,7 +360,7 @@ export interface WebPhoneFieldCountryItemRenderContext
 // ─── Global overrides ───────────────────────────────────────────────────────────
 
 /**
- * "Catch-all" override shape that targets every web field in one go — used
+ * "Catch-all" override shape that targets every web field in one go - used
  * for `globalDefaults.field`. Inherits the full base + slot union.
  */
 export interface WebGlobalFieldPropsOverrides extends WebFieldPropsBase<WebFieldSlot> {}
@@ -425,7 +425,7 @@ export interface WebSelectFieldPropsOverrides
   extends WebFieldPropsBase<WebSelectFieldSlot> {
   /** Passthrough attributes for the native `<select>` element. */
   selectProps?: Omit<SelectHTMLAttributes<HTMLSelectElement>, OmittedHtmlInputAttribute>;
-  /** Replace the whole picker UI — see {@link SelectPickerRenderContext}. */
+  /** Replace the whole picker UI - see {@link SelectPickerRenderContext}. */
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
@@ -435,7 +435,7 @@ export interface WebRadioFieldPropsOverrides
     WebInputBehaviorProps {
   /** Passthrough attributes for each `<input type="radio">`. */
   inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
-  /** Replace the whole picker UI — see {@link SelectPickerRenderContext}. */
+  /** Replace the whole picker UI - see {@link SelectPickerRenderContext}. */
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
@@ -448,7 +448,7 @@ export interface WebOtpFieldPropsOverrides
 }
 
 /**
- * Override shape for the `password` field renderer — includes the visibility
+ * Override shape for the `password` field renderer - includes the visibility
  * toggle plus the optional strength meter and rule list.
  */
 export interface WebPasswordFieldPropsOverrides
@@ -510,7 +510,7 @@ export interface WebPasswordFieldPropsOverrides
 }
 
 /**
- * Override shape for the `phone` field renderer — includes country picker
+ * Override shape for the `phone` field renderer - includes country picker
  * customization, search input, layout, and E.164 preview.
  */
 export interface WebPhoneFieldPropsOverrides
@@ -575,7 +575,7 @@ export interface WebPhoneFieldPropsOverrides
 }
 
 /**
- * Override shape for the `file` field renderer — covers the drop zone, browse
+ * Override shape for the `file` field renderer - covers the drop zone, browse
  * button, per-file preview/list rendering, and all helper copy.
  */
 export interface WebFileFieldPropsOverrides extends WebFieldPropsBase<WebFileFieldSlot> {
@@ -660,7 +660,7 @@ export interface WebFileFieldPropsOverrides extends WebFieldPropsBase<WebFileFie
 }
 
 /**
- * Override shape for the async-autocomplete renderer — used when a `select`
+ * Override shape for the async-autocomplete renderer - used when a `select`
  * field declares an async options source.
  */
 export interface WebAsyncAutocompleteFieldPropsOverrides
@@ -690,14 +690,14 @@ export interface WebAsyncAutocompleteFieldPropsOverrides
   renderEmpty?: () => React.ReactNode;
   /** Render the "loading" state in the listbox. */
   renderLoading?: () => React.ReactNode;
-  /** Replace the whole picker UI — see {@link SelectPickerRenderContext}. */
+  /** Replace the whole picker UI - see {@link SelectPickerRenderContext}. */
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
 // ─── Combined field overrides (catch-all for generic usage) ─────────────────────
 
 /**
- * Union of every per-field override shape — the widest type a web field can
+ * Union of every per-field override shape - the widest type a web field can
  * accept. Useful for helpers that need to handle "any field" without knowing
  * the concrete field type at compile time.
  *
@@ -707,7 +707,7 @@ export interface WebAsyncAutocompleteFieldPropsOverrides
 export interface WebFieldPropsOverrides
   extends WebFieldPropsBase<WebFieldSlot>,
     WebInputBehaviorProps {
-  /** Input passthrough — see per-field types for the precise shape. */
+  /** Input passthrough - see per-field types for the precise shape. */
   inputProps?: Omit<InputHTMLAttributes<HTMLInputElement>, OmittedHtmlInputAttribute>;
   textareaProps?: Omit<
     TextareaHTMLAttributes<HTMLTextAreaElement>,

@@ -1,5 +1,5 @@
 /**
- * Example — React Native
+ * Example - React Native
  * ──────────────────────
  * Full onboarding tour on a mobile dashboard screen.
  *
@@ -66,7 +66,7 @@ function Dashboard() {
         id="header"
         sequence={1}
         title="Welcome to MyApp 👋"
-        content="Your personal dashboard — all key metrics in one place."
+        content="Your personal dashboard - all key metrics in one place."
         placement="bottom"
       >
         <View style={styles.header}>

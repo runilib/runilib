@@ -1,8 +1,8 @@
 # Changelog
 
-## [1.0.0] — 2026-03-17
+## [1.0.0] - 2026-03-17
 
-### Added — initial public release
+### Added - initial public release
 
 `@runilib/react-walkit` is a cross-platform walkthrough and tooltip library for React and React Native. It focuses on onboarding tours, contextual guidance, and spotlight-driven product education with one shared API.
 

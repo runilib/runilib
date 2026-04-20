@@ -133,7 +133,7 @@ function areValuesDifferent(left: unknown, right: unknown): boolean {
 
 function formatValue(value: unknown, descriptor: FieldDescriptor<unknown>): string {
   if (value === null || value === undefined || value === '') {
-    return '—';
+    return '-';
   }
 
   switch (descriptor._type) {

@@ -66,7 +66,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: React version, Node version, bundler, browser, OS — anything relevant.
+      description: React version, Node version, bundler, browser, OS - anything relevant.
       placeholder: |
         - React: 19.0.0
         - Node: 22.11.0

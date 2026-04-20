@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON-LD requires dangerouslySetInnerHTML — standard Next.js pattern */
+/** biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON-LD requires dangerouslySetInnerHTML - standard Next.js pattern */
 import type { Metadata } from 'next';
 import { AppShell } from '../components/AppShell';
 import { LIBRARIES } from '../data/libraries';
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'RUNILIB — Cross-platform React and React Native ecosystem',
+        alt: 'RUNILIB - Cross-platform React and React Native ecosystem',
         type: 'image/png',
       },
     ],

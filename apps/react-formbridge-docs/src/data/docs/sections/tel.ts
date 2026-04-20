@@ -8,8 +8,8 @@ import {
 
 const TEL_METHODS_TABLE = buildMethodsTable([
   [
-    '`—`',
-    '`—`',
+    '`-`',
+    '`-`',
     '`field.tel()` does not add methods beyond the shared string-builder surface; it mainly preconfigures a generic phone format validator.',
   ],
 ]);

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Libraries — RUNILIB React & React Native Ecosystem',
+  title: 'Libraries - RUNILIB React & React Native Ecosystem',
   description:
     'Browse RUNILIB libraries and packages for React and React Native. Explore cross-platform modules, shared APIs, documentation and TypeScript-first building blocks for web and mobile.',
   keywords: [
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     'composable packages',
   ],
   openGraph: {
-    title: 'RUNILIB Libraries — React & React Native Packages',
+    title: 'RUNILIB Libraries - React & React Native Packages',
     description:
       'Explore the RUNILIB collection of cross-platform React and React Native packages for web and mobile.',
     url: 'https://runilib.dev/libraries',

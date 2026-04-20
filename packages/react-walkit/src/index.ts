@@ -2,7 +2,7 @@
  * runilib/react-walkit
  * ──────────────────
  * Cross-platform Tooltip / onboarding / guided tour library.
- * Works identically on React (web) and React Native — same API, no changes needed.
+ * Works identically on React (web) and React Native - same API, no changes needed.
  *
  * @see https://github.com/runilib/react-walkit
  *

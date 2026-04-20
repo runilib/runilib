@@ -29,7 +29,7 @@ export default function Ecosystem() {
     {
       icon: '🧪',
       title: 'Native TypeScript',
-      desc: 'Zero casting, types inferred automatically from your schema — full autocomplete.',
+      desc: 'Zero casting, types inferred automatically from your schema - full autocomplete.',
     },
     {
       icon: '♿',

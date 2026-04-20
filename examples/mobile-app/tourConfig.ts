@@ -30,7 +30,7 @@ export const HOME_STEPS: { [key in string]: WalkitStepProps } = {
     sequence: 2,
     route: '/walkit',
     title: '➕ Add tasks fast',
-    content: 'Tap here to create a task in seconds — with priority and due date.',
+    content: 'Tap here to create a task in seconds - with priority and due date.',
   },
   FILTER_BAR: {
     id: 'filter-bar',
@@ -90,7 +90,7 @@ export const PROFILE_STEPS: { [key in string]: WalkitStepProps } = {
     route: '/walkit/profile',
     title: '📦 Powered by',
     content:
-      'This app is built with runilib libraries — the same code runs on web and native.',
+      'This app is built with runilib libraries - the same code runs on web and native.',
   },
 } as const;
 

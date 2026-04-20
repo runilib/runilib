@@ -199,7 +199,7 @@ export function parseDynamicForm(definition: JsonFormDefinition): {
 }
 
 /**
- * `parseJsonSchema()` — convert a standard JSON Schema (draft-07) into a react-formbridge schema.
+ * `parseJsonSchema()` - convert a standard JSON Schema (draft-07) into a react-formbridge schema.
  *
  * @example
  * const jsonSchema = {

@@ -14,7 +14,7 @@ export const checkboxSection: LibraryDoc['sections'][number] = {
   title: 'field.checkbox()',
   content: `Boolean builder rendered as a checkbox. Best for agreements, legal acceptance, and opt-in flags.
 
-- \`mustBeTrue()\` turns the checkbox into a hard validation gate — submit is blocked until checked
+- \`mustBeTrue()\` turns the checkbox into a hard validation gate - submit is blocked until checked
 - For settings and preferences that toggle on/off, prefer \`field.switch()\` instead
 - The label is the clickable text next to the checkbox`,
   codeTabs: [

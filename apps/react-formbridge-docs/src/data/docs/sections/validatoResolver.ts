@@ -155,11 +155,11 @@ ${RESOLVER_LIBRARY_OPTIONS_SURFACE}
       title: 'Tips',
       content: `| Tip | Details |
 | --- | --- |
-| Resolver contract | Must return \`{ values, errors }\` — the built-in adapters already handle this for you |
+| Resolver contract | Must return \`{ values, errors }\` - the built-in adapters already handle this for you |
 | Prefer built-ins | Customize an existing adapter before writing a custom resolver from scratch |
-| Root errors | Default to \`'_root'\` — useful for banner-level or submit-level failures |
+| Root errors | Default to \`'_root'\` - useful for banner-level or submit-level failures |
 | Cross-platform | A resolver works with the same \`useFormBridge()\` API on web and native |
-| When to reach for a resolver | Business validation already exists elsewhere — otherwise prefer builder rules |
+| When to reach for a resolver | Business validation already exists elsewhere - otherwise prefer builder rules |
 | Valibot specifics | Expects \`valibot\` installed in the consumer app, or passed explicitly via \`module: v\` |`,
     },
   ],

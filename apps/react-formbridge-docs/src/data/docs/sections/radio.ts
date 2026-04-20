@@ -35,7 +35,7 @@ const RADIO_METHODS_TABLE = buildMethodsTable([
   [
     '`oneOf(values, message?)`',
     '`Array<value | option>`',
-    'Additional allow-list check layered on top of `options()` — restricts the runtime-accepted values to a narrower subset.',
+    'Additional allow-list check layered on top of `options()` - restricts the runtime-accepted values to a narrower subset.',
   ],
   [
     '`notOneOf(values, message?)`',
@@ -52,7 +52,7 @@ const RADIO_METHODS_TABLE = buildMethodsTable([
 export const radioSection: LibraryDoc['sections'][number] = {
   id: 'fb-radio',
   title: 'field.radio()',
-  content: `Radio-group builder — all options stay visible at once instead of hiding behind a dropdown.
+  content: `Radio-group builder - all options stay visible at once instead of hiding behind a dropdown.
 
 - Same underlying \`SelectFieldBuilder\` as \`field.select()\`, with identical \`options()\`, \`optionsFrom()\`, and \`defaultSelected()\` methods
 - Choose radio when the list is short (2–6 items) and every option should be scannable
@@ -75,7 +75,7 @@ export const radioSection: LibraryDoc['sections'][number] = {
       title: 'Defaults, inheritance & field methods',
       content: `- defaultValue is \`''\`
 - type is \`radio\`
-- Reuses the same \`SelectFieldBuilder\` as \`field.select()\` — all select-specific methods are available (\`options()\`, \`optionsFrom()\`, \`searchable()\`, \`defaultSelected()\`, \`selected()\`)
+- Reuses the same \`SelectFieldBuilder\` as \`field.select()\` - all select-specific methods are available (\`options()\`, \`optionsFrom()\`, \`searchable()\`, \`defaultSelected()\`, \`selected()\`)
 ${BASE_FIELD_BUILDER_REFERENCE}
 ${SELECT_FIELD_BUILDER_REFERENCE}
 
@@ -93,8 +93,8 @@ ${FENCE}tsx Billing.tsx
 const schema = {
   billing: field.radio('Billing')
     .options([
-      { label: 'Monthly — $9/mo', value: 'month' },
-      { label: 'Yearly — $90/yr', value: 'year' },
+      { label: 'Monthly - $9/mo', value: 'month' },
+      { label: 'Yearly - $90/yr', value: 'year' },
     ])
     .defaultSelected('month'),
 }
