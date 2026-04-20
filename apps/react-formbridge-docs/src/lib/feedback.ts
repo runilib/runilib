@@ -50,16 +50,6 @@ export const FEEDBACK_TYPE_OPTIONS: Array<{
   },
 ];
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function asTrimmedString(value: unknown) {
-  return typeof value === 'string' ? value.trim() : '';
-}
-
-function asBoundedString(value: unknown, maxLength: number) {
-  return asTrimmedString(value).slice(0, maxLength);
-}
-
 function getFeedbackTypeLabel(feedbackType: FeedbackType) {
   return (
     FEEDBACK_TYPE_OPTIONS.find((option) => option.value === feedbackType)?.label ??
@@ -148,56 +138,4 @@ export function getInitialFeedbackValues(relevantPage = ''): FeedbackSubmissionV
     reproductionSteps: '',
     subject: '',
   };
-}
-
-export function parseFeedbackSubmission(
-  input: unknown,
-): { ok: true; values: FeedbackSubmissionValues } | { ok: false; error: string } {
-  if (!input || typeof input !== 'object') {
-    return { ok: false, error: 'Invalid feedback payload.' };
-  }
-
-  const record = input as Record<string, unknown>;
-  const feedbackType = normalizeFeedbackType(String(record.feedbackType ?? 'general'));
-  const values: FeedbackSubmissionValues = {
-    actualBehavior: asBoundedString(record.actualBehavior, 3000),
-    area: asBoundedString(record.area, 160),
-    contactConsent: record.contactConsent === true,
-    email: asBoundedString(record.email, 160),
-    expectedBehavior: asBoundedString(record.expectedBehavior, 3000),
-    feedbackType,
-    message: asBoundedString(record.message, 3000),
-    name: asBoundedString(record.name, 120),
-    relevantPage: normalizeRelevantPage(asBoundedString(record.relevantPage, 300)),
-    reproductionSteps: asBoundedString(record.reproductionSteps, 3000),
-    subject: asBoundedString(record.subject, 160),
-  };
-
-  if (values.subject.length < 4) {
-    return { ok: false, error: 'The subject is too short.' };
-  }
-
-  if (values.message.length < 20) {
-    return { ok: false, error: 'Please add a few more details before sending.' };
-  }
-
-  if (values.email && !EMAIL_PATTERN.test(values.email)) {
-    return { ok: false, error: 'The contact email looks invalid.' };
-  }
-
-  if (values.feedbackType === 'bug') {
-    if (!values.expectedBehavior) {
-      return { ok: false, error: 'Expected behavior is required for bug reports.' };
-    }
-
-    if (!values.actualBehavior) {
-      return { ok: false, error: 'Actual behavior is required for bug reports.' };
-    }
-
-    if (!values.reproductionSteps) {
-      return { ok: false, error: 'Steps to reproduce are required for bug reports.' };
-    }
-  }
-
-  return { ok: true, values };
 }
