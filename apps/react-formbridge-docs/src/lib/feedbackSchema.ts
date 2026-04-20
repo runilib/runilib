@@ -1,4 +1,4 @@
-import { createSchema, field, type SchemaValues } from '@runilib/react-formbridge';
+import { createSchema, field, type SchemaValues } from '@runilib/react-formbridge/schema';
 
 import { FEEDBACK_TYPE_OPTIONS } from './feedback';
 

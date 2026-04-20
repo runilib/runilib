@@ -66,6 +66,11 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs",
       "default": "./dist/index.mjs"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.mts",
+      "import": "./dist/schema.mjs",
+      "default": "./dist/schema.mjs"
     }
   },
   "files": [
