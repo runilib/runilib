@@ -152,7 +152,7 @@ export default function Home() {
             >
               {t.hero.cta} <Arrow>→</Arrow>
             </PrimaryBtn>
-            <SecondaryBtn href="/libraries">{t.hero.ctaSecondary}</SecondaryBtn>
+            {/* <SecondaryBtn href="/libraries">{t.hero.ctaSecondary}</SecondaryBtn> */}
           </HeroCTAs>
           <StatsRow>
             {[

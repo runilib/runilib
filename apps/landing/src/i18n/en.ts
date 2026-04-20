@@ -74,7 +74,7 @@ export const en: Translations = {
   cta: {
     title: 'Ready to simplify your stack?',
     desc: 'Join developers who stopped writing the same code twice.',
-    primary: 'Start for free',
+    primary: 'Browse libraries',
     secondary: '⭐ Star on GitHub',
   },
   footer: {
