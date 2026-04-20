@@ -46,10 +46,10 @@ yarn run dev
 Or target a specific workspace:
 
 ```bash
-yarn dev:landing              # landing site
-yarn dev:docs:formbridge      # react-formbridge docs
-yarn dev:ex:web               # web example app
-yarn dev:ex:mobile            # mobile example app (Expo)
+yarn run dev:landing              # landing site
+yarn run dev:docs:formbridge      # react-formbridge docs
+yarn run dev:ex:web               # web example app
+yarn run dev:ex:mobile            # mobile example app (Expo)
 ```
 
 ## Useful commands

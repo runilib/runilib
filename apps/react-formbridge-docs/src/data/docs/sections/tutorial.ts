@@ -149,13 +149,13 @@ This option is enough if your goal is to understand the runtime before you wire 
         code: `yarn install
 
 # Documentation site
-yarn dev:docs:formbridge
+yarn run dev:docs:formbridge
 
 # Web examples (Vite)
-yarn dev:ex:web
+yarn run dev:ex:web
 
 # Expo / React Native examples
-yarn dev:ex:mobile`,
+yarn run dev:ex:mobile`,
       },
     },
     {
@@ -198,12 +198,11 @@ The important idea is that the schema owns the field behavior, while the compone
         {
           filename: 'web.tsx',
           lang: 'tsx',
-          code: `import type { FormSchema } from '@runilib/react-formbridge'
-import { field, useFormBridge } from '@runilib/react-formbridge'
+          code: `import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   email: field.email('Email address').required().trim().lowercase(),
-} satisfies FormSchema
+}
 
 export function NewsletterSignup() {
   const { Form, fields } = useFormBridge(schema, {
@@ -222,12 +221,11 @@ export function NewsletterSignup() {
           filename: 'native.tsx',
           lang: 'tsx',
           code: `import { ScrollView, View } from 'react-native'
-import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   email: field.email('Email address').required().trim().lowercase(),
-} satisfies FormSchema
+}
 
 export function NewsletterSignupScreen() {
   const { Form, fields } = useFormBridge(schema, {
