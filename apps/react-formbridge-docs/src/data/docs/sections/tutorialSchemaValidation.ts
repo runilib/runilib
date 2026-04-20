@@ -2,8 +2,8 @@ import type { LibraryDoc } from './../../../types/index';
 
 export const tutorialSchemaValidationSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial-schema-validation',
-  title: 'Tutorial: schema() & strong validation',
-  content: `This tutorial builds a **real-world booking form** that pushes validation well beyond single-field rules. You will use \`schema()\` to express cross-field constraints, async checks, form-level errors, global error mapping, and server-side reuse - all without any external validation library.
+  title: 'Tutorial: createSchema() & strong validation',
+  content: `This tutorial builds a **real-world booking form** that pushes validation well beyond single-field rules. You will use \`createSchema()\` to express cross-field constraints, async checks, form-level errors, global error mapping, and server-side reuse - all without any external validation library.
 
 By the end you will have a form that:
 
@@ -21,7 +21,7 @@ By the end you will have a form that:
       code: `import { field, schema, useFormBridge } from '@runilib/react-formbridge'
 
 // ── Schema with full cross-field validation ──────────────────────────
-const bookingSchema = schema({
+const bookingSchema = createSchema({
   username:     field.text('Username').required().trim().min(3).max(20)
                   .pattern(/^[a-z0-9_]+$/i, 'Letters, numbers, and underscores only.'),
   email:        field.email('Email').trim().lowercase(),
@@ -144,10 +144,10 @@ export async function createBooking(raw: unknown) {
   subsections: [
     {
       id: 'fb-tutorial-schema-validation-why',
-      title: 'Why schema() instead of field rules alone',
+      title: 'Why createSchema() instead of field rules alone',
       content: `Field-level rules (\`required\`, \`min\`, \`pattern\`, \`sameAs\`, …) validate each field in isolation. That covers 80% of forms. But the moment a rule depends on **more than one field**, you need a higher vantage point.
 
-| Need | Field rules | schema() |
+| Need | Field rules | createSchema() |
 | --- | --- | --- |
 | "Email is required" | \`field.email().required()\` | Not needed |
 | "Provide email **or** phone" | Cannot express | \`.atLeastOne(['email', 'phone'])\` |
@@ -157,12 +157,12 @@ export async function createBooking(raw: unknown) {
 | Rewrite all error messages at once | One field at a time | \`.errorMap(fn)\` |
 | Server-side reuse | Mount a React component | \`.safeParse(values)\` - no React needed |
 
-\`schema()\` wraps the same shape object you already know. The wrapped value is still passed straight to \`useFormBridge\`, so nothing changes in your component tree.`,
+\`createSchema()\` wraps the same shape object you already know. The wrapped value is still passed straight to \`useFormBridge\`, so nothing changes in your component tree.`,
     },
     {
       id: 'fb-tutorial-schema-validation-step1',
       title: 'Step 1 - Start with a plain schema',
-      content: `Begin with the field builders. Each field owns its own local rules. No \`schema()\` wrapper yet.`,
+      content: `Begin with the field builders. Each field owns its own local rules. No \`createSchema()\` wrapper yet.`,
       code: {
         filename: '01-plain-schema.ts',
         lang: 'ts',
@@ -187,14 +187,14 @@ const bookingFields = {
     },
     {
       id: 'fb-tutorial-schema-validation-step2',
-      title: 'Step 2 - Wrap in schema() and add atLeastOne',
-      content: `Wrap the shape in \`schema()\` and chain your first cross-field rule. \`atLeastOne\` ensures the user fills in at least one of the listed fields. The error is form-level (no \`path\`), so it surfaces under \`state.formLevelError\`.`,
+      title: 'Step 2 - Wrap in createSchema() and add atLeastOne',
+      content: `Wrap the shape in \`createSchema()\` and chain your first cross-field rule. \`atLeastOne\` ensures the user fills in at least one of the listed fields. The error is form-level (no \`path\`), so it surfaces under \`state.formLevelError\`.`,
       code: {
         filename: '02-at-least-one.ts',
         lang: 'ts',
         code: `import { field, schema } from '@runilib/react-formbridge'
 
-const bookingSchema = schema({
+const bookingSchema = createSchema({
   email: field.email('Email').trim().lowercase(),
   phone: field.phone('Phone').defaultCountry('FR'),
   // ... other fields ...
@@ -217,7 +217,7 @@ const bookingSchema = schema({
         lang: 'ts',
         code: `import { field, schema } from '@runilib/react-formbridge'
 
-const bookingSchema = schema({
+const bookingSchema = createSchema({
   departure:  field.date('Departure date').required(),
   returnDate: field.date('Return date').required(),
   // ...
@@ -251,7 +251,7 @@ This is where you put rules that are too complex for a single boolean predicate:
       code: {
         filename: '04-super-refine.ts',
         lang: 'ts',
-        code: `const bookingSchema = schema({ /* ... */ })
+        code: `const bookingSchema = createSchema({ /* ... */ })
   .superRefine((values, ctx) => {
     // Rule 1: passwords must match
     if (values.password !== values.confirmPassword) {
@@ -287,7 +287,7 @@ Pin the error to a specific field with \`path\` so the user sees the feedback ex
       code: {
         filename: '05-refine-async.ts',
         lang: 'ts',
-        code: `const bookingSchema = schema({ /* ... */ })
+        code: `const bookingSchema = createSchema({ /* ... */ })
   .refineAsync(
     async (values) => {
       // Skip the check if username is too short to be valid anyway
@@ -317,7 +317,7 @@ This is the FormBridge-native equivalent of Zod's \`errorMap\`. Use it for i18n,
       code: {
         filename: '06-error-map.ts',
         lang: 'ts',
-        code: `const bookingSchema = schema({ /* ... */ })
+        code: `const bookingSchema = createSchema({ /* ... */ })
   .errorMap((issue, defaultMessage) => {
     switch (issue.code) {
       case 'required':
@@ -384,7 +384,7 @@ export function BookingForm() {
     {
       id: 'fb-tutorial-schema-validation-step8',
       title: 'Step 8 - Reuse the schema on the server',
-      content: `Because \`schema()\` exposes \`safeParse\` and \`safeParseAsync\`, you can validate the exact same rules server-side - in a server action, a tRPC handler, an API route, or a test - without mounting React.
+      content: `Because \`createSchema()\` exposes \`safeParse\` and \`safeParseAsync\`, you can validate the exact same rules server-side - in a server action, a tRPC handler, an API route, or a test - without mounting React.
 
 The returned \`errorsByField\` is drop-in compatible with \`state.errors\`, so you can feed server errors straight back into the form via \`setErrors()\`.`,
       code: {
@@ -422,7 +422,7 @@ export async function createBooking(raw: unknown) {
     {
       id: 'fb-tutorial-schema-validation-chaining',
       title: 'Chaining order and execution',
-      content: `Every \`schema()\` method returns the same wrapped schema, so the chain is fully fluent. The execution order matters:
+      content: `Every \`createSchema()\` method returns the same wrapped schema, so the chain is fully fluent. The execution order matters:
 
 | Order | What runs | Stops on failure? |
 | --- | --- | --- |
@@ -438,7 +438,7 @@ The chain itself is declarative. You can declare refinements in any order; FormB
     {
       id: 'fb-tutorial-schema-validation-helpers',
       title: 'Built-in helpers cheat sheet',
-      content: `\`schema()\` ships with three high-level helpers built on top of \`superRefine\`. Use them before writing a custom refinement - they cover the most common cross-field patterns.
+      content: `\`createSchema()\` ships with three high-level helpers built on top of \`superRefine\`. Use them before writing a custom refinement - they cover the most common cross-field patterns.
 
 | Helper | What it checks | Error target |
 | --- | --- | --- |
@@ -453,7 +453,7 @@ For anything more complex, drop to \`refine\` (one boolean, one error) or \`supe
         code: `import { field, schema } from '@runilib/react-formbridge'
 
 // ── exactlyOne: pick one delivery method ─────────────────────────────
-const deliverySchema = schema({
+const deliverySchema = createSchema({
   pickup:    field.text('Pickup address'),
   homeAddr:  field.text('Home delivery address'),
   lockerCode: field.text('Parcel locker code'),
@@ -463,7 +463,7 @@ const deliverySchema = schema({
 )
 
 // ── allOrNone: optional-but-atomic billing section ───────────────────
-const billingSchema = schema({
+const billingSchema = createSchema({
   billingStreet: field.text('Street'),
   billingCity:   field.text('City'),
   billingZip:    field.text('ZIP code'),
@@ -574,7 +574,7 @@ describe('bookingSchema', () => {
 
 | Next step | Why |
 | --- | --- |
-| [schema() API reference](/docs/schema-api) | Full signatures, edge cases, and \`ValidationIssue\` shape |
+| [createSchema() API reference](/docs/schema-api) | Full signatures, edge cases, and \`ValidationIssue\` shape |
 | [Validation overview](/docs/built-in-validation) | How field-level, schema-level, imperative, and resolver validation work together |
 | [Conditional logic](/docs/conditional-logic) | \`visibleWhen\`, \`requiredWhen\`, \`disabledWhen\` - rules that change form shape at runtime |
 | [Draft persistence](/docs/draft-persistence) | Save the form state across refreshes so strong validation never costs the user their input |

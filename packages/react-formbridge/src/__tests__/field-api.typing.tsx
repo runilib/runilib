@@ -1,11 +1,11 @@
 import { field } from '../core/field-builders/field';
+import { createSchema } from '../core/validators/createSchema';
 import { ref } from '../core/validators/reference';
-import { schema } from '../core/validators/schema';
 import { useFormBridge as useNativeFormBridge } from '../hooks/useFormBridge.native';
 import { useFormBridge as useWebFormBridge } from '../hooks/useFormBridge.web';
 
 function WebTypingHarness() {
-  const signupSchema = schema({
+  const signupSchema = createSchema({
     name: field.text('Name'),
     bio: field.textarea('Bio'),
     country: field.select('Country').options(['FR', 'US']),
@@ -54,7 +54,7 @@ function WebTypingHarness() {
 }
 
 function NativeTypingHarness() {
-  const nativeSchema = schema({
+  const nativeSchema = createSchema({
     name: field.text('Name'),
     country: field.select('Country').options(['FR', 'US']),
     otp: field.otp('Code'),

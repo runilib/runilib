@@ -117,7 +117,7 @@ type InferFieldValue<T> =
       : never;
 
 /**
- * Phantom marker used by `schema()` to carry the underlying shape type without
+ * Phantom marker used by `createSchema()` to carry the underlying shape type without
  * exposing field keys at the top level of the returned object. Type-only -
  * never present at runtime.
  */
@@ -216,7 +216,7 @@ export interface FormState<Schema extends FormSchema> {
   submitCount: number;
   /**
    * Form-level validation error produced by cross-field rules (e.g. `refine()`
-   * / `superRefine()` in a `schema()` pipeline). `null` when there is no
+   * / `superRefine()` in a `createSchema()` pipeline). `null` when there is no
    * form-level validation issue.
    */
   formLevelError: string | null;

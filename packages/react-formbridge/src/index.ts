@@ -45,14 +45,14 @@ export type {
   ResolverIssueMapResult,
   ResolverPathInput,
 } from './core/resolvers/types';
-export { ref } from './core/validators/reference';
 export {
+  createSchema,
   type FormBridgeSchema,
   type FormBridgeSchemaApi,
   FormBridgeSchemaValidationError,
   getSchemaValidationApi,
-  schema,
-} from './core/validators/schema';
+} from './core/validators/createSchema';
+export { ref } from './core/validators/reference';
 export {
   type FormBridgeProviderProps,
   useFormBridgeContext,

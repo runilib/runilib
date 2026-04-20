@@ -67,7 +67,7 @@ export interface FormBridgeSchemaApi<TSchema extends FormSchema> {
 }
 
 /**
- * Return type of `schema()`. Carries the underlying shape as a phantom (typed
+ * Return type of `createSchema()`. Carries the underlying shape as a phantom (typed
  * via {@link FB_SCHEMA_SHAPE}) so that direct autocomplete on a schema object
  * only surfaces the validation API - `safeParse`, `refine`, `atLeastOne`, etc.
  * - not the individual field keys. Field-level inference still flows through
@@ -268,7 +268,7 @@ export function getSchemaValidationApi<TSchema extends FormSchema>(
   return candidate as unknown as FormBridgeSchema<TSchema>;
 }
 
-export function schema<const TSchema extends FormSchema>(
+export function createSchema<const TSchema extends FormSchema>(
   shape: TSchema,
 ): FormBridgeSchema<TSchema> {
   const enhanced = { ...shape } as unknown as FormBridgeSchema<TSchema> & {

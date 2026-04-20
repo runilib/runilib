@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
-import { field, MASKS, schema, useFormBridge } from '@runilib/react-formbridge';
+import { createSchema, field, MASKS, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { QuickTestExample } from './quickTest';
 import { createDemoFieldUi, createDemoFormUi } from './shared';
 
-const checkoutSchema = schema({
+const checkoutSchema = createSchema({
   firstName: field
     .text()
     .required('First name is required')

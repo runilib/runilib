@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
-import { field, schema, useFormBridge } from '@runilib/react-formbridge';
+import { createSchema, field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { createDemoFormUi, simulateSubmitDelay } from './shared';
 
-const tripSchema = schema({
+const tripSchema = createSchema({
   fullName: field.text().required('Full name is required').label('Full name'),
   email: field.email().label('Email').trim().lowercase(),
   phone: field.phone('FR').label('Phone'),
@@ -71,12 +71,12 @@ export function SchemaRefinementExample() {
     <section className={`${styles.sectionCard} ${styles.customerSection}`}>
       <div className={styles.customerShell}>
         <aside className={styles.customerAside}>
-          <span className={styles.customerEyebrow}>schema() refinements</span>
+          <span className={styles.customerEyebrow}>createSchema() refinements</span>
           <h2 className={styles.customerTitle}>Cross-field validation</h2>
           <p className={styles.customerIntro}>
             Four built-in helpers - no Zod, no Yup, no resolver. Each one is a single
-            chain call on the value returned by <code>schema()</code>, and errors are
-            routed to the right field automatically.
+            chain call on the value returned by <code>createSchema()</code>, and errors
+            are routed to the right field automatically.
           </p>
 
           <div className={styles.points}>

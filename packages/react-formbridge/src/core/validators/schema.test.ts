@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { field } from '../field-builders/field';
-import { FormBridgeSchemaValidationError, schema } from './schema';
+import { createSchema, FormBridgeSchemaValidationError } from './createSchema';
 
-describe('schema()', () => {
+describe('createSchema()', () => {
   it('returns structured field issues and supports errorMap()', () => {
-    const signupSchema = schema({
+    const signupSchema = createSchema({
       email: field.email('Email').required(),
       role: field.select('Role').disallowPlaceholder(),
     }).errorMap((issue) =>
@@ -23,7 +23,7 @@ describe('schema()', () => {
   });
 
   it('supports refine() and superRefine()', () => {
-    const contactSchema = schema({
+    const contactSchema = createSchema({
       email: field.text('Email'),
       phone: field.text('Phone'),
       coupon: field.text('Coupon'),
@@ -54,7 +54,7 @@ describe('schema()', () => {
   });
 
   it('supports cross-field helpers like exactlyOne and allOrNone', () => {
-    const checkoutSchema = schema({
+    const checkoutSchema = createSchema({
       primaryEmail: field.text('Primary email'),
       backupEmail: field.text('Backup email'),
       city: field.text('City'),
@@ -83,7 +83,7 @@ describe('schema()', () => {
   });
 
   it('supports async validators and async refinements', async () => {
-    const asyncSchema = schema({
+    const asyncSchema = createSchema({
       username: field.text('Username').validateAsync(async (value) => {
         await new Promise((resolve) => setTimeout(resolve, 5));
         return value === 'taken' ? 'Already taken.' : null;

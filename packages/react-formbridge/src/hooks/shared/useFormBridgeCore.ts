@@ -6,8 +6,8 @@ import {
   type VisibilityMap,
 } from '../../core/conditions/conditions';
 import { usePersist } from '../../core/persist/draft';
+import { getSchemaValidationApi } from '../../core/validators/createSchema';
 import { extractDefaults, validateField } from '../../core/validators/engine';
-import { getSchemaValidationApi } from '../../core/validators/schema';
 import type {
   FieldDescriptor,
   FocusableFieldHandle,
