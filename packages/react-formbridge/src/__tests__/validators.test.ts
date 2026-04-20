@@ -6,7 +6,7 @@ import { ref } from '../core/validators/reference';
 const desc = (f: ReturnType<typeof field.text>) => f._build();
 
 // ─── required ─────────────────────────────────────────────────────────────────
-describe('validateField — required', () => {
+describe('validateField - required', () => {
   it('returns error for empty string', async () =>
     expect(await validateField(desc(field.text('x').required()), '', {})).not.toBeNull());
   it('returns error for null', async () =>
@@ -32,7 +32,7 @@ describe('validateField — required', () => {
 });
 
 // ─── min / max ────────────────────────────────────────────────────────────────
-describe('validateField — min/max (string)', () => {
+describe('validateField - min/max (string)', () => {
   it('fails min length', async () =>
     expect(await validateField(desc(field.text('x').min(5)), 'abc', {})).not.toBeNull());
   it('passes min length', async () =>
@@ -53,7 +53,7 @@ describe('validateField — min/max (string)', () => {
   });
 });
 
-describe('validateField — min/max (number)', () => {
+describe('validateField - min/max (number)', () => {
   const numDesc = (f: any) => f._build();
   it('fails min', async () =>
     expect(
@@ -92,7 +92,7 @@ describe('validateField — min/max (number)', () => {
 });
 
 // ─── pattern ──────────────────────────────────────────────────────────────────
-describe('validateField — pattern', () => {
+describe('validateField - pattern', () => {
   it('fails non-matching pattern', async () => {
     const err = await validateField(
       desc(field.text('x').pattern(/^\d+$/, 'Digits only.')),

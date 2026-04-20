@@ -10,7 +10,7 @@ const FIELD_LABEL_PROPS_TABLE = buildMethodsTable([
   [
     '`children`',
     '`ReactNode`',
-    'Optional label override. When omitted, the component pulls `label(...)` straight from the schema descriptor — keep the text in one place instead of duplicating it in JSX.',
+    'Optional label override. When omitted, the component pulls `label(...)` straight from the schema descriptor - keep the text in one place instead of duplicating it in JSX.',
   ],
   [
     '`render`',
@@ -35,7 +35,7 @@ const FIELD_LABEL_PROPS_TABLE = buildMethodsTable([
   [
     '`style`',
     '`CSSProperties | StyleProp<TextStyle>`',
-    'Inline style — `CSSProperties` on web, `StyleProp<TextStyle>` on native.',
+    'Inline style - `CSSProperties` on web, `StyleProp<TextStyle>` on native.',
   ],
   [
     '`render(...)` for extra native attrs',
@@ -49,9 +49,9 @@ export const fieldLabelSection: LibraryDoc['sections'][number] = {
   title: 'FieldLabel component',
   content: `Standalone label component returned by \`useFormBridge\`. Renders a field's label and required mark, reading both directly from the schema descriptor.
 
-- Label text comes from \`field.x('Label text')\` in the schema — the component stays in sync automatically, so you don't duplicate strings in JSX
+- Label text comes from \`field.x('Label text')\` in the schema - the component stays in sync automatically, so you don't duplicate strings in JSX
 - Required mark is driven by \`.required()\` on the builder. Flip the schema and the asterisk appears/disappears everywhere
-- \`htmlFor\` defaults to the field \`name\`, which matches the id emitted by the generated fields — click the label, the input focuses, accessibility wired for free
+- \`htmlFor\` defaults to the field \`name\`, which matches the id emitted by the generated fields - click the label, the input focuses, accessibility wired for free
 - Use it when you render inputs through \`form.fieldController(name)\` or when your design-system row layout keeps label / input / error as separate slots
 - Unlike \`Form\` and \`Form.Submit\`, \`FieldLabel\` keeps a deliberately focused API today instead of mirroring every native label attribute; if you need total control over the wrapper element, use \`render\``,
   codeTabs: [
@@ -94,7 +94,7 @@ const form = useFormBridge(schema)
     {
       filename: 'FieldLabel.render.tsx',
       lang: 'tsx',
-      code: `// Full control — build a label with an inline help tooltip
+      code: `// Full control - build a label with an inline help tooltip
 <form.FieldLabel
   name="taxId"
   render={({ label, required, htmlFor }) => (
@@ -115,10 +115,10 @@ const form = useFormBridge(schema)
       title: 'Why it exists',
       content: `The generated \`<form.fields.email />\` component already renders its own label inline. \`<FieldLabel />\` exists for the cases where that isn't enough:
 
-- **Custom layouts** — you render the input yourself via \`form.fieldController('email')\` and want a drop-in label slot without re-implementing the required-mark logic
-- **Design-system rows** — your form grid keeps label / input / error in separate columns, and each slot is its own component
-- **Single source of truth** — the label text lives once in the schema; flipping a field between optional and required automatically updates every place \`<FieldLabel />\` is mounted
-- **Tooltips, icons, help popovers** — use \`render\` to wrap the label in richer UI without giving up the typed \`name\` binding or the required-mark automation`,
+- **Custom layouts** - you render the input yourself via \`form.fieldController('email')\` and want a drop-in label slot without re-implementing the required-mark logic
+- **Design-system rows** - your form grid keeps label / input / error in separate columns, and each slot is its own component
+- **Single source of truth** - the label text lives once in the schema; flipping a field between optional and required automatically updates every place \`<FieldLabel />\` is mounted
+- **Tooltips, icons, help popovers** - use \`render\` to wrap the label in richer UI without giving up the typed \`name\` binding or the required-mark automation`,
     },
     {
       id: 'fb-field-label-props',
@@ -132,7 +132,7 @@ const form = useFormBridge(schema)
 - **Ad-hoc override** → pass children: \`<form.FieldLabel name="email">Work email</form.FieldLabel>\`
 - **Localized required mark** → \`renderRequiredMark={() => <span>({t('required')})</span>}\`
 - **Label with tooltip/help icon** → use the \`render\` prop to wrap the label in your design-system tooltip
-- **Shared row component** → build a \`<FormRow name="email" />\` wrapper that internally mounts \`FieldLabel\`, \`fieldController\`, and \`FieldError\` — the typed \`name\` flows through all three`,
+- **Shared row component** → build a \`<FormRow name="email" />\` wrapper that internally mounts \`FieldLabel\`, \`fieldController\`, and \`FieldError\` - the typed \`name\` flows through all three`,
     },
   ],
 };

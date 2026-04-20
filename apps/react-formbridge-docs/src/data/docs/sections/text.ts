@@ -38,7 +38,7 @@ const TEXT_METHODS_TABLE = buildMethodsTable([
   [
     '`length(exact, message?)`',
     '`exact: number`',
-    'Requires an exact character count — handy for fixed-size codes like tax IDs, IBAN fragments, or reference numbers.',
+    'Requires an exact character count - handy for fixed-size codes like tax IDs, IBAN fragments, or reference numbers.',
   ],
   [
     '`between(min, max, message?)`',

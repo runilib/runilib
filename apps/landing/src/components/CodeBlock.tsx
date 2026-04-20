@@ -5,22 +5,22 @@ import styled from 'styled-components';
 
 // ── VS Code One Dark color palette ────────────────────────────
 const C = {
-  keyword: '#c792ea', // purple    — import, export, const, return, if...
-  string: '#c3e88d', // green     — "string", 'string', `template`
+  keyword: '#c792ea', // purple    - import, export, const, return, if...
+  string: '#c3e88d', // green     - "string", 'string', `template`
   template: '#c3e88d', // green
-  comment: '#546e7a', // gray-blue — // and /* */
-  funcName: '#82aaff', // blue      — function names, hooks
-  typeName: '#ffcb6b', // yellow    — Type, Interface, class names
-  attrName: '#89ddff', // cyan      — JSX props/attrs
-  tagName: '#f07178', // coral     — <Component>, html tags
-  number: '#f78c6c', // orange    — 42, 3.14, 0xFF
-  boolean: '#ff9cac', // pink      — true, false, null, undefined
-  operator: '#89ddff', // cyan      — =>, =, ?, :, +
-  punct: '#89ddff', // cyan      — {}, (), []
-  plain: '#a6accd', // light     — default text
+  comment: '#546e7a', // gray-blue - // and /* */
+  funcName: '#82aaff', // blue      - function names, hooks
+  typeName: '#ffcb6b', // yellow    - Type, Interface, class names
+  attrName: '#89ddff', // cyan      - JSX props/attrs
+  tagName: '#f07178', // coral     - <Component>, html tags
+  number: '#f78c6c', // orange    - 42, 3.14, 0xFF
+  boolean: '#ff9cac', // pink      - true, false, null, undefined
+  operator: '#89ddff', // cyan      - =>, =, ?, :, +
+  punct: '#89ddff', // cyan      - {}, (), []
+  plain: '#a6accd', // light     - default text
   dimmed: '#4a5568', // muted
-  regex: '#ff5370', // red       — /regex/
-  decorator: '#ffcb6b', // yellow    — @decorator
+  regex: '#ff5370', // red       - /regex/
+  decorator: '#ffcb6b', // yellow    - @decorator
 } as const;
 
 // ── Token types ───────────────────────────────────────────────

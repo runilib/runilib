@@ -85,7 +85,7 @@ export type ExtraFieldProps<
 /**
  * Theming shape used by `globalDefaults` and similar "apply to every field"
  * config points. Same building blocks as {@link FieldStyleProps} but no
- * per-field overrides (label/placeholder/hint) — those must stay local.
+ * per-field overrides (label/placeholder/hint) - those must stay local.
  *
  * @typeParam TProps - Extra per-field override props merged in.
  * @typeParam TPlatform - `'web'` or `'native'`.
@@ -133,7 +133,7 @@ export type PlatformGlobalFieldPropsOverrides<TPlatform extends Platform> =
 
 /**
  * Union of every per-type field override for a single platform. Rarely
- * needed directly — prefer {@link PlatformFieldPropsForType} to narrow by
+ * needed directly - prefer {@link PlatformFieldPropsForType} to narrow by
  * field type.
  *
  * @typeParam TPlatform - `'web'` or `'native'`.
@@ -145,7 +145,7 @@ export type PlatformFieldPropsOverrides<TPlatform extends Platform> =
 
 /**
  * Resolves to the exact override shape for a given `(platform, fieldType)`
- * pair — e.g. `PlatformFieldPropsForType<'web', 'select'>` resolves to
+ * pair - e.g. `PlatformFieldPropsForType<'web', 'select'>` resolves to
  * `WebSelectFieldPropsOverrides | WebAsyncAutocompleteFieldPropsOverrides`.
  *
  * Used by {@link FieldPropsForSchemaEntry} to give each `<form.fields.*>`
@@ -227,7 +227,7 @@ export type FieldComponent<TProps = ExtraFieldProps> = (
 ) => React.ReactElement | null;
 
 /**
- * Strongly-typed map of auto-rendered field components — one entry per schema
+ * Strongly-typed map of auto-rendered field components - one entry per schema
  * key. Exposed on the hook as `.fields`.
  *
  * @typeParam S - The form schema.

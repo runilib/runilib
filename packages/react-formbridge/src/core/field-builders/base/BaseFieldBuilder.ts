@@ -212,7 +212,7 @@ export class BaseFieldBuilder<
 
   /**
    * Adds a custom validation function to the field.
-   * Multiple validators can be chained — they run in order and the first
+   * Multiple validators can be chained - they run in order and the first
    * error message returned is displayed.
    *
    * @param fn - A validator function that receives the current value and returns
@@ -576,7 +576,7 @@ export class BaseFieldBuilder<
 
   /**
    * Builds and returns the final field descriptor with all configured conditions.
-   * This is called internally by the form engine — you typically don't need to
+   * This is called internally by the form engine - you typically don't need to
    * call it yourself.
    *
    * @returns A cloned `FieldDescriptor` merged with the field's conditions.

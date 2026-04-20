@@ -71,7 +71,7 @@ export function CustomStorageAdapterExample() {
         <h2 style={titleStyle}>Drafts persisted through a custom adapter</h2>
         <p style={subtitleStyle}>
           Values are base64-encoded, written to <code>sessionStorage</code>, and every
-          read/write is streamed to the log on the right. Refresh this tab — the form is
+          read/write is streamed to the log on the right. Refresh this tab - the form is
           restored from the adapter.
         </p>
       </header>

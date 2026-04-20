@@ -36,7 +36,7 @@ export const DEFAULT_STRENGTH_META: PasswordStrengthMeta = {
 };
 
 /**
- * Mixin applied to PasswordFieldBuilder — adds the .withStrengthIndicator() method.
+ * Mixin applied to PasswordFieldBuilder - adds the .withStrengthIndicator() method.
  *
  * @example
  * field.password('Password')

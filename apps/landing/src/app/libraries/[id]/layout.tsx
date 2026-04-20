@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `${lib.name} docs — ${lib.tagline}`;
+  const title = `${lib.name} docs - ${lib.tagline}`;
   const description = `${lib.desc} Installation, API reference, TypeScript examples and cross-platform guidance for React web and React Native.`;
 
   return {

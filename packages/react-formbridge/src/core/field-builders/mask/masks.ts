@@ -1,5 +1,5 @@
 /**
- * formbridge — Input Mask Engine
+ * formbridge - Input Mask Engine
  */
 
 import { type MASK_PRESET, MASK_REGEX, MASKS } from './constants';

@@ -35,7 +35,7 @@ const SELECT_METHODS_TABLE = buildMethodsTable([
   [
     '`notOneOf(values, message?)`',
     '`Array<value | option>`',
-    'Deny-list version of `oneOf()` — rejects a subset of values even if they exist in `options()`.',
+    'Deny-list version of `oneOf()` - rejects a subset of values even if they exist in `options()`.',
   ],
   [
     '`disallowPlaceholder(message?)`',

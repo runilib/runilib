@@ -30,7 +30,7 @@ export class OtpFieldBuilder extends BaseFieldBuilder<string, 'otp'> {
 
   /**
    * Masks each cell with a display character (default `•`). The real value
-   * stays in form state — only the rendered character is replaced.
+   * stays in form state - only the rendered character is replaced.
    */
   mask(char: string = '•'): this {
     this._desc._otpMaskChar = char.slice(0, 1) || '•';

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * react-formbridge — Form Analytics
+ * react-formbridge - Form Analytics
  * ────────────────────────
  * Tracks field interactions, timing, validation, abandonment and completion.
  *

@@ -11,11 +11,11 @@ export const validationSection: LibraryDoc['sections'][number] = {
 
 Every approach below flows through the same runtime and lands in the same \`state.errors\` bag. There are **five complementary ways** to validate, and you can combine any of them in the same form:
 
-1. **Field-level builder rules** — \`required\`, \`min\`, \`max\`, \`pattern/patterns\`, \`email\`, \`url\`, \`matches/sameAs\`, \`mustBeTrue\`, \`validate(fn)\`, number helpers, file limits, phone formatting, etc. Declared directly on each builder, they cover most everyday rules.
-2. **Schema-level cross-field validation** via \`schema()\` — the recommended path the moment you need rules that span multiple fields (\`refine\`, \`superRefine\`, \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, \`errorMap\`, async refinements, \`safeParse\` / \`validate\`). Zero external dependency required. See the dedicated [schema() API](/docs/schema-api) section.
-3. **Imperative validation** from the runtime — \`validate(names?)\`, \`setError()\`, \`clearErrors()\` let you trigger checks on demand and merge server-side errors into the same bag.
+1. **Field-level builder rules** - \`required\`, \`min\`, \`max\`, \`pattern/patterns\`, \`email\`, \`url\`, \`matches/sameAs\`, \`mustBeTrue\`, \`validate(fn)\`, number helpers, file limits, phone formatting, etc. Declared directly on each builder, they cover most everyday rules.
+2. **Schema-level cross-field validation** via \`schema()\` - the recommended path the moment you need rules that span multiple fields (\`refine\`, \`superRefine\`, \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, \`errorMap\`, async refinements, \`safeParse\` / \`validate\`). Zero external dependency required. See the dedicated [schema() API](/docs/schema-api) section.
+3. **Imperative validation** from the runtime - \`validate(names?)\`, \`setError()\`, \`clearErrors()\` let you trigger checks on demand and merge server-side errors into the same bag.
 4. **Trigger configuration** - \`validateOn\` and \`revalidateOn\` control **when** validation runs (\`'onBlur'\`, \`'onChange'\`, \`'onSubmit'\`, \`'onTouched'\`). Defaults: \`validateOn='onBlur'\`, \`revalidateOn='onChange'\`.
-5. **External resolvers** (opt-in) — bring your own Zod / Yup / Joi / Valibot schema via \`validatorResolver\` when you already own a domain schema elsewhere in the app.
+5. **External resolvers** (opt-in) - bring your own Zod / Yup / Joi / Valibot schema via \`validatorResolver\` when you already own a domain schema elsewhere in the app.
 
 > FormBridge's design goal: **built-in validation is the complete path**, not a stepping stone to an external resolver. Resolvers are provided for teams that already have a domain schema they want to reuse, not because the built-in pipeline is incomplete.`,
   subsections: [
@@ -34,7 +34,7 @@ Every approach below flows through the same runtime and lands in the same \`stat
 | \`pattern\` | \`(regex: RegExp, message?: string)\` | Single regex check |
 | \`patterns\` | \`([{ regex, message }, ...])\` | Multiple regex checks in order |
 | \`matches\` | \`(otherField: string, message?: string)\` | Cross-field equality check |
-| \`sameAs\` | \`(otherField: string, message?: string)\` | Alias of \`matches\` — confirm password style |
+| \`sameAs\` | \`(otherField: string, message?: string)\` | Alias of \`matches\` - confirm password style |
 | \`validate\` | \`((value, allValues) => string \\| null)\` | Custom sync predicate, return \`null\` when valid |
 | \`mustBeTrue\` | \`(message?: string)\` | Agreement toggles (checkbox / switch) |
 
@@ -76,7 +76,7 @@ const signupSchema = {
     },
     {
       id: 'fb-validation-schema',
-      title: '2. Schema-level validation — schema() (recommended for cross-field rules)',
+      title: '2. Schema-level validation - schema() (recommended for cross-field rules)',
       content: `Wrap your shape with \`schema()\` the moment you need rules that depend on **more than one field**, form-level errors, parsing utilities, async refinements, or global error message mapping. The wrapped value is still handed straight to \`useFormBridge\`, so you never split rendering and validation across two objects.
 
 **Cross-field primitives exposed by \`schema()\`**
@@ -96,9 +96,9 @@ const signupSchema = {
 
 | Method | Signature | Description |
 | --- | --- | --- |
-| \`safeParse\` | \`(values) => ValidationResult\` | Never throws — returns \`{ success, data, errorsByField, formLevelErrors, issues }\` |
+| \`safeParse\` | \`(values) => ValidationResult\` | Never throws - returns \`{ success, data, errorsByField, formLevelErrors, issues }\` |
 | \`safeParseAsync\` | \`(values) => Promise<ValidationResult>\` | Async variant, runs sync + async refinements |
-| \`validate\` | \`(values) => data\` | Strict — throws \`FormBridgeSchemaValidationError\` on failure |
+| \`validate\` | \`(values) => data\` | Strict - throws \`FormBridgeSchemaValidationError\` on failure |
 | \`validateAsync\` | \`(values) => Promise<data>\` | Async strict variant |
 
 Form-level errors (any issue without a \`path\`) surface under \`state.formLevelError\`. Field-level issues land in \`state.errors[fieldName]\` like every other rule.
@@ -134,12 +134,12 @@ export const tripSchema = schema({
     {
       id: 'fb-validation-imperative',
       title: '3. Imperative validation & server-side errors',
-      content: `The runtime returned by \`useFormBridge\` exposes imperative entry points so you can drive validation from your own code — submit handlers, effects, or server round-trips.
+      content: `The runtime returned by \`useFormBridge\` exposes imperative entry points so you can drive validation from your own code - submit handlers, effects, or server round-trips.
 
 | Method / State | Signature | Description |
 | --- | --- | --- |
 | \`validate\` | \`(names?: string \\| string[]) => Promise<Errors>\` | Run validation on demand. Pass one field, an array, or nothing for the whole form. Returns the up-to-date error map |
-| \`setError\` | \`(name: string, message: string) => void\` | Push a single error into the state — ideal for surfacing one server-side error |
+| \`setError\` | \`(name: string, message: string) => void\` | Push a single error into the state - ideal for surfacing one server-side error |
 | \`setErrors\` | \`(errorsByField: Record<string, string>) => void\` | Merge a bag of server errors in one call |
 | \`clearErrors\` | \`(names?: string \\| string[]) => void\` | Clear one, several, or all errors |
 | \`state.errors\` | \`Record<string, string>\` | Current error map (read from React) |
@@ -173,7 +173,7 @@ async function onSubmit(values) {
     },
     {
       id: 'fb-validation-triggers',
-      title: '4. Trigger matrix — when validation runs',
+      title: '4. Trigger matrix - when validation runs',
       content: `Accepted validation trigger values on \`useFormBridge({ validateOn, revalidateOn })\`:
 
 | Trigger | Description |
@@ -216,7 +216,7 @@ All resolvers share the same options surface documented in the [\`Schema adapter
 
 ${RESOLVER_SHARED_OPTIONS_SURFACE}
 
-> You do **not** need a resolver to get cross-field validation, async checks, or i18n — \`schema()\` covers all of that natively. Reach for a resolver only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
+> You do **not** need a resolver to get cross-field validation, async checks, or i18n - \`schema()\` covers all of that natively. Reach for a resolver only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
       code: {
         filename: 'resolver.tsx',
         lang: 'tsx',
@@ -240,14 +240,14 @@ const { Form, fields, state } = useFormBridge(formSchema, {
     },
     {
       id: 'fb-validation-parse',
-      title: 'Bonus — parsing outside the form (server actions, tests, utilities)',
-      content: `Because \`schema()\` exposes \`safeParse\` / \`safeParseAsync\` / \`validate\` / \`validateAsync\`, you can reuse the **exact same schema** outside of React — in server actions, tRPC procedures, background jobs, or tests — without mounting a form.
+      title: 'Bonus - parsing outside the form (server actions, tests, utilities)',
+      content: `Because \`schema()\` exposes \`safeParse\` / \`safeParseAsync\` / \`validate\` / \`validateAsync\`, you can reuse the **exact same schema** outside of React - in server actions, tRPC procedures, background jobs, or tests - without mounting a form.
 
 | Method | Signature | Description |
 | --- | --- | --- |
 | \`safeParse\` | \`(values) => ValidationResult\` | Synchronous, never throws |
-| \`safeParseAsync\` | \`(values) => Promise<ValidationResult>\` | Runs sync + async refinements — recommended for server-side |
-| \`validate\` | \`(values) => data\` | Strict variant — throws \`FormBridgeSchemaValidationError\` on failure |
+| \`safeParseAsync\` | \`(values) => Promise<ValidationResult>\` | Runs sync + async refinements - recommended for server-side |
+| \`validate\` | \`(values) => data\` | Strict variant - throws \`FormBridgeSchemaValidationError\` on failure |
 | \`validateAsync\` | \`(values) => Promise<data>\` | Async strict variant |
 
 The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formLevelErrors\` (array of form-level messages). See the [\`schema() API\`](/docs/schema-api) section for the full result shape.`,

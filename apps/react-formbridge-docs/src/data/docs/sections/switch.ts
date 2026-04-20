@@ -14,7 +14,7 @@ export const switchSection: LibraryDoc['sections'][number] = {
   title: 'field.switch()',
   content: `Boolean builder rendered as a toggle switch. Prefer it for settings, preferences, and feature flags.
 
-- Same API as \`field.checkbox()\` — only the visual renderer changes
+- Same API as \`field.checkbox()\` - only the visual renderer changes
 - Use \`defaultValue(true)\` when the toggle should start enabled
 - Keep \`field.checkbox()\` for agreements and legal acceptance flows`,
   codeTabs: [

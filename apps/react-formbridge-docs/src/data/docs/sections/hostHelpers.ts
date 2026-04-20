@@ -3,15 +3,15 @@ import type { LibraryDoc } from './../../../types/index';
 export const hostHelpersSection: LibraryDoc['sections'][number] = {
   id: 'fb-host-helpers',
   title: 'Host Components Helpers (FieldHost, SubmitHost, FormHost)',
-  content: `\`FieldHost\`, \`SubmitHost\`, and \`FormHost\` are **stable wrapper components** exported from \`@runilib/react-formbridge\`. They exist for one specific reason: styling systems like \`styled-components\`, \`styled-components/native\`, \`emotion\`, \`panda\`, \`stitches\`, and any other wrapper-based styling API need a **stable component reference** to attach styles to — and the components returned by \`useFormBridge()\` (\`form.Form\`, \`form.fields.email\`, \`form.Form.Submit\`) are generated at runtime inside the hook, so their identity changes on every render of the owning component.
+  content: `\`FieldHost\`, \`SubmitHost\`, and \`FormHost\` are **stable wrapper components** exported from \`@runilib/react-formbridge\`. They exist for one specific reason: styling systems like \`styled-components\`, \`styled-components/native\`, \`emotion\`, \`panda\`, \`stitches\`, and any other wrapper-based styling API need a **stable component reference** to attach styles to - and the components returned by \`useFormBridge()\` (\`form.Form\`, \`form.fields.email\`, \`form.Form.Submit\`) are generated at runtime inside the hook, so their identity changes on every render of the owning component.
 
 Host helpers solve that: they are regular, importable, module-level React components that **forward** the actual runtime component through a prop (\`form\`, \`field\`, or \`submit\`). You style the host once at module scope, and the host renders whichever runtime component you pass in.
 
-- \`FieldHost\` — renders any generated field component passed through its \`field\` prop (e.g. \`form.fields.email\`, \`form.fields.phone\`).
-- \`SubmitHost\` — renders \`Form.Submit\` through a stable \`submit\` prop.
-- \`FormHost\` — renders the generated \`Form\` component through a stable \`form\` prop.
+- \`FieldHost\` - renders any generated field component passed through its \`field\` prop (e.g. \`form.fields.email\`, \`form.fields.phone\`).
+- \`SubmitHost\` - renders \`Form.Submit\` through a stable \`submit\` prop.
+- \`FormHost\` - renders the generated \`Form\` component through a stable \`form\` prop.
 
-They are **passthrough components** — they do not add behavior, state, or extra markup. Every prop you pass (besides \`field\` / \`submit\` / \`form\`) is forwarded to the underlying runtime component as-is, and every built-in option (\`style\`, \`className\`, \`classNames\`, \`styles\`, \`inputProps\`, \`disabled\`, \`loadingText\`, …) keeps working exactly the way it does on the generated components. That now includes the platform-native attributes exposed by the wrapped component itself: \`FormHost\` inherits the same native form / wrapper props as \`Form\`, and \`SubmitHost\` inherits the same native button / pressable props as \`Form.Submit\`. Types are preserved end-to-end: \`FieldHost\` is generic over the field's extra props, \`FormHost\` over the schema, and \`SubmitHost\` over the platform.`,
+They are **passthrough components** - they do not add behavior, state, or extra markup. Every prop you pass (besides \`field\` / \`submit\` / \`form\`) is forwarded to the underlying runtime component as-is, and every built-in option (\`style\`, \`className\`, \`classNames\`, \`styles\`, \`inputProps\`, \`disabled\`, \`loadingText\`, …) keeps working exactly the way it does on the generated components. That now includes the platform-native attributes exposed by the wrapped component itself: \`FormHost\` inherits the same native form / wrapper props as \`Form\`, and \`SubmitHost\` inherits the same native button / pressable props as \`Form.Submit\`. Types are preserved end-to-end: \`FieldHost\` is generic over the field's extra props, \`FormHost\` over the schema, and \`SubmitHost\` over the platform.`,
   codeTabs: [
     {
       filename: 'WhyHostsExist.tsx',
@@ -20,7 +20,7 @@ They are **passthrough components** — they do not add behavior, state, or extr
 //
 // form.fields.email is created fresh every time the owning component
 // re-renders, so \`styled(form.fields.email)\` would produce a new styled
-// component on every render — breaking memoization and sometimes React's
+// component on every render - breaking memoization and sometimes React's
 // component identity checks.
 const form = useFormBridge(schema)
 const StyledEmail = styled(form.fields.email)\`…\` // 🔥 unstable reference
@@ -143,7 +143,7 @@ export function ContactScreen() {
       title: 'Why they exist',
       content: `\`useFormBridge()\` returns components that are **closed over the current runtime**: \`form.Form\`, \`form.Form.Submit\`, and every \`form.fields.*\` component are functions created *inside* the hook so they can carry the form's state, validation pipeline, and analytics hooks without a context lookup.
 
-That design is great for DX, but it means their component reference is not stable across renders — re-mounting the parent, re-running the hook, or switching to a new schema produces brand new component functions. Styling libraries that use \`styled(Component)\`, \`emotion.styled(Component)\`, \`panda.cva(Component)\`, etc. all assume you pass them a **module-level component** whose identity never changes. If you pass them a freshly-created function on each render, you get:
+That design is great for DX, but it means their component reference is not stable across renders - re-mounting the parent, re-running the hook, or switching to a new schema produces brand new component functions. Styling libraries that use \`styled(Component)\`, \`emotion.styled(Component)\`, \`panda.cva(Component)\`, etc. all assume you pass them a **module-level component** whose identity never changes. If you pass them a freshly-created function on each render, you get:
 
 - A new styled component generated on every render (wasted work, potential memory churn).
 - Broken \`React.memo\` / \`useMemo\` optimizations downstream.
@@ -162,7 +162,7 @@ Host helpers are the fix. They are defined once at the module level, their ident
 
 You do **not** need host helpers when:
 
-- You are styling with CSS classes, Tailwind, CSS Modules, inline \`style\` props, or the built-in \`ui\` / \`globalDefaults\` options — those work directly on the generated components.
+- You are styling with CSS classes, Tailwind, CSS Modules, inline \`style\` props, or the built-in \`ui\` / \`globalDefaults\` options - those work directly on the generated components.
 - You already need to replace the whole field renderer (custom trigger, modal picker, composite widget). In that case, \`fieldController()\` gives you more control.
 - You are writing a brand new field type that no builder covers. In that case, \`field.custom()\` is the right tool.
 
@@ -171,7 +171,7 @@ In short: host helpers are the bridge between FormBridge's schema-driven runtime
     {
       id: 'fb-host-helpers-props',
       title: 'Props surface',
-      content: `Each host helper accepts **its own special prop** plus every prop of the underlying component. Nothing is filtered — FormBridge just calls \`React.createElement\` with the component you passed in and spreads the rest of the props onto it.
+      content: `Each host helper accepts **its own special prop** plus every prop of the underlying component. Nothing is filtered - FormBridge just calls \`React.createElement\` with the component you passed in and spreads the rest of the props onto it.
 
 That means the native platform attributes of the wrapped runtime component stay available too. For example, \`<FormHost form={form.Form} method="post" aria-label="Checkout" />\` works on web, and \`<SubmitHost submit={form.Form.Submit} testID="checkout-submit" />\` works on native.
 
@@ -181,16 +181,16 @@ That means the native platform attributes of the wrapped runtime component stay 
 | \`SubmitHost\` | \`{ submit: SubmitButtonComponent } & SubmitButtonProps\` | \`children\`, \`loadingText\`, \`disabled\`, \`style\`, \`className\`, native button / pressable attrs, … | Typed per platform (\`'web'\` &#124; \`'native'\`) |
 | \`FormHost\` | \`{ form: FormComponent } & FormProps<Schema>\` | \`onSubmit\`, \`onError\`, \`onSubmitError\`, \`children\`, \`style\`, \`className\`, native form / wrapper attrs, … | Generic over the schema |
 
-Because the host just forwards, you can combine \`styled(FieldHost).attrs({ classNames: { … } })\` with inline props at render time — the two are merged the way they would be on the raw field.`,
+Because the host just forwards, you can combine \`styled(FieldHost).attrs({ classNames: { … } })\` with inline props at render time - the two are merged the way they would be on the raw field.`,
     },
     {
       id: 'fb-host-helpers-gotchas',
       title: 'Gotchas',
-      content: `- **You must pass the runtime component explicitly.** Host helpers do not read from context — \`<FieldHost field={form.fields.email} />\` is mandatory. There is no "current field" fallback.
+      content: `- **You must pass the runtime component explicitly.** Host helpers do not read from context - \`<FieldHost field={form.fields.email} />\` is mandatory. There is no "current field" fallback.
 - **Define the styled host at module scope, never inside a component.** Redefining \`const StyledField = styled(FieldHost)\` on every render brings back the exact identity problem the helpers were designed to solve.
 - **Keep the \`field\` / \`submit\` / \`form\` prop reference stable** across renders. \`form.fields.email\` from the same \`useFormBridge()\` call is stable within a single render tree; do not recreate the hook conditionally above it.
 - **Host helpers do not work for fully custom UI.** If you need to replace the markup entirely, use [\`fieldController()\`](/docs/fieldcontroller). Host helpers only help you *wrap* the generated components.
-- **Field override props still apply.** Inline-styling with props like \`classNames\`, \`styles\`, \`inputProps\` (or with \`globalDefaults\`) keeps working inside a host-wrapped component; wrapper styles compose on top of — not in place of — FormBridge's own rendering.`,
+- **Field override props still apply.** Inline-styling with props like \`classNames\`, \`styles\`, \`inputProps\` (or with \`globalDefaults\`) keeps working inside a host-wrapped component; wrapper styles compose on top of - not in place of - FormBridge's own rendering.`,
     },
   ],
 };

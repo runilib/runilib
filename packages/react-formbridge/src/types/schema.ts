@@ -19,11 +19,11 @@ import type { FieldDescriptor, FieldType } from './field';
  * {@link FormState.status}.
  *
  * @remarks
- * - `idle`        — no submission in flight; default/resting state.
- * - `validating`  — schema/async validators are running before submit.
- * - `submitting`  — `onSubmit` handler is awaiting.
- * - `success`     — last submission resolved without throwing.
- * - `error`       — last submission threw or validation rejected.
+ * - `idle`        - no submission in flight; default/resting state.
+ * - `validating`  - schema/async validators are running before submit.
+ * - `submitting`  - `onSubmit` handler is awaiting.
+ * - `success`     - last submission resolved without throwing.
+ * - `error`       - last submission threw or validation rejected.
  */
 export type FormStatus = 'idle' | 'validating' | 'submitting' | 'success' | 'error';
 
@@ -39,7 +39,7 @@ export type FormStatus = 'idle' | 'validating' | 'submitting' | 'success' | 'err
 export type FormSchemaEntry = FieldDescriptor<unknown, FieldType> | AnyFieldBuilder;
 
 /**
- * A FormBridge form schema — the object you pass to `useFormBridge({ schema })`.
+ * A FormBridge form schema - the object you pass to `useFormBridge({ schema })`.
  *
  * Keys are field names; values are descriptors or builders. FormBridge derives
  * `values`, `errors`, `touched`, etc. from this shape, so the schema is the
@@ -118,7 +118,7 @@ type InferFieldValue<T> =
 
 /**
  * Phantom marker used by `schema()` to carry the underlying shape type without
- * exposing field keys at the top level of the returned object. Type-only —
+ * exposing field keys at the top level of the returned object. Type-only -
  * never present at runtime.
  */
 export declare const FB_SCHEMA_SHAPE: unique symbol;
@@ -156,7 +156,7 @@ export type SchemaValues<S extends FormSchema> = {
  * `state` object and passed to selectors like `globalDefaults(state)`.
  *
  * All boolean flags (`isValid`, `isDirty`, …) are derived from the raw maps
- * (`errors`, `dirty`, `touched`, `status`) and kept in sync automatically — do
+ * (`errors`, `dirty`, `touched`, `status`) and kept in sync automatically - do
  * not mutate them directly.
  *
  * @typeParam Schema - The form's schema, used to key `values`/`errors`/etc.
@@ -185,13 +185,13 @@ export interface FormState<Schema extends FormSchema> {
    */
   dirty: Partial<Record<keyof SchemaShape<Schema>, boolean>>;
   /**
-   * Coarse lifecycle state — see {@link FormStatus}. Prefer the boolean
+   * Coarse lifecycle state - see {@link FormStatus}. Prefer the boolean
    * helpers below (`isSubmitting`, `isSubmitSuccess`, …) for UI conditions.
    */
   status: FormStatus;
   /**
    * `true` when {@link errors} is empty. Reflects current validation, not
-   * whether the user has attempted submit — use with `submitCount` if you only
+   * whether the user has attempted submit - use with `submitCount` if you only
    * want to show errors after a submit attempt.
    */
   isValid: boolean;
@@ -221,7 +221,7 @@ export interface FormState<Schema extends FormSchema> {
    */
   formLevelError: string | null;
   /**
-   * Error message produced by the most recent failed `onSubmit` call — for
+   * Error message produced by the most recent failed `onSubmit` call - for
    * example an API/network error. `null` when the last submission succeeded or
    * no submission has happened yet.
    */

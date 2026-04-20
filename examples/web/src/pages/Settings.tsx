@@ -41,7 +41,7 @@ export const SETTINGS_STEPS: { [key in string]: WalkitStepProps } = {
     sequence: 12,
     route: '/walkit/settings',
     title: '⚡ runilib',
-    content: 'This app is powered by runilib — same code, every platform.',
+    content: 'This app is powered by runilib - same code, every platform.',
   },
 };
 
@@ -261,7 +261,7 @@ export function Settings({ onBack }: { onBack: () => void }) {
             <section className={`card ${styles.section} ${styles.libsSection}`}>
               <h2 className={styles.sectionTitle}>⚡ Powered by runilib</h2>
               <p className={styles.libsDesc}>
-                Libraries used in this app — same API on React and React Native.
+                Libraries used in this app - same API on React and React Native.
               </p>
               <div className={styles.libsList}>
                 {[

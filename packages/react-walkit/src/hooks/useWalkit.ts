@@ -2,7 +2,7 @@ import { useWalkitContext } from '../context/WalkitContext';
 import type { UseWalkitReturn } from '../types/Walkit.types';
 
 /**
- * `useWalkit` — main hook to control the onboarding tour.
+ * `useWalkit` - main hook to control the onboarding tour.
  *
  * Must be used inside a `<WalkitProvider>`.
  *

@@ -30,31 +30,31 @@ export const fr: Translations = {
     label: 'Pourquoi RUNILIB',
     title: "Le problème qu'on résout",
     subtitle:
-      "Écrire la même logique deux fois — une pour le web, une pour mobile — c'est fini.",
+      "Maintenir deux codebases en parallèle - une pour le web, une pour le mobile - c'est fini.",
     items: [
       {
-        title: 'Schema-first',
-        desc: "Décris ton intention en TypeScript. La librairie génère les composants, la validation et l'UI automatiquement.",
+        title: 'Un codebase, deux plateformes',
+        desc: 'Construis une fonctionnalité une seule fois en TypeScript et exécute-la à l’identique sur React et React Native - sans forks, sans adapters.',
       },
       {
-        title: 'Cross-platform',
-        desc: 'Un seul schema fonctionne sur React (web) et React Native. Pas de code dupliqué, pas de divergence.',
+        title: 'Un modèle mental partagé',
+        desc: 'Chaque librairie suit les mêmes conventions d’API. Tu en apprends une, tu les comprends toutes.',
       },
       {
-        title: '100% TypeScript',
-        desc: 'Types inférés automatiquement depuis ton schema. Zéro casting, zéro any, autocomplétion complète.',
+        title: 'TypeScript strict',
+        desc: 'Inférence complète, zéro any, aucune surprise au runtime. Ton éditeur sait ce que ton code fait avant toi.',
       },
       {
-        title: 'Accessible par défaut',
-        desc: 'WCAG 2.1 AA out of the box. Navigation clavier, ARIA roles, focus management — tout est géré.',
+        title: 'Autosuffisant',
+        desc: 'Chaque package embarque tout ce dont il a besoin - pas de peer-deps, pas de conflits de versions, pas d’installs cachés.',
       },
       {
-        title: 'Zéro config',
-        desc: "Pas de provider obligatoire, pas de configuration initiale. import + use. C'est tout.",
+        title: 'Zéro setup',
+        desc: 'Pas de provider obligatoire, pas de fichier de config, pas de câblage initial. Import + use.',
       },
       {
-        title: 'Composable',
-        desc: "Chaque librairie fonctionne seule ou ensemble. L'écosystème grandit sans casser l'existant.",
+        title: 'Composable & tree-shakeable',
+        desc: "Prends uniquement ce dont tu as besoin. L'écosystème grandit sans casser ton app.",
       },
     ],
   },
@@ -79,7 +79,7 @@ export const fr: Translations = {
   },
   footer: {
     desc: 'Un écosystème de librairies cross-platform pour React et React Native. Écris une fois, fonctionne partout.',
-    copyright: `© ${new Date().getFullYear()} RUNILIB — React Universal Libs. Fait avec ♥ par AKS.`,
+    copyright: `© ${new Date().getFullYear()} RUNILIB - React Universal Libs. Fait avec ♥ par AKS.`,
     cols: {
       libraries: 'Librairies',
       docs: 'Documentation',
@@ -106,7 +106,7 @@ export const fr: Translations = {
   ecosystem: {
     title: 'Un écosystème, une philosophie',
     subtitle:
-      "RUNILIB n'est pas une librairie. C'est une façon de développer — sans duplication, sans friction, sans compromis entre web et mobile.",
+      "RUNILIB n'est pas une librairie. C'est une façon de développer - sans duplication, sans friction, sans compromis entre web et mobile.",
     principles: {
       label: 'Principes',
       title: 'Ce qui unit toutes les librairies',
@@ -127,7 +127,7 @@ export const fr: Translations = {
       label: 'Open Source',
       title: 'Contribuer à RUNILIB',
       subtitle:
-        'RUNILIB est construit par la communauté, pour la communauté. Que tu corriges une faute, améliores la doc ou livres une nouvelle feature — chaque contribution compte.',
+        'RUNILIB est construit par la communauté, pour la communauté. Que tu corriges une faute, améliores la doc ou livres une nouvelle feature - chaque contribution compte.',
     },
     whyContribute: {
       label: 'Pourquoi contribuer',
@@ -172,7 +172,7 @@ export const fr: Translations = {
         {
           step: '02',
           title: 'Fork & clone',
-          desc: 'Fork le monorepo runilib/runilib sur GitHub, puis clone ton fork en local. Les pull requests sont ouvertes sur le monorepo — les repos mirrors sont en lecture seule pour le code. Le projet utilise Yarn 4 workspaces avec Corepack.',
+          desc: 'Fork le monorepo runilib/runilib sur GitHub, puis clone ton fork en local. Les pull requests sont ouvertes sur le monorepo - les repos mirrors sont en lecture seule pour le code. Le projet utilise Yarn 4 workspaces avec Corepack.',
         },
         {
           step: '03',
@@ -193,13 +193,13 @@ export const fr: Translations = {
         {
           step: '06',
           title: 'Ouvrir une Pull Request',
-          desc: "Pousse sur ton fork et ouvre une PR sur la branche main. Utilise le template de PR — indique ce qui a changé, pourquoi, et comment tester. Référence l'issue que tu résous.",
+          desc: "Pousse sur ton fork et ouvre une PR sur la branche main. Utilise le template de PR - indique ce qui a changé, pourquoi, et comment tester. Référence l'issue que tu résous.",
           note: 'Les PRs petites et ciblées sont relues bien plus vite que les grandes.',
         },
         {
           step: '07',
           title: 'Code review',
-          desc: 'Un mainteneur relira ta PR et laissera des commentaires. Traite les retours, pousse de nouveaux commits — ne force-push pas pendant la review. La conversation fait partie du processus.',
+          desc: 'Un mainteneur relira ta PR et laissera des commentaires. Traite les retours, pousse de nouveaux commits - ne force-push pas pendant la review. La conversation fait partie du processus.',
         },
         {
           step: '08',
@@ -222,7 +222,7 @@ export const fr: Translations = {
         },
         {
           title: 'Props transientes',
-          desc: 'Utilise des props préfixées $ dans styled-components pour éviter leur transmission au DOM — ex: $active, $color, $open.',
+          desc: 'Utilise des props préfixées $ dans styled-components pour éviter leur transmission au DOM - ex: $active, $color, $open.',
         },
         {
           title: 'Exports nommés',
@@ -242,7 +242,7 @@ export const fr: Translations = {
         },
         {
           title: "Pas d'effets de bord à l'import",
-          desc: "Les entry points de librairie doivent être purs. setLocale() et autres configurateurs sont des appels explicites — jamais automatiques à l'import.",
+          desc: "Les entry points de librairie doivent être purs. setLocale() et autres configurateurs sont des appels explicites - jamais automatiques à l'import.",
         },
       ],
     },
@@ -250,16 +250,16 @@ export const fr: Translations = {
       label: 'Avant de soumettre',
       title: 'Checklist de PR',
       items: [
-        'Types compilent — yarn typecheck passe sans erreur',
-        'Tests passent — yarn test vert sur web et native',
-        'Lint passe — yarn lint sans warning',
-        'Pas de fichier CSS ajouté — style via styled-components uniquement',
-        'Cross-platform — testé ou pris en compte sur React Native',
-        "Docs mises à jour — README ou page de doc mis à jour si l'API a changé",
-        'Changeset ajouté — yarn changeset pour toute modif visible des packages',
-        'Description de PR — remplie : ce qui a changé, pourquoi, comment tester',
-        'Issue liée — la description contient "Closes #123"',
-        'Responsabilité unique — la PR fait une seule chose',
+        'Types compilent - yarn typecheck passe sans erreur',
+        'Tests passent - yarn test vert sur web et native',
+        'Lint passe - yarn lint sans warning',
+        'Pas de fichier CSS ajouté - style via styled-components uniquement',
+        'Cross-platform - testé ou pris en compte sur React Native',
+        "Docs mises à jour - README ou page de doc mis à jour si l'API a changé",
+        'Changeset ajouté - yarn changeset pour toute modif visible des packages',
+        'Description de PR - remplie : ce qui a changé, pourquoi, comment tester',
+        'Issue liée - la description contient "Closes #123"',
+        'Responsabilité unique - la PR fait une seule chose',
       ],
     },
     goodFirstIssues: {
@@ -316,7 +316,7 @@ export const fr: Translations = {
       label: 'Reconnaissance',
       title: 'Mur des contributeurs',
       subtitle:
-        'Chaque contribution mergée mérite une place ici. Code, docs, design, traductions, signalements de bugs — tout compte.',
+        'Chaque contribution mergée mérite une place ici. Code, docs, design, traductions, signalements de bugs - tout compte.',
     },
     cta: {
       title: 'Prêt pour ta première contribution ?',

@@ -10,7 +10,7 @@ const FIELD_ERROR_PROPS_TABLE = buildMethodsTable([
   [
     '`render`',
     '`(ctx) => ReactNode`',
-    'Custom render function. Only called when there *is* an error to show — no null checks needed inside. The context exposes `{ name, error }`.',
+    'Custom render function. Only called when there *is* an error to show - no null checks needed inside. The context exposes `{ name, error }`.',
   ],
   [
     '`className`',
@@ -20,7 +20,7 @@ const FIELD_ERROR_PROPS_TABLE = buildMethodsTable([
   [
     '`style`',
     '`CSSProperties | StyleProp<TextStyle>`',
-    'Inline style — `CSSProperties` on web, `StyleProp<TextStyle>` on native. Merged on top of the default error color.',
+    'Inline style - `CSSProperties` on web, `StyleProp<TextStyle>` on native. Merged on top of the default error color.',
   ],
   [
     '`render(...)` for extra native attrs',
@@ -34,7 +34,7 @@ export const fieldErrorSection: LibraryDoc['sections'][number] = {
   title: 'FieldError component',
   content: `Standalone error component returned by \`useFormBridge\`. Renders the validation error for a single field anywhere in the tree, with the same visibility rules the auto-rendered fields already follow.
 
-- Returns \`null\` when there is nothing to show, so it's safe to mount unconditionally — no \`{error && ...}\` boilerplate at the call site
+- Returns \`null\` when there is nothing to show, so it's safe to mount unconditionally - no \`{error && ...}\` boilerplate at the call site
 - Visibility follows the standard FormBridge rule: \`touched || submitCount > 0\`. The message stays hidden until the user has interacted with the field or tried to submit
 - Fully typed: the \`name\` prop autocompletes from your schema keys, so renaming a field breaks the usage site at compile time instead of at runtime
 - Use it when you render fields through \`form.fieldController(name)\` or a fully custom UI and want FormBridge to keep driving the error rendering
@@ -63,7 +63,7 @@ const form = useFormBridge(schema)
     {
       filename: 'FieldError.custom.tsx',
       lang: 'tsx',
-      code: `// Custom error UI — inline icon + text
+      code: `// Custom error UI - inline icon + text
 <form.FieldError
   name="email"
   render={({ error }) => (
@@ -88,10 +88,10 @@ const form = useFormBridge(schema)
       title: 'Why it exists',
       content: `The auto-rendered \`<form.fields.email />\` component already shows its own error inline. \`<FieldError />\` exists for the cases where that isn't enough:
 
-- **Custom layouts** — you're rendering the input yourself via \`form.fieldController('email')\` and need a drop-in error slot without re-implementing the \`touched || submitCount > 0\` rule
-- **Design-system integration** — your form rows have a fixed label/input/error grid and each slot is its own React component
-- **Multi-placement errors** — you want to show the error both inline *and* in a summary bar at the top of the form (mount \`<FieldError />\` twice, it stays in sync)
-- **Render-prop wrappers** — you need to wrap the error in a tooltip, toast, animation, or icon that the default \`<span>\` can't express`,
+- **Custom layouts** - you're rendering the input yourself via \`form.fieldController('email')\` and need a drop-in error slot without re-implementing the \`touched || submitCount > 0\` rule
+- **Design-system integration** - your form rows have a fixed label/input/error grid and each slot is its own React component
+- **Multi-placement errors** - you want to show the error both inline *and* in a summary bar at the top of the form (mount \`<FieldError />\` twice, it stays in sync)
+- **Render-prop wrappers** - you need to wrap the error in a tooltip, toast, animation, or icon that the default \`<span>\` can't express`,
     },
     {
       id: 'fb-field-error-props',

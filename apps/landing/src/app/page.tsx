@@ -152,7 +152,7 @@ export default function Home() {
             >
               {t.hero.cta} <Arrow>→</Arrow>
             </PrimaryBtn>
-            <SecondaryBtn href="/libraries">{t.hero.ctaSecondary}</SecondaryBtn>
+            {/* <SecondaryBtn href="/libraries">{t.hero.ctaSecondary}</SecondaryBtn> */}
           </HeroCTAs>
           <StatsRow>
             {[
@@ -310,7 +310,7 @@ export default function Home() {
         <QuoteInner>
           <QuoteMark>"</QuoteMark>
           <QuoteText>The best code is the code you don't have to write twice.</QuoteText>
-          <QuoteBy>— RUNILIB founding principle</QuoteBy>
+          <QuoteBy>- RUNILIB founding principle</QuoteBy>
         </QuoteInner>
       </QuoteSection>
 

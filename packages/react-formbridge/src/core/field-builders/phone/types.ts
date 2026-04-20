@@ -13,6 +13,6 @@ export interface CountryInfo {
   flag: string;
   /** Example national format, used as placeholder/help */
   exampleNational?: string;
-  /** Priority — shown at top of the list (higher = earlier) */
+  /** Priority - shown at top of the list (higher = earlier) */
   priority?: number;
 }

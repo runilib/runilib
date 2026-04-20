@@ -5,7 +5,7 @@ export const inferTypeSection: LibraryDoc['sections'][number] = {
   id: 'fb-infer-type',
 
   title: 'field.inferType()',
-  content: `\`field.inferType<T>(fields)\` generates a schema purely from a TypeScript type — no object instance needed. You describe each property with its configuration, and the schema is fully typed against \`T\`.
+  content: `\`field.inferType<T>(fields)\` generates a schema purely from a TypeScript type - no object instance needed. You describe each property with its configuration, and the schema is fully typed against \`T\`.
 
 The same helper is also exported as \`inferFromType<T>(fields)\` when you prefer a direct utility import.
 

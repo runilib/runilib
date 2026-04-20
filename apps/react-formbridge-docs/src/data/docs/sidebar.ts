@@ -40,11 +40,11 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     items: [
       { id: 'fb-use-form-bridge', label: 'useFormBridge()' },
       { id: 'fb-use-form-bridge-context', label: 'useFormBridgeContext()' },
-      { id: 'fb-use-async-options', label: 'useAsyncOptions() experimental' },
       { id: 'fb-analytics', label: 'useFormBridgeAnalytics()' },
       { id: 'fb-dynamic', label: 'useDynamicFormBridge()' },
       { id: 'fb-wizard', label: 'useFormBridgeWizard()' },
       { id: 'fb-readonly', label: 'useFormBridgeReadonly()' },
+      { id: 'fb-use-async-options', label: 'useAsyncOptions() - experimental' },
     ],
   },
   {

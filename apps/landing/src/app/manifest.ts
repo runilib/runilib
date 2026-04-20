@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'RUNILIB — React Universal Libs',
+    name: 'RUNILIB - React Universal Libs',
     short_name: 'RUNILIB',
     description:
       'Open-source ecosystem of React and React Native libraries with shared TypeScript APIs for web and mobile.',

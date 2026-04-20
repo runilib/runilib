@@ -69,7 +69,7 @@ export default function Docs() {
             <QuickCard>
               <QuickName>TypeScript</QuickName>
               <QuickDesc>
-                Every schema is fully typed. Types are inferred — no manual annotations
+                Every schema is fully typed. Types are inferred - no manual annotations
                 needed.
               </QuickDesc>
               <QuickCode>{`const form = useFormBridge({\n  email: field.email('Email').required(),\n})\n// form.fields.email is typed ✓`}</QuickCode>

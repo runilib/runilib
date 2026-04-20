@@ -17,14 +17,14 @@ The same helper is also exported as \`inferFromObject(obj, overrides?)\` when yo
 | Value-based | \`boolean\` → switch, \`number\` → number, \`Array\` → select, everything else → text | \`true\` → \`field.switch()\` |
 | Labels | Keys are prettified automatically | \`firstName\` → "First name", \`phone_number\` → "Phone number" |
 
-The returned schema can be spread and selectively overridden with explicit builders — inferred fields and hand-written fields mix freely.`,
+The returned schema can be spread and selectively overridden with explicit builders - inferred fields and hand-written fields mix freely.`,
   code: {
     filename: 'InferBasic.ts',
     lang: 'ts',
 
     code: `import { field } from '@runilib/react-formbridge'
 
-// Pass any object — field.infer reads keys + values to build the schema
+// Pass any object - field.infer reads keys + values to build the schema
 const user = {
   firstName: 'Ava',
   email: 'ava@example.com',
@@ -83,7 +83,7 @@ const schema = field.infer(product, {
         code: `import { field, useFormBridge } from '@runilib/react-formbridge'
 
 function EditUserForm({ user }: { user: User }) {
-  // Schema is generated from the existing user — form is pre-filled
+  // Schema is generated from the existing user - form is pre-filled
   const schema = field.infer(user, {
     email:    { required: 'Email is required' },
     password: { hidden: true },
@@ -105,7 +105,7 @@ function EditUserForm({ user }: { user: User }) {
     {
       id: 'fb-infer-notes',
       title: 'When to use inference vs explicit builders',
-      content: `Inference shines for rapid scaffolding — admin panels, CRUD tools, internal dashboards, prototypes. For production user-facing forms, explicit builders give you full control over labels, validation messages, conditional logic, and UX polish.
+      content: `Inference shines for rapid scaffolding - admin panels, CRUD tools, internal dashboards, prototypes. For production user-facing forms, explicit builders give you full control over labels, validation messages, conditional logic, and UX polish.
 
 ${INFER_AUTODETECTION_SURFACE}
 

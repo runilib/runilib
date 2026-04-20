@@ -3,8 +3,8 @@ import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable, FENCE } from '../const
 
 const CUSTOM_METHODS_TABLE = buildMethodsTable([
   [
-    '`—`',
-    '`—`',
+    '`-`',
+    '`-`',
     '`field.custom(defaultValue)` does not add methods on top of the base builder; it is the raw BaseFieldBuilder escape hatch.',
   ],
 ]);
@@ -51,13 +51,13 @@ const { Form, fields } = useFormBridge(schema)
     {
       id: 'fb-custom-props',
       title: 'Defaults, inheritance & field methods',
-      content: `\`field.custom(defaultValue)\` returns a typed \`BaseFieldBuilder\` — no extra methods, just the shared base surface (see Builder basics).
+      content: `\`field.custom(defaultValue)\` returns a typed \`BaseFieldBuilder\` - no extra methods, just the shared base surface (see Builder basics).
 
 | Key | Description |
 | --- | --- |
-| \`defaultValue\` | Required — stays typed through the generated field |
+| \`defaultValue\` | Required - stays typed through the generated field |
 | \`label\` | Optional at construction, usually added with \`label('...')\` |
-| \`render(fn)\` | Main escape hatch — keeps the form runtime while replacing the UI |
+| \`render(fn)\` | Main escape hatch - keeps the form runtime while replacing the UI |
 | \`fieldController\` | If you need custom UI for a built-in field type (\`select\`, \`masked\`, \`phone\`), prefer \`form.fieldController(name)\` instead |
 
 \`render(fn)\` receives: \`name\`, \`label\`, \`value\`, \`placeholder\`, \`error\`, \`touched\`, \`dirty\`, \`validating\`, \`disabled\`, \`hint\`, \`options\`, \`otpLength\`, \`onChange\`, \`onBlur\`, \`onFocus\`, \`allValues\`

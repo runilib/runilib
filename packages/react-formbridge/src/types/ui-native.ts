@@ -50,7 +50,7 @@ type NativeFieldPropsBase<TSlots extends string> = FieldRenderersProps & {
   highlightOnError?: boolean;
   /** Marks the input as read-only. */
   readOnly?: boolean;
-  /** Typed autofill hint — see {@link FieldAutoComplete}. */
+  /** Typed autofill hint - see {@link FieldAutoComplete}. */
   autoComplete?: FieldAutoComplete;
   /** Move focus into this field on mount. */
   autoFocus?: boolean;
@@ -116,7 +116,7 @@ type NativeOtpFieldSlot =
   | 'otpInput'
   | 'otpSeparator';
 /**
- * Slots for the password renderer — visibility toggle plus the optional
+ * Slots for the password renderer - visibility toggle plus the optional
  * strength meter and rule list.
  */
 type NativePasswordFieldSlot =
@@ -135,7 +135,7 @@ type NativePasswordFieldSlot =
   | 'passwordRuleBullet'
   | 'passwordRuleText';
 /**
- * Slots for the phone renderer — country picker trigger, modal + list of
+ * Slots for the phone renderer - country picker trigger, modal + list of
  * countries, and the E.164 preview.
  */
 type NativePhoneFieldSlot =
@@ -156,7 +156,7 @@ type NativePhoneFieldSlot =
   | 'phoneCountryName'
   | 'phoneEmptyText';
 /**
- * Slots for the file renderer — a single "Pick files" button plus the file
+ * Slots for the file renderer - a single "Pick files" button plus the file
  * list with per-item metadata and a remove button.
  */
 type NativeFileFieldSlot =
@@ -172,7 +172,7 @@ type NativeFileFieldSlot =
   | 'fileRemoveButton'
   | 'fileRemoveText';
 /**
- * Slots for the async-autocomplete renderer — uses a trigger + modal combobox
+ * Slots for the async-autocomplete renderer - uses a trigger + modal combobox
  * pattern (no inline listbox like web).
  */
 type NativeAsyncAutocompleteFieldSlot =
@@ -192,7 +192,7 @@ type NativeAsyncAutocompleteFieldSlot =
 // ─── Exported composite slot type ───────────────────────────────────────────────
 
 /**
- * Union of every slot name declared by native field renderers — useful as
+ * Union of every slot name declared by native field renderers - useful as
  * the key type for global `styles` maps that target any field.
  */
 export type NativeFieldSlot =
@@ -249,7 +249,7 @@ export interface NativeFileFieldItemRenderContext extends NativeFileFieldRenderC
 }
 
 /**
- * Render context for password-field overrides on native — visibility toggle
+ * Render context for password-field overrides on native - visibility toggle
  * and strength meter state.
  */
 export interface NativePasswordFieldRenderContext {
@@ -278,7 +278,7 @@ export interface NativePasswordFieldRuleRenderContext
 }
 
 /**
- * Render context for phone-field overrides on native — matches the web
+ * Render context for phone-field overrides on native - matches the web
  * context field-for-field so cross-platform theming can share helpers.
  */
 export interface NativePhoneFieldRenderContext {
@@ -331,7 +331,7 @@ export interface NativePhoneFieldCountryItemRenderContext
 // ─── Global overrides ───────────────────────────────────────────────────────────
 
 /**
- * "Catch-all" override shape that targets every native field in one go — used
+ * "Catch-all" override shape that targets every native field in one go - used
  * for `globalDefaults.field`. Inherits the full base + slot union.
  */
 export interface NativeGlobalFieldPropsOverrides
@@ -341,7 +341,7 @@ export interface NativeGlobalFieldPropsOverrides
 
 /**
  * Override shape for `text`/`email`/`number`/`tel`/`url`/`date` renderers on
- * native — all single-line text-like fields share this shape.
+ * native - all single-line text-like fields share this shape.
  */
 export interface NativeTextFieldPropsOverrides
   extends NativeFieldPropsBase<NativeTextFieldSlot>,
@@ -355,7 +355,7 @@ export interface NativeCheckboxFieldPropsOverrides
   extends NativeFieldPropsBase<NativeCheckboxFieldSlot> {}
 
 /**
- * Override shape for the `switch` field renderer on native — uses the RN
+ * Override shape for the `switch` field renderer on native - uses the RN
  * `<Switch>` component and adds row/label slots.
  */
 export interface NativeSwitchFieldPropsOverrides
@@ -367,7 +367,7 @@ export interface NativeSwitchFieldPropsOverrides
  */
 export interface NativeSelectFieldPropsOverrides
   extends NativeFieldPropsBase<NativeSelectFieldSlot> {
-  /** Replace the whole picker UI — see {@link SelectPickerRenderContext}. */
+  /** Replace the whole picker UI - see {@link SelectPickerRenderContext}. */
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
@@ -380,7 +380,7 @@ export interface NativeOtpFieldPropsOverrides
 }
 
 /**
- * Override shape for the `password` renderer on native — visibility toggle
+ * Override shape for the `password` renderer on native - visibility toggle
  * plus the optional strength meter and rule list.
  */
 export interface NativePasswordFieldPropsOverrides
@@ -432,7 +432,7 @@ export interface NativePasswordFieldPropsOverrides
 }
 
 /**
- * Override shape for the `phone` field renderer on native — country modal
+ * Override shape for the `phone` field renderer on native - country modal
  * picker, search, layout, and E.164 preview.
  */
 export interface NativePhoneFieldPropsOverrides
@@ -486,7 +486,7 @@ export interface NativePhoneFieldPropsOverrides
 /**
  * Override shape for the `file` field renderer on native.
  *
- * FormBridge does not ship with a bundled file picker on React Native — you
+ * FormBridge does not ship with a bundled file picker on React Native - you
  * must wire one in via `pickFiles` (e.g. `expo-document-picker`,
  * `react-native-image-picker`). The renderer otherwise handles the list UI,
  * previews, and removals.
@@ -571,7 +571,7 @@ export interface NativeFileFieldPropsOverrides
 }
 
 /**
- * Override shape for the native async-autocomplete renderer — used when a
+ * Override shape for the native async-autocomplete renderer - used when a
  * `select` field declares an async options source. Uses a modal picker
  * pattern on native.
  */
@@ -580,7 +580,7 @@ export interface NativeAsyncAutocompleteFieldPropsOverrides
     NativeInputBehaviorProps {
   /** Passthrough props for the `TextInput` used inside the modal. */
   inputProps?: Record<string, unknown>;
-  /** Replace the whole picker UI — see {@link SelectPickerRenderContext}. */
+  /** Replace the whole picker UI - see {@link SelectPickerRenderContext}. */
   renderPicker?: (ctx: SelectPickerRenderContext) => React.ReactNode;
 }
 
@@ -593,7 +593,7 @@ export interface NativeAsyncAutocompleteFieldPropsOverrides
  * narrowing by field type.
  *
  * Prefer the per-field interfaces (e.g. {@link NativeTextFieldPropsOverrides})
- * when you know the field type — this one exists for generic code paths.
+ * when you know the field type - this one exists for generic code paths.
  */
 export interface NativeFieldPropsOverrides
   extends NativeFieldPropsBase<NativeFieldSlot>,

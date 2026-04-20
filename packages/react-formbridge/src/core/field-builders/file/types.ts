@@ -1,4 +1,4 @@
-// ─── FileValue — platform-agnostic file reference ────────────────────────────
+// ─── FileValue - platform-agnostic file reference ────────────────────────────
 
 export interface FileValue {
   /** Platform-agnostic URI (blob URL on web, file:// on native) */

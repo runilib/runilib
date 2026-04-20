@@ -32,7 +32,7 @@ The design goal is stated plainly: **FormBridge should be self-sufficient.** Bui
       content: `Use \`schema()\` whenever any of the following apply:
 
 - You need **cross-field validation** (one field's validity depends on another's value).
-- You want **form-level errors** that are not attached to a specific field — \`schema()\` surfaces these under \`state.formLevelError\`.
+- You want **form-level errors** that are not attached to a specific field - \`schema()\` surfaces these under \`state.formLevelError\`.
 - You want to **parse** the submitted values to a fully-typed object via \`safeParse\` / \`validate\` ideal inside server actions, tRPC procedures, or standalone utilities where you do not have a mounted form.
 - You want **async refinements** (e.g. username availability, server-side uniqueness checks) wired into the same validation pass as synchronous rules.
 - You want to **customise error messages globally** via \`errorMap\` instead of overriding each field.
@@ -93,7 +93,7 @@ export function TripBookingForm() {
     {
       id: 'fb-schema-api-parse',
       title: 'safeParse / safeParseAsync',
-      content: `The **parse surface** runs every field-level validator plus every refinement and returns a structured result. It never throws — the caller inspects \`result.success\` to decide what to do.
+      content: `The **parse surface** runs every field-level validator plus every refinement and returns a structured result. It never throws - the caller inspects \`result.success\` to decide what to do.
 
 **Signature**
 
@@ -114,7 +114,7 @@ type ValidationResult<T> =
 | --- | --- | --- |
 | \`errorsByField\` | \`Record<string, string>\` | Map keyed by field name, first error per field. Drop-in compatible with \`state.errors\` |
 | \`formLevelErrors\` | \`string[]\` | Messages that had no field path (form-level) |
-| \`issues\` | \`ValidationIssue[]\` | Raw, ordered list of every issue (including duplicates) — useful for analytics or custom grouping |
+| \`issues\` | \`ValidationIssue[]\` | Raw, ordered list of every issue (including duplicates) - useful for analytics or custom grouping |
 
 **When to use which**
 

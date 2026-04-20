@@ -28,7 +28,7 @@ import type { FieldComponents } from './ui';
  * the auto-rendered fields.
  *
  * @typeParam Schema - The form schema (drives the `name` autocomplete).
- * @typeParam TPlatform - `'web'` or `'native'` — selects className vs native style.
+ * @typeParam TPlatform - `'web'` or `'native'` - selects className vs native style.
  */
 export type FieldErrorProps<
   Schema extends FormSchema,
@@ -42,7 +42,7 @@ export type FieldErrorProps<
    */
   render?: (ctx: { name: string; error: string }) => ReactNode;
 } & (TPlatform extends 'web' ? { className?: string } : EmptyProps) & {
-    /** Inline style — `CSSProperties` on web, `StyleProp<TextStyle>` on native. */
+    /** Inline style - `CSSProperties` on web, `StyleProp<TextStyle>` on native. */
     style?: PlatformStyleValue<TPlatform>;
   };
 
@@ -76,7 +76,7 @@ export type FieldLabelProps<
   children?: ReactNode;
   /**
    * Custom render function. Receives everything needed to build an accessible
-   * label — useful for wrapping the label in tooltips, icons, etc.
+   * label - useful for wrapping the label in tooltips, icons, etc.
    */
   render?: (ctx: {
     name: string;
@@ -87,14 +87,14 @@ export type FieldLabelProps<
   /** Custom renderer for the required-mark (defaults to a red asterisk). */
   renderRequiredMark?: () => ReactNode;
 } & (TPlatform extends 'web' ? { className?: string; htmlFor?: string } : EmptyProps) & {
-    /** Inline style — `CSSProperties` on web, `StyleProp<TextStyle>` on native. */
+    /** Inline style - `CSSProperties` on web, `StyleProp<TextStyle>` on native. */
     style?: PlatformStyleValue<TPlatform>;
   };
 
 /**
  * Minimal imperative handle a focusable field must expose to FormBridge so
  * features like "focus first invalid field on submit" can work. Both methods
- * are optional — FormBridge gracefully skips fields that don't support them.
+ * are optional - FormBridge gracefully skips fields that don't support them.
  */
 export interface FocusableFieldHandle {
   /** Move keyboard focus to this field. */
@@ -137,7 +137,7 @@ type FieldControllerState<
  * - change/blur/focus handlers,
  * - imperative actions (`setValue`, `validate`, `setError`, …).
  *
- * Use this when you need full control over a field's rendering — it's the
+ * Use this when you need full control over a field's rendering - it's the
  * public API for writing "custom field" components.
  *
  * @typeParam Schema - The form schema.
@@ -162,7 +162,7 @@ export type FieldController<
     blur: () => void;
     /** Run validation for just this field. Resolves to `true` when valid. */
     validate: () => Promise<boolean>;
-    /** Manually set an error message — typically from a server response. */
+    /** Manually set an error message - typically from a server response. */
     setError: (message: string) => void;
     /** Clear any error currently set on this field. */
     clearError: () => void;
@@ -177,7 +177,7 @@ export type FieldController<
 
 /**
  * The full object returned by `useFormBridge`. This is the public API surface
- * consumers interact with — every component, handler, and store accessor you
+ * consumers interact with - every component, handler, and store accessor you
  * get from the hook lives here.
  *
  * @typeParam Schema - The form schema you passed in.
@@ -198,7 +198,7 @@ export interface UseFormBridgeReturn<
   FormProvider: (props: { children: ReactNode }) => JSX.Element;
 
   /**
-   * The smart Form component — renders a form wrapper bound to the hook's
+   * The smart Form component - renders a form wrapper bound to the hook's
    * state. Exposes `.Submit` as a nested component for a drop-in submit button.
    *
    * @example <form.Form onSubmit={handleSignUp}> ... </form.Form>
@@ -206,7 +206,7 @@ export interface UseFormBridgeReturn<
   Form: FormComponent<Schema, TPlatform>;
 
   /**
-   * Auto-rendered field components — one entry per schema key, picked by the
+   * Auto-rendered field components - one entry per schema key, picked by the
    * field's type.
    *
    * - On web: renders `<input>`, `<textarea>`, `<select>`, etc.
@@ -257,7 +257,7 @@ export interface UseFormBridgeReturn<
   /** Get the current value of a single field. */
   getValue: <K extends keyof SchemaShape<Schema>>(name: K) => SchemaValues<Schema>[K];
 
-  /** Get the full values map — same shape as `state.values`. */
+  /** Get the full values map - same shape as `state.values`. */
   getValues: () => SchemaValues<Schema>;
 
   /**
@@ -278,7 +278,7 @@ export interface UseFormBridgeReturn<
   resetFields: (values?: Partial<SchemaValues<Schema>>) => void;
 
   /**
-   * Set a field error manually — typically called from an API error branch in
+   * Set a field error manually - typically called from an API error branch in
    * your `onSubmit` to surface server-side validation.
    */
   setError: (name: keyof SchemaShape<Schema>, message: string) => void;
@@ -297,14 +297,14 @@ export interface UseFormBridgeReturn<
   watch: <K extends keyof SchemaShape<Schema>>(name: K) => SchemaValues<Schema>[K];
 
   /**
-   * Reactive version of `getValues` — the caller re-renders on *any* value
+   * Reactive version of `getValues` - the caller re-renders on *any* value
    * change. Use sparingly; prefer `watch(name)` when you only care about one
    * field.
    */
   watchAll: () => SchemaValues<Schema>;
 
   /**
-   * Programmatic submit — same as pressing the submit button. Runs validation,
+   * Programmatic submit - same as pressing the submit button. Runs validation,
    * awaits `onSubmit`, and updates `status`/`submitError` accordingly.
    */
   submit: () => Promise<void>;
@@ -349,7 +349,7 @@ export interface UseFormBridgeReturn<
  * @typeParam Schema - The form schema (typed `onSubmit`/`onError`).
  */
 export interface BaseFormProps<Schema extends FormSchema> {
-  /** The form body — typically a tree of `<form.fields.*>` and a `<form.Form.Submit>`. */
+  /** The form body - typically a tree of `<form.fields.*>` and a `<form.Form.Submit>`. */
   children: ReactNode;
   /**
    * Called when the user submits and validation passes. Receives the fully
@@ -359,7 +359,7 @@ export interface BaseFormProps<Schema extends FormSchema> {
   onSubmit: (values: SchemaValues<Schema>) => void | Promise<void>;
   /**
    * Called when the user submits but validation fails. Receives the current
-   * errors map — useful for analytics or showing a banner.
+   * errors map - useful for analytics or showing a banner.
    */
   onError?: (errors: Partial<Record<keyof SchemaShape<Schema>, string>>) => void;
   /**
@@ -454,7 +454,7 @@ export type WebSubmitNativeProps = Omit<
  * FormBridge also reads it.
  */
 export interface NativeSubmitNativeProps {
-  /** Manual disable flag — combined with the automatic in-flight disable. */
+  /** Manual disable flag - combined with the automatic in-flight disable. */
   disabled?: boolean;
   [key: string]: unknown;
 }
@@ -475,17 +475,17 @@ export type SubmitButtonProps<TPlatform extends Platform = Platform> = {
   style?: PlatformStyleValue<TPlatform>;
   /** Label shown while the form is submitting/validating (defaults to `'Please wait…'`). */
   loadingText?: ReactNode;
-  /** Container style — native only (wraps the button visual). */
+  /** Container style - native only (wraps the button visual). */
   containerStyle?: TPlatform extends 'native' ? NativeStyleValue : never;
-  /** Text style applied to the label — native only. */
+  /** Text style applied to the label - native only. */
   textStyle?: TPlatform extends 'native' ? NativeStyleValue : never;
-  /** Loading indicator color — native only. */
+  /** Loading indicator color - native only. */
   indicatorColor?: TPlatform extends 'native' ? string : never;
 } & (TPlatform extends 'web' ? WebSubmitNativeProps : NativeSubmitNativeProps);
 
 /**
  * The component type returned as `Form.Submit`. Always resolves to a valid
- * element — there is no null branch.
+ * element - there is no null branch.
  */
 export type SubmitButtonComponent<TPlatform extends Platform = Platform> = (
   props: SubmitButtonProps<TPlatform>,

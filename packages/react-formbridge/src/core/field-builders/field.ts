@@ -22,7 +22,7 @@ function withLabel<T extends { label: (label: string) => T }>(
 }
 
 /**
- * `field` — schema builder namespace.
+ * `field` - schema builder namespace.
  *
  * Each method returns a fluent builder.
  *

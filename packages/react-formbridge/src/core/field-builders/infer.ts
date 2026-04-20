@@ -147,7 +147,7 @@ function buildFieldFromEntry(
 // ─── field.infer() ────────────────────────────────────────────────────────────
 
 /**
- * `field.infer()` — generate a formbridge schema from an existing object or TypeScript type.
+ * `field.infer()` - generate a formbridge schema from an existing object or TypeScript type.
  *
  * Automatically detects field types from key names and value types.
  * Pass overrides to customise individual fields.
@@ -195,7 +195,7 @@ function inferFromObject<T extends Record<string, unknown>>(
 }
 
 /**
- * `field.inferType<T>()` — generate a schema purely from a TypeScript type (no object needed).
+ * `field.inferType<T>()` - generate a schema purely from a TypeScript type (no object needed).
  * You must pass a key map that describes each property.
  *
  * @example

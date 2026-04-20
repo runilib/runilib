@@ -146,7 +146,7 @@ export default function Libraries() {
           )}
         </LibList>
         <RoadmapBlock>
-          <SectionLabel>Roadmap — Coming next</SectionLabel>
+          <SectionLabel>Roadmap - Coming next</SectionLabel>
           <RoadTitle>Expanding the ecosystem</RoadTitle>
           <RoadGrid>
             {ROADMAP_LIBS.map((lib) => (

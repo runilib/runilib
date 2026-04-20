@@ -289,7 +289,7 @@ export function FileVariantsExample() {
                   <span>Accepted: {accept.join(', ')}</span>
                   <span>
                     Max size:{' '}
-                    {maxSize ? `${Math.round(maxSize / (1024 * 1024))} MB` : '—'}
+                    {maxSize ? `${Math.round(maxSize / (1024 * 1024))} MB` : '-'}
                   </span>
                 </div>
               </div>

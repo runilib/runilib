@@ -9,11 +9,11 @@ export const en: Translations = {
     github: 'GitHub',
   },
   hero: {
-    badge: 'A growing collection · Open Source · MIT',
-    title: 'A playful pack of React & React Native libs.',
-    titleAccent: 'One codebase. Web & Native.',
+    badge: 'React UNIversal LIBs · A growing collection · Open Source · MIT',
+    title: 'Build it once in TypeScript.',
+    titleAccent: 'Run it everywhere React runs.',
     subtitle:
-      'RUNILIB is an open-source collection of small, composable libraries for React and React Native. Shared APIs, real TypeScript DX, and zero duplicated work between web and mobile.',
+      'RUNILIB is a growing collection of open-source libraries with one shared TypeScript API across React and React Native. No duplicated code, no parallel codebases, no drift between platforms.',
     cta: 'Get started',
     ctaSecondary: 'Browse libraries',
     stats: {
@@ -29,31 +29,32 @@ export const en: Translations = {
   features: {
     label: 'Why RUNILIB',
     title: 'The problem we solve',
-    subtitle: 'Writing the same logic twice — once for web, once for mobile — is over.',
+    subtitle:
+      'Maintaining two parallel codebases - one for web, one for mobile - is over.',
     items: [
       {
-        title: 'Schema-first',
-        desc: 'Describe your intent in TypeScript. The library generates components, validation and UI automatically.',
+        title: 'One codebase, two platforms',
+        desc: 'Build a feature once in TypeScript and run it identically on React and React Native - no forks, no adapters.',
       },
       {
-        title: 'Cross-platform',
-        desc: 'One schema works on both React (web) and React Native. No duplicated code, no divergence.',
+        title: 'One shared mental model',
+        desc: 'Every library follows the same API conventions. Learn one, you understand them all.',
       },
       {
-        title: '100% TypeScript',
-        desc: 'Types inferred automatically from your schema. Zero casting, zero any, full autocomplete.',
+        title: 'Strict TypeScript',
+        desc: 'Full type inference, zero any, no runtime surprises. Your editor knows what your code does before you do.',
       },
       {
-        title: 'Accessible by default',
-        desc: 'WCAG 2.1 AA out of the box. Keyboard nav, ARIA roles, focus management — all handled.',
+        title: 'Self-sufficient',
+        desc: 'Every package ships with everything it needs - no peer-dep chains, no version conflicts, no hidden installs.',
       },
       {
-        title: 'Zero config',
-        desc: "No mandatory provider, no initial setup. import + use. That's it.",
+        title: 'Zero setup',
+        desc: 'No mandatory provider, no config file, no initial wiring. Import and use.',
       },
       {
-        title: 'Composable',
-        desc: 'Each library works standalone or together. The ecosystem grows without breaking existing code.',
+        title: 'Composable & tree-shakeable',
+        desc: 'Take only what you need. The ecosystem grows without breaking your app.',
       },
     ],
   },
@@ -73,12 +74,12 @@ export const en: Translations = {
   cta: {
     title: 'Ready to simplify your stack?',
     desc: 'Join developers who stopped writing the same code twice.',
-    primary: 'Start for free',
+    primary: 'Browse libraries',
     secondary: '⭐ Star on GitHub',
   },
   footer: {
     desc: 'A cross-platform library ecosystem for React and React Native. Write once, run everywhere.',
-    copyright: `© ${new Date().getFullYear()} RUNILIB — React Universal Libs. Built with ♥ by AKS.`,
+    copyright: `© ${new Date().getFullYear()} RUNILIB - React Universal Libs. Built with ♥ by AKS.`,
     cols: {
       libraries: 'Libraries',
       docs: 'Documentation',
@@ -105,7 +106,7 @@ export const en: Translations = {
   ecosystem: {
     title: 'One ecosystem, one philosophy',
     subtitle:
-      "RUNILIB is not a library. It's a way to develop — without duplication, without friction, without compromise between web and mobile.",
+      "RUNILIB is not a library. It's a way to develop - without duplication, without friction, without compromise between web and mobile.",
     principles: {
       label: 'Principles',
       title: 'What unites all libraries',
@@ -172,7 +173,7 @@ export const en: Translations = {
         {
           step: '02',
           title: 'Fork & clone',
-          desc: 'Fork the runilib/runilib monorepo on GitHub, then clone your fork locally. Pull requests are opened against the monorepo — the mirror repos are read-only for code. The project uses Yarn 4 workspaces with Corepack.',
+          desc: 'Fork the runilib/runilib monorepo on GitHub, then clone your fork locally. Pull requests are opened against the monorepo - the mirror repos are read-only for code. The project uses Yarn 4 workspaces with Corepack.',
         },
         {
           step: '03',
@@ -193,13 +194,13 @@ export const en: Translations = {
         {
           step: '06',
           title: 'Open a Pull Request',
-          desc: "Push to your fork and open a PR against the main branch. Use the PR template — fill in what changed, why, and how to test it. Link the issue you're resolving.",
+          desc: "Push to your fork and open a PR against the main branch. Use the PR template - fill in what changed, why, and how to test it. Link the issue you're resolving.",
           note: 'Small, focused PRs get reviewed much faster than large ones.',
         },
         {
           step: '07',
           title: 'Code review',
-          desc: 'A maintainer will review your PR and leave comments. Address the feedback, push new commits — do not force-push during review. The conversation is part of the process.',
+          desc: 'A maintainer will review your PR and leave comments. Address the feedback, push new commits - do not force-push during review. The conversation is part of the process.',
         },
         {
           step: '08',
@@ -222,7 +223,7 @@ export const en: Translations = {
         },
         {
           title: 'Transient props',
-          desc: 'Use $prefixed props for styled-components to avoid forwarding to the DOM — e.g. $active, $color, $open.',
+          desc: 'Use $prefixed props for styled-components to avoid forwarding to the DOM - e.g. $active, $color, $open.',
         },
         {
           title: 'Named exports',
@@ -242,7 +243,7 @@ export const en: Translations = {
         },
         {
           title: 'No side effects on import',
-          desc: 'Library entry points must be pure. setLocale() and other configurators are explicit calls — never run automatically on import.',
+          desc: 'Library entry points must be pure. setLocale() and other configurators are explicit calls - never run automatically on import.',
         },
       ],
     },

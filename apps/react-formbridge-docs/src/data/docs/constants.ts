@@ -534,7 +534,7 @@ export const FORM_COMPONENT_PROPS_SURFACE = [
     [
       '`onSubmit`',
       '`(values) => void \\| Promise<void>`',
-      '**Required** — sync or async submit handler',
+      '**Required** - sync or async submit handler',
     ],
     ['`onError?`', '`(errors) => void`', 'Called when validation fails before submit'],
     [
@@ -615,20 +615,20 @@ export const GENERATED_FIELD_UI_SURFACE = [
     [
       '`inputProps?`',
       '`object`',
-      'Text-like fields — forward props to the underlying input',
+      'Text-like fields - forward props to the underlying input',
     ],
     ['`textareaProps?`', '`object`', '`textarea` on web'],
     ['`selectProps?`', '`object`', '`select` on web'],
-    ['`renderPicker?`', '`(ctx) => ReactNode`', 'Select-like fields — custom picker UI'],
+    ['`renderPicker?`', '`(ctx) => ReactNode`', 'Select-like fields - custom picker UI'],
     [
       '`renderOption?`',
       '`(option, state) => ReactNode`',
-      'Async select/autocomplete — custom option row',
+      'Async select/autocomplete - custom option row',
     ],
     [
       '`renderEmpty?` / `renderLoading?`',
       '`() => ReactNode`',
-      'Async select/autocomplete — empty/loading states',
+      'Async select/autocomplete - empty/loading states',
     ],
     ['`searchInputProps?`', '`object`', 'Phone fields on web'],
     ['`renderFileIcon?`', '`(file) => ReactNode`', 'File fields on web'],
@@ -694,7 +694,7 @@ export const ACTIONS_HELPERS_SURFACE = [
     [
       '`getValues`',
       '`() => Values`',
-      'Read the full typed value object without subscribing — ideal for building payloads or logging',
+      'Read the full typed value object without subscribing - ideal for building payloads or logging',
     ],
     [
       '`setError`',
@@ -709,12 +709,12 @@ export const ACTIONS_HELPERS_SURFACE = [
     [
       '`watch`',
       '`(name) => value`',
-      'Reactive single-field read — subscribes the caller so it re-renders on change',
+      'Reactive single-field read - subscribes the caller so it re-renders on change',
     ],
     [
       '`watchAll`',
       '`() => Values`',
-      'Reactive full-values read — heavier than `watch`, use for summary bars or debug panels',
+      'Reactive full-values read - heavier than `watch`, use for summary bars or debug panels',
     ],
     [
       '`submit`',
@@ -739,7 +739,7 @@ export const ACTIONS_HELPERS_SURFACE = [
     [
       '`visibility[name]`',
       '`{ visible, required, disabled }`',
-      'Computed per-field conditional flags — drive surrounding layout without re-implementing the rule engine',
+      'Computed per-field conditional flags - drive surrounding layout without re-implementing the rule engine',
     ],
   ]),
 ].join('\n');
@@ -750,7 +750,7 @@ export const VALIDATION_RUNTIME_SURFACE = [
   buildMethodsTable([
     [
       'Builder rules',
-      '—',
+      '-',
       'Field-level rules live on the builders themselves and are documented in the builder sections',
     ],
     [
@@ -834,7 +834,7 @@ export const RESOLVER_LIBRARY_OPTIONS_SURFACE = [
 ].join('\n');
 
 export const CONDITIONAL_VISIBILITY_SURFACE = [
-  'Visibility helpers live on every builder. Multiple calls compose with **AND** logic — every rule must pass for the field to stay visible. When a field is hidden its value follows the on-hide policy (default: reset to the field default).',
+  'Visibility helpers live on every builder. Multiple calls compose with **AND** logic - every rule must pass for the field to stay visible. When a field is hidden its value follows the on-hide policy (default: reset to the field default).',
   '',
   buildMethodsTable([
     [
@@ -860,7 +860,7 @@ export const CONDITIONAL_VISIBILITY_SURFACE = [
     [
       '`visibleWhenFalsy(field)`',
       '`(field: string)`',
-      'Mirror of `visibleWhenTruthy` — visible when the named field is falsy. Handy for "still empty" hints or reminder blocks.',
+      'Mirror of `visibleWhenTruthy` - visible when the named field is falsy. Handy for "still empty" hints or reminder blocks.',
     ],
     [
       '`visibleWhenAny(pairs)`',
@@ -870,7 +870,7 @@ export const CONDITIONAL_VISIBILITY_SURFACE = [
     [
       '`visibleAndRequiredWhen(fieldOrPredicate, value?)`',
       '`(field: string, value?: unknown)` or `((values, ctx) => boolean)`',
-      'Shorthand that pushes the same rule into both the visibility **and** required stacks in one call — keeps the two stacks in sync automatically.',
+      'Shorthand that pushes the same rule into both the visibility **and** required stacks in one call - keeps the two stacks in sync automatically.',
     ],
   ]),
   '',
@@ -882,7 +882,7 @@ ${FENCE}`,
 ].join('\n');
 
 export const CONDITIONAL_REQUIRED_SURFACE = [
-  'Dynamic required state works like visibility — the rule is evaluated on every form change. A hidden field never raises a required error even if `requiredWhen` would otherwise match.',
+  'Dynamic required state works like visibility - the rule is evaluated on every form change. A hidden field never raises a required error even if `requiredWhen` would otherwise match.',
   '',
   buildMethodsTable([
     [
@@ -893,7 +893,7 @@ export const CONDITIONAL_REQUIRED_SURFACE = [
     [
       '`requiredWhen(predicate)`',
       '`((values, ctx) => boolean)`',
-      'Cross-field predicate — use when the decision needs multiple fields.',
+      'Cross-field predicate - use when the decision needs multiple fields.',
     ],
     [
       '`requiredWhenAny(pairs)`',
@@ -923,7 +923,7 @@ export const CONDITIONAL_DISABLED_SURFACE = [
     [
       '`disabledWhen(predicate)`',
       '`((values, ctx) => boolean)`',
-      'Cross-field predicate form. There is intentionally no `disabledWhenAny` — compose a predicate if you need OR logic.',
+      'Cross-field predicate form. There is intentionally no `disabledWhenAny` - compose a predicate if you need OR logic.',
     ],
   ]),
   '',
@@ -934,7 +934,7 @@ ${FENCE}`,
 ].join('\n');
 
 export const CONDITIONAL_ON_HIDE_SURFACE = [
-  'On-hide behavior controls what happens to a field value when the field becomes invisible. It only runs on the hide transition — re-showing the field never mutates the value.',
+  'On-hide behavior controls what happens to a field value when the field becomes invisible. It only runs on the hide transition - re-showing the field never mutates the value.',
   '',
   buildMethodsTable([
     [
@@ -955,7 +955,7 @@ export const CONDITIONAL_ON_HIDE_SURFACE = [
   ]),
   '',
   `${FENCE}ts
-// Default — reset
+// Default - reset
 field.text('Company name').visibleWhen('accountType', 'business')
 // Clear the input when the branch is not selected
 field.text('VAT').visibleWhen('accountType', 'business').clearOnHide()
@@ -1004,7 +1004,7 @@ export const GLOBAL_UI_SURFACE = [
     [
       '`globalDefaults`',
       '`(state) => FormBridgeUiOptions`',
-      'Function invoked on each render — can react to submit/dirty/error state',
+      'Function invoked on each render - can react to submit/dirty/error state',
     ],
     [
       '`field?`',
@@ -1102,7 +1102,7 @@ export const INFER_OPTIONS_SURFACE = [
   'Complete `InferFieldOptions` surface:',
   '',
   buildMethodsTable([
-    ['`type?`', '`FieldType`', 'Force a specific field type — overrides auto-detection'],
+    ['`type?`', '`FieldType`', 'Force a specific field type - overrides auto-detection'],
     ['`label?`', '`string`', 'Override the generated label'],
     ['`placeholder?`', '`string`', 'Override the generated placeholder'],
     ['`hint?`', '`string`', 'Helper text'],
@@ -1131,7 +1131,7 @@ export const ANALYTICS_OPTIONS_SURFACE = [
     [
       '`handlers`',
       '`AnalyticsHandlers`',
-      '**Required** — set of callbacks the tracker fires on every tracked event. Each handler is individually optional',
+      '**Required** - set of callbacks the tracker fires on every tracked event. Each handler is individually optional',
     ],
     [
       '`exclude?`',
@@ -1141,7 +1141,7 @@ export const ANALYTICS_OPTIONS_SURFACE = [
     [
       '`formId?`',
       '`string`',
-      'Optional identifier injected on the tracker instance. Pass-through only — the hook does not read it',
+      'Optional identifier injected on the tracker instance. Pass-through only - the hook does not read it',
     ],
   ]),
   '',
@@ -1224,7 +1224,7 @@ export const ANALYTICS_HANDLERS_SURFACE = [
     ],
   ]),
   '',
-  '**Example — wiring every event to a single tracker**',
+  '**Example - wiring every event to a single tracker**',
   '',
   `${FENCE}ts handlers.ts`,
   'const handlers: AnalyticsHandlers = {',
@@ -1247,9 +1247,9 @@ export const ANALYTICS_TRACKER_SURFACE = [
   '`useFormBridgeAnalytics(opts, getValues)` returns a `FormBridgeAnalyticsTracker | null`:',
   '',
   '- Returns `null` when `opts` is `undefined` (analytics disabled).',
-  '- Otherwise returns the live tracker instance so you can drive it imperatively from code that does not live inside `useFormBridge()` — useful when wiring a third-party field component that needs to notify the tracker manually.',
+  '- Otherwise returns the live tracker instance so you can drive it imperatively from code that does not live inside `useFormBridge()` - useful when wiring a third-party field component that needs to notify the tracker manually.',
   '',
-  '**When you pass `analytics` directly to `useFormBridge(schema, { analytics })`, you never touch this instance — the core wires every handler for you.** The surface below only matters if you call the standalone hook as an escape hatch.',
+  '**When you pass `analytics` directly to `useFormBridge(schema, { analytics })`, you never touch this instance - the core wires every handler for you.** The surface below only matters if you call the standalone hook as an escape hatch.',
   '',
   '**Core imperative methods**',
   '',
@@ -1271,7 +1271,7 @@ export const ANALYTICS_TRACKER_SURFACE = [
     ],
   ]),
   '',
-  '**Field events — call from a custom field integration**',
+  '**Field events - call from a custom field integration**',
   '',
   buildMethodsTable([
     [
@@ -1331,7 +1331,7 @@ export const ANALYTICS_TRACKER_SURFACE = [
     ],
   ]),
   '',
-  '**Example — driving the tracker manually from a third-party field**',
+  '**Example - driving the tracker manually from a third-party field**',
   '',
   `${FENCE}tsx CustomFieldWithAnalytics.tsx`,
   'const analytics = useFormBridgeAnalytics(',
@@ -1442,7 +1442,7 @@ export const ASYNC_OPTIONS_CONFIG_SURFACE = [
 ].join('\n');
 
 export const ASYNC_OPTIONS_FETCHER_SURFACE = [
-  '`OptionsFetcherContext<TDeps>` — the single argument passed to your `fetch()` callback:',
+  '`OptionsFetcherContext<TDeps>` - the single argument passed to your `fetch()` callback:',
   '',
   buildMethodsTable([
     [
@@ -1467,7 +1467,7 @@ export const ASYNC_OPTIONS_FETCHER_SURFACE = [
   `${FENCE}ts SafeFetcher.ts`,
   'fetch: async ({ search, deps, signal }) => {',
   "  const res = await fetch('/api/users?q=' + encodeURIComponent(search), { signal })",
-  '  // fetch() rejects with AbortError when signal is aborted — the hook',
+  '  // fetch() rejects with AbortError when signal is aborted - the hook',
   '  // detects it and quietly drops the result, so no try/catch needed here.',
   '  if (!res.ok) {',
   "    throw new Error('Failed to load users (HTTP ' + res.status + ')')",
@@ -1579,7 +1579,7 @@ export const DYNAMIC_JSON_SURFACE = [
     ],
     [
       '`custom`',
-      '—',
+      '-',
       'Exists in the JSON rule surface today, but the built-in parser does not execute arbitrary custom JSON validators yet',
     ],
   ]),
@@ -1635,7 +1635,7 @@ export const WIZARD_STEP_SURFACE = [
     [
       '`id`',
       '`string`',
-      'Stable identifier — used for URL routing, persistence keys, `goToStep()`, and `WizardStepChangeEvent.step.id`. Keep it URL-safe',
+      'Stable identifier - used for URL routing, persistence keys, `goToStep()`, and `WizardStepChangeEvent.step.id`. Keep it URL-safe',
     ],
     [
       '`label`',
@@ -1660,7 +1660,7 @@ export const WIZARD_STEP_SURFACE = [
     [
       '`formOptions?`',
       '`Partial<UseFormBridgeOptions<S, TPlatform>>`',
-      'Per-step overrides forwarded to the underlying `useFormBridge()` — `validateOn`, `revalidateOn`, `validatorResolver`, `analytics`, `globalDefaults`, `persist`, `initialValues` (merged with accumulated wizard values)',
+      'Per-step overrides forwarded to the underlying `useFormBridge()` - `validateOn`, `revalidateOn`, `validatorResolver`, `analytics`, `globalDefaults`, `persist`, `initialValues` (merged with accumulated wizard values)',
     ],
   ]),
   '',
@@ -1689,7 +1689,7 @@ export const WIZARD_OPTIONS_SURFACE = [
     [
       '`onSubmit`',
       '`(allValues) => void \\| Promise<void>`',
-      '**Required** — final submit handler called once after the last step passes validation. Receives merged `allValues`. Throwing routes to `onSubmitError`; resolving flips `isSubmitSuccess` and clears every persisted draft',
+      '**Required** - final submit handler called once after the last step passes validation. Receives merged `allValues`. Throwing routes to `onSubmitError`; resolving flips `isSubmitSuccess` and clears every persisted draft',
     ],
     [
       '`onSubmitError?`',
@@ -1795,7 +1795,7 @@ export const WIZARD_EVENT_SURFACE = [
   "| `'goTo'` / `'goToStep'` | `wizard.goTo(index)` or `wizard.goToStep(id)` (step indicator click, resume flow) |",
   "| `'skip'` | `wizard.skip()` on an `optional` step |",
   "| `'restore'` | Post-hydration resume to the step saved in persistent storage |",
-  "| `'fallback'` | Controlled `stepId` did not match any visible step — wizard fell back to the first visible one (tell your router to replace the URL) |",
+  "| `'fallback'` | Controlled `stepId` did not match any visible step - wizard fell back to the first visible one (tell your router to replace the URL) |",
   '',
   '**Example**',
   '',
@@ -1902,7 +1902,7 @@ export const WIZARD_RETURN_SURFACE = [
     [
       '`next`',
       '`() => Promise<boolean>`',
-      'Validates the active step, saves its draft, merges values, marks complete, advances. Resolves `false` on validation failure. **Does not call `onSubmit` on the last step** — use `submit()`',
+      'Validates the active step, saves its draft, merges values, marks complete, advances. Resolves `false` on validation failure. **Does not call `onSubmit` on the last step** - use `submit()`',
     ],
     [
       '`prev`',
@@ -1942,7 +1942,7 @@ export const WIZARD_RETURN_SURFACE = [
     [
       '`isSubmitSuccess`',
       '`boolean`',
-      '`true` once `onSubmit` has resolved. Stays `true` until unmount — use to render the success screen',
+      '`true` once `onSubmit` has resolved. Stays `true` until unmount - use to render the success screen',
     ],
     [
       '`submitError`',
@@ -1961,7 +1961,7 @@ export const WIZARD_RETURN_SURFACE = [
     ],
   ]),
   '',
-  '**Example — rendering a wizard body**',
+  '**Example - rendering a wizard body**',
   '',
   `${FENCE}tsx WizardBody.tsx`,
   'if (wizard.isHydrating || !wizard.step) return <Spinner />',
@@ -2009,7 +2009,7 @@ export const READONLY_OPTIONS_SURFACE = [
     [
       '`values`',
       '`SchemaValues<S>`',
-      'Current values to render — shape comes directly from your schema, so every key is typed',
+      'Current values to render - shape comes directly from your schema, so every key is typed',
     ],
     [
       '`originalValues?`',
@@ -2019,7 +2019,7 @@ export const READONLY_OPTIONS_SURFACE = [
     [
       '`formatters?`',
       '`Partial<Record<keyof S, (value) => string>>`',
-      'Per-field display formatter. Overrides the built-in formatting (dates → `toLocaleDateString()`, booleans → `✓ Yes / ✗ No`, passwords → `••••••••`, select/radio → matching option label, empty → `—`)',
+      'Per-field display formatter. Overrides the built-in formatting (dates → `toLocaleDateString()`, booleans → `✓ Yes / ✗ No`, passwords → `••••••••`, select/radio → matching option label, empty → `-`)',
     ],
   ]),
 ].join('\n');
@@ -2048,12 +2048,12 @@ export const READONLY_FIELD_STATE_SURFACE = [
     [
       '`original?`',
       '`unknown`',
-      'Raw `originalValues[name]` — present only when `changed` is `true`',
+      'Raw `originalValues[name]` - present only when `changed` is `true`',
     ],
     [
       '`originalDisplay?`',
       '`string`',
-      'Formatted version of `original` — useful for rendering a "before" column. Present only when `changed` is `true`',
+      'Formatted version of `original` - useful for rendering a "before" column. Present only when `changed` is `true`',
     ],
   ]),
 ].join('\n');
@@ -2093,12 +2093,12 @@ export const READONLY_RETURN_SURFACE = [
     [
       '`fields`',
       '`Record<keyof S, FieldReadonlyState>`',
-      'Computed readonly state for every visible (non-`_hidden`) field — see the field state table above',
+      'Computed readonly state for every visible (non-`_hidden`) field - see the field state table above',
     ],
     [
       '`fieldNames`',
       '`Array<keyof S>`',
-      'Visible field names in schema iteration order — use this to render rows deterministically instead of `Object.keys(fields)`',
+      'Visible field names in schema iteration order - use this to render rows deterministically instead of `Object.keys(fields)`',
     ],
     [
       '`changedFields`',

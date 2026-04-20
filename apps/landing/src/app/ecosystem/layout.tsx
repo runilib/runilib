@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Ecosystem & Roadmap — Cross-Platform React Architecture',
+  title: 'Ecosystem & Roadmap - Cross-Platform React Architecture',
   description:
     'Discover the RUNILIB ecosystem vision for React and React Native: shared APIs, consistent DX, accessible defaults and the roadmap for current and future cross-platform packages.',
   keywords: [
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     'React ecosystem design',
   ],
   openGraph: {
-    title: 'RUNILIB Ecosystem — Vision, Architecture & Roadmap',
+    title: 'RUNILIB Ecosystem - Vision, Architecture & Roadmap',
     description:
       'Shared APIs, composable packages and cross-platform architecture. See the full RUNILIB vision and roadmap.',
     url: 'https://runilib.dev/ecosystem',

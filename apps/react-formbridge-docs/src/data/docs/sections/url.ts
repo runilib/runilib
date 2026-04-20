@@ -8,8 +8,8 @@ import {
 
 const URL_METHODS_TABLE = buildMethodsTable([
   [
-    '`—`',
-    '`—`',
+    '`-`',
+    '`-`',
     '`field.url()` does not add methods beyond the shared string-builder surface; it mainly preconfigures an HTTP/HTTPS format validator.',
   ],
 ]);

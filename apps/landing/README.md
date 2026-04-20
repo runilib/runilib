@@ -1,4 +1,4 @@
-# RUNILIB — Official Website
+# RUNILIB - Official Website
 
 Official site for RUNILIB (React Universal Libs), built with **React 18 + TypeScript + styled-components**.
 
@@ -11,7 +11,7 @@ Official site for RUNILIB (React Universal Libs), built with **React 18 + TypeSc
 | **styled-components** | 6 | CSS-in-JS + ThemeProvider |
 | **React Router** | 6 | SPA routing |
 | **Vite** | 5 | Build tool |
-| **Sora + DM Mono** | — | Typography (Google Fonts) |
+| **Sora + DM Mono** | - | Typography (Google Fonts) |
 
 ## Quick start
 
@@ -81,12 +81,12 @@ src/
 - Both languages are 100% complete
 
 ### Dynamic library documentation
-- `/libraries/formbridge` — formbridge docs with sidebar
-- `/libraries/walkit`   — walkit docs with sidebar
+- `/libraries/formbridge` - formbridge docs with sidebar
+- `/libraries/walkit`   - walkit docs with sidebar
 - Each doc has prev/next navigation between sections
 
 ### VS Code syntax highlighter
-- Built from scratch — no external deps
+- Built from scratch - no external deps
 - One Dark color palette
 - Supports: tsx, ts, bash
 - Line numbers, copy button, filename
@@ -95,4 +95,4 @@ src/
 ### All styled with styled-components
 - Zero CSS files
 - Full TypeScript types via DefaultTheme augmentation
-- ThemeProvider at root — all components have full theme access
+- ThemeProvider at root - all components have full theme access

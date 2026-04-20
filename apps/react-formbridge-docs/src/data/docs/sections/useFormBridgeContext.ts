@@ -31,7 +31,7 @@ function LiveSummary() {
 
   return (
     <aside>
-      <p>Current email: {email || '—'}</p>
+      <p>Current email: {email || '-'}</p>
       <p>{state.isValid ? 'Ready to submit' : 'Some required fields are still missing.'}</p>
     </aside>
   )

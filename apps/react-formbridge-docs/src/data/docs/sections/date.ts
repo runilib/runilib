@@ -10,7 +10,7 @@ const DATE_METHODS_TABLE = buildMethodsTable([
   [
     '`minDate(date, message?)`',
     '`Date | string`',
-    'Sets a lower date bound such as "no past dates" (inclusive — same day is allowed).',
+    'Sets a lower date bound such as "no past dates" (inclusive - same day is allowed).',
   ],
   [
     '`maxDate(date, message?)`',
@@ -20,7 +20,7 @@ const DATE_METHODS_TABLE = buildMethodsTable([
   [
     '`before(date, message?)`',
     '`Date | string | FieldReference`',
-    "Requires the value to be **strictly before** another date. Accepts a literal date or a `ref()` to another date field — great for `startDate.before(ref('endDate'))` style rules.",
+    "Requires the value to be **strictly before** another date. Accepts a literal date or a `ref()` to another date field - great for `startDate.before(ref('endDate'))` style rules.",
   ],
   [
     '`after(date, message?)`',
@@ -30,7 +30,7 @@ const DATE_METHODS_TABLE = buildMethodsTable([
   [
     '`between(start, end, message?)`',
     '`Date | string | number`',
-    'Requires the value to fall inside `[start, end]` inclusively. Takes literals only (not refs) — use `before()` + `after()` for cross-field windows.',
+    'Requires the value to fall inside `[start, end]` inclusively. Takes literals only (not refs) - use `before()` + `after()` for cross-field windows.',
   ],
   [
     '`past(message?)`',

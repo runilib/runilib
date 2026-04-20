@@ -32,7 +32,7 @@ const PHONE_METHODS_TABLE = buildMethodsTable([
   [
     '`validateFormat(value = true)`',
     '`value?: boolean`',
-    'Enables libphonenumber-based format validation. Adds three sequential checks: `isPossible()`, `isValid()`, and a format parse — each with its own error message. Disable with `validateFormat(false)` if you need lenient input.',
+    'Enables libphonenumber-based format validation. Adds three sequential checks: `isPossible()`, `isValid()`, and a format parse - each with its own error message. Disable with `validateFormat(false)` if you need lenient input.',
   ],
 ]);
 

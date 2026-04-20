@@ -396,7 +396,7 @@ export default function Contributing() {
               href={contributor.profileUrl}
               target="_blank"
               rel="noopener"
-              title={`@${contributor.handle} — ${contributor.contributions} contribution${
+              title={`@${contributor.handle} - ${contributor.contributions} contribution${
                 contributor.contributions > 1 ? 's' : ''
               }`}
             >

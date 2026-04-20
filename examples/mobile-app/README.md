@@ -1,6 +1,6 @@
-# Taskflow — Mobile Example App
+# Taskflow - Mobile Example App
 
-Demo app for **stepwise** (runilib) — a real task management app built with Expo.
+Demo app for **stepwise** (runilib) - a real task management app built with Expo.
 
 ## Stack
 - Expo SDK 52 + React Native
@@ -20,18 +20,18 @@ npm run android    # Android emulator
 
 ## stepwise use cases demonstrated
 
-1. **Auto-start on mount** — tour launches automatically after 900ms
-2. **6-step tour** — greeting, stats card, filter bar, add button, task item, bottom nav
-3. **Custom light theme** — warm white/amber palette
-4. **Haptic feedback** — native feedback on task interactions
-5. **Conditional step** — task-item step only on the first item (`active={idx === 0}`)
-6. **Restart button** — tap "▶ Tour" in the header to replay
-7. **onStepChange callback** — logs to Expo console on each step
+1. **Auto-start on mount** - tour launches automatically after 900ms
+2. **6-step tour** - greeting, stats card, filter bar, add button, task item, bottom nav
+3. **Custom light theme** - warm white/amber palette
+4. **Haptic feedback** - native feedback on task interactions
+5. **Conditional step** - task-item step only on the first item (`active={idx === 0}`)
+6. **Restart button** - tap "▶ Tour" in the header to replay
+7. **onStepChange callback** - logs to Expo console on each step
 
 ## Same API as the web app
 
 ```tsx
-// Exact same code as in the web app — only the wrapped element changes
+// Exact same code as in the web app - only the wrapped element changes
 <WalkitStep id="add-task" sequence={2} title="Add tasks" content="Tap to add.">
   <TouchableOpacity style={s.addBtn}>   {/* RN element */}
     <Text>+ Add</Text>

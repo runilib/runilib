@@ -1,5 +1,5 @@
 /**
- * Example — React Web
+ * Example - React Web
  * ────────────────────
  * Illustrates a full onboarding tour on a dashboard page.
  *
