@@ -104,11 +104,13 @@ const signupSchema = {
 
 Form-level errors (any issue without a \`path\`) surface under \`state.formLevelError\`. Field-level issues land in \`state.errors[fieldName]\` like every other rule.
 
+If the schema object lives in a module that is also imported by server-side code, define that module with \`@runilib/react-formbridge/schema\` and keep \`useFormBridge\` imported from the main package in your client components.
+
 **For the complete API reference, options, signatures and examples, see the dedicated [\`createSchema() API\`](/docs/schema-api) section.**`,
       code: {
         filename: 'schema-validation.ts',
         lang: 'ts',
-        code: `import { field, schema } from '@runilib/react-formbridge'
+        code: `import { createSchema, field } from '@runilib/react-formbridge'
 
 export const tripSchema = createSchema({
   email: field.email().label('Email'),
@@ -251,11 +253,23 @@ const { Form, fields, state } = useFormBridge(formSchema, {
 | \`validate\` | \`(values) => data\` | Strict variant - throws \`FormBridgeSchemaValidationError\` on failure |
 | \`validateAsync\` | \`(values) => Promise<data>\` | Async strict variant |
 
-The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formLevelErrors\` (array of form-level messages). See the [\`createSchema() API\`](/docs/schema-api) section for the full result shape.`,
+The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formLevelErrors\` (array of form-level messages). See the [\`createSchema() API\`](/docs/schema-api) section for the full result shape.
+
+If that schema module is imported by server code, define it with \`@runilib/react-formbridge/schema\` so only the non-React surface is pulled into the server module graph.`,
       code: {
-        filename: 'server-action.ts',
+        filename: 'tripSchema.ts + server-action.ts',
         lang: 'ts',
-        code: `'use server'
+        code: `// tripSchema.ts
+import { createSchema, field } from '@runilib/react-formbridge/schema'
+
+export const tripSchema = createSchema({
+  email: field.email('Email'),
+  phone: field.phone('FR').label('Phone'),
+})
+  .atLeastOne(['email', 'phone'], 'Provide at least an email or a phone.')
+
+// server-action.ts
+'use server'
 
 import { tripSchema } from './tripSchema'
 

@@ -8,7 +8,8 @@ export const schemaApiSection: LibraryDoc['sections'][number] = {
 - **The plain schema** describes what fields exist and how they render, default, and self-validate.
 - **createSchema(shape)** takes that same object and returns a wrapped value that **additionally** exposes a validation API (\`safeParse\`, \`refine\`, \`atLeastOne\`, etc.). The wrapped value is still accepted by \`useFormBridge\`, so you do not split rendering and validation across two objects.
 - **Autocomplete stays clean:** The wrapped value deliberately hides the field keys from direct autocomplete on the schema object typing \`mySchema.\` suggests only the API methods. Field-level inference still flows through \`SchemaValues<typeof mySchema>\` and the generated \`fields.*\` components.
-- **Type inference is preserved:** \`const\` inference on the shape keeps every field's builder type, so refinements receive a fully typed \`values\` argument and errors are routed back to the right field.`,
+- **Type inference is preserved:** \`const\` inference on the shape keeps every field's builder type, so refinements receive a fully typed \`values\` argument and errors are routed back to the right field.
+- **Import surface stays flexible:** use the main \`@runilib/react-formbridge\` entry in client-only files; if the schema module is shared with strict server runtimes, author it from \`@runilib/react-formbridge/schema\` and import React APIs separately from the main package.`,
   subsections: [
     {
       id: 'fb-schema-why',
@@ -42,11 +43,11 @@ If your form has only independent field rules, the plain object form with \`sati
     {
       id: 'fb-schema-quickstart',
       title: 'Quick start',
-      content: `The wrapped schema is used exactly like a plain shape. Hand it to \`useFormBridge\`, render via \`fields.*\`, and chain cross-field rules on the result of \`createSchema()\`. Declare the schema at module scope (outside the component) so its identity stays stable across renders.`,
+      content: `The wrapped schema is used exactly like a plain shape. Hand it to \`useFormBridge\`, render via \`fields.*\`, and chain cross-field rules on the result of \`createSchema()\`. Declare the schema at module scope (outside the component) so its identity stays stable across renders. If that schema module is reused outside React, move the schema authoring imports to \`@runilib/react-formbridge/schema\`.`,
       code: {
         filename: 'TripBookingForm.tsx',
         lang: 'tsx',
-        code: `import { field, schema, useFormBridge } from '@runilib/react-formbridge'
+        code: `import { createSchema, field, useFormBridge } from '@runilib/react-formbridge'
 
 const tripSchema = createSchema({
   email: field.email().label('Email'),
@@ -87,6 +88,54 @@ export function TripBookingForm() {
       <Form.Submit>Book the trip</Form.Submit>
     </Form>
   )
+}`,
+      },
+    },
+    {
+      id: 'fb-schema-shared-modules',
+      title: 'Shared client/server schema modules',
+      content: `If a schema file is imported by both React code and server-side code, define that file with the server-safe \`@runilib/react-formbridge/schema\` subpath. That keeps schema authoring and parsing available without pulling hooks or UI helpers into the server module graph.
+
+Keep React-only APIs such as \`useFormBridge\` imported from the main \`@runilib/react-formbridge\` entry inside your client component files.`,
+      code: {
+        filename: 'bookingSchema.ts + BookingForm.tsx + actions.ts',
+        lang: 'ts',
+        code: `// bookingSchema.ts
+import { createSchema, field, type SchemaValues } from '@runilib/react-formbridge/schema'
+
+export const bookingSchema = createSchema({
+  email: field.email('Email').trim().lowercase(),
+  phone: field.phone('Phone').defaultCountry('FR'),
+}).atLeastOne(
+  ['email', 'phone'],
+  'Provide at least an email or a phone number.',
+)
+
+export type BookingValues = SchemaValues<typeof bookingSchema>
+
+// BookingForm.tsx
+import { useFormBridge } from '@runilib/react-formbridge'
+import { bookingSchema } from './bookingSchema'
+
+export function BookingForm() {
+  const { Form, fields } = useFormBridge(bookingSchema)
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <fields.email />
+      <fields.phone />
+      <Form.Submit>Continue</Form.Submit>
+    </Form>
+  )
+}
+
+// actions.ts
+'use server'
+
+import { bookingSchema, type BookingValues } from './bookingSchema'
+
+export async function submitBooking(raw: unknown) {
+  return bookingSchema.safeParseAsync(raw as Partial<BookingValues>)
 }`,
       },
     },

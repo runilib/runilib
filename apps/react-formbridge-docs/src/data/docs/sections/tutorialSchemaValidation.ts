@@ -18,7 +18,7 @@ By the end you will have a form that:
     {
       filename: 'FinalResult.tsx',
       lang: 'tsx',
-      code: `import { field, schema, useFormBridge } from '@runilib/react-formbridge'
+      code: `import { createSchema, field, useFormBridge } from '@runilib/react-formbridge'
 
 // ── Schema with full cross-field validation ──────────────────────────
 const bookingSchema = createSchema({
@@ -120,13 +120,22 @@ export function BookingForm() {
     {
       filename: 'ServerReuse.ts',
       lang: 'ts',
-      code: `// The same schema works outside React - zero duplication.
+      code: `// bookingSchema.ts
+import { createSchema, field, type SchemaValues } from '@runilib/react-formbridge/schema'
+
+export const bookingSchema = createSchema({
+  // same schema as in the form module
+})
+
+export type BookingValues = SchemaValues<typeof bookingSchema>
+
+// createBooking.ts
 'use server'
 
-import { bookingSchema } from './bookingSchema'
+import { bookingSchema, type BookingValues } from './bookingSchema'
 
 export async function createBooking(raw: unknown) {
-  const result = await bookingSchema.safeParseAsync(raw as any)
+  const result = await bookingSchema.safeParseAsync(raw as Partial<BookingValues>)
 
   if (!result.success) {
     return {
@@ -192,7 +201,7 @@ const bookingFields = {
       code: {
         filename: '02-at-least-one.ts',
         lang: 'ts',
-        code: `import { field, schema } from '@runilib/react-formbridge'
+        code: `import { createSchema, field } from '@runilib/react-formbridge'
 
 const bookingSchema = createSchema({
   email: field.email('Email').trim().lowercase(),
@@ -215,7 +224,7 @@ const bookingSchema = createSchema({
       code: {
         filename: '03-date-order.ts',
         lang: 'ts',
-        code: `import { field, schema } from '@runilib/react-formbridge'
+        code: `import { createSchema, field } from '@runilib/react-formbridge'
 
 const bookingSchema = createSchema({
   departure:  field.date('Departure date').required(),
@@ -386,17 +395,29 @@ export function BookingForm() {
       title: 'Step 8 - Reuse the schema on the server',
       content: `Because \`createSchema()\` exposes \`safeParse\` and \`safeParseAsync\`, you can validate the exact same rules server-side - in a server action, a tRPC handler, an API route, or a test - without mounting React.
 
-The returned \`errorsByField\` is drop-in compatible with \`state.errors\`, so you can feed server errors straight back into the form via \`setErrors()\`.`,
+The returned \`errorsByField\` is drop-in compatible with \`state.errors\`, so you can feed server errors straight back into the form via \`setErrors()\`.
+
+If \`bookingSchema\` lives in a module shared between your client form and the server action, define that module with \`@runilib/react-formbridge/schema\` and keep \`useFormBridge\` imported from the main package only in React files.`,
       code: {
         filename: '08-server-reuse.ts',
         lang: 'ts',
-        code: `'use server'
+        code: `// bookingSchema.ts
+import { createSchema, field, type SchemaValues } from '@runilib/react-formbridge/schema'
 
-import { bookingSchema } from './bookingSchema'
+export const bookingSchema = createSchema({
+  // same schema as above
+})
+
+export type BookingValues = SchemaValues<typeof bookingSchema>
+
+// createBooking.ts
+'use server'
+
+import { bookingSchema, type BookingValues } from './bookingSchema'
 
 export async function createBooking(raw: unknown) {
   // safeParseAsync runs sync + async refinements
-  const result = await bookingSchema.safeParseAsync(raw as any)
+  const result = await bookingSchema.safeParseAsync(raw as Partial<BookingValues>)
 
   if (!result.success) {
     // result.errorsByField → { username: "..." }
@@ -450,7 +471,7 @@ For anything more complex, drop to \`refine\` (one boolean, one error) or \`supe
       code: {
         filename: 'helpers-examples.ts',
         lang: 'ts',
-        code: `import { field, schema } from '@runilib/react-formbridge'
+        code: `import { createSchema, field } from '@runilib/react-formbridge'
 
 // ── exactlyOne: pick one delivery method ─────────────────────────────
 const deliverySchema = createSchema({
