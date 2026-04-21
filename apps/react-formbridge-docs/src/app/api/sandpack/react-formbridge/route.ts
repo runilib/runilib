@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { NextResponse } from 'next/server';
@@ -12,9 +12,14 @@ const PACKAGE_ROOT = path.resolve(
   'packages',
   'react-formbridge',
 );
-const DIST_ENTRY = path.join(PACKAGE_ROOT, 'dist', 'index.mjs');
-const DIST_TYPES = path.join(PACKAGE_ROOT, 'dist', 'index.d.mts');
+const DIST_DIR = path.join(PACKAGE_ROOT, 'dist');
 const PACKAGE_JSON = path.join(PACKAGE_ROOT, 'package.json');
+
+function isWebBundleFile(name: string): boolean {
+  if (name.includes('.native.')) return false;
+  if (name.endsWith('.map')) return false;
+  return name.endsWith('.mjs') || name.endsWith('.d.mts') || name.endsWith('.d.ts');
+}
 
 export async function GET() {
   if (process.env.NODE_ENV === 'production') {
@@ -28,24 +33,28 @@ export async function GET() {
   }
 
   try {
-    const [bundle, types, rawPackageJson] = await Promise.all([
-      readFile(DIST_ENTRY, 'utf8'),
-      readFile(DIST_TYPES, 'utf8'),
-      readFile(PACKAGE_JSON, 'utf8'),
-    ]);
-
+    const rawPackageJson = await readFile(PACKAGE_JSON, 'utf8');
     const packageJson = JSON.parse(rawPackageJson) as {
       name?: string;
       version?: string;
       dependencies?: Record<string, string>;
     };
 
+    const entries = await readdir(DIST_DIR);
+    const bundleEntries = entries.filter(isWebBundleFile);
+
+    const files: Record<string, string> = {};
+    await Promise.all(
+      bundleEntries.map(async (name) => {
+        files[name] = await readFile(path.join(DIST_DIR, name), 'utf8');
+      }),
+    );
+
     return NextResponse.json(
       {
-        bundle,
         dependencies: packageJson.dependencies ?? {},
+        files,
         packageName: packageJson.name ?? '@runilib/react-formbridge',
-        types,
         version: packageJson.version ?? '0.0.0-local',
       },
       {
