@@ -149,8 +149,7 @@ type LocalFormBridgePackage = {
   readonly packageName: string;
   readonly version: string;
   readonly dependencies: Record<string, string>;
-  readonly bundle: string;
-  readonly types: string;
+  readonly files: Record<string, string>;
 };
 
 /* ------------------------------------------------------------------ */
@@ -272,34 +271,45 @@ function buildLocalPackageFiles(
   pkg: LocalFormBridgePackage,
 ): Record<string, PlaygroundFile> {
   const packageRoot = `/node_modules/${pkg.packageName}`;
+  const result: Record<string, PlaygroundFile> = {};
 
-  return {
-    [`${packageRoot}/index.d.ts`]: {
-      code: pkg.types,
+  for (const [filename, content] of Object.entries(pkg.files)) {
+    result[`${packageRoot}/${filename}`] = {
+      code: content,
       hidden: true,
       readOnly: true,
-    },
-    [`${packageRoot}/index.mjs`]: {
-      code: pkg.bundle,
-      hidden: true,
-      readOnly: true,
-    },
-    [`${packageRoot}/package.json`]: {
-      code: JSON.stringify(
-        {
-          name: pkg.packageName,
-          version: pkg.version,
-          main: './index.mjs',
-          module: './index.mjs',
-          types: './index.d.ts',
+    };
+  }
+
+  result[`${packageRoot}/package.json`] = {
+    code: JSON.stringify(
+      {
+        name: pkg.packageName,
+        version: pkg.version,
+        main: './index.mjs',
+        module: './index.mjs',
+        types: './index.d.mts',
+        exports: {
+          '.': {
+            types: './index.d.mts',
+            import: './index.mjs',
+            default: './index.mjs',
+          },
+          './schema': {
+            types: './schema.d.mts',
+            import: './schema.mjs',
+            default: './schema.mjs',
+          },
         },
-        null,
-        2,
-      ),
-      hidden: true,
-      readOnly: true,
-    },
+      },
+      null,
+      2,
+    ),
+    hidden: true,
+    readOnly: true,
   };
+
+  return result;
 }
 
 /* ------------------------------------------------------------------ */
