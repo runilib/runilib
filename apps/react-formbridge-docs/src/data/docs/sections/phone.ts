@@ -46,18 +46,168 @@ export const phoneSection: LibraryDoc['sections'][number] = {
 - \`storeE164()\` normalizes the output to \`+33612345678\` format for API consumption`,
   codeTabs: [
     {
-      filename: 'Phone.tsx',
-      lang: 'ts',
+      filename: 'Phone.web.tsx',
+      label: 'Web',
+      interactive: true,
+      lang: 'tsx',
+      code: `import { useState } from 'react'
+import { field, useFormBridge } from '@runilib/react-formbridge'
 
-      code: `const schema = {
+const schema = {
   phone: field.phone('Phone')
     .defaultCountry('FR')
-    .preferredCountries(['FR','US','GB'])
+    .preferredCountries(['FR', 'US', 'GB'])
     .searchable()
     .showFlag(true)
     .showDialCode(true)
     .storeE164()
     .required(),
+}
+
+export function PhonePlaygroundWeb() {
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+  const { Form, fields, state } = useFormBridge(schema, {
+    validateOn: 'onBlur',
+  })
+
+  return (
+    <div
+      style={{
+        fontFamily: 'sans-serif',
+        padding: 20,
+        background: '#f5f7fb',
+        display: 'grid',
+        gap: 16,
+      }}
+    >
+      <div>
+        <h3 style={{ margin: '0 0 8px' }}>Interactive phone field</h3>
+        <p style={{ margin: 0, color: '#4b5563' }}>
+          Switch country, type a number, then submit to inspect the E.164 payload.
+        </p>
+      </div>
+
+      <Form
+        onSubmit={async (values) => {
+          setSubmitted(values)
+        }}
+      >
+        <div style={{ display: 'grid', gap: 12 }}>
+          <fields.phone />
+          <Form.Submit>Save phone</Form.Submit>
+        </div>
+      </Form>
+
+      <div style={{ display: 'grid', gap: 12 }}>
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Live values</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+            {JSON.stringify(state.values, null, 2)}
+          </pre>
+        </div>
+
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Last submit</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+            {JSON.stringify(submitted, null, 2)}
+          </pre>
+        </div>
+      </div>
+    </div>
+  )
+}`,
+    },
+    {
+      filename: 'Phone.native.tsx',
+      label: 'App',
+      interactive: true,
+      lang: 'tsx',
+      code: `import { useState } from 'react'
+import { ScrollView, Text, View } from 'react-native'
+import { field, useFormBridge } from '@runilib/react-formbridge'
+
+const schema = {
+  phone: field.phone('Phone')
+    .defaultCountry('FR')
+    .preferredCountries(['FR', 'US', 'GB'])
+    .searchable()
+    .showFlag(true)
+    .showDialCode(true)
+    .storeE164()
+    .required(),
+}
+
+export function PhonePlaygroundApp() {
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+  const { Form, fields, state } = useFormBridge(schema, {
+    validateOn: 'onBlur',
+  })
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
+      <View style={{ padding: 16, gap: 16 }}>
+        <View style={{ gap: 6 }}>
+          <Text style={{ fontSize: 18, fontWeight: '600' }}>Interactive phone field</Text>
+          <Text style={{ color: '#4b5563' }}>
+            Change country, enter a number, then submit to inspect the E.164 value.
+          </Text>
+        </View>
+
+        <Form
+          onSubmit={async (values) => {
+            setSubmitted(values)
+          }}
+        >
+          <View style={{ gap: 12 }}>
+            <fields.phone />
+            <Form.Submit>Save phone</Form.Submit>
+          </View>
+        </Form>
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            backgroundColor: '#fff',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: '600' }}>Live values</Text>
+          <Text>{JSON.stringify(state.values, null, 2)}</Text>
+        </View>
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            backgroundColor: '#fff',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: '600' }}>Last submit</Text>
+          <Text>{JSON.stringify(submitted, null, 2)}</Text>
+        </View>
+      </View>
+    </ScrollView>
+  )
 }`,
     },
   ],

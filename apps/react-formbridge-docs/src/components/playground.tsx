@@ -149,7 +149,12 @@ type LocalFormBridgePackage = {
   readonly packageName: string;
   readonly version: string;
   readonly dependencies: Record<string, string>;
-  readonly files: Record<string, string>;
+  readonly distFiles: Record<string, string>;
+  readonly exports?: Record<string, unknown>;
+  readonly main?: string;
+  readonly module?: string;
+  readonly reactNative?: string;
+  readonly typeEntry?: string;
 };
 
 /* ------------------------------------------------------------------ */
@@ -271,45 +276,70 @@ function buildLocalPackageFiles(
   pkg: LocalFormBridgePackage,
 ): Record<string, PlaygroundFile> {
   const packageRoot = `/node_modules/${pkg.packageName}`;
-  const result: Record<string, PlaygroundFile> = {};
-
-  for (const [filename, content] of Object.entries(pkg.files)) {
-    result[`${packageRoot}/${filename}`] = {
-      code: content,
-      hidden: true,
-      readOnly: true,
-    };
-  }
-
-  result[`${packageRoot}/package.json`] = {
-    code: JSON.stringify(
+  const injectedDistFiles = Object.fromEntries(
+    Object.entries(pkg.distFiles).map(([relativePath, code]) => [
+      `${packageRoot}/${relativePath}`,
       {
-        name: pkg.packageName,
-        version: pkg.version,
-        main: './index.mjs',
-        module: './index.mjs',
-        types: './index.d.mts',
-        exports: {
-          '.': {
-            types: './index.d.mts',
-            import: './index.mjs',
-            default: './index.mjs',
-          },
-          './schema': {
-            types: './schema.d.mts',
-            import: './schema.mjs',
-            default: './schema.mjs',
+        code,
+        hidden: true,
+        readOnly: true,
+      } satisfies PlaygroundFile,
+    ]),
+  );
+
+  return {
+    ...injectedDistFiles,
+    [`${packageRoot}/package.json`]: {
+      code: JSON.stringify(
+        {
+          name: pkg.packageName,
+          version: pkg.version,
+          main: pkg.main ?? './dist/index.mjs',
+          module: pkg.module ?? pkg.main ?? './dist/index.mjs',
+          types: pkg.typeEntry ?? './dist/index.d.mts',
+          'react-native': pkg.reactNative ?? './dist/index.native.mjs',
+          exports: pkg.exports ?? {
+            '.': {
+              import: './dist/index.mjs',
+              default: './dist/index.mjs',
+              types: './dist/index.d.mts',
+            },
+            './schema': {
+              import: './dist/schema.mjs',
+              default: './dist/schema.mjs',
+              types: './dist/schema.d.mts',
+            },
           },
         },
-      },
-      null,
-      2,
-    ),
-    hidden: true,
-    readOnly: true,
+        null,
+        2,
+      ),
+      hidden: true,
+      readOnly: true,
+    },
+    // Keep root proxies so the package still resolves even if the sandbox falls back
+    // to classic main-file resolution instead of package exports.
+    [`${packageRoot}/index.d.ts`]: {
+      code: `export * from './dist/index.d.mts';\n`,
+      hidden: true,
+      readOnly: true,
+    },
+    [`${packageRoot}/index.mjs`]: {
+      code: `export * from './dist/index.mjs';\n`,
+      hidden: true,
+      readOnly: true,
+    },
+    [`${packageRoot}/schema.d.ts`]: {
+      code: `export * from './dist/schema.d.mts';\n`,
+      hidden: true,
+      readOnly: true,
+    },
+    [`${packageRoot}/schema.mjs`]: {
+      code: `export * from './dist/schema.mjs';\n`,
+      hidden: true,
+      readOnly: true,
+    },
   };
-
-  return result;
 }
 
 /* ------------------------------------------------------------------ */
