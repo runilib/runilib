@@ -299,6 +299,31 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
     search.trim() ? `No countries match "${search.trim()}".` : 'No countries available.',
     renderContext,
   );
+  const shouldRenderE164 =
+    Boolean(normalizedValue?.e164) &&
+    (e164Text !== undefined || renderE164 !== undefined);
+
+  const defaultE164Content =
+    normalizedValue?.e164 && shouldRenderE164 ? (
+      <span
+        data-fb-slot="e164"
+        className={classNames?.phoneE164}
+        style={mergeStyles(styles?.phoneE164)}
+      >
+        {resolveText(e164Text, normalizedValue.e164, {
+          ...renderContext,
+          e164: normalizedValue.e164,
+        })}
+      </span>
+    ) : null;
+  const resolvedE164Content =
+    normalizedValue?.e164 && defaultE164Content
+      ? (renderE164?.({
+          ...renderContext,
+          defaultContent: defaultE164Content,
+          e164: normalizedValue.e164,
+        }) ?? defaultE164Content)
+      : null;
   const defaultCountryButtonContent = (
     <>
       {descriptor._phoneShowFlag && (
@@ -603,34 +628,7 @@ export const PhoneInput = ({ descriptor, extra, registerFocusable, ...props }: P
         renderHint,
       })}
 
-      {normalizedValue?.e164 &&
-        (renderE164?.({
-          ...renderContext,
-          defaultContent: (
-            <span
-              data-fb-slot="e164"
-              className={classNames?.phoneE164}
-              style={mergeStyles(styles?.phoneE164)}
-            >
-              {resolveText(e164Text, normalizedValue.e164, {
-                ...renderContext,
-                e164: normalizedValue.e164,
-              })}
-            </span>
-          ),
-          e164: normalizedValue.e164,
-        }) ?? (
-          <span
-            data-fb-slot="e164"
-            className={classNames?.phoneE164}
-            style={mergeStyles(styles?.phoneE164)}
-          >
-            {resolveText(e164Text, normalizedValue.e164, {
-              ...renderContext,
-              e164: normalizedValue.e164,
-            })}
-          </span>
-        ))}
+      {resolvedE164Content}
     </div>
   );
 };

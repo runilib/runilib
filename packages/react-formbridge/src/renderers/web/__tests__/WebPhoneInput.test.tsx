@@ -126,6 +126,55 @@ describe('WebPhoneInput ui', () => {
     getByText('No matches for zzz');
   });
 
+  it('keeps the E.164 preview hidden by default and only renders it when opted in', () => {
+    const country = getCountry('FR');
+
+    if (!country) {
+      throw new Error('Expected FR to be available in the phone country list.');
+    }
+
+    const value = buildPhoneValue(country, '06 12 34 56 78');
+    const { container, queryByText, rerender } = renderPhoneField(field.phone('Phone'), {
+      value,
+    });
+
+    expect(queryByText('+33612345678')).toBeNull();
+    expect(container.querySelector('[data-fb-slot="e164"]')).toBeNull();
+
+    const descriptor = field.phone('Phone')._build();
+    const resolvedDescriptor = {
+      ...descriptor,
+      fieldPropsFromClient: {},
+    } as React.ComponentProps<typeof PhoneInput>['descriptor'];
+
+    rerender(
+      <PhoneInput
+        descriptor={resolvedDescriptor}
+        name="phone"
+        value={value}
+        label={descriptor._label ?? ''}
+        placeholder={descriptor._placeholder}
+        allValues={{}}
+        error={null}
+        touched={false}
+        dirty={false}
+        validating={false}
+        disabled={false}
+        required={Boolean(descriptor._required)}
+        hint={descriptor._hint}
+        onChange={() => {}}
+        onBlur={() => {}}
+        onFocus={() => {}}
+        extra={{
+          e164Text: ({ e164 }) => `Stored as ${e164}`,
+        }}
+      />,
+    );
+
+    expect(queryByText('Stored as +33612345678')).toBeTruthy();
+    expect(container.querySelector('[data-fb-slot="e164"]')).toBeTruthy();
+  });
+
   it('lets runtime input styles override integrated defaults', () => {
     const { getByRole } = renderPhoneField(field.phone('Phone'), {
       extra: {

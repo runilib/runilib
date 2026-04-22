@@ -89,16 +89,33 @@ export const textSection: LibraryDoc['sections'][number] = {
     .pattern(/^[a-z\\s'-]+$/i, 'Only letters and spaces.'),
 }
 const { Form, fields } = useFormBridge(schema)
-<Form onSubmit={save}><fields.fullName /><Form.Submit>Save</Form.Submit></Form>`,
+
+return (
+<Form onSubmit={save}>
+  <fields.fullName />
+  <Form.Submit>Save</Form.Submit>
+</Form>
+)`,
     },
     {
       filename: 'Text.native.tsx',
       lang: 'tsx',
       code: `const schema = {
-  fullName: field.text('Full name').required().trim(),
+  fullName: field.text('Full name')
+    .required('Name is required')
+    .trim()
+    .min(2)
+    .max(80)
+    .pattern(/^[a-z\\s'-]+$/i, 'Only letters and spaces.'),
 }
 const { Form, fields } = useFormBridge(schema)
-<Form onSubmit={save}><fields.fullName /><Form.Submit>Save</Form.Submit></Form>`,
+
+return (
+<Form onSubmit={save}>
+  <fields.fullName />
+  <Form.Submit>Save</Form.Submit>
+</Form>
+)`,
     },
   ],
   subsections: [

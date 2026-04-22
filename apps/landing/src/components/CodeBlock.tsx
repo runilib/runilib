@@ -401,6 +401,9 @@ const Wrap = styled.div`
   border: 1px solid rgba(0,229,200,0.15);
   box-shadow: 0 4px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
   background: #0d1117;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 `;
 const Header = styled.div`
   display: flex;
@@ -409,6 +412,11 @@ const Header = styled.div`
   padding: 10px 16px;
   background: #161b22;
   border-bottom: 1px solid rgba(255,255,255,0.07);
+  min-width: 0;
+  @media (max-width: 480px) {
+    gap: 8px;
+    padding: 10px 12px;
+  }
 `;
 const Dots = styled.div`
   display: flex;
@@ -449,9 +457,13 @@ const CopyBtn = styled.button<{ copied: boolean }>`
   &:hover { border-color: rgba(0,229,200,0.4); color: #00e5c8; }
 `;
 const Pre = styled.div`
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   padding: 16px 0;
   background: #0d1117;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   table {
     border-collapse: collapse;
     width: 100%;
@@ -470,6 +482,11 @@ const LineNum = styled.td`
   min-width: 48px;
   border-right: 1px solid rgba(255,255,255,0.04);
   vertical-align: top;
+  @media (max-width: 600px) {
+    font-size: 11.5px;
+    padding: 0 10px;
+    min-width: 32px;
+  }
 `;
 const LineCode = styled.td`
   font-family: 'DM Mono', monospace;
@@ -479,4 +496,8 @@ const LineCode = styled.td`
   white-space: pre;
   vertical-align: top;
   color: #a6accd;
+  @media (max-width: 600px) {
+    font-size: 12px;
+    padding: 0 14px;
+  }
 `;

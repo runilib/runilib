@@ -337,6 +337,27 @@ export const NativePhoneInput: React.FC<Props> = ({
     search.trim() ? `No countries match "${search.trim()}".` : 'No countries available.',
     renderContext,
   );
+  const shouldRenderE164 =
+    Boolean(normalizedValue?.e164) &&
+    (e164Text !== undefined || renderE164 !== undefined);
+  const defaultE164Content =
+    normalizedValue?.e164 && shouldRenderE164 ? (
+      <Text style={sx(styles?.phoneE164)}>
+        {resolveText(e164Text, normalizedValue.e164, {
+          ...renderContext,
+          e164: normalizedValue.e164,
+        })}
+      </Text>
+    ) : null;
+  const resolvedE164Content =
+    normalizedValue?.e164 && defaultE164Content
+      ? (renderE164?.({
+          ...renderContext,
+          defaultContent: defaultE164Content,
+          e164: normalizedValue.e164,
+        }) ?? defaultE164Content)
+      : null;
+
   const defaultCountryButtonContent = (
     <>
       {descriptor._phoneShowFlag && (
@@ -444,27 +465,7 @@ export const NativePhoneInput: React.FC<Props> = ({
         />
       </View>
 
-      {normalizedValue?.e164
-        ? (renderE164?.({
-            ...renderContext,
-            defaultContent: (
-              <Text style={sx(styles?.phoneE164)}>
-                {resolveText(e164Text, normalizedValue.e164, {
-                  ...renderContext,
-                  e164: normalizedValue.e164,
-                })}
-              </Text>
-            ),
-            e164: normalizedValue.e164,
-          }) ?? (
-            <Text style={sx(styles?.phoneE164)}>
-              {resolveText(e164Text, normalizedValue.e164, {
-                ...renderContext,
-                e164: normalizedValue.e164,
-              })}
-            </Text>
-          ))
-        : null}
+      {resolvedE164Content}
 
       {props.error
         ? (renderError?.({ id, name: props.name, error: props.error }) ?? (

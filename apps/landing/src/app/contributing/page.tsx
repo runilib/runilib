@@ -507,6 +507,8 @@ function _TwitterIcon() {
 const PageWrap = styled.div`
   padding-top: 64px;
   min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
 `;
 
 // Section primitives
@@ -514,6 +516,9 @@ const Section = styled.section`
   max-width: 1240px;
   margin: 0 auto;
   padding: 88px 24px;
+  @media (max-width: 600px) {
+    padding: 56px 18px;
+  }
 `;
 const SectionLabel = styled.div`
   font-family: 'DM Mono', monospace;
@@ -601,9 +606,15 @@ const HeroInner = styled.div`
   gap: 48px;
   flex-wrap: wrap;
   animation: ${fadeUp} 0.6s ease both;
+  @media (max-width: 600px) {
+    padding: 56px 18px 44px;
+    gap: 32px;
+  }
 `;
 const HeroLeft = styled.div`
   max-width: 600px;
+  min-width: 0;
+  width: 100%;
 `;
 const HeroTitle = styled.h1`
   font-family: 'Sora', sans-serif;
@@ -635,7 +646,8 @@ const HeroRight = styled.div`
   @media (max-width: 760px) {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
+    width: 100%;
   }
 `;
 const HeroStat = styled.div`
@@ -646,6 +658,11 @@ const HeroStat = styled.div`
   text-align: center;
   min-width: 120px;
   background-image: ${({ theme }) => theme.gradientCard};
+  @media (max-width: 760px) {
+    flex: 1 1 100px;
+    min-width: 0;
+    padding: 14px 12px;
+  }
 `;
 const StatNum = styled.div`
   font-family: 'Sora', sans-serif;
@@ -660,6 +677,9 @@ const StatNum = styled.div`
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: ${shimmer} 3s linear infinite;
+  @media (max-width: 760px) {
+    font-size: 22px;
+  }
 `;
 const StatLbl = styled.div`
   font-family: 'DM Mono', monospace;
@@ -667,6 +687,10 @@ const StatLbl = styled.div`
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: ${({ theme }) => theme.textMuted};
+  @media (max-width: 760px) {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
 `;
 
 // ── Why contribute ──────────────────────────────────────────────────────────
@@ -725,6 +749,9 @@ const StepsSection = styled.section`
   border-top: 1px solid ${({ theme }) => theme.border};
   border-bottom: 1px solid ${({ theme }) => theme.border};
   padding: 88px 24px;
+  @media (max-width: 600px) {
+    padding: 56px 18px;
+  }
 `;
 const StepsInner = styled.div`
   max-width: 900px;
@@ -738,11 +765,11 @@ const StepsList = styled.div`
 `;
 const StepRow = styled.div`
   display: grid;
-  grid-template-columns: 64px 1fr;
+  grid-template-columns: 64px minmax(0, 1fr);
   gap: 24px;
   @media (max-width: 600px) {
-    grid-template-columns: 48px 1fr;
-    gap: 16px;
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 12px;
   }
 `;
 const StepLeft = styled.div`
@@ -755,7 +782,7 @@ const StepNum = styled.div`
   width: 48px; height: 48px;
   border-radius: 50%;
   background: ${({ theme }) => theme.teal};
-  color: "#fff";
+  color: #fff;
   font-family: 'DM Mono', monospace;
   font-size: 13px;
   font-weight: 700;
@@ -764,7 +791,7 @@ const StepNum = styled.div`
   justify-content: center;
   flex-shrink: 0;
   box-shadow: 0 0 20px ${({ theme }) => theme.teal}40;
-  @media (max-width: 600px) { width: 36px; height: 36px; font-size: 11px; }
+  @media (max-width: 600px) { width: 32px; height: 32px; font-size: 11px; }
 `;
 const StepConnector = styled.div`
   width: 2px;
@@ -779,6 +806,7 @@ const StepConnector = styled.div`
 `;
 const StepContent = styled.div<{ $last: boolean }>`
   padding-bottom: ${({ $last }) => ($last ? '0' : '48px')};
+  min-width: 0;
 `;
 const StepTitle = styled.h3`
   font-family: 'Sora', sans-serif;
@@ -811,7 +839,12 @@ const StepNote = styled.div`
   max-width: 680px;
 `;
 const NoteIcon = styled.span`flex-shrink: 0; font-size: 16px;`;
-const StepCodeWrap = styled.div`margin-top: 20px; max-width: 700px;`;
+const StepCodeWrap = styled.div`
+  margin-top: 20px;
+  max-width: 700px;
+  min-width: 0;
+  width: 100%;
+`;
 
 // ── Code style ──────────────────────────────────────────────────────────────
 
@@ -875,6 +908,9 @@ const ChecklistSection = styled.section`
   border-top: 1px solid ${({ theme }) => theme.border};
   border-bottom: 1px solid ${({ theme }) => theme.border};
   padding: 88px 24px;
+  @media (max-width: 600px) {
+    padding: 56px 18px;
+  }
 `;
 const ChecklistInner = styled.div`
   max-width: 1240px;
@@ -1046,6 +1082,9 @@ const CommunitySection = styled.section`
   border-top: 1px solid ${({ theme }) => theme.border};
   border-bottom: 1px solid ${({ theme }) => theme.border};
   padding: 88px 24px;
+  @media (max-width: 600px) {
+    padding: 56px 18px;
+  }
 `;
 const CommunityInner = styled.div`max-width: 1240px; margin: 0 auto;`;
 const CommunitySub = styled.p`
@@ -1193,6 +1232,9 @@ const CTASection = styled.section`
   text-align: center;
   padding: 100px 24px;
   overflow: hidden;
+  @media (max-width: 600px) {
+    padding: 64px 18px;
+  }
 `;
 const CTAGlow = styled.div`
   position: absolute;

@@ -12,7 +12,7 @@ export const useFormBridgeContextSection: LibraryDoc['sections'][number] = {
 - It throws if used outside \`<form.Form>\` or \`<form.FormProvider>\``,
   codeTabs: [
     {
-      filename: 'FormContext.web.tsx',
+      filename: 'web.tsx',
       lang: 'tsx',
       code: `import {
   field,
@@ -54,7 +54,7 @@ export function NewsletterSettings() {
 }`,
     },
     {
-      filename: 'FormContext.native.tsx',
+      filename: 'native.tsx',
       lang: 'tsx',
       code: `import { Text, View } from 'react-native'
 import {

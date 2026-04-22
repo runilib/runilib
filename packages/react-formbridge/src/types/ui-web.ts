@@ -541,7 +541,7 @@ export interface WebPhoneFieldPropsOverrides
   searchPlaceholderText?: WebTextOverride<WebPhoneFieldRenderContext>;
   /** Text shown when the search query matches no countries. */
   emptySearchText?: WebTextOverride<WebPhoneFieldRenderContext>;
-  /** Label shown next to / below the E.164 preview ("International: …"). */
+  /** Opt-in label shown next to / below the E.164 preview ("International: …"). */
   e164Text?: WebTextOverride<
     WebPhoneFieldRenderContext & {
       e164: string;
@@ -565,7 +565,7 @@ export interface WebPhoneFieldPropsOverrides
       defaultContent: ReactNode;
     },
   ) => ReactNode;
-  /** Full renderer for the E.164 preview below the phone input. */
+  /** Opt-in full renderer for the E.164 preview below the phone input. */
   renderE164?: (
     ctx: WebPhoneFieldRenderContext & {
       defaultContent: ReactNode;

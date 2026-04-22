@@ -17,7 +17,7 @@ Every approach below flows through the same runtime and lands in the same \`stat
 4. **Trigger configuration** - \`validateOn\` and \`revalidateOn\` control **when** validation runs (\`'onBlur'\`, \`'onChange'\`, \`'onSubmit'\`, \`'onTouched'\`). Defaults: \`validateOn='onBlur'\`, \`revalidateOn='onChange'\`.
 5. **External resolvers** (opt-in) - bring your own Zod / Yup / Joi / Valibot schema via \`validatorResolver\` when you already own a domain schema elsewhere in the app.
 
-> FormBridge's design goal: **built-in validation is the complete path**, not a stepping stone to an external resolver. Resolvers are provided for teams that already have a domain schema they want to reuse, not because the built-in pipeline is incomplete.`,
+ FormBridge's design goal: **built-in validation is the complete path**, not a stepping stone to an external resolver. Resolvers are provided for teams that already have a domain schema they want to reuse, not because the built-in pipeline is incomplete.`,
   subsections: [
     {
       id: 'fb-validation-field-level',

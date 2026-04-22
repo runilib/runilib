@@ -450,7 +450,7 @@ export interface NativePhoneFieldPropsOverrides
   searchPlaceholderText?: NativeTextOverride<NativePhoneFieldRenderContext>;
   /** Text shown when the search query matches no countries. */
   emptySearchText?: NativeTextOverride<NativePhoneFieldRenderContext>;
-  /** Label shown next to / below the E.164 preview. */
+  /** Opt-in label shown next to / below the E.164 preview. */
   e164Text?: NativeTextOverride<
     NativePhoneFieldRenderContext & {
       e164: string;
@@ -474,7 +474,7 @@ export interface NativePhoneFieldPropsOverrides
       defaultContent: React.ReactNode;
     },
   ) => React.ReactNode;
-  /** Full renderer for the E.164 preview. */
+  /** Opt-in full renderer for the E.164 preview. */
   renderE164?: (
     ctx: NativePhoneFieldRenderContext & {
       defaultContent: React.ReactNode;
@@ -710,7 +710,7 @@ export interface NativeFieldPropsOverrides
   searchPlaceholderText?: NativeTextOverride<NativePhoneFieldRenderContext>;
   /** Phone: text shown when the search query matches no countries. */
   emptySearchText?: NativeTextOverride<NativePhoneFieldRenderContext>;
-  /** Phone: label shown next to the E.164 preview. */
+  /** Phone: opt-in label shown next to the E.164 preview. */
   e164Text?: NativeTextOverride<
     NativePhoneFieldRenderContext & {
       e164: string;
@@ -734,7 +734,7 @@ export interface NativeFieldPropsOverrides
       defaultContent: React.ReactNode;
     },
   ) => React.ReactNode;
-  /** Phone: full renderer for the E.164 preview. */
+  /** Phone: opt-in full renderer for the E.164 preview. */
   renderE164?: (
     ctx: NativePhoneFieldRenderContext & {
       defaultContent: React.ReactNode;

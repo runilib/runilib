@@ -49,10 +49,12 @@ export const maskedSection: LibraryDoc['sections'][number] = {
 - The renderer adapts width and input mode to the mask profile (numeric vs alphanumeric)`,
   codeTabs: [
     {
-      filename: 'Masked.tsx',
+      filename: 'Masked.web.tsx',
+      label: 'Web',
+      interactive: true,
       lang: 'tsx',
-
-      code: `import { MASKS } from '@runilib/react-formbridge'
+      code: `import { useState } from 'react'
+import { MASKS, field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   cardNumber: field
@@ -69,6 +71,160 @@ const schema = {
       L: /[A-Z]/,
     })
     .uppercase(),
+}
+
+export function MaskedPlaygroundWeb() {
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+  const { Form, fields, state } = useFormBridge(schema, {
+    validateOn: 'onBlur',
+  })
+
+  return (
+    <div
+      style={{
+        fontFamily: 'sans-serif',
+        padding: 20,
+        background: '#f5f7fb',
+        display: 'grid',
+        gap: 16,
+      }}
+    >
+      <div>
+        <h3 style={{ margin: '0 0 8px' }}>Interactive masked fields</h3>
+        <p style={{ margin: 0, color: '#4b5563' }}>
+          Try the card mask and the custom plate mask, then inspect the stored values.
+        </p>
+      </div>
+
+      <Form
+        onSubmit={async (values) => {
+          setSubmitted(values)
+        }}
+      >
+        <div style={{ display: 'grid', gap: 12 }}>
+          <fields.cardNumber />
+          <fields.licensePlate />
+          <Form.Submit>Save values</Form.Submit>
+        </div>
+      </Form>
+
+      <div style={{ display: 'grid', gap: 12 }}>
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Live values</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+            {JSON.stringify(state.values, null, 2)}
+          </pre>
+        </div>
+
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Last submit</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+            {JSON.stringify(submitted, null, 2)}
+          </pre>
+        </div>
+      </div>
+    </div>
+  )
+}`,
+    },
+    {
+      filename: 'Masked.native.tsx',
+      label: 'App',
+      interactive: true,
+      lang: 'tsx',
+      code: `import { useState } from 'react'
+import { ScrollView, Text, View } from 'react-native'
+import { MASKS, field, useFormBridge } from '@runilib/react-formbridge'
+
+const schema = {
+  cardNumber: field
+    .masked(MASKS.CARD_16)
+    .label('Card number')
+    .required()
+    .showMaskInPlaceholder()
+    .validateComplete('Card is incomplete.'),
+
+  licensePlate: field
+    .masked('LL-999-LL')
+    .label('License plate')
+    .tokens({
+      L: /[A-Z]/,
+    })
+    .uppercase(),
+}
+
+export function MaskedPlaygroundApp() {
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+  const { Form, fields, state } = useFormBridge(schema, {
+    validateOn: 'onBlur',
+  })
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
+      <View style={{ padding: 16, gap: 16 }}>
+        <View style={{ gap: 6 }}>
+          <Text style={{ fontSize: 18, fontWeight: '600' }}>Interactive masked fields</Text>
+          <Text style={{ color: '#4b5563' }}>
+            Try the built-in card mask and the custom license-plate mask.
+          </Text>
+        </View>
+
+        <Form
+          onSubmit={async (values) => {
+            setSubmitted(values)
+          }}
+        >
+          <View style={{ gap: 12 }}>
+            <fields.cardNumber />
+            <fields.licensePlate />
+            <Form.Submit>Save values</Form.Submit>
+          </View>
+        </Form>
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            backgroundColor: '#fff',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: '600' }}>Live values</Text>
+          <Text>{JSON.stringify(state.values, null, 2)}</Text>
+        </View>
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            backgroundColor: '#fff',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: '600' }}>Last submit</Text>
+          <Text>{JSON.stringify(submitted, null, 2)}</Text>
+        </View>
+      </View>
+    </ScrollView>
+  )
 }`,
     },
   ],

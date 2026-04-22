@@ -17,7 +17,7 @@ export const analyticsSection: LibraryDoc['sections'][number] = {
 - For most forms, passing \`analytics\` directly to \`useFormBridge(schema, { analytics })\` is the simplest path; the standalone hook is the lower-level escape hatch`,
   codeTabs: [
     {
-      filename: 'Analytics.web.tsx',
+      filename: 'web.tsx',
       lang: 'tsx',
       code: `import {
   field,
@@ -58,7 +58,7 @@ export function SignupWithAnalytics() {
 }`,
     },
     {
-      filename: 'Analytics.native.tsx',
+      filename: 'native.tsx',
       lang: 'tsx',
       code: `import { ScrollView, View } from 'react-native'
 import {
