@@ -158,11 +158,11 @@ Host helpers are the fix. They are defined once at the module level, their ident
       content: `Reach for host helpers when **both** of the following are true:
 
 - You are styling FormBridge with a **wrapper-based** library: \`styled-components\`, \`styled-components/native\`, \`emotion\` (\`styled()\`), \`panda\` (\`cva(Component)\`), \`stitches\`, \`linaria\`, \`goober\`, or anything else that expects a stable component reference.
-- You want to keep using the generated components (\`form.Form\`, \`form.fields.*\`, \`form.Form.Submit\`) instead of dropping down to [\`fieldController()\`](/docs/fieldcontroller) or [\`field.custom()\`](/docs/field-custom).
+- You want to keep using the generated components (\`form.Form\`, \`form.fields.*\`, \`form.Form.Submit\`) instead of dropping down to [fieldController()](/docs/fieldcontroller) or [field.custom()](/docs/field-custom).
 
 You do **not** need host helpers when:
 
-- You are styling with CSS classes, Tailwind, CSS Modules, inline \`style\` props, or the built-in \`ui\` / \`globalDefaults\` options - those work directly on the generated components.
+- You are styling with CSS classes, Tailwind, CSS Modules, inline \`style\` props, or the built-in \`globalDefaults\` options - those work directly on the generated components.
 - You already need to replace the whole field renderer (custom trigger, modal picker, composite widget). In that case, \`fieldController()\` gives you more control.
 - You are writing a brand new field type that no builder covers. In that case, \`field.custom()\` is the right tool.
 
