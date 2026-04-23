@@ -49,7 +49,7 @@ export function CheckoutForm() {
           classNames: {
             wrapper: styles.field,
             label: styles.label,
-            input: styles.input,
+            textInput: styles.input,
             textarea: styles.input,
             error: styles.error,
             hint: styles.hint,
@@ -63,7 +63,7 @@ export function CheckoutForm() {
       <form.fields.projectName />
       <form.fields.ownerEmail
         styles={{
-            input: { borderColor: '#38bdf8' },
+            textInput: { borderColor: '#38bdf8' },
         }}
       />
       <form.fields.launchNotes />
@@ -127,7 +127,7 @@ export function CheckoutScreen() {
           styles: {
             wrapper: checkoutUi.fieldRoot,
             label: checkoutUi.fieldLabel,
-            input: checkoutUi.fieldInput,
+            textInput: checkoutUi.fieldInput,
             hint: checkoutUi.fieldHint,
             error: checkoutUi.fieldError,
           },
@@ -143,7 +143,7 @@ export function CheckoutScreen() {
           <form.fields.ownerEmail />
           <form.fields.launchNotes
             styles={{
-                input: { minHeight: 112 }
+                textInput: { minHeight: 112 }
             }}
           />
           <form.Form.Submit>Save theme</form.Form.Submit>
@@ -180,7 +180,7 @@ Merge order is predictable: builder \`behavior\` → \`globalDefaults\` → loca
 | Text-like fields | \`inputProps\` | Web + Native |
 | \`textarea\` fields | \`textareaProps\` | Web only |
 | \`select\` fields | \`selectProps\` | Web only |
-| Web fields | wrapper-level \`className\` | Web only |
+| Web fields | \`classNames\` / \`styles\` slot maps | Web only |
 | Native fields | \`className\`, \`textareaProps\`, \`selectProps\` | Not exposed |`,
     },
     {
@@ -206,7 +206,7 @@ Merge order is predictable: builder \`behavior\` → \`globalDefaults\` → loca
         classNames: {
           wrapper: styles.formField,
           label: styles.formLabel,
-          input: styles.formInput,
+          textInput: styles.formInput,
           textarea: styles.formInput,
           select: styles.formInput,
           hint: styles.helperText,
@@ -219,7 +219,7 @@ Merge order is predictable: builder \`behavior\` → \`globalDefaults\` → loca
   <form.fields.projectName />
   <form.fields.ownerEmail
     styles={{
-        input: { borderColor: '#38bdf8' },
+        textInput: { borderColor: '#38bdf8' },
     }}
   />
   <form.fields.department />
@@ -235,10 +235,10 @@ Merge order is predictable: builder \`behavior\` → \`globalDefaults\` → loca
         styles: {
           wrapper: s.fieldRoot,
           label: s.fieldLabel,
-          input: s.fieldInput,
+          textInput: s.fieldInput,
           hint: s.fieldHint,
           error: s.fieldError,
-          optionTrigger: s.fieldInput,
+          selectTrigger: s.fieldInput,
         },
       },
     submit: {
@@ -340,7 +340,7 @@ const EmailField = styled(FieldHost).attrs({
     },
     styles: {
       wrapper: { marginBottom: 0, gap: 8 },
-      input: {
+      textInput: {
         minHeight: 52,
         borderWidth: 1.5,
         borderColor: 'rgba(56, 189, 248, 0.28)',
@@ -464,7 +464,7 @@ const EmailShell = styled(FieldHost).attrs({
     styles: {
       wrapper: { marginBottom: 0, gap: 8 },
       label: { color: '#dbeafe', fontSize: 12, fontWeight: '800' },
-      input: {
+      textInput: {
         minHeight: 52,
         borderWidth: 1.5,
         borderColor: 'rgba(56, 189, 248, 0.28)',
@@ -523,7 +523,7 @@ const form = useFormBridge({
           wrapper: 'space-y-2',
           label:
             'text-xs font-semibold uppercase tracking-[0.14em] text-slate-200',
-          input:
+          textInput:
             'w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-50 outline-none',
           textarea:
             'min-h-28 w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-slate-50 outline-none',
@@ -538,14 +538,12 @@ const form = useFormBridge({
 
 <form.Form onSubmit={save}>
   <form.fields.ownerEmail
-    styles={{
-      classNames: {
-        input: 'border-cyan-400 focus:ring-2 focus:ring-cyan-400/30',
-      },
-      inputProps: {
-        autoComplete: 'email',
-        inputMode: 'email',
-      },
+    classNames={{
+      textInput: 'border-cyan-400 focus:ring-2 focus:ring-cyan-400/30',
+    }}
+    inputProps={{
+      autoComplete: 'email',
+      inputMode: 'email',
     }}
   />
   <form.fields.launchNotes />
@@ -587,7 +585,7 @@ const form = useFormBridge({
             letterSpacing: '0.05em',
             textTransform: 'uppercase',
           },
-          input: {
+          textInput: {
             background: 'rgba(15, 23, 42, 0.5)',
             border: '1px solid rgba(251, 191, 36, 0.18)',
             borderRadius: 16,
@@ -621,7 +619,7 @@ const form = useFormBridge({
 
 <form.fields.postalCode
   styles={{
-      input: { textAlign: 'center', letterSpacing: '0.14em' },
+      textInput: { textAlign: 'center', letterSpacing: '0.14em' },
   }}
 />`,
         },
@@ -653,7 +651,7 @@ const form = useFormBridge({
             letterSpacing: 0.7,
             textTransform: 'uppercase',
           },
-          input: {
+          textInput: {
             minHeight: 52,
             borderWidth: 1.5,
             borderColor: 'rgba(251, 191, 36, 0.18)',
@@ -682,7 +680,7 @@ highlightOnError={false}
 
 <form.fields.postalCode
   styles={{
-      input: { textAlign: 'center', letterSpacing: 2 },
+      textInput: { textAlign: 'center', letterSpacing: 2 },
   }}
 />`,
         },
@@ -693,7 +691,7 @@ highlightOnError={false}
       title: 'Web styling surface',
       content: `On web, the API is broad enough to work with CSS Modules, utility classes, styled-components, Emotion, or plain objects.
 
-- Root-level \`className\` and \`style\` theme the field container directly
+- \`classNames.wrapper\` and \`styles.wrapper\` theme the field container directly
 - \`globalDefaults.form\` and \`globalDefaults.submit\` style the generated form wrapper and submit button
 - \`highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
 - \`wrapperProps\`, \`labelProps\`, \`hintProps\`, and \`errorProps\` let you push DOM attributes without losing the generated renderer
@@ -707,7 +705,7 @@ ${WEB_SLOT_SURFACE}`,
       title: 'Native styling surface',
       content: `On React Native, the same layering applies, but the override points stay React Native-friendly instead of DOM-specific.
 
-- Root-level \`style\` themes the field wrapper, while \`globalDefaults.form\` and \`globalDefaults.submit\` theme the form container and submit button
+- \`styles.wrapper\` themes the field wrapper, while \`globalDefaults.form\` and \`globalDefaults.submit\` theme the form container and submit button
 - \`highlightOnError\` lets you opt out of the built-in red field chrome while keeping the error message
 - Renderer-specific extra keys are also supported in \`styles\`, which is especially useful for inputs such as checkboxes, async selectors, or modal option lists
 - \`wrapperProps\`, \`labelProps\`, \`inputProps\`, \`hintProps\`, and \`errorProps\` help with test IDs, accessibility, or integration with surrounding layout primitives
@@ -723,7 +721,7 @@ ${NATIVE_SLOT_SURFACE}`,
 - Keep platform-specific differences inside the \`globalDefaults\` object at the screen level
 - Use local field props when one field needs a variant, a special helper text, or a different accent color on one screen
 - Use the stable host recipe for \`styled-components\` and \`styled-components/native\`
-- Use \`className\` and \`classNames\` slot maps for Tailwind-style utility frameworks on web
+- Use \`className\` on \`form\` / \`submit\` plus \`classNames\` slot maps on fields for Tailwind-style utility frameworks on web
 - Use \`style\`, \`styles\`, wrappers, or the stable host recipe for React Native styling systems such as StyleSheet, NativeWind-friendly wrappers, or in-house component kits
 - Let the field type guide the override point: \`inputProps\` for text-like fields, \`textareaProps\` for textareas, \`selectProps\` for selects
 - The API stays agnostic on purpose, so the same schema can power web and native without forcing the same styling stack on both platforms

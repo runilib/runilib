@@ -20,7 +20,7 @@ useFormBridge(schema, {
 
 - **It's a function**, not a static object. You receive the live \`FormState<S>\` (\`isSubmitting\`, \`isValid\`, \`isDirty\`, \`errors\`, \`values\`, \`submitError\`, …) and return an options bag. This means the theme can **react to form state**: highlight the form red on submit error, change the submit label while submitting, dim fields while the form is busy, etc.
 - **Local field props still win.** Anything you pass directly on \`<fields.email classNames={...} />\` overrides the matching key from \`globalDefaults.field\`. The merge order is: builder \`behavior\` → \`globalDefaults\` → local field props → \`fieldController\` / custom render.
-- **Platform-aware typing.** On web, \`field\`/\`form\`/\`submit\` accept web-specific overrides (\`className\`, \`classNames\`, \`wrapperProps\`, \`inputProps\`, …). On native, they accept RN-specific overrides (\`style\`, \`containerStyle\`, \`textStyle\`, \`indicatorColor\`, …). The hook variant you import (\`useFormBridge\` web vs native) selects the correct shape automatically.
+- **Platform-aware typing.** On web, generated fields expose slot maps such as \`classNames\` / \`styles\`, plus DOM passthrough props like \`wrapperProps\` and \`inputProps\`. On native, fields expose RN-friendly \`styles\`, \`wrapperProps\`, \`keyboardType\`, \`secureTextEntry\`, and submit-specific props such as \`containerStyle\`, \`textStyle\`, and \`indicatorColor\`. The hook variant you import (\`useFormBridge\` web vs native) selects the correct shape automatically.
 
 > Prefer \`globalDefaults\` over per-field overrides as soon as two or more fields need the same look. Reach for local field props only for genuine one-off exceptions. For full custom chrome beyond styling, see [\`fieldController\`](/docs/fieldcontroller) or [\`field.custom()\`](/docs/field-custom).`,
   codeTabs: [
@@ -46,7 +46,7 @@ export function LoginForm() {
         classNames: {
           wrapper: styles.fieldWrapper,
           label: styles.label,
-          input: styles.input,
+          textInput: styles.input,
           error: styles.error,
           hint: styles.hint,
           requiredMark: styles.required,
@@ -56,7 +56,6 @@ export function LoginForm() {
       submit: {
         className: styles.submit,
         loadingText: state.isSubmitting ? 'Signing in…' : 'Sign in',
-        disabled: !state.isDirty,
       },
     }),
   })
@@ -90,7 +89,7 @@ export function LoginScreen() {
         styles: {
           wrapper: s.fieldWrapper,
           label: s.label,
-          input: s.input,
+          textInput: s.input,
           error: s.error,
         },
       },
@@ -140,7 +139,7 @@ Because the selector receives \`state\`, the theme can **react**:
 
 - Switch \`submit.loadingText\` while \`state.isSubmitting\` is \`true\`
 - Add a \`formLevelError\` className when \`state.submitError\` is set
-- Disable the submit button until \`state.isDirty\`
+- Swap the submit button className or style when the form becomes valid / dirty
 - Tint every field wrapper when the form has unresolved errors
 
 Return the same shape regardless of state - React just re-renders the theme each time.`,
@@ -157,8 +156,8 @@ Return the same shape regardless of state - React just re-renders the theme each
 
 Practical consequences:
 
-- Change the **whole form's look** once in \`globalDefaults\` - no need to repeat \`className\` / \`style\` on every \`<fields.*>\` call site.
-- Override a **single field** locally with \`<fields.email className="..." />\` without touching the global theme.
+- Change the **whole form's look** once in \`globalDefaults\` - no need to repeat \`classNames\` / \`styles\` on every \`<fields.*>\` call site.
+- Override a **single field** locally with \`<fields.email classNames={{ wrapper: 'narrow' }} />\` without touching the global theme.
 - Keep **one-off exceptions local**; keep **shared language global**. That's the mental model.`,
     },
     {
@@ -170,12 +169,10 @@ Practical consequences:
 
 | Key | Description |
 | --- | --- |
-| \`style\` | Base style applied to every field wrapper |
-| \`classNames?\` (web) / \`styles?\` | Per-slot overrides (see the **Web slot names** and **Native slot names** subsections below) |
+| \`styles?\` | Per-slot style overrides (web + native) |
 | \`hideLabel?\` | Hide visual labels while keeping them for screen readers |
 | \`highlightOnError?\` | Turn the default red error chrome on/off |
 | \`readOnly?\` | Mark every field read-only (handy for "view mode") |
-| \`inputMode?\` | Virtual-keyboard hint for text-like fields |
 | \`wrapperProps?\` / \`labelProps?\` / \`hintProps?\` / \`errorProps?\` | Passthrough props for the DOM nodes of each slot |
 | \`inputProps\` / \`textareaProps\` / \`selectProps\` / \`buttonProps\` / … | Per-type passthrough - FormBridge routes them to the matching renderer |
 
@@ -183,7 +180,13 @@ Practical consequences:
 
 | Key | Description |
 | --- | --- |
-| \`className?\` | Class added to every field's wrapper |
+| \`classNames?\` | Per-slot class names for renderers such as \`wrapper\`, \`label\`, \`textInput\`, \`textarea\`, or \`select\` |
+
+**Native-only extras**
+
+| Key | Description |
+| --- | --- |
+| \`keyboardType?\` / \`secureTextEntry?\` | RN-specific input hints for text-like fields |
 
 **Caveat: props that must stay local, not global**
 
@@ -204,11 +207,10 @@ Declare those directly on the specific \`<fields.*>\` call site.`,
         code: `useFormBridge(schema, {
   globalDefaults: () => ({
     field: {
-      className: 'fb-field',
       classNames: {
         wrapper: 'fb-field__wrapper',
         label: 'fb-field__label',
-        input: 'fb-field__input',
+        textInput: 'fb-field__input',
         textarea: 'fb-field__input',
         select: 'fb-field__input',
         error: 'fb-field__error',
@@ -293,7 +295,6 @@ FormBridge manages \`disabled\` and the loading transition itself, so \`state.is
     submit: {
       className: 'fb-submit',
       loadingText: state.isSubmitting ? 'Saving…' : undefined,
-      disabled: !state.isDirty || !state.isValid,
     },
   }),
 })`,
@@ -323,11 +324,11 @@ ${NATIVE_SLOT_SURFACE}`,
       title: 'When to use globalDefaults vs. alternatives',
       content: `FormBridge offers three styling layers. Pick the right one for the scope of your change:
 
-- **\`globalDefaults\`** - use when **two or more fields** need the same look, or when you want the theme to **react to form state**. Default recommendation for CSS Modules / StyleSheet / design-system-wide chrome. Declared once on \`useFormBridge\`.
-- **Local field props** - use for **one-off exceptions** on a single field. Example: \`<fields.email className='narrow' />\`. Wins over global config.
-- **\`fieldController\` / \`field.custom().render(...)\`** - use when styling isn't enough and you need **custom chrome** (e.g. a bespoke phone picker UI on top of the built-in value model, or a totally new field type). See [\`fieldController\`](/docs/fieldcontroller) and [\`field.custom()\`](/docs/field-custom).
+- **globalDefaults** - use when **two or more fields** need the same look, or when you want the theme to **react to form state**. Default recommendation for CSS Modules / StyleSheet / design-system-wide chrome. Declared once on \`useFormBridge\`.
+- **Local field props** - use for **one-off exceptions** on a single field. Example: \`<fields.email classNames={{ wrapper: 'narrow' }} />\`. Wins over global config.
+- **fieldController / field.custom().render(...)** - use when styling isn't enough and you need **custom chrome** (e.g. a bespoke phone picker UI on top of the built-in value model, or a totally new field type). See [fieldController](/docs/fieldcontroller) and [field.custom()](/docs/field-custom).
 
-> The [\`Styling\`](/docs/styling) section shows end-to-end examples that combine all three layers.`,
+The [Styling](/docs/styling) section shows end-to-end examples that combine all three layers.`,
     },
   ],
 };

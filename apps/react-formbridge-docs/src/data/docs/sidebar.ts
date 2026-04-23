@@ -54,12 +54,12 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     group: 'Components',
     color: 'blue',
     items: [
-      { id: 'fb-form', label: 'Form Components' },
-      { id: 'fb-field-error', label: 'FieldError Components' },
-      { id: 'fb-field-label', label: 'FieldLabel Components' },
-      { id: 'fb-fields', label: 'Generated fields' },
-      { id: 'fb-field-controller', label: 'fieldController()' },
-      { id: 'fb-host-helpers', label: 'Host Components' },
+      { id: 'fb-form', label: '<Form/>' },
+      { id: 'fb-field-error', label: '<FieldError/>' },
+      { id: 'fb-field-label', label: '<FieldLabel/>' },
+      { id: 'fb-fields', label: '<GeneratedFields />' },
+      { id: 'fb-field-controller', label: 'form.fieldController()' },
+      { id: 'fb-host-helpers', label: '<HostComponents />' },
     ],
   },
   {

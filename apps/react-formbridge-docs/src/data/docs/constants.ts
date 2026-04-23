@@ -1114,7 +1114,7 @@ export const GLOBAL_UI_SURFACE = [
     ],
     [
       '`field?`',
-      '`{ className?, style?, ui? }`',
+      '`{ classNames?, styles?, hideLabel?, highlightOnError?, readOnly?, wrapperProps?, ... }`',
       'Shared defaults for all generated fields',
     ],
     [
