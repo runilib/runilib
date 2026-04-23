@@ -14,10 +14,10 @@ export const en: Translations = {
     titleAccent: 'Run it everywhere React runs.',
     subtitle:
       'RUNILIB is a growing collection of open-source libraries with one shared TypeScript API across React and React Native. No duplicated code, no parallel codebases, no drift between platforms.',
-    cta: 'Get started',
+    cta: 'Browse libraries',
     ctaSecondary: 'Browse libraries',
     stats: {
-      libs: 'Libraries',
+      libs: 'Available Libraries',
       ts: 'TypeScript',
       platforms: 'Platforms',
       config: 'Config needed',

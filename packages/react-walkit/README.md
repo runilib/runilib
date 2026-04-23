@@ -6,7 +6,7 @@ Cross-platform onboarding tours and guided walkthroughs for React and React Nati
 
 `@runilib/react-walkit` helps you highlight UI, attach contextual popovers, and run guided tours with the same API across web and native, including cross-page and cross-screen flows.
 
-Full documentation: https://runilib.dev/docs/react-walkit
+Full documentation: https://runilib.dev/libraries/react-walkit
 
 > This repository is mirrored from the runilib monorepo.
 > Active development happens in the monorepo.
