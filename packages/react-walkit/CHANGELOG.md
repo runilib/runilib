@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- [#35](https://github.com/runilib/runilib/pull/35) [`eb16585`](https://github.com/runilib/runilib/commit/eb16585a0502a1f92db6377e8d63456f0df0b6a9) Thanks [@akladekouassi](https://github.com/akladekouassi)! - Initial public release of `@runilib/react-walkit`.
+
+  Provides cross-platform product tours, onboarding walkthroughs, spotlight overlays, and contextual tooltips for React and React Native.
+
+  - One shared API for React web and React Native
+  - Guided tours with spotlight overlays and customizable popovers
+  - Programmatic control with navigation and lifecycle events
+  - Built-in tooltip primitive for contextual help and feature discovery
+
 ### Added - initial public release
 
 `@runilib/react-walkit` is a cross-platform walkthrough and tooltip library for React and React Native. It focuses on onboarding tours, contextual guidance, and spotlight-driven product education with one shared API.
