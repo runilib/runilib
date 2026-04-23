@@ -155,7 +155,7 @@ export default function Home() {
           </HeroCTAs>
           <StatsRow>
             {[
-              { val: '3', key: 'libs' },
+              { val: '2', key: 'libs' },
               { val: '100%', key: 'ts' },
               { val: '2', key: 'platforms' },
               { val: '0', key: 'config' },
@@ -168,30 +168,6 @@ export default function Home() {
           </StatsRow>
         </HeroLeft>
       </HeroSection>
-
-      {/* ── INSTALL STRIP ── */}
-      {/* <InstallStrip>
-        <StripInner>
-          <StripLabel>{t.install.label}</StripLabel>
-          <StripCmds>
-            {(
-              [
-                'npm install @runilib/react-formbridge @runilib/react-walkit',
-                'yarn add @runilib/react-formbridge @runilib/react-walkit',
-                'pnpm add @runilib/react-formbridge @runilib/react-walkit',
-              ] as const
-            ).map((_cmd, i) => (
-              <StripCmd key={i === 0 ? 'npm-install' : 'yarn-add'}>
-                <Prompt>{i === 0 ? 'npm' : 'yarn'}</Prompt>
-                <CmdText>
-                  {i === 0 ? 'install' : 'add'} @runilib/react-formbridge
-                  @runilib/react-walkit @runilib/tooltip
-                </CmdText>
-              </StripCmd>
-            ))}
-          </StripCmds>
-        </StripInner>
-      </InstallStrip> */}
 
       {/* ── FEATURES ── */}
       <Section>

@@ -6,7 +6,7 @@ Schema-first forms for React and React Native.
 
 `@runilib/react-formbridge` lets you define a form once and reuse the same API across web and native. It generates fields from a schema and handles validation, conditional logic, persistence, async options, and multi-step flows.
 
-Full documentation: https://runilib.dev/docs/react-formbridge
+Full documentation: https://react-formbridge.runilib.dev
 
 > This repository is mirrored from the runilib monorepo.
 > Active development happens in the monorepo.
