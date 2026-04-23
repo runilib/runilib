@@ -1,6 +1,7 @@
 {
   "name": "@runilib/react-formbridge",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
   "description": "Schema-first, headless form engine for React and React Native. Define fields once with a type-safe builder API, validate with Zod/Yup/Joi/Valibot, and render anywhere - web or native - with zero platform glue. Built-in support for multi-step wizards, dynamic JSON-driven forms, input masking, phone inputs, file uploads, async options, conditional fields, form analytics, and state persistence.",
   "keywords": [
     "react",
