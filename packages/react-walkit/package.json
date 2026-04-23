@@ -1,6 +1,6 @@
 {
   "name": "@runilib/react-walkit",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Cross-platform product tours, onboarding flows and tooltips: Build product tours, user onboarding walkthroughs, feature discovery flows and tooltips with the same API on React web and React Native. Includes spotlight overlays, customizable popovers, analytics hooks and programmatic control.",
   "publishConfig": {
     "access": "public"
