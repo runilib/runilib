@@ -10,7 +10,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import type { FileValue } from '../../core/field-builders/file/types';
+import type { FileValue } from '../../core/field-descriptors/file/types';
 import type { ExtraFieldProps, NativeFileFieldPropsOverrides } from '../../types';
 import {
   defaultErrorChromeStyle,

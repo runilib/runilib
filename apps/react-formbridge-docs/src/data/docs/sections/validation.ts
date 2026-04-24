@@ -15,9 +15,9 @@ Every approach below flows through the same runtime and lands in the same \`stat
 2. **Schema-level cross-field validation** via \`createSchema()\` - the recommended path the moment you need rules that span multiple fields (\`refine\`, \`superRefine\`, \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, \`errorMap\`, async refinements, \`safeParse\` / \`validate\`). Zero external dependency required. See the dedicated [createSchema() API](/docs/schema-api) section.
 3. **Imperative validation** from the runtime - \`validate(names?)\`, \`setError()\`, \`clearErrors()\` let you trigger checks on demand and merge server-side errors into the same bag.
 4. **Trigger configuration** - \`validateOn\` and \`revalidateOn\` control **when** validation runs (\`'onBlur'\`, \`'onChange'\`, \`'onSubmit'\`, \`'onTouched'\`). Defaults: \`validateOn='onBlur'\`, \`revalidateOn='onChange'\`.
-5. **External resolvers** (opt-in) - bring your own Zod / Yup / Joi / Valibot schema via \`validatorResolver\` when you already own a domain schema elsewhere in the app.
+5. **External bridges** (opt-in) - bring your own Zod / Yup / Joi / Valibot schema via \`validatorBridge\` when you already own a domain schema elsewhere in the app.
 
- FormBridge's design goal: **built-in validation is the complete path**, not a stepping stone to an external resolver. Resolvers are provided for teams that already have a domain schema they want to reuse, not because the built-in pipeline is incomplete.`,
+ FormBridge's design goal: **built-in validation is the complete path**, not a stepping stone to an external bridge. Bridges are provided for teams that already have a domain schema they want to reuse, not because the built-in pipeline is incomplete.`,
   subsections: [
     {
       id: 'fb-validation-field-level',
@@ -204,27 +204,27 @@ Pick \`'onTouched'\` for the smoothest UX: no premature errors while the user is
       },
     },
     {
-      id: 'fb-validation-resolver',
-      title: '5. External resolvers (opt-in)',
-      content: `Use a resolver when you already own a domain schema elsewhere in the app (Zod, Yup, Joi, Valibot) and want to reuse it as the validation source of truth. The resolver receives the current values and returns \`{ values, errors }\`, which the runtime merges into \`state.errors\` exactly like built-in validation.
+      id: 'fb-validation-bridge',
+      title: '5. External bridges (opt-in)',
+      content: `Use a bridge when you already own a domain schema elsewhere in the app (Zod, Yup, Joi, Valibot) and want to reuse it as the validation source of truth. The bridge receives the current values and returns \`{ values, errors }\`, which the runtime merges into \`state.errors\` exactly like built-in validation.
 
-| Resolver | Signature | Description |
+| Bridge | Signature | Description |
 | --- | --- | --- |
-| \`zodResolver\` | \`(schema, options?)\` | Reuse an existing Zod schema |
-| \`yupResolver\` | \`(schema, options?)\` | Reuse an existing Yup schema |
-| \`joiResolver\` | \`(schema, options?)\` | Reuse an existing Joi schema |
-| \`valibotResolver\` | \`(schema, options?)\` | Reuse an existing Valibot schema |
+| \`zodBridge\` | \`(schema, options?)\` | Reuse an existing Zod schema |
+| \`yupBridge\` | \`(schema, options?)\` | Reuse an existing Yup schema |
+| \`joiBridge\` | \`(schema, options?)\` | Reuse an existing Joi schema |
+| \`valibotBridge\` | \`(schema, options?)\` | Reuse an existing Valibot schema |
 
-All resolvers share the same options surface documented in the [\`Schema adapters\`](/docs/schema-adapters-zod-yup-joi-valibot) section.
+All bridges share the same options surface documented in the [\`Schema adapters\`](/docs/schema-adapters-zod-yup-joi-valibot) section.
 
 ${RESOLVER_SHARED_OPTIONS_SURFACE}
 
-> You do **not** need a resolver to get cross-field validation, async checks, or i18n - \`createSchema()\` covers all of that natively. Reach for a resolver only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
+> You do **not** need a bridge to get cross-field validation, async checks, or i18n - \`createSchema()\` covers all of that natively. Reach for a bridge only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
       code: {
-        filename: 'resolver.tsx',
+        filename: 'bridge.tsx',
         lang: 'tsx',
         code: `import { z } from 'zod'
-import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge'
+import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge'
 
 const zSchema = z.object({
   email: z.string().email(),
@@ -237,7 +237,7 @@ const formSchema = {
 }
 
 const { Form, fields, state } = useFormBridge(formSchema, {
-  resolver: zodResolver(zSchema),
+  validatorBridge: zodBridge(zSchema),
 })`,
       },
     },

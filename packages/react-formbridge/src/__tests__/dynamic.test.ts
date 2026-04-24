@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   parseDynamicForm,
   parseJsonSchema,
-} from '../core/field-builders/dynamic/dynamic';
+} from '../core/field-descriptors/dynamic/dynamic';
 import type { JsonFormDefinition } from '../index.native';
 
 const SIMPLE_DEF: JsonFormDefinition = {

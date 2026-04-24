@@ -88,7 +88,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
   const {
     validateOn = 'onBlur',
     revalidateOn = 'onChange',
-    validatorResolver,
+    validatorBridge,
     persist: persistOpts,
   } = options;
   const schemaValidationApi = getSchemaValidationApi(schema);
@@ -369,8 +369,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
         return null;
       }
 
-      if (validatorResolver) {
-        const result = await validatorResolver(candidateValues);
+      if (validatorBridge) {
+        const result = await validatorBridge(candidateValues);
         return result.errors[name] ?? null;
       }
 
@@ -378,7 +378,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
 
       return validateField(effectiveDescriptor, value, candidateValues);
     },
-    [getEffectiveDescriptor, getRuntimeFieldState, validatorResolver],
+    [getEffectiveDescriptor, getRuntimeFieldState, validatorBridge],
   );
 
   const runAllValidation = useCallback(async (): Promise<{
@@ -390,8 +390,8 @@ export function useFormBridgeCore<const S extends FormSchema>(
     const visibilityMap = evaluateAllConditions(conditionsMap, values);
     const errors: Record<string, string> = {};
 
-    if (validatorResolver) {
-      const result = await validatorResolver(values);
+    if (validatorBridge) {
+      const result = await validatorBridge(values);
 
       for (const [name, message] of Object.entries(result.errors)) {
         const runtime = visibilityMap[name] ?? {
@@ -462,7 +462,7 @@ export function useFormBridgeCore<const S extends FormSchema>(
     conditionsMap,
     descriptors,
     getEffectiveDescriptor,
-    validatorResolver,
+    validatorBridge,
     schemaValidationApi,
   ]);
 

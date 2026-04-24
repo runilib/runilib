@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { field } from '../field-builders/field';
+import { field } from '../field-descriptors/field';
 import { createSchema, FormBridgeSchemaValidationError } from './createSchema';
 
 describe('createSchema()', () => {

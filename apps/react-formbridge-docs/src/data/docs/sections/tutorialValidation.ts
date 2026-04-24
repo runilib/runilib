@@ -2,12 +2,12 @@ import type { LibraryDoc } from './../../../types/index';
 
 export const tutorialValidationSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial-validation',
-  title: 'Tutorial: validation & resolvers',
+  title: 'Tutorial: validation & bridges',
   content: `Validation is usually a mix of fast local UX rules and one stronger source of truth for business constraints.
 
 - Start with fluent builder rules when the rule clearly belongs to one field
 - Add conditional required or visibility rules in the schema instead of scattering conditions through JSX
-- Use a resolver when Zod, Yup, Joi, or Valibot already owns the canonical validation contract
+- Use a bridge when Zod, Yup, Joi, or Valibot already owns the canonical validation contract
 - Use async options when a field depends on remote search or lookup data`,
   subsections: [
     {
@@ -44,13 +44,13 @@ const form = useFormBridge(schema, {
     {
       id: 'fb-tutorial-validation-adapters',
       title: 'Schema adapters',
-      content: `Use a resolver when the backend or another package already shares a validation schema with the frontend.`,
+      content: `Use a bridge when the backend or another package already shares a validation schema with the frontend.`,
       codeTabs: [
         {
-          filename: 'zod-resolver.ts',
+          filename: 'zod-bridge.ts',
           lang: 'ts',
           code: `import { z } from 'zod'
-import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge'
+import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge'
 
 const schema = {
   email: field.email('Email').required(),
@@ -63,14 +63,14 @@ const zodSchema = z.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: zodResolver(zodSchema),
+  validatorBridge: zodBridge(zodSchema),
 })`,
         },
         {
-          filename: 'yup-resolver.ts',
+          filename: 'yup-bridge.ts',
           lang: 'ts',
           code: `import * as yup from 'yup'
-import { field, useFormBridge, yupResolver } from '@runilib/react-formbridge'
+import { field, useFormBridge, yupBridge } from '@runilib/react-formbridge'
 
 const schema = {
   fullName: field.text('Full name').required(),
@@ -83,14 +83,14 @@ const yupSchema = yup.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: yupResolver(yupSchema),
+  validatorBridge: yupBridge(yupSchema),
 })`,
         },
         {
-          filename: 'joi-resolver.ts',
+          filename: 'joi-bridge.ts',
           lang: 'ts',
           code: `import Joi from 'joi'
-import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge'
+import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   email: field.email('Email').required(),
@@ -103,15 +103,15 @@ const joiSchema = Joi.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: joiResolver(joiSchema),
+  validatorBridge: joiBridge(joiSchema),
 })`,
         },
         {
-          filename: 'valibot-resolver.ts',
+          filename: 'valibot-bridge.ts',
           lang: 'ts',
           code: `
 import * as v from 'valibot'
-import { field, useFormBridge, valibotResolver } from '@runilib/react-formbridge'
+import { field, useFormBridge, valibotBridge } from '@runilib/react-formbridge'
 
 const schema = {
   handle: field.text('Handle').required(),
@@ -124,7 +124,7 @@ const valibotSchema = v.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: valibotResolver(valibotSchema),
+  validatorBridge: valibotBridge(valibotSchema),
 })`,
         },
       ],

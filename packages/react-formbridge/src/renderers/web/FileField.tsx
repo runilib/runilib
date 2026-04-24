@@ -9,8 +9,8 @@ import React, {
   useState,
 } from 'react';
 
-import type { BuiltFileDescriptor } from '../../core/field-builders/file/FileFieldBuilder';
-import type { FileValue } from '../../core/field-builders/file/types';
+import type { BuiltFileDescriptor } from '../../core/field-descriptors/file/FileFieldBuilder';
+import type { FileValue } from '../../core/field-descriptors/file/types';
 import type { FieldRenderProps, WebFileFieldPropsOverrides } from '../../types';
 import type { ExtraFieldProps } from '../../types.web';
 import { cx, mergeStyles, renderHelperSlot, renderLabelSlot } from './helpers';

@@ -606,7 +606,7 @@ describe('bookingSchema', () => {
 | Next step | Why |
 | --- | --- |
 | [createSchema() API reference](/docs/schema-api) | Full signatures, edge cases, and \`ValidationIssue\` shape |
-| [Validation overview](/docs/built-in-validation) | How field-level, schema-level, imperative, and resolver validation work together |
+| [Validation overview](/docs/built-in-validation) | How field-level, schema-level, imperative, and bridge validation work together |
 | [Conditional logic](/docs/conditional-logic) | \`visibleWhen\`, \`requiredWhen\`, \`disabledWhen\` - rules that change form shape at runtime |
 | [Draft persistence](/docs/draft-persistence) | Save the form state across refreshes so strong validation never costs the user their input |
 | [Tutorial: advanced flows](/docs/advanced-flows) | Wizards, dynamic forms, readonly review, and analytics |`,

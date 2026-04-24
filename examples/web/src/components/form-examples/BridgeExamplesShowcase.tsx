@@ -1,58 +1,57 @@
 import { useState } from 'react';
 
 import styles from './FormExamples.module.css';
-import { JoiResolverExample } from './JoiResolverExample';
+import { JoiBridgeExample } from './JoiBridgeExample';
 import { SchemaRefinementExample } from './SchemaRefinementExample';
-import { ValibotResolverExample } from './ValibotResolverExample';
-import { YupResolverExample } from './YupResolverExample';
-import { ZodResolverExample } from './ZodResolverExample';
+import { ValibotBridgeExample } from './ValibotBridgeExample';
+import { YupBridgeExample } from './YupBridgeExample';
+import { ZodBridgeExample } from './ZodBridgeExample';
 
-const RESOLVER_TABS = [
+const BRIDGE_TABS = [
   {
     id: 'built-in',
     label: 'Built-in',
-    note: 'No resolver',
+    note: 'No bridge',
     component: SchemaRefinementExample,
   },
   {
     id: 'zod',
     label: 'Zod',
     note: 'Typed parsing',
-    component: ZodResolverExample,
+    component: ZodBridgeExample,
   },
   {
     id: 'yup',
     label: 'Yup',
     note: 'Chainable rules',
-    component: YupResolverExample,
+    component: YupBridgeExample,
   },
   {
     id: 'joi',
     label: 'Joi',
     note: 'Strict business rules',
-    component: JoiResolverExample,
+    component: JoiBridgeExample,
   },
   {
     id: 'valibot',
     label: 'Valibot',
     note: 'Composable pipelines',
-    component: ValibotResolverExample,
+    component: ValibotBridgeExample,
   },
 ] as const;
 
-type ResolverTabId = (typeof RESOLVER_TABS)[number]['id'];
+type BridgeTabId = (typeof BRIDGE_TABS)[number]['id'];
 
-export function ResolverExamplesShowcase() {
-  const [activeTab, setActiveTab] = useState<ResolverTabId>('built-in');
-  const activeEntry =
-    RESOLVER_TABS.find((item) => item.id === activeTab) ?? RESOLVER_TABS[0];
+export function BridgeExamplesShowcase() {
+  const [activeTab, setActiveTab] = useState<BridgeTabId>('built-in');
+  const activeEntry = BRIDGE_TABS.find((item) => item.id === activeTab) ?? BRIDGE_TABS[0];
   const ActiveExample = activeEntry.component;
 
   return (
     <section className={`${styles.sectionCard} ${styles.resolverShowcase}`}>
       <div className={styles.resolverShowcaseHead}>
         <div>
-          <span className={styles.resolverEyebrow}>resolver demos</span>
+          <span className={styles.resolverEyebrow}>bridge demos</span>
           <h2 className={styles.resolverTitle}>Schema adapters in action</h2>
           <p className={styles.resolverSubtitle}>
             Switch between real forms wired to Zod, Yup, Joi, and Valibot. Each demo is
@@ -62,7 +61,7 @@ export function ResolverExamplesShowcase() {
         </div>
 
         <div className={styles.resolverSwitcher}>
-          {RESOLVER_TABS.map((item) => (
+          {BRIDGE_TABS.map((item) => (
             <button
               key={item.id}
               type="button"

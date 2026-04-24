@@ -132,7 +132,7 @@ export default function HomePage() {
         <Shell>
           <HeroSection>
             <HeroIntroTitle>
-              Build forms you&apos;ll <HeroIntroAccent>love shipping</HeroIntroAccent>
+              Describe forms once. <HeroIntroAccent>Ship them everywhere</HeroIntroAccent>
             </HeroIntroTitle>
             <HeroGrid>
               <HeroCopy>

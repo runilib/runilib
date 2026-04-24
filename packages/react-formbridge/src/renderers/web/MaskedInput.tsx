@@ -15,8 +15,8 @@ import {
   getMaskAutoLayout,
   getMaskCharacterProfile,
   getMaskPlaceholder,
-} from '../../core/field-builders/mask/masks';
-import type { MaskedDescriptor } from '../../core/field-builders/mask/types';
+} from '../../core/field-descriptors/mask/masks';
+import type { MaskedDescriptor } from '../../core/field-descriptors/mask/types';
 import type { FocusableFieldHandle } from '../../types';
 import type { WebTextFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';

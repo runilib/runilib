@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { field } from '../core/field-builders/field';
+import { field } from '../core/field-descriptors/field';
 import { validateAll, validateField } from '../core/validators/engine';
 import { ref } from '../core/validators/reference';
 

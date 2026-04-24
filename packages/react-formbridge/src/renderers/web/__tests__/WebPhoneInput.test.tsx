@@ -2,11 +2,11 @@ import type React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { field } from '../../../core/field-builders/field';
+import { field } from '../../../core/field-descriptors/field';
 import {
   buildPhoneValue,
   getCountry,
-} from '../../../core/field-builders/phone/countries';
+} from '../../../core/field-descriptors/phone/countries';
 import { PhoneInput } from '../PhoneInput';
 
 function renderPhoneField(

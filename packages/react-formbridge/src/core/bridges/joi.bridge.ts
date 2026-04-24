@@ -1,20 +1,20 @@
-import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
+import type { BridgeResult, SchemaValidatorBridge } from '../../types/options';
 import type {
-  ResolverAdapterOptions,
-  ResolverMode,
-  ResolverPathInput,
-  ResolverValues,
+  BridgeAdapterOptions,
+  BridgeMode,
+  BridgePathInput,
+  BridgeValues,
 } from './types';
 import { collectErrors, failure, success } from './utils';
 
-export interface JoiResolverIssue {
-  path?: ResolverPathInput;
+export interface JoiBridgeIssue {
+  path?: BridgePathInput;
   message?: string;
 }
 
 interface JoiValidationError extends Error {
   isJoi?: boolean;
-  details?: JoiResolverIssue[];
+  details?: JoiBridgeIssue[];
 }
 
 interface JoiSchema {
@@ -28,13 +28,13 @@ interface JoiSchema {
   validateAsync?: (data: unknown, options?: object) => Promise<unknown>;
 }
 
-export interface JoiResolverOptions extends ResolverAdapterOptions<JoiResolverIssue> {
-  mode?: ResolverMode;
+export interface JoiBridgeOptions extends BridgeAdapterOptions<JoiBridgeIssue> {
+  mode?: BridgeMode;
   stripQuotes?: boolean;
   validateOptions?: Record<string, unknown>;
 }
 
-function getJoiValidationOptions(options: JoiResolverOptions): Record<string, unknown> {
+function getJoiValidationOptions(options: JoiBridgeOptions): Record<string, unknown> {
   return {
     abortEarly: false,
     allowUnknown: true,
@@ -53,8 +53,8 @@ function isJoiValidationError(error: unknown): error is JoiValidationError {
 
 async function executeJoiValidation(
   schema: JoiSchema,
-  values: ResolverValues,
-  options: JoiResolverOptions,
+  values: BridgeValues,
+  options: JoiBridgeOptions,
 ): Promise<{ error?: JoiValidationError; value: unknown }> {
   const validateOptions = getJoiValidationOptions(options);
 
@@ -100,17 +100,17 @@ async function executeJoiValidation(
   }
 
   throw new Error(
-    '[@runilib/react-formbridge] joiResolver expected a schema exposing validate or validateAsync.',
+    '[@runilib/react-formbridge] joiBridge expected a schema exposing validate or validateAsync.',
   );
 }
 
-export function joiResolver(
+export function joiBridge(
   schema: JoiSchema,
-  options: JoiResolverOptions = {},
-): SchemaValidatorResolver {
+  options: JoiBridgeOptions = {},
+): SchemaValidatorBridge {
   const { normalizeMessage, stripQuotes = true, ...restOptions } = options;
 
-  const mergedOptions: JoiResolverOptions = {
+  const mergedOptions: JoiBridgeOptions = {
     ...restOptions,
     stripQuotes,
     normalizeMessage: (message, issue) => {
@@ -119,7 +119,7 @@ export function joiResolver(
     },
   };
 
-  return async (values): Promise<ResolverResult> => {
+  return async (values): Promise<BridgeResult> => {
     const { error, value } = await executeJoiValidation(schema, values, mergedOptions);
 
     if (!error) {

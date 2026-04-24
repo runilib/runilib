@@ -1,22 +1,22 @@
-import type { ResolverResult } from '../../types/options';
+import type { BridgeResult } from '../../types/options';
 import {
+  type BridgeAdapterOptions,
+  type BridgeIssueContext,
+  type BridgePathInput,
+  type BridgePathSegment,
+  type BridgeValues,
   FORM_ROOT_ERROR_KEY,
-  type ResolverAdapterOptions,
-  type ResolverIssueContext,
-  type ResolverPathInput,
-  type ResolverPathSegment,
-  type ResolverValues,
 } from './types';
 
-function isRecord(value: unknown): value is ResolverValues {
+function isRecord(value: unknown): value is BridgeValues {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function toResolverValues(candidate: unknown, fallback: ResolverValues): ResolverValues {
+function toBridgeValues(candidate: unknown, fallback: BridgeValues): BridgeValues {
   return isRecord(candidate) ? candidate : fallback;
 }
 
-function splitPathString(path: string): ResolverPathSegment[] {
+function splitPathString(path: string): BridgePathSegment[] {
   return path
     .replace(/\[(\d+)\]/g, '.$1')
     .split('.')
@@ -25,14 +25,14 @@ function splitPathString(path: string): ResolverPathSegment[] {
     .map((segment) => (/^\d+$/.test(segment) ? Number(segment) : segment));
 }
 
-function toPathSegments(path: ResolverPathInput): ResolverPathSegment[] {
+function toPathSegments(path: BridgePathInput): BridgePathSegment[] {
   if (path == null) {
     return [];
   }
 
   if (Array.isArray(path)) {
     return path.filter(
-      (segment): segment is ResolverPathSegment =>
+      (segment): segment is BridgePathSegment =>
         typeof segment === 'string' || typeof segment === 'number',
     );
   }
@@ -48,14 +48,14 @@ function toPathSegments(path: ResolverPathInput): ResolverPathSegment[] {
   return [];
 }
 
-function defaultPathKey(path: ResolverPathSegment[]): string | null {
+function defaultPathKey(path: BridgePathSegment[]): string | null {
   return path.length > 0 ? path.map(String).join('.') : null;
 }
 
 function resolveErrorKey<TIssue>(
-  path: ResolverPathInput,
+  path: BridgePathInput,
   issue: TIssue,
-  options: ResolverAdapterOptions<TIssue>,
+  options: BridgeAdapterOptions<TIssue>,
 ): string | null {
   const segments = toPathSegments(path);
 
@@ -74,7 +74,7 @@ function resolveErrorKey<TIssue>(
 function normalizeMessage<TIssue>(
   message: string | undefined,
   issue: TIssue,
-  options: ResolverAdapterOptions<TIssue>,
+  options: BridgeAdapterOptions<TIssue>,
 ): string {
   const safeMessage = String(message ?? 'Invalid value.').trim() || 'Invalid value.';
   const normalized = options.normalizeMessage
@@ -88,7 +88,7 @@ function appendError<TIssue>(
   errors: Record<string, string>,
   key: string | null,
   message: string,
-  options: ResolverAdapterOptions<TIssue>,
+  options: BridgeAdapterOptions<TIssue>,
 ): void {
   if (!key || !message) {
     return;
@@ -123,9 +123,9 @@ function appendError<TIssue>(
 
 export function collectErrors<TIssue>(
   issues: TIssue[],
-  values: ResolverValues,
-  options: ResolverAdapterOptions<TIssue>,
-  getIssuePath: (issue: TIssue) => ResolverPathInput,
+  values: BridgeValues,
+  options: BridgeAdapterOptions<TIssue>,
+  getIssuePath: (issue: TIssue) => BridgePathInput,
   getIssueMessage: (issue: TIssue) => string | undefined,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
@@ -134,7 +134,7 @@ export function collectErrors<TIssue>(
     const defaultPath = toPathSegments(getIssuePath(issue));
     const defaultMessage = normalizeMessage(getIssueMessage(issue), issue, options);
 
-    const context: ResolverIssueContext<TIssue> = {
+    const context: BridgeIssueContext<TIssue> = {
       issue,
       index,
       values,
@@ -162,18 +162,18 @@ export function collectErrors<TIssue>(
   return errors;
 }
 
-export function success(values: unknown, fallback: ResolverValues): ResolverResult {
+export function success(values: unknown, fallback: BridgeValues): BridgeResult {
   return {
-    values: toResolverValues(values, fallback),
+    values: toBridgeValues(values, fallback),
     errors: {},
   };
 }
 
 export function failure(
-  values: ResolverValues,
+  values: BridgeValues,
   errors: Record<string, string>,
-): ResolverResult {
+): BridgeResult {
   return { values, errors };
 }
 
-export type ResolverMode = 'async' | 'auto' | 'sync';
+export type BridgeMode = 'async' | 'auto' | 'sync';

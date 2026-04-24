@@ -1,17 +1,17 @@
-import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
+import type { BridgeResult, SchemaValidatorBridge } from '../../types/options';
 import type {
-  ResolverAdapterOptions,
-  ResolverMode,
-  ResolverPathSegment,
-  ResolverValues,
+  BridgeAdapterOptions,
+  BridgeMode,
+  BridgePathSegment,
+  BridgeValues,
 } from './types';
 import { collectErrors, failure, success } from './utils';
 
-export interface ValibotResolverIssue {
+export interface ValibotBridgeIssue {
   path?: Array<
-    | ResolverPathSegment
+    | BridgePathSegment
     | {
-        key?: ResolverPathSegment;
+        key?: BridgePathSegment;
       }
   >;
   message?: string;
@@ -20,7 +20,7 @@ export interface ValibotResolverIssue {
 interface ValibotResult {
   success: boolean;
   output?: unknown;
-  issues?: ValibotResolverIssue[];
+  issues?: ValibotBridgeIssue[];
 }
 
 interface ValibotModuleLike {
@@ -32,15 +32,14 @@ interface ValibotModuleLike {
   ) => Promise<ValibotResult>;
 }
 
-export interface ValibotResolverOptions
-  extends ResolverAdapterOptions<ValibotResolverIssue> {
-  mode?: ResolverMode;
+export interface ValibotBridgeOptions extends BridgeAdapterOptions<ValibotBridgeIssue> {
+  mode?: BridgeMode;
   module?: ValibotModuleLike | { default?: ValibotModuleLike };
   parseOptions?: unknown;
 }
 
 function unwrapValibotModule(
-  candidate: ValibotResolverOptions['module'],
+  candidate: ValibotBridgeOptions['module'],
 ): ValibotModuleLike | null {
   if (!candidate) {
     return null;
@@ -55,7 +54,7 @@ function unwrapValibotModule(
   return candidate as ValibotModuleLike;
 }
 
-function loadValibotModule(options: ValibotResolverOptions): ValibotModuleLike {
+function loadValibotModule(options: ValibotBridgeOptions): ValibotModuleLike {
   const providedModule = unwrapValibotModule(options.module);
 
   if (providedModule) {
@@ -71,11 +70,11 @@ function loadValibotModule(options: ValibotResolverOptions): ValibotModuleLike {
   }
 
   throw new Error(
-    '[@runilib/react-formbridge] valibotResolver requires `valibot`. Install it or pass `{ module: v }` in the resolver options.',
+    '[@runilib/react-formbridge] valibotBridge requires `valibot`. Install it or pass `{ module: v }` in the bridge options.',
   );
 }
 
-function getValibotPath(issue: ValibotResolverIssue): ResolverPathSegment[] {
+function getValibotPath(issue: ValibotBridgeIssue): BridgePathSegment[] {
   return (issue.path ?? []).flatMap((segment) => {
     if (typeof segment === 'string' || typeof segment === 'number') {
       return [segment];
@@ -92,8 +91,8 @@ function getValibotPath(issue: ValibotResolverIssue): ResolverPathSegment[] {
 
 async function executeValibotParse(
   schema: unknown,
-  values: ResolverValues,
-  options: ValibotResolverOptions,
+  values: BridgeValues,
+  options: ValibotBridgeOptions,
 ): Promise<ValibotResult> {
   const module = loadValibotModule(options);
 
@@ -113,15 +112,15 @@ async function executeValibotParse(
   }
 
   throw new Error(
-    '[@runilib/react-formbridge] valibotResolver expected a module exposing safeParse or safeParseAsync.',
+    '[@runilib/react-formbridge] valibotBridge expected a module exposing safeParse or safeParseAsync.',
   );
 }
 
-export function valibotResolver(
+export function valibotBridge(
   schema: unknown,
-  options: ValibotResolverOptions = {},
-): SchemaValidatorResolver {
-  return async (values): Promise<ResolverResult> => {
+  options: ValibotBridgeOptions = {},
+): SchemaValidatorBridge {
+  return async (values): Promise<BridgeResult> => {
     const result = await executeValibotParse(schema, values, options);
 
     if (result.success) {

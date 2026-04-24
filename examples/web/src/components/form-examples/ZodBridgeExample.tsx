@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge';
+import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge';
 
 import { z } from 'zod';
+import { BridgeExampleFrame } from './BridgeExampleFrame';
 import styles from './FormExamples.module.css';
-import { ResolverExampleFrame } from './ResolverExampleFrame';
 import { createDemoFormUi, simulateSubmitDelay } from './shared';
 
-export function ZodResolverExample() {
+export function ZodBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
   const formSchema = useMemo(
@@ -34,15 +34,15 @@ export function ZodResolverExample() {
     [],
   );
 
-  const resolver = useMemo(
-    () => zodResolver(schema as Parameters<typeof zodResolver>[0], { mode: 'auto' }),
+  const bridge = useMemo(
+    () => zodBridge(schema as Parameters<typeof zodBridge>[0], { mode: 'auto' }),
     [schema],
   );
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     globalDefaults: () => createDemoFormUi(styles),
-    validatorResolver: resolver,
+    validatorBridge: bridge,
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -50,8 +50,8 @@ export function ZodResolverExample() {
   const liveValues = watchAll();
 
   return (
-    <ResolverExampleFrame
-      resolverName="Zod"
+    <BridgeExampleFrame
+      bridgeName="Zod"
       accent="#fb923c"
       title="Product launch intake"
       description="Great when you want one schema to validate raw inputs and return a strongly typed payload to your submit handler."
@@ -106,6 +106,6 @@ export function ZodResolverExample() {
           </Form.Submit>
         </div>
       </Form>
-    </ResolverExampleFrame>
+    </BridgeExampleFrame>
   );
 }

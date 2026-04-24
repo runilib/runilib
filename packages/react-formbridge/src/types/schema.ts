@@ -1,9 +1,9 @@
-import type { BaseFieldBuilder } from '../core/field-builders/base/BaseFieldBuilder';
+import type { BaseFieldBuilder } from '../core/field-descriptors/base/BaseFieldBuilder';
 import type {
   BuiltFileDescriptor,
   FileFieldBuilder,
-} from '../core/field-builders/file/FileFieldBuilder';
-import type { AnyFieldBuilder } from '../core/field-builders/types';
+} from '../core/field-descriptors/file/FileFieldBuilder';
+import type { AnyFieldBuilder } from '../core/field-descriptors/types';
 import type { FieldDescriptor, FieldType } from './field';
 
 // ─── Form state machine ────────────────────────────────────────────────────────

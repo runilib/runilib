@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge, valibotResolver } from '@runilib/react-formbridge';
+import { field, useFormBridge, valibotBridge } from '@runilib/react-formbridge';
 
 import * as v from 'valibot';
+import { BridgeExampleFrame } from './BridgeExampleFrame';
 import styles from './FormExamples.module.css';
-import { ResolverExampleFrame } from './ResolverExampleFrame';
 import { createDemoFormUi, DEMO_PLANS, simulateSubmitDelay } from './shared';
 
-export function ValibotResolverExample() {
+export function ValibotBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
   const formSchema = useMemo(
@@ -45,10 +45,10 @@ export function ValibotResolverExample() {
     [],
   );
 
-  const resolver = useMemo(
+  const bridge = useMemo(
     () =>
-      valibotResolver(schema, {
-        module: v as NonNullable<Parameters<typeof valibotResolver>[1]>['module'],
+      valibotBridge(schema, {
+        module: v as NonNullable<Parameters<typeof valibotBridge>[1]>['module'],
         mode: 'sync',
       }),
     [schema],
@@ -58,7 +58,7 @@ export function ValibotResolverExample() {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
     globalDefaults: () => createDemoFormUi(styles),
-    validatorResolver: resolver,
+    validatorBridge: bridge,
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -69,8 +69,8 @@ export function ValibotResolverExample() {
     'No plan selected';
 
   return (
-    <ResolverExampleFrame
-      resolverName="Valibot"
+    <BridgeExampleFrame
+      bridgeName="Valibot"
       accent="#a78bfa"
       title="Billing enrollment"
       description="A compact option when you want composable validation pipelines, excellent tree-shaking, and explicit control over the parsing module."
@@ -79,8 +79,8 @@ export function ValibotResolverExample() {
         <>
           <p className={styles.resolverPreviewValue}>{planLabel}</p>
           <p className={styles.resolverPreviewMuted}>
-            This example passes `{` module: v `}` explicitly so the resolver stays stable
-            in ESM and browser-first environments.
+            This example passes `{` module: v `}` explicitly so the bridge stays stable in
+            ESM and browser-first environments.
           </p>
         </>
       }
@@ -122,6 +122,6 @@ export function ValibotResolverExample() {
           </Form.Submit>
         </div>
       </Form>
-    </ResolverExampleFrame>
+    </BridgeExampleFrame>
   );
 }

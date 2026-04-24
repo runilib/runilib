@@ -1,19 +1,29 @@
 import { useMemo, useState } from 'react';
+import { Text, View } from 'react-native';
 
-import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge';
+import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge';
 
 import Joi from 'joi';
-import styles from './FormExamples.module.css';
-import { ResolverExampleFrame } from './ResolverExampleFrame';
-import { CUSTOMER_DEPARTMENTS, createDemoFormUi, simulateSubmitDelay } from './shared';
+import { BridgeExampleCard } from './BridgeExampleCard';
+import { formExampleStyles as s } from './FormExamples.styles';
+import {
+  CUSTOMER_DEPARTMENTS,
+  createNativeFieldProps,
+  simulateSubmitDelay,
+} from './shared';
 
-export function JoiResolverExample() {
+export function JoiBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
+  const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
   const formSchema = useMemo(
     () => ({
       city: field.text().label('City').placeholder('Lyon'),
-      department: field.select().label('Department').options(CUSTOMER_DEPARTMENTS),
+      department: field
+        .select()
+        .label('Department')
+        .options(CUSTOMER_DEPARTMENTS)
+        .searchable(),
       phone: field.tel().label('Support phone').placeholder('+33 6 98 12 45 78'),
       postalCode: field.text().label('Postal code').placeholder('69002'),
     }),
@@ -50,9 +60,9 @@ export function JoiResolverExample() {
     [],
   );
 
-  const resolver = useMemo(
+  const bridge = useMemo(
     () =>
-      joiResolver(schema, {
+      joiBridge(schema, {
         stripQuotes: true,
         validateOptions: {
           allowUnknown: false,
@@ -64,8 +74,7 @@ export function JoiResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
-    validatorResolver: resolver,
+    validatorBridge: bridge,
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -76,19 +85,19 @@ export function JoiResolverExample() {
     'No department yet';
 
   return (
-    <ResolverExampleFrame
-      resolverName="Joi"
+    <BridgeExampleCard
+      bridgeName="Joi"
       accent="#60a5fa"
       title="Regional support routing"
-      description="Handy when you want strict business rules, custom enterprise messages, and predictable path-based errors coming from Joi."
+      description="Strict business rules and predictable path-based errors, backed by Joi."
       highlights={['Custom messages', 'Strict rules', 'Quote stripping']}
       preview={
         <>
-          <p className={styles.resolverPreviewValue}>{departmentLabel}</p>
-          <p className={styles.resolverPreviewMuted}>
-            Joi is validating the combination of city, phone, department, and postal code
-            with clear business-facing copy.
-          </p>
+          <Text style={s.previewValue}>{departmentLabel}</Text>
+          <Text style={s.previewText}>
+            Joi validates city, phone, department, and postal code with clear
+            business-facing copy.
+          </Text>
         </>
       }
       parsedSubmission={lastSubmission}
@@ -98,39 +107,43 @@ export function JoiResolverExample() {
           : null
       }
       submitError={state.submitError}
-      footer="Joi shines when validation logic already exists on the backend and you want the frontend to mirror it closely."
+      footer="Joi is a strong fit when frontend validation should mirror backend business logic closely."
     >
       <Form
-        className={styles.resolverForm}
         onSubmit={async (values) => {
           await simulateSubmitDelay();
           setLastSubmission(values);
         }}
       >
-        <div className={styles.formRow}>
-          <fields.city />
-          <fields.department />
-        </div>
+        <View style={s.sectionBlock}>
+          <Text style={s.sectionBlockTitle}>Routing rules</Text>
 
-        <div className={styles.formRow}>
-          <fields.phone />
-          <fields.postalCode />
-        </div>
+          <View style={s.formRow}>
+            <View style={s.halfField}>
+              <fields.city {...fieldProps} />
+            </View>
+            <View style={s.halfField}>
+              <fields.department {...fieldProps} />
+            </View>
+          </View>
 
-        <div className={styles.footerRow}>
-          <p className={styles.helperText}>
-            Joi keeps the final payload raw, but its error system is excellent for dense
-            business rules.
-          </p>
+          <View style={s.formRow}>
+            <View style={s.halfField}>
+              <fields.phone {...fieldProps} />
+            </View>
+            <View style={s.halfField}>
+              <fields.postalCode {...fieldProps} />
+            </View>
+          </View>
+        </View>
 
-          <Form.Submit
-            className={styles.submitButton}
-            loadingText="Routing with Joi…"
-          >
-            Validate with Joi
-          </Form.Submit>
-        </div>
+        <Form.Submit
+          style={s.submitButton}
+          loadingText="Routing with Joi..."
+        >
+          Validate with Joi
+        </Form.Submit>
       </Form>
-    </ResolverExampleFrame>
+    </BridgeExampleCard>
   );
 }

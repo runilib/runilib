@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { joiResolver, valibotResolver, yupResolver, zodResolver } from '.';
+import { joiBridge, valibotBridge, yupBridge, zodBridge } from '.';
 import { FORM_ROOT_ERROR_KEY } from './types';
 
-describe('zodResolver', () => {
+describe('zodBridge', () => {
   it('aggregates duplicate field errors and keeps root errors', async () => {
     const safeParseAsync = vi.fn().mockResolvedValue({
       success: false,
@@ -15,7 +15,7 @@ describe('zodResolver', () => {
       },
     });
 
-    const resolver = zodResolver(
+    const bridge = zodBridge(
       { safeParseAsync },
       {
         errorMode: 'join',
@@ -23,7 +23,7 @@ describe('zodResolver', () => {
       },
     );
 
-    await expect(resolver({ email: 'aks@runilib.dev' })).resolves.toEqual({
+    await expect(bridge({ email: 'aks@runilib.dev' })).resolves.toEqual({
       values: { email: 'aks@runilib.dev' },
       errors: {
         email: 'Invalid email | Email already used',
@@ -39,7 +39,7 @@ describe('zodResolver', () => {
       data: { email: 'aks@runilib.dev', age: 31 },
     });
 
-    const resolver = zodResolver(
+    const bridge = zodBridge(
       { safeParse },
       {
         mode: 'sync',
@@ -47,7 +47,7 @@ describe('zodResolver', () => {
       },
     );
 
-    await expect(resolver({ email: 'AKS@runilib.dev', age: '31' })).resolves.toEqual({
+    await expect(bridge({ email: 'AKS@runilib.dev', age: '31' })).resolves.toEqual({
       values: { email: 'aks@runilib.dev', age: 31 },
       errors: {},
     });
@@ -59,7 +59,7 @@ describe('zodResolver', () => {
   });
 });
 
-describe('yupResolver', () => {
+describe('yupBridge', () => {
   it('merges validate options and maps root errors', async () => {
     const validationError = Object.assign(new Error('Validation failed'), {
       name: 'ValidationError',
@@ -70,7 +70,7 @@ describe('yupResolver', () => {
     });
     const validate = vi.fn().mockRejectedValue(validationError);
 
-    const resolver = yupResolver(
+    const bridge = yupBridge(
       { validate },
       {
         rootKey: 'form',
@@ -78,7 +78,7 @@ describe('yupResolver', () => {
       },
     );
 
-    await expect(resolver({ email: 'aks', plan: '' })).resolves.toEqual({
+    await expect(bridge({ email: 'aks', plan: '' })).resolves.toEqual({
       values: { email: 'aks', plan: '' },
       errors: {
         email: 'Email is invalid',
@@ -104,7 +104,7 @@ describe('yupResolver', () => {
       throw validationError;
     });
 
-    const resolver = yupResolver(
+    const bridge = yupBridge(
       { validateSync },
       {
         mode: 'sync',
@@ -116,7 +116,7 @@ describe('yupResolver', () => {
       },
     );
 
-    await expect(resolver({})).resolves.toEqual({
+    await expect(bridge({})).resolves.toEqual({
       values: {},
       errors: {
         'billing > address > city': 'Yup says: Still missing city',
@@ -125,21 +125,21 @@ describe('yupResolver', () => {
   });
 });
 
-describe('joiResolver', () => {
+describe('joiBridge', () => {
   it('supports validateAsync and returns parsed values', async () => {
     const validateAsync = vi.fn().mockResolvedValue({
       age: 31,
       email: 'aks@runilib.dev',
     });
 
-    const resolver = joiResolver(
+    const bridge = joiBridge(
       { validateAsync },
       {
         validateOptions: { convert: true },
       },
     );
 
-    await expect(resolver({ age: '31', email: 'aks@runilib.dev' })).resolves.toEqual({
+    await expect(bridge({ age: '31', email: 'aks@runilib.dev' })).resolves.toEqual({
       values: { age: 31, email: 'aks@runilib.dev' },
       errors: {},
     });
@@ -161,14 +161,14 @@ describe('joiResolver', () => {
       },
     });
 
-    const resolver = joiResolver(
+    const bridge = joiBridge(
       { validate },
       {
         rootKey: null,
       },
     );
 
-    await expect(resolver({ email: 'aks' })).resolves.toEqual({
+    await expect(bridge({ email: 'aks' })).resolves.toEqual({
       values: { email: 'aks' },
       errors: {
         email: 'email must be a valid email',
@@ -177,7 +177,7 @@ describe('joiResolver', () => {
   });
 });
 
-describe('valibotResolver', () => {
+describe('valibotBridge', () => {
   it('uses the provided module and resolves object-based paths', async () => {
     const module = {
       safeParse: vi.fn().mockReturnValue({
@@ -191,7 +191,7 @@ describe('valibotResolver', () => {
       }),
     };
 
-    const resolver = valibotResolver(
+    const bridge = valibotBridge(
       { any: 'schema' },
       {
         module,
@@ -199,7 +199,7 @@ describe('valibotResolver', () => {
       },
     );
 
-    await expect(resolver({})).resolves.toEqual({
+    await expect(bridge({})).resolves.toEqual({
       values: {},
       errors: {
         'payment.cards.0.cvv': 'Invalid CVV',
@@ -208,9 +208,9 @@ describe('valibotResolver', () => {
   });
 
   it('throws a helpful error when valibot is unavailable', async () => {
-    const resolver = valibotResolver({}, { module: undefined, mode: 'sync' });
+    const bridge = valibotBridge({}, { module: undefined, mode: 'sync' });
 
-    await expect(resolver({ email: 'aks@runilib.dev' })).rejects.toThrow(
+    await expect(bridge({ email: 'aks@runilib.dev' })).rejects.toThrow(
       'Install it or pass `{ module: v }`',
     );
   });

@@ -3,16 +3,16 @@
 // so that existing `from '../types/types'` imports continue to work.
 // ─────────────────────────────────────────────────────────────────────────────────
 
-export type { FileSourceType, FileValue } from '../core/field-builders/file/types';
+export type { FileSourceType, FileValue } from '../core/field-descriptors/file/types';
 export type {
   PasswordRule,
   StrengthConfig,
   StrengthResult,
   StrengthRuleConfig,
   StrengthScoreLevel,
-} from '../core/field-builders/password/types';
-export type { PhoneValue } from '../core/field-builders/phone/countries';
-export type { PhoneCountryLayout } from '../core/field-builders/phone/types';
+} from '../core/field-descriptors/password/types';
+export type { PhoneValue } from '../core/field-descriptors/phone/countries';
+export type { PhoneCountryLayout } from '../core/field-descriptors/phone/types';
 export type {
   AsyncValidator,
   EmptyProps,
@@ -47,11 +47,11 @@ export type {
   UseFormBridgeReturn,
 } from './form';
 export type {
+  BridgeResult,
   globalDefaultsContext,
   OptionsFetcher,
   OptionsFetcherContext,
-  ResolverResult,
-  SchemaValidatorResolver,
+  SchemaValidatorBridge,
   UseFormBridgeOptions,
   ValidationTrigger,
 } from './options';

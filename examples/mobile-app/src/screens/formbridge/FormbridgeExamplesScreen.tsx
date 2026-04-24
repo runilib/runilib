@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BridgeExamplesShowcase } from '../../components/formbridge-examples/BridgeExamplesShowcase';
 import { CreateSchemaAdvancedExample } from '../../components/formbridge-examples/CreateSchemaAdvancedExample';
 import { CustomerCheckoutExample } from '../../components/formbridge-examples/CustomerCheckoutExample';
 import { CustomMaskExamplesShowcase } from '../../components/formbridge-examples/CustomMaskExamplesShowcase';
@@ -10,7 +11,6 @@ import { CustomStorageAdapterExample } from '../../components/formbridge-example
 import { FieldVariantsShowcase } from '../../components/formbridge-examples/FieldVariantsShowcase';
 import { PasswordVariantsExample } from '../../components/formbridge-examples/PasswordVariantsExample';
 import { PhoneVariantsExample } from '../../components/formbridge-examples/PhoneVariantsExample';
-import { ResolverExamplesShowcase } from '../../components/formbridge-examples/ResolverExamplesShowcase';
 import { StylingExamplesShowcase } from '../../components/formbridge-examples/StylingExamplesShowcase';
 
 export function FormbridgeExamplesScreen() {
@@ -50,7 +50,7 @@ export function FormbridgeExamplesScreen() {
           <Text style={s.subtitle}>
             This section gathers the route-based wizard, checkout flow, field variants,
             password recipes, phone recipes, file upload demos, masks, styling overrides,
-            and resolver demos in one dedicated place.
+            and bridge demos in one dedicated place.
           </Text>
 
           <TouchableOpacity
@@ -78,7 +78,7 @@ export function FormbridgeExamplesScreen() {
         <View style={s.sectionCard}>
           <Text style={s.sectionEyebrow}>Field systems</Text>
           <Text style={s.sectionTitle}>
-            Passwords, phone flows, schema rules, masks, styling, and resolvers.
+            Passwords, phone flows, schema rules, masks, styling, and bridges.
           </Text>
           <Text style={s.sectionText}>
             The rest of the examples are grouped by concern so the package behavior is
@@ -91,7 +91,7 @@ export function FormbridgeExamplesScreen() {
           <CustomMaskExamplesShowcase />
           <StylingExamplesShowcase />
           <CreateSchemaAdvancedExample />
-          <ResolverExamplesShowcase />
+          <BridgeExamplesShowcase />
         </View>
       </ScrollView>
     </SafeAreaView>

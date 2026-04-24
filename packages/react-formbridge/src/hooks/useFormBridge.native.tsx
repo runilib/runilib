@@ -9,11 +9,11 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { isFileDescriptor } from '../core/field-builders/file/FileFieldBuilder';
-import { isMaskedDescriptor } from '../core/field-builders/mask/MaskedFieldBuilder';
-import { isStrengthDescriptor } from '../core/field-builders/password/PasswordWithStrength';
-import type { PhoneValue } from '../core/field-builders/phone/countries';
-import { isPhoneDescriptor } from '../core/field-builders/phone/PhoneFieldBuilder';
+import { isFileDescriptor } from '../core/field-descriptors/file/FileFieldBuilder';
+import { isMaskedDescriptor } from '../core/field-descriptors/mask/MaskedFieldBuilder';
+import { isStrengthDescriptor } from '../core/field-descriptors/password/PasswordWithStrength';
+import type { PhoneValue } from '../core/field-descriptors/phone/countries';
+import { isPhoneDescriptor } from '../core/field-descriptors/phone/PhoneFieldBuilder';
 import { AsyncAutocompleteField } from '../renderers/native/AsyncAutocompleteField';
 import { NativeField } from '../renderers/native/Field';
 import { NativeFileField } from '../renderers/native/FileField';

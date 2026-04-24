@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge, yupResolver } from '@runilib/react-formbridge';
+import { field, useFormBridge, yupBridge } from '@runilib/react-formbridge';
 
 import * as yup from 'yup';
+import { BridgeExampleFrame } from './BridgeExampleFrame';
 import styles from './FormExamples.module.css';
-import { ResolverExampleFrame } from './ResolverExampleFrame';
 import { createDemoFormUi, simulateSubmitDelay } from './shared';
 
-export function YupResolverExample() {
+export function YupBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
   const formSchema = useMemo(
@@ -46,13 +46,13 @@ export function YupResolverExample() {
     [],
   );
 
-  const resolver = useMemo(() => yupResolver(schema, { mode: 'sync' }), [schema]);
+  const bridge = useMemo(() => yupBridge(schema, { mode: 'sync' }), [schema]);
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
     globalDefaults: () => createDemoFormUi(styles),
-    validatorResolver: resolver,
+    validatorBridge: bridge,
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -60,8 +60,8 @@ export function YupResolverExample() {
   const liveValues = watchAll();
 
   return (
-    <ResolverExampleFrame
-      resolverName="Yup"
+    <BridgeExampleFrame
+      bridgeName="Yup"
       accent="#34d399"
       title="Pilot qualification form"
       description="Useful when your team already models product or API validation with Yup and wants the same chainable style in the UI layer."
@@ -114,6 +114,6 @@ export function YupResolverExample() {
           </Form.Submit>
         </div>
       </Form>
-    </ResolverExampleFrame>
+    </BridgeExampleFrame>
   );
 }

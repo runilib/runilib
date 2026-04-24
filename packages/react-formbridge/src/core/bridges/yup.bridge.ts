@@ -1,16 +1,16 @@
-import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
+import type { BridgeResult, SchemaValidatorBridge } from '../../types/options';
 import type {
-  ResolverAdapterOptions,
-  ResolverMode,
-  ResolverPathInput,
-  ResolverValues,
+  BridgeAdapterOptions,
+  BridgeMode,
+  BridgePathInput,
+  BridgeValues,
 } from './types';
 import { collectErrors, failure, success } from './utils';
 
 // ─── Yup ─────────────────────────────────────────────────────────────────────
 
-export interface YupResolverIssue {
-  path?: ResolverPathInput;
+export interface YupBridgeIssue {
+  path?: BridgePathInput;
   message?: string;
 }
 
@@ -18,7 +18,7 @@ interface YupValidationError {
   message: string;
   name?: string;
   path?: string;
-  inner?: YupResolverIssue[];
+  inner?: YupBridgeIssue[];
   value?: unknown;
 }
 
@@ -27,12 +27,12 @@ interface YupSchema {
   validateSync?: (data: unknown, options?: object) => unknown;
 }
 
-export interface YupResolverOptions extends ResolverAdapterOptions<YupResolverIssue> {
-  mode?: ResolverMode;
+export interface YupBridgeOptions extends BridgeAdapterOptions<YupBridgeIssue> {
+  mode?: BridgeMode;
   validateOptions?: Record<string, unknown>;
 }
 
-function getYupValidationOptions(options: YupResolverOptions): Record<string, unknown> {
+function getYupValidationOptions(options: YupBridgeOptions): Record<string, unknown> {
   return {
     abortEarly: false,
     ...options.validateOptions,
@@ -41,8 +41,8 @@ function getYupValidationOptions(options: YupResolverOptions): Record<string, un
 
 async function executeYupValidation(
   schema: YupSchema,
-  values: ResolverValues,
-  options: YupResolverOptions,
+  values: BridgeValues,
+  options: YupBridgeOptions,
 ): Promise<unknown> {
   const validateOptions = getYupValidationOptions(options);
 
@@ -62,11 +62,11 @@ async function executeYupValidation(
   }
 
   throw new Error(
-    '[@runilib/react-formbridge] yupResolver expected a schema exposing validate or validateSync.',
+    '[@runilib/react-formbridge] yupBridge expected a schema exposing validate or validateSync.',
   );
 }
 
-function extractYupIssues(error: YupValidationError): YupResolverIssue[] {
+function extractYupIssues(error: YupValidationError): YupBridgeIssue[] {
   if (Array.isArray(error.inner) && error.inner.length > 0) {
     return error.inner;
   }
@@ -79,11 +79,11 @@ function extractYupIssues(error: YupValidationError): YupResolverIssue[] {
   ];
 }
 
-export function yupResolver(
+export function yupBridge(
   schema: YupSchema,
-  options: YupResolverOptions = {},
-): SchemaValidatorResolver {
-  return async (values): Promise<ResolverResult> => {
+  options: YupBridgeOptions = {},
+): SchemaValidatorBridge {
+  return async (values): Promise<BridgeResult> => {
     try {
       const data = await executeYupValidation(schema, values, options);
       return success(data, values);

@@ -2,7 +2,7 @@ import type React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { field } from '../../../core/field-builders/field';
+import { field } from '../../../core/field-descriptors/field';
 import { NativeField } from '../Field';
 
 function renderNativeField(

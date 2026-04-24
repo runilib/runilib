@@ -1,4 +1,4 @@
-import { field } from '../core/field-builders/field';
+import { field } from '../core/field-descriptors/field';
 import { createSchema } from '../core/validators/createSchema';
 import { ref } from '../core/validators/reference';
 import { useFormBridge as useNativeFormBridge } from '../hooks/useFormBridge.native';

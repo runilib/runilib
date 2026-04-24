@@ -51,7 +51,7 @@ import { useAsyncOptionsSection } from './sections/useAsyncOptions';
 import { useFormBridgeSection } from './sections/useFormBridge';
 import { useFormBridgeContextSection } from './sections/useFormBridgeContext';
 import { validationSection } from './sections/validation';
-import { adaptersSection } from './sections/validatoResolver';
+import { adaptersSection } from './sections/validatorBridge';
 import { webUiSection } from './sections/webUi';
 import { wizardSection } from './sections/wizard';
 import { docSidebar } from './sidebar';

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { parseDynamicForm } from '../../core/field-builders/dynamic/dynamic';
-import type { JsonFormDefinition } from '../../core/field-builders/dynamic/types';
+import { parseDynamicForm } from '../../core/field-descriptors/dynamic/dynamic';
+import type { JsonFormDefinition } from '../../core/field-descriptors/dynamic/types';
 import type {
   FieldDescriptor,
   FormSchema,

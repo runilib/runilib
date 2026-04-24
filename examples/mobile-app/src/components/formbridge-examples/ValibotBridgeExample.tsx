@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge, valibotResolver } from '@runilib/react-formbridge';
+import { field, useFormBridge, valibotBridge } from '@runilib/react-formbridge';
 
 import * as v from 'valibot';
+import { BridgeExampleCard } from './BridgeExampleCard';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { ResolverExampleCard } from './ResolverExampleCard';
 import { createNativeFieldProps, DEMO_PLANS, simulateSubmitDelay } from './shared';
 
-export function ValibotResolverExample() {
+export function ValibotBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
   const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
@@ -47,10 +47,10 @@ export function ValibotResolverExample() {
     [],
   );
 
-  const resolver = useMemo(
+  const bridge = useMemo(
     () =>
-      valibotResolver(schema, {
-        module: v as NonNullable<Parameters<typeof valibotResolver>[1]>['module'],
+      valibotBridge(schema, {
+        module: v as NonNullable<Parameters<typeof valibotBridge>[1]>['module'],
         mode: 'sync',
       }),
     [schema],
@@ -59,7 +59,7 @@ export function ValibotResolverExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    validatorResolver: resolver,
+    validatorBridge: bridge,
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -70,8 +70,8 @@ export function ValibotResolverExample() {
     'No plan selected';
 
   return (
-    <ResolverExampleCard
-      resolverName="Valibot"
+    <BridgeExampleCard
+      bridgeName="Valibot"
       accent="#a78bfa"
       title="Billing enrollment"
       description="Composable validation pipelines with explicit module injection for stable browser and ESM usage."
@@ -80,7 +80,7 @@ export function ValibotResolverExample() {
         <>
           <Text style={s.previewValue}>{planLabel}</Text>
           <Text style={s.previewText}>
-            This demo passes module injection explicitly so the resolver stays stable in
+            This demo passes module injection explicitly so the bridge stays stable in
             browser-first environments.
           </Text>
         </>
@@ -127,6 +127,6 @@ export function ValibotResolverExample() {
           Validate with Valibot
         </Form.Submit>
       </Form>
-    </ResolverExampleCard>
+    </BridgeExampleCard>
   );
 }

@@ -288,8 +288,8 @@ export const fr: Translations = {
         },
         {
           tag: 'help wanted',
-          title: 'formbridge : résolveur Valibot',
-          desc: 'Implémenter un adaptateur de résolveur pour la librairie de validation Valibot.',
+          title: 'formbridge : bridge Valibot',
+          desc: 'Implémenter un adaptateur bridge pour la librairie de validation Valibot.',
           color: 'blue',
         },
         {

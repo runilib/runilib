@@ -1,35 +1,35 @@
-import type { ResolverResult, SchemaValidatorResolver } from '../../types/options';
+import type { BridgeResult, SchemaValidatorBridge } from '../../types/options';
 
-type ResolverValues = Record<string, unknown>;
-type ResolverPathSegment = string | number;
+type BridgeValues = Record<string, unknown>;
+type BridgePathSegment = string | number;
 
-export type ResolverPathInput =
-  | ResolverPathSegment
-  | ResolverPathSegment[]
+export type BridgePathInput =
+  | BridgePathSegment
+  | BridgePathSegment[]
   | null
   | string
   | undefined;
 
-export type ResolverErrorMode = 'first' | 'join' | 'last';
+export type BridgeErrorMode = 'first' | 'join' | 'last';
 
 export const FORM_ROOT_ERROR_KEY = '_root';
 
-export interface ResolverIssueMapResult {
-  path?: ResolverPathInput;
+export interface BridgeIssueMapResult {
+  path?: BridgePathInput;
   message?: string | null;
 }
 
-export interface ResolverIssueContext<TIssue = unknown> {
+export interface BridgeIssueContext<TIssue = unknown> {
   issue: TIssue;
   index: number;
-  values: ResolverValues;
+  values: BridgeValues;
   defaultMessage: string;
-  defaultPath: ResolverPathSegment[];
+  defaultPath: BridgePathSegment[];
   defaultPathKey: string | null;
   rootKey: string | null;
 }
 
-export interface ResolverAdapterOptions<TIssue = unknown> {
+export interface BridgeAdapterOptions<TIssue = unknown> {
   /**
    * Where pathless errors should land.
    * Set to `null` to drop form-level errors entirely.
@@ -38,7 +38,7 @@ export interface ResolverAdapterOptions<TIssue = unknown> {
   /**
    * How to aggregate multiple messages targeting the same field.
    */
-  errorMode?: ResolverErrorMode;
+  errorMode?: BridgeErrorMode;
   /**
    * Separator used when `errorMode` is `join`.
    */
@@ -46,13 +46,13 @@ export interface ResolverAdapterOptions<TIssue = unknown> {
   /**
    * Customize the final key written in the error bag.
    */
-  formatPath?: (path: ResolverPathSegment[], issue: TIssue) => string | null | undefined;
+  formatPath?: (path: BridgePathSegment[], issue: TIssue) => string | null | undefined;
   /**
    * Customize or skip an issue before it is added to the error bag.
    */
   mapIssue?: (
-    context: ResolverIssueContext<TIssue>,
-  ) => ResolverIssueMapResult | null | undefined;
+    context: BridgeIssueContext<TIssue>,
+  ) => BridgeIssueMapResult | null | undefined;
   /**
    * Final message normalization hook.
    */
@@ -61,15 +61,15 @@ export interface ResolverAdapterOptions<TIssue = unknown> {
 
 // ─── Shared helpers ──────────────────────────────────────────────────────────
 
-function isRecord(value: unknown): value is ResolverValues {
+function isRecord(value: unknown): value is BridgeValues {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function toResolverValues(candidate: unknown, fallback: ResolverValues): ResolverValues {
+function toBridgeValues(candidate: unknown, fallback: BridgeValues): BridgeValues {
   return isRecord(candidate) ? candidate : fallback;
 }
 
-function splitPathString(path: string): ResolverPathSegment[] {
+function splitPathString(path: string): BridgePathSegment[] {
   return path
     .replace(/\[(\d+)\]/g, '.$1')
     .split('.')
@@ -78,14 +78,14 @@ function splitPathString(path: string): ResolverPathSegment[] {
     .map((segment) => (/^\d+$/.test(segment) ? Number(segment) : segment));
 }
 
-function toPathSegments(path: ResolverPathInput): ResolverPathSegment[] {
+function toPathSegments(path: BridgePathInput): BridgePathSegment[] {
   if (path == null) {
     return [];
   }
 
   if (Array.isArray(path)) {
     return path.filter(
-      (segment): segment is ResolverPathSegment =>
+      (segment): segment is BridgePathSegment =>
         typeof segment === 'string' || typeof segment === 'number',
     );
   }
@@ -101,14 +101,14 @@ function toPathSegments(path: ResolverPathInput): ResolverPathSegment[] {
   return [];
 }
 
-function defaultPathKey(path: ResolverPathSegment[]): string | null {
+function defaultPathKey(path: BridgePathSegment[]): string | null {
   return path.length > 0 ? path.map(String).join('.') : null;
 }
 
 function resolveErrorKey<TIssue>(
-  path: ResolverPathInput,
+  path: BridgePathInput,
   issue: TIssue,
-  options: ResolverAdapterOptions<TIssue>,
+  options: BridgeAdapterOptions<TIssue>,
 ): string | null {
   const segments = toPathSegments(path);
 
@@ -127,7 +127,7 @@ function resolveErrorKey<TIssue>(
 function normalizeMessage<TIssue>(
   message: string | undefined,
   issue: TIssue,
-  options: ResolverAdapterOptions<TIssue>,
+  options: BridgeAdapterOptions<TIssue>,
 ): string {
   const safeMessage = String(message ?? 'Invalid value.').trim() || 'Invalid value.';
   const normalized = options.normalizeMessage
@@ -141,7 +141,7 @@ function appendError<TIssue>(
   errors: Record<string, string>,
   key: string | null,
   message: string,
-  options: ResolverAdapterOptions<TIssue>,
+  options: BridgeAdapterOptions<TIssue>,
 ): void {
   if (!key || !message) {
     return;
@@ -176,9 +176,9 @@ function appendError<TIssue>(
 
 function collectErrors<TIssue>(
   issues: TIssue[],
-  values: ResolverValues,
-  options: ResolverAdapterOptions<TIssue>,
-  getIssuePath: (issue: TIssue) => ResolverPathInput,
+  values: BridgeValues,
+  options: BridgeAdapterOptions<TIssue>,
+  getIssuePath: (issue: TIssue) => BridgePathInput,
   getIssueMessage: (issue: TIssue) => string | undefined,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
@@ -187,7 +187,7 @@ function collectErrors<TIssue>(
     const defaultPath = toPathSegments(getIssuePath(issue));
     const defaultMessage = normalizeMessage(getIssueMessage(issue), issue, options);
 
-    const context: ResolverIssueContext<TIssue> = {
+    const context: BridgeIssueContext<TIssue> = {
       issue,
       index,
       values,
@@ -215,23 +215,23 @@ function collectErrors<TIssue>(
   return errors;
 }
 
-function success(values: unknown, fallback: ResolverValues): ResolverResult {
+function success(values: unknown, fallback: BridgeValues): BridgeResult {
   return {
-    values: toResolverValues(values, fallback),
+    values: toBridgeValues(values, fallback),
     errors: {},
   };
 }
 
-function failure(values: ResolverValues, errors: Record<string, string>): ResolverResult {
+function failure(values: BridgeValues, errors: Record<string, string>): BridgeResult {
   return { values, errors };
 }
 
-type ResolverMode = 'async' | 'auto' | 'sync';
+type BridgeMode = 'async' | 'auto' | 'sync';
 
 // ─── Zod ─────────────────────────────────────────────────────────────────────
 
-export interface ZodResolverIssue {
-  path?: ResolverPathInput;
+export interface ZodBridgeIssue {
+  path?: BridgePathInput;
   message?: string;
 }
 
@@ -243,7 +243,7 @@ interface ZodParseSuccess {
 interface ZodParseFailure {
   success: false;
   error?: {
-    issues?: ZodResolverIssue[];
+    issues?: ZodBridgeIssue[];
   };
 }
 
@@ -254,15 +254,15 @@ interface ZodSchema {
   safeParseAsync?: (data: unknown, options?: unknown) => Promise<ZodParseResult>;
 }
 
-export interface ZodResolverOptions extends ResolverAdapterOptions<ZodResolverIssue> {
-  mode?: ResolverMode;
+export interface ZodBridgeOptions extends BridgeAdapterOptions<ZodBridgeIssue> {
+  mode?: BridgeMode;
   parseOptions?: unknown;
 }
 
 async function executeZodParse(
   schema: ZodSchema,
-  values: ResolverValues,
-  options: ZodResolverOptions,
+  values: BridgeValues,
+  options: ZodBridgeOptions,
 ): Promise<ZodParseResult> {
   if (
     (options.mode === 'async' || options.mode === 'auto' || options.mode == null) &&
@@ -280,15 +280,15 @@ async function executeZodParse(
   }
 
   throw new Error(
-    '[@runilib/react-formbridge] zodResolver expected a schema exposing safeParse or safeParseAsync.',
+    '[@runilib/react-formbridge] zodBridge expected a schema exposing safeParse or safeParseAsync.',
   );
 }
 
-export function zodResolver(
+export function zodBridge(
   schema: ZodSchema,
-  options: ZodResolverOptions = {},
-): SchemaValidatorResolver {
-  return async (values): Promise<ResolverResult> => {
+  options: ZodBridgeOptions = {},
+): SchemaValidatorBridge {
+  return async (values): Promise<BridgeResult> => {
     const result = await executeZodParse(schema, values, options);
 
     if (result.success) {

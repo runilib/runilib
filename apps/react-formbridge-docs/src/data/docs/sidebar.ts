@@ -17,7 +17,7 @@ export const docSidebar: LibraryDoc['sidebar'] = [
       { id: 'fb-tutorial', label: 'Tutorial' },
       { id: 'fb-tutorial-signup', label: 'Signup form' },
       { id: 'fb-tutorial-checkout', label: 'Checkout flow' },
-      { id: 'fb-tutorial-validation', label: 'Validation & resolvers' },
+      { id: 'fb-tutorial-validation', label: 'Validation & bridges' },
       {
         id: 'fb-tutorial-schema-validation',
         label: 'createSchema() & strong validation',
@@ -93,7 +93,7 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     color: 'blue',
     items: [
       { id: 'fb-validation', label: 'Built-in validation' },
-      { id: 'fb-adapters', label: 'Validator resolver' },
+      { id: 'fb-adapters', label: 'Validator bridge' },
       { id: 'fb-conditional', label: 'Conditional logic' },
     ],
   },
