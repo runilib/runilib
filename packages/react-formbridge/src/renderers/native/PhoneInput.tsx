@@ -78,7 +78,6 @@ const defaultIntegratedRowStyle: ViewStyle = {
   alignItems: 'stretch',
   borderWidth: 1,
   borderColor: '#d1d5db',
-  // borderRadius: 14,
   backgroundColor: '#ffffff',
 };
 
@@ -88,7 +87,6 @@ const defaultCountryButtonStyle: ViewStyle = {
   paddingHorizontal: 12,
   borderWidth: 1,
   borderColor: '#d1d5db',
-  // borderRadius: 14,
   backgroundColor: '#ffffff',
   flexDirection: 'row',
   alignItems: 'center',
@@ -100,7 +98,6 @@ const defaultIntegratedCountryButtonStyle: ViewStyle = {
   minHeight: 52,
   minWidth: 92,
   borderWidth: 0,
-  // borderRadius: 0,
   backgroundColor: 'transparent',
 };
 
@@ -116,12 +113,77 @@ const defaultIntegratedInputStyle: TextStyle = {
   paddingHorizontal: 14,
   paddingVertical: 12,
   borderWidth: 0,
-  // borderRadius: 0,
   borderTopLeftRadius: 0,
   borderBottomLeftRadius: 0,
   backgroundColor: 'transparent',
   color: '#111827',
   fontSize: 15,
+};
+
+const defaultPhoneModalBackdropStyle: ViewStyle = {
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  paddingHorizontal: 16,
+  paddingVertical: 64,
+};
+
+const defaultPhoneModalCardStyle: ViewStyle = {
+  backgroundColor: '#ffffff',
+  borderRadius: 12,
+  maxHeight: '100%',
+  overflow: 'hidden',
+  padding: 12,
+  gap: 8,
+};
+
+const defaultPhoneSearchInputStyle: TextStyle = {
+  minHeight: 44,
+  paddingHorizontal: 12,
+  paddingVertical: 10,
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  borderRadius: 8,
+  backgroundColor: '#ffffff',
+  color: '#111827',
+  fontSize: 15,
+};
+
+const defaultPhoneCountryRowStyle: ViewStyle = {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 12,
+  paddingVertical: 12,
+  paddingHorizontal: 8,
+};
+
+const defaultPhoneCountryFlagStyle: TextStyle = {
+  fontSize: 20,
+};
+
+const defaultPhoneCountryNameStyle: TextStyle = {
+  flex: 1,
+  color: '#111827',
+  fontSize: 15,
+};
+
+const defaultPhoneCountryDialStyle: TextStyle = {
+  color: '#6b7280',
+  fontSize: 14,
+};
+
+const defaultPhoneSeparatorStyle: ViewStyle = {
+  height: 1,
+  backgroundColor: '#e5e7eb',
+  marginVertical: 4,
+};
+
+const defaultPhoneEmptyTextStyle: TextStyle = {
+  paddingVertical: 16,
+  paddingHorizontal: 8,
+  color: '#6b7280',
+  fontSize: 14,
+  textAlign: 'center',
 };
 
 export const NativePhoneInput: React.FC<Props> = ({
@@ -494,11 +556,11 @@ export const NativePhoneInput: React.FC<Props> = ({
         onRequestClose={() => setOpen(false)}
       >
         <Pressable
-          style={sx(styles?.phoneModalBackdrop)}
+          style={sx(defaultPhoneModalBackdropStyle, styles?.phoneModalBackdrop)}
           onPress={() => setOpen(false)}
         >
           <Pressable
-            style={sx(styles?.phoneModalCard)}
+            style={sx(defaultPhoneModalCardStyle, styles?.phoneModalCard)}
             onPress={(event) => event.stopPropagation()}
           >
             {descriptor._phoneSearchable && (
@@ -506,7 +568,11 @@ export const NativePhoneInput: React.FC<Props> = ({
                 value={search}
                 onChangeText={setSearch}
                 placeholder={resolvedSearchPlaceholder}
-                style={sx(styles?.phoneSearchInput, searchInputPropsStyle)}
+                style={sx(
+                  defaultPhoneSearchInputStyle,
+                  styles?.phoneSearchInput,
+                  searchInputPropsStyle,
+                )}
                 {...searchInputPropsRest}
               />
             )}
@@ -519,12 +585,14 @@ export const NativePhoneInput: React.FC<Props> = ({
                   {renderEmptySearchContent?.({
                     ...renderContext,
                     defaultContent: (
-                      <Text style={sx(styles?.phoneEmptyText)}>
+                      <Text
+                        style={sx(defaultPhoneEmptyTextStyle, styles?.phoneEmptyText)}
+                      >
                         {resolvedEmptySearchText}
                       </Text>
                     ),
                   }) ?? (
-                    <Text style={sx(styles?.phoneEmptyText)}>
+                    <Text style={sx(defaultPhoneEmptyTextStyle, styles?.phoneEmptyText)}>
                       {resolvedEmptySearchText}
                     </Text>
                   )}
@@ -532,7 +600,11 @@ export const NativePhoneInput: React.FC<Props> = ({
               )}
               renderItem={({ item }) => {
                 if ('separator' in item) {
-                  return <View style={sx(styles?.phoneSeparator)} />;
+                  return (
+                    <View
+                      style={sx(defaultPhoneSeparatorStyle, styles?.phoneSeparator)}
+                    />
+                  );
                 }
 
                 const index = filteredCountries.findIndex(
@@ -542,10 +614,22 @@ export const NativePhoneInput: React.FC<Props> = ({
                 const defaultCountryItemContent = (
                   <>
                     {descriptor._phoneShowFlag && (
-                      <Text style={sx(styles?.phoneCountryFlag)}>{item.flag}</Text>
+                      <Text
+                        style={sx(defaultPhoneCountryFlagStyle, styles?.phoneCountryFlag)}
+                      >
+                        {item.flag}
+                      </Text>
                     )}
-                    <Text style={sx(styles?.phoneCountryName)}>{item.name}</Text>
-                    <Text style={sx(styles?.phoneCountryDial)}>+{item.dial}</Text>
+                    <Text
+                      style={sx(defaultPhoneCountryNameStyle, styles?.phoneCountryName)}
+                    >
+                      {item.name}
+                    </Text>
+                    <Text
+                      style={sx(defaultPhoneCountryDialStyle, styles?.phoneCountryDial)}
+                    >
+                      +{item.dial}
+                    </Text>
                   </>
                 );
                 const resolvedCountryItemContent =
@@ -560,7 +644,7 @@ export const NativePhoneInput: React.FC<Props> = ({
                 return (
                   <Pressable
                     onPress={() => selectCountry(item)}
-                    style={sx(styles?.phoneCountryRow)}
+                    style={sx(defaultPhoneCountryRowStyle, styles?.phoneCountryRow)}
                   >
                     {resolvedCountryItemContent}
                   </Pressable>
