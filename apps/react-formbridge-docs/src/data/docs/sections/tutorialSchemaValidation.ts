@@ -355,10 +355,25 @@ This is the FormBridge-native equivalent of Zod's \`errorMap\`. Use it for i18n,
       code: {
         filename: '07-render.tsx',
         lang: 'tsx',
-        code: `import { useFormBridge } from '@runilib/react-formbridge'
-import { bookingSchema } from './bookingSchema'
+        code: `import { createSchema, field, useFormBridge } from '@runilib/react-formbridge'
 
-export function BookingForm() {
+// In a real app this schema lives in its own module (see Step 8).
+// We inline a condensed version here so the playground runs standalone.
+const bookingSchema = createSchema({
+  username: field.text('Username').required().trim().min(3).max(20),
+  email: field.email('Email').trim().lowercase(),
+  phone: field.phone('Phone').defaultCountry('FR'),
+  departure: field.date('Departure date').required(),
+  returnDate: field.date('Return date').required(),
+  password: field.password('Password').required().min(8),
+  confirmPassword: field
+    .password('Confirm password')
+    .required()
+    .sameAs('password', 'Passwords do not match.'),
+  terms: field.checkbox('I accept the terms').mustBeTrue('You must accept the terms.'),
+}).atLeastOne(['email', 'phone'], 'Provide at least an email or a phone number.')
+
+export default function BookingForm() {
   const { Form, fields, state } = useFormBridge(bookingSchema, {
     validateOn: 'onTouched',
     revalidateOn: 'onChange',
@@ -367,12 +382,7 @@ export function BookingForm() {
   const formLevelError = state.formLevelError
 
   return (
-    <Form onSubmit={async (values) => {
-      await fetch('/api/bookings', {
-        method: 'POST',
-        body: JSON.stringify(values),
-      })
-    }}>
+    <Form onSubmit={async (values) => console.log('submit', values)}>
       <fields.username />
       <fields.email />
       <fields.phone />
@@ -382,7 +392,7 @@ export function BookingForm() {
       <fields.confirmPassword />
       <fields.terms />
 
-      {formLevelError ? <p className="form-error">{formLevelError}</p> : null}
+      {formLevelError ? <p style={{ color: '#b91c1c' }}>{formLevelError}</p> : null}
 
       <Form.Submit disabled={!state.isValid}>Book trip</Form.Submit>
     </Form>

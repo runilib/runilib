@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/security/noDangerouslySetInnerHtml: JSON-LD is required for FAQ and item list metadata */
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 
 import { Playground } from '@/components/playground';
 import { faqItems, homeFeatures, homeSnippets, libraryInfo, useCases } from '@/data/site';
@@ -81,7 +81,6 @@ function buildPlaygroundFiles(code: string, exportName: string) {
 
 export default function HomePage() {
   const [activeSnippetIndex, setActiveSnippetIndex] = useState(0);
-  const [installCopied, setInstallCopied] = useState(false);
 
   const docsHref = getDocsLandingHref();
   const featuredEntries = getFeaturedEntries();
@@ -117,17 +116,6 @@ export default function HomePage() {
       description: DOC_SUMMARY_OVERRIDES[entry.id] ?? entry.summary,
     })),
   };
-
-  const handleCopyInstall = useCallback(() => {
-    if (typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-      return;
-    }
-
-    navigator.clipboard.writeText(libraryInfo.installCommand).then(() => {
-      setInstallCopied(true);
-      globalThis.window.setTimeout(() => setInstallCopied(false), 1800);
-    });
-  }, []);
 
   return (
     <>
@@ -174,18 +162,6 @@ export default function HomePage() {
                     View on GitHub
                   </SecondaryAnchor>
                 </HeroActions>
-
-                <InstallBar>
-                  <InstallCommand>{libraryInfo.installCommand}</InstallCommand>
-                  <InstallCopyButton
-                    aria-label="Copy install command"
-                    onClick={handleCopyInstall}
-                    type="button"
-                    $copied={installCopied}
-                  >
-                    <ClipboardIcon aria-hidden="true" />
-                  </InstallCopyButton>
-                </InstallBar>
               </HeroCopy>
 
               <HeroVisual>
@@ -688,76 +664,6 @@ const ButtonGlyph = styled.span`
     monospace;
   font-size: 12px;
   font-weight: 700;
-`;
-
-const InstallBar = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  width: fit-content;
-  max-width: 100%;
-  margin-top: 24px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid ${({ theme }) => theme.borderStrong};
-  background: ${({ theme }) => theme.surface};
-
-  @media (max-width: 640px) {
-    width: 100%;
-  }
-`;
-
-const InstallCommand = styled.code`
-  color: ${({ theme }) => theme.textSoft};
-  font-size: 12px;
-  overflow-wrap: anywhere;
-`;
-
-const InstallCopyButton = styled.button<{ $copied: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 30px;
-  border: 1px solid ${({ theme }) => theme.border};
-  border-radius: 8px;
-  background: ${({ theme, $copied }) => ($copied ? theme.accentSoft : theme.surfaceSoft)};
-  color: ${({ theme, $copied }) => ($copied ? theme.accent : theme.textMuted)};
-  cursor: pointer;
-  transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-
-  &:hover {
-    border-color: ${({ theme }) => theme.accent};
-    color: ${({ theme }) => theme.accent};
-  }
-`;
-
-const ClipboardIcon = styled.span`
-  position: relative;
-  width: 12px;
-  height: 12px;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    border: 1.5px solid currentColor;
-    border-radius: 3px;
-  }
-
-  &::before {
-    inset: 2px 0 0 2px;
-    background: transparent;
-  }
-
-  &::after {
-    inset: 0 2px 2px 0;
-    background: transparent;
-  }
 `;
 
 const HeroVisual = styled.div`
