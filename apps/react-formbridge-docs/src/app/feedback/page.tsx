@@ -6,6 +6,10 @@ export const metadata: Metadata = {
   title: 'Feedback',
   description:
     'Share documentation feedback, bug reports, feature requests, and API questions for react-formbridge.',
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 interface FeedbackRouteProps {

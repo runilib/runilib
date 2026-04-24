@@ -608,7 +608,7 @@ const HeroBadge = styled.div`
   font-weight: 700;
 `;
 
-const HeroTitle = styled.h1`
+const HeroTitle = styled.h2`
   margin: 18px 0 0;
   color: ${({ theme }) => theme.text};
   font-size: clamp(3rem, 4vw, 4.85rem);

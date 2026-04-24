@@ -35,8 +35,7 @@
   "homepage": "https://runilib.dev/docs/react-formbridge",
   "repository": {
     "type": "git",
-    "url": "https://github.com/runilib/runilib.git",
-    "directory": "packages/react-formbridge"
+    "url": "https://github.com/runilib/react-formbridge"
   },
   "bugs": {
     "url": "https://github.com/runilib/runilib/issues"
