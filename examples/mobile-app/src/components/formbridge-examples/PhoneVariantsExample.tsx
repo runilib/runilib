@@ -83,86 +83,86 @@ export function PhoneVariantsExample() {
           ...baseUi.submit,
           loadingText: 'Saving phone playbook...',
         },
-        // field: {
-        //   ...baseUi.field,
-        //   styles: {
-        //     ...baseUi.field?.styles,
-        //     phoneInput: {
-        //       ...(typeof baseInputStyle === 'object' ? baseInputStyle : {}),
-        //       flex: 1,
-        //       borderColor: 'rgba(96, 165, 250, 0.22)',
-        //       backgroundColor: '#ffffff',
-        //       color: '#10203a',
-        //     },
-        //     phoneCountryFlag: {
-        //       fontSize: 16,
-        //     },
-        //     phoneCountryDial: {
-        //       color: '#93c5fd',
-        //       fontSize: 12,
-        //       fontWeight: '700',
-        //     },
-        //     phoneChevron: {
-        //       color: '#93c5fd',
-        //       fontSize: 12,
-        //     },
-        //     phoneCountryDivider: {
-        //       backgroundColor: 'rgba(96, 165, 250, 0.16)',
-        //     },
-        //     phoneE164: {
-        //       color: '#64748b',
-        //       fontSize: 12,
-        //     },
-        //     phoneModalBackdrop: {
-        //       flex: 1,
-        //       backgroundColor: 'rgba(2, 6, 23, 0.62)',
-        //       justifyContent: 'center',
-        //       padding: 18,
-        //     },
-        //     phoneModalCard: {
-        //       maxHeight: '78%',
-        //       borderRadius: 22,
-        //       backgroundColor: '#ffffff',
-        //       borderWidth: 1,
-        //       borderColor: 'rgba(148, 163, 184, 0.18)',
-        //       padding: 14,
-        //       gap: 12,
-        //     },
-        //     phoneSearchInput: {
-        //       borderRadius: 14,
-        //       borderWidth: 1,
-        //       borderColor: 'rgba(148, 163, 184, 0.16)',
-        //       backgroundColor: '#f8fbff',
-        //       color: '#10203a',
-        //       paddingHorizontal: 14,
-        //       paddingVertical: 12,
-        //     },
-        //     phoneSeparator: {
-        //       height: 1,
-        //       marginVertical: 6,
-        //       backgroundColor: 'rgba(148, 163, 184, 0.12)',
-        //     },
-        //     phoneCountryRow: {
-        //       flexDirection: 'row',
-        //       alignItems: 'center',
-        //       gap: 10,
-        //       paddingHorizontal: 12,
-        //       paddingVertical: 12,
-        //     },
-        //     phoneCountryName: {
-        //       flex: 1,
-        //       color: '#10203a',
-        //       fontSize: 13,
-        //       fontWeight: '700',
-        //     },
-        //     phoneEmptyText: {
-        //       color: '#64748b',
-        //       fontSize: 12,
-        //       textAlign: 'center',
-        //       paddingVertical: 18,
-        //     },
-        //   },
-        // },
+        field: {
+          ...baseUi.field,
+          styles: {
+            ...baseUi.field?.styles,
+            phoneInput: {
+              ...(typeof baseInputStyle === 'object' ? baseInputStyle : {}),
+              flex: 1,
+              borderColor: 'rgba(96, 165, 250, 0.22)',
+              backgroundColor: '#ffffff',
+              color: '#10203a',
+            },
+            phoneCountryFlag: {
+              fontSize: 16,
+            },
+            phoneCountryDial: {
+              color: '#93c5fd',
+              fontSize: 12,
+              fontWeight: '700',
+            },
+            phoneChevron: {
+              color: '#93c5fd',
+              fontSize: 12,
+            },
+            phoneCountryDivider: {
+              backgroundColor: 'rgba(96, 165, 250, 0.16)',
+            },
+            phoneE164: {
+              color: '#64748b',
+              fontSize: 12,
+            },
+            phoneModalBackdrop: {
+              flex: 1,
+              backgroundColor: 'rgba(2, 6, 23, 0.62)',
+              justifyContent: 'center',
+              padding: 18,
+            },
+            phoneModalCard: {
+              maxHeight: '78%',
+              borderRadius: 22,
+              backgroundColor: '#ffffff',
+              borderWidth: 1,
+              borderColor: 'rgba(148, 163, 184, 0.18)',
+              padding: 14,
+              gap: 12,
+            },
+            phoneSearchInput: {
+              borderRadius: 14,
+              borderWidth: 1,
+              borderColor: 'rgba(148, 163, 184, 0.16)',
+              backgroundColor: '#f8fbff',
+              color: '#10203a',
+              paddingHorizontal: 14,
+              paddingVertical: 12,
+            },
+            phoneSeparator: {
+              height: 1,
+              marginVertical: 6,
+              backgroundColor: 'rgba(148, 163, 184, 0.12)',
+            },
+            phoneCountryRow: {
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              paddingHorizontal: 12,
+              paddingVertical: 12,
+            },
+            phoneCountryName: {
+              flex: 1,
+              color: '#10203a',
+              fontSize: 13,
+              fontWeight: '700',
+            },
+            phoneEmptyText: {
+              color: '#64748b',
+              fontSize: 12,
+              textAlign: 'center',
+              paddingVertical: 18,
+            },
+          },
+        },
       };
     },
   });
@@ -207,173 +207,173 @@ export function PhoneVariantsExample() {
         }}
       >
         <fields.supportLine
-        // {...{
-        //   styles: {
-        //     phoneRow: {
-        //       flexDirection: 'row',
-        //       alignItems: 'stretch',
-        //       gap: 12,
-        //     },
-        //     phoneCountryButton: {
-        //       minWidth: 128,
-        //       minHeight: 54,
-        //       paddingHorizontal: 14,
-        //       borderRadius: 16,
-        //       borderWidth: 1,
-        //       borderColor: 'rgba(96, 165, 250, 0.22)',
-        //       backgroundColor: '#ffffff',
-        //       flexDirection: 'row',
-        //       alignItems: 'center',
-        //       justifyContent: 'space-between',
-        //       gap: 8,
-        //     },
-        //   },
-        //   countryButtonAriaLabel: 'Select support market',
-        //   searchPlaceholderText: 'Search support market',
-        //   renderCountryButtonContent: ({ currentCountry, defaultContent }) => (
-        //     <View
-        //       style={{
-        //         flexDirection: 'row',
-        //         alignItems: 'center',
-        //         justifyContent: 'space-between',
-        //         gap: 8,
-        //         flex: 1,
-        //       }}
-        //     >
-        //       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        //         <Text>{currentCountry.flag}</Text>
-        //         <Text style={{ color: '#10203a', fontWeight: '700', fontSize: 12 }}>
-        //           {currentCountry.code}
-        //         </Text>
-        //       </View>
-        //       {typeof defaultContent === 'string' ? (
-        //         <Text style={{ color: '#93c5fd', fontSize: 12 }}>{defaultContent}</Text>
-        //       ) : (
-        //         defaultContent
-        //       )}
-        //     </View>
-        //   ),
-        //   renderCountryItemContent: ({ country, selected }) => (
-        //     <>
-        //       <Text>{country.flag}</Text>
-        //       <View style={{ flex: 1, gap: 2 }}>
-        //         <Text style={{ color: '#10203a', fontSize: 13, fontWeight: '700' }}>
-        //           {country.name}
-        //         </Text>
-        //         <Text style={{ color: '#64748b', fontSize: 11 }}>
-        //           {selected
-        //             ? 'Currently routing support here'
-        //             : 'Available support market'}
-        //         </Text>
-        //       </View>
-        //       <Text style={{ color: '#86efac', fontSize: 12, fontWeight: '700' }}>
-        //         +{country.dial}
-        //       </Text>
-        //     </>
-        //   ),
-        //   renderE164: ({ e164 }) => (
-        //     <Text style={{ color: '#86efac', fontSize: 12 }}>Stored route {e164}</Text>
-        //   ),
-        // }}
+          {...{
+            styles: {
+              phoneRow: {
+                flexDirection: 'row',
+                alignItems: 'stretch',
+                gap: 12,
+              },
+              phoneCountryButton: {
+                minWidth: 128,
+                minHeight: 54,
+                paddingHorizontal: 14,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: 'rgba(96, 165, 250, 0.22)',
+                backgroundColor: '#ffffff',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 8,
+              },
+            },
+            countryButtonAriaLabel: 'Select support market',
+            searchPlaceholderText: 'Search support market',
+            renderCountryButtonContent: ({ currentCountry, defaultContent }) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  flex: 1,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text>{currentCountry.flag}</Text>
+                  <Text style={{ color: '#10203a', fontWeight: '700', fontSize: 12 }}>
+                    {currentCountry.code}
+                  </Text>
+                </View>
+                {typeof defaultContent === 'string' ? (
+                  <Text style={{ color: '#93c5fd', fontSize: 12 }}>{defaultContent}</Text>
+                ) : (
+                  defaultContent
+                )}
+              </View>
+            ),
+            renderCountryItemContent: ({ country, selected }) => (
+              <>
+                <Text>{country.flag}</Text>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ color: '#10203a', fontSize: 13, fontWeight: '700' }}>
+                    {country.name}
+                  </Text>
+                  <Text style={{ color: '#64748b', fontSize: 11 }}>
+                    {selected
+                      ? 'Currently routing support here'
+                      : 'Available support market'}
+                  </Text>
+                </View>
+                <Text style={{ color: '#86efac', fontSize: 12, fontWeight: '700' }}>
+                  +{country.dial}
+                </Text>
+              </>
+            ),
+            renderE164: ({ e164 }) => (
+              <Text style={{ color: '#86efac', fontSize: 12 }}>Stored route {e164}</Text>
+            ),
+          }}
         />
 
         <fields.salesHotline
-        // {...{
-        //   styles: {
-        //     phoneRow: {
-        //       borderColor: 'rgba(96, 165, 250, 0.22)',
-        //       backgroundColor: '#ffffff',
-        //     },
-        //     phoneCountryButton: {
-        //       minWidth: 122,
-        //     },
-        //     phoneInput: {
-        //       color: '#10203a',
-        //     },
-        //   },
-        //   countryButtonAriaLabel: 'Choose the sales market',
-        //   searchPlaceholderText: 'Search revenue market',
-        //   emptySearchText: ({ search }) => `No sales market found for "${search}"`,
-        //   renderCountryButtonContent: ({ currentCountry }) => (
-        //     <View
-        //       style={{
-        //         flexDirection: 'row',
-        //         alignItems: 'center',
-        //         justifyContent: 'space-between',
-        //         gap: 8,
-        //         flex: 1,
-        //       }}
-        //     >
-        //       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        //         <Text>{currentCountry.flag}</Text>
-        //         <Text style={{ color: '#10203a', fontWeight: '700', fontSize: 12 }}>
-        //           Sales
-        //         </Text>
-        //       </View>
-        //       <Text style={{ color: '#93c5fd', fontSize: 12 }}>
-        //         +{currentCountry.dial}
-        //       </Text>
-        //     </View>
-        //   ),
-        //   renderCountryItemContent: ({ country, selected }) => (
-        //     <>
-        //       <Text>{country.flag}</Text>
-        //       <Text
-        //         style={{ flex: 1, color: '#10203a', fontSize: 13, fontWeight: '700' }}
-        //       >
-        //         {country.name}
-        //       </Text>
-        //       <Text
-        //         style={{
-        //           color: selected ? '#fbbf24' : '#93c5fd',
-        //           fontSize: 12,
-        //           fontWeight: '700',
-        //         }}
-        //       >
-        //         {selected ? 'ACTIVE' : `+${country.dial}`}
-        //       </Text>
-        //     </>
-        //   ),
-        //   e164Text: ({ e164 }) => `CRM storage: ${e164}`,
-        // }}
+          {...{
+            styles: {
+              phoneRow: {
+                borderColor: 'rgba(96, 165, 250, 0.22)',
+                backgroundColor: '#ffffff',
+              },
+              phoneCountryButton: {
+                minWidth: 122,
+              },
+              phoneInput: {
+                color: '#10203a',
+              },
+            },
+            countryButtonAriaLabel: 'Choose the sales market',
+            searchPlaceholderText: 'Search revenue market',
+            emptySearchText: ({ search }) => `No sales market found for "${search}"`,
+            renderCountryButtonContent: ({ currentCountry }) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  flex: 1,
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text>{currentCountry.flag}</Text>
+                  <Text style={{ color: '#10203a', fontWeight: '700', fontSize: 12 }}>
+                    Sales
+                  </Text>
+                </View>
+                <Text style={{ color: '#93c5fd', fontSize: 12 }}>
+                  +{currentCountry.dial}
+                </Text>
+              </View>
+            ),
+            renderCountryItemContent: ({ country, selected }) => (
+              <>
+                <Text>{country.flag}</Text>
+                <Text
+                  style={{ flex: 1, color: '#10203a', fontSize: 13, fontWeight: '700' }}
+                >
+                  {country.name}
+                </Text>
+                <Text
+                  style={{
+                    color: selected ? '#fbbf24' : '#93c5fd',
+                    fontSize: 12,
+                    fontWeight: '700',
+                  }}
+                >
+                  {selected ? 'ACTIVE' : `+${country.dial}`}
+                </Text>
+              </>
+            ),
+            e164Text: ({ e164 }) => `CRM storage: ${e164}`,
+          }}
         />
 
         <fields.executiveDesk
-        // {...{
-        //   styles: {
-        //     phoneRow: {
-        //       borderColor: 'rgba(148, 163, 184, 0.2)',
-        //       backgroundColor: '#ffffff',
-        //     },
-        //     phoneCountryButton: {
-        //       minWidth: 94,
-        //     },
-        //     phoneInput: {
-        //       color: '#10203a',
-        //     },
-        //   },
-        //   renderCountryButtonContent: ({ currentCountry }) => (
-        //     <View
-        //       style={{
-        //         flexDirection: 'row',
-        //         alignItems: 'center',
-        //         justifyContent: 'space-between',
-        //         gap: 8,
-        //         flex: 1,
-        //       }}
-        //     >
-        //       <Text style={{ color: '#10203a', fontWeight: '700', fontSize: 12 }}>
-        //         {currentCountry.name}
-        //       </Text>
-        //       <Text style={{ color: '#93c5fd', fontSize: 12 }}>▾</Text>
-        //     </View>
-        //   ),
-        //   renderE164: ({ e164 }) => (
-        //     <Text style={{ color: '#5f6f88', fontSize: 12 }}>
-        //       Directory format: {e164}
-        //     </Text>
-        //   ),
-        // }}
+          {...{
+            styles: {
+              phoneRow: {
+                borderColor: 'rgba(148, 163, 184, 0.2)',
+                backgroundColor: '#ffffff',
+              },
+              phoneCountryButton: {
+                minWidth: 94,
+              },
+              phoneInput: {
+                color: '#10203a',
+              },
+            },
+            renderCountryButtonContent: ({ currentCountry }) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  flex: 1,
+                }}
+              >
+                <Text style={{ color: '#10203a', fontWeight: '700', fontSize: 12 }}>
+                  {currentCountry.name}
+                </Text>
+                <Text style={{ color: '#93c5fd', fontSize: 12 }}>▾</Text>
+              </View>
+            ),
+            renderE164: ({ e164 }) => (
+              <Text style={{ color: '#5f6f88', fontSize: 12 }}>
+                Directory format: {e164}
+              </Text>
+            ),
+          }}
         />
 
         <Form.Submit>Save phone playbook</Form.Submit>
