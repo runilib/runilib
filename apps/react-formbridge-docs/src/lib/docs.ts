@@ -1,4 +1,5 @@
 import { formbridgeDocs } from '@/data/docs';
+import { formbridgePackageVersion } from '@/data/packageVersion';
 import { groupDescriptions } from '@/data/site';
 import type {
   DocEntry,
@@ -9,7 +10,7 @@ import type {
 } from '@/types';
 
 const docs: LibraryDoc = formbridgeDocs;
-const currentVersion = docs.versions[0] ?? '1.0.0';
+const currentVersion = docs.versions[0] ?? formbridgePackageVersion;
 
 function semverLte(a: string, b: string): boolean {
   const pa = a.split('.').map(Number);

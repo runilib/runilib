@@ -356,6 +356,11 @@ yarn workspace @examples/web add @runilib/my-lib@workspace:*
 
 Pick at least one real consumer. For a cross-platform library, testing both web and mobile is strongly recommended.
 
+If the consumer app displays the package version in the UI:
+- do **not** hardcode the version string
+- read it from the library `package.json` instead so the landing pages and docs stay aligned automatically after each release
+- follow the existing pattern used in `apps/landing/src/data/packageVersions.ts` and `apps/react-formbridge-docs/src/data/packageVersion.ts`
+
 Then run:
 
 ```bash

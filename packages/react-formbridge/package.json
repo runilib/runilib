@@ -40,10 +40,6 @@
   "bugs": {
     "url": "https://github.com/runilib/runilib/issues"
   },
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/ton-compte"
-  },
   "license": "MIT",
   "author": "AKS <tech-founder@gonextstep.io>",
   "sideEffects": false,

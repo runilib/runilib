@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { formbridgePackageVersion } from '@/data/packageVersion';
+
 import type { SandpackTheme } from '@codesandbox/sandpack-react';
 import { Sandpack } from '@codesandbox/sandpack-react';
 import styled from 'styled-components';
@@ -14,7 +16,6 @@ import { useThemeMode } from './ThemeProviders';
 const MONO_STACK = `'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace`;
 const BODY_STACK = `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
 const FORMBRIDGE_PACKAGE_NAME = '@runilib/react-formbridge';
-const FORMBRIDGE_PUBLISHED_VERSION = '1.0.0';
 const SNACK_SDK_VERSION = '52.0.0';
 const LOCAL_FORMBRIDGE_ENDPOINT = '/api/sandpack/react-formbridge';
 
@@ -456,7 +457,7 @@ export function Playground({
     return {
       ...requestedDependencies,
       [FORMBRIDGE_PACKAGE_NAME]:
-        requestedDependencies[FORMBRIDGE_PACKAGE_NAME] ?? FORMBRIDGE_PUBLISHED_VERSION,
+        requestedDependencies[FORMBRIDGE_PACKAGE_NAME] ?? formbridgePackageVersion,
     };
   }, [
     dependencies,

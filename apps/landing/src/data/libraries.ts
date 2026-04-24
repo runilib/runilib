@@ -1,4 +1,5 @@
 import type { LibraryInfo } from '../types';
+import { landingPackageVersions } from './packageVersions';
 
 export const FORM_BRIDGE_DOCS_URL =
   process.env.NODE_ENV === 'development'
@@ -27,7 +28,7 @@ export const LIBRARIES: LibraryInfo[] = [
     desc: 'Build product tours, user onboarding walkthroughs, feature discovery flows and tooltips with the same API on React web and React Native. Includes spotlight overlays, customizable popovers, analytics hooks and programmatic control.',
     color: 'amber',
     icon: '💬',
-    version: '1.0.0',
+    version: landingPackageVersions.walkit,
     tags: [
       'Product tours',
       'User onboarding',
@@ -59,7 +60,7 @@ export const LIBRARIES: LibraryInfo[] = [
     desc: 'Build schema-driven forms for React and React Native with TypeScript. Define one shared schema, then generate fields, validation, form state, multi-step flows and UI patterns for web and mobile.',
     color: 'blue',
     icon: '📋',
-    version: '1.0.0',
+    version: landingPackageVersions.formbridge,
     tags: [
       'Form builder',
       'Schema-driven forms',
