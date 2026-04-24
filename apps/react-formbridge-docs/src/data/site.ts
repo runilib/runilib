@@ -127,13 +127,6 @@ export const homeSnippets: CodeSnippet[] = [
     label: 'Web',
     filename: 'SignupForm.web.tsx',
     lang: 'tsx',
-    preview: {
-      src: '/docs/formbridge/formbridge-overview-web.svg',
-      alt: 'Web preview of a schema-driven signup form rendered with generated fields.',
-      caption: 'Web preview',
-      maxWidth: 1440,
-      maxHeight: 900,
-    },
     code: `import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
@@ -172,13 +165,6 @@ export function SignupForm() {
     label: 'Native',
     filename: 'SignupScreen.native.tsx',
     lang: 'tsx',
-    preview: {
-      src: '/docs/formbridge/formbridge-overview-native.svg',
-      alt: 'Native preview of the same schema rendered as a mobile signup screen.',
-      caption: 'Native preview',
-      maxWidth: 720,
-      maxHeight: 1280,
-    },
     code: `import { Alert, ScrollView, View } from 'react-native'
 import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
@@ -204,7 +190,7 @@ export function SignupScreen() {
           Alert.alert('Submitted', JSON.stringify(values, null, 2))
         }}
       >
-        <View style={{ gap: 12, padding: 16 }}>
+        <View style={{ gap: 12, paddingTop: 40, padding: 16 }}>
           <fields.email />
           <fields.password />
           <fields.role />
