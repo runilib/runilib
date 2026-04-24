@@ -201,7 +201,10 @@ function buildSnackUrl(params: {
   }
 
   if (params.dependencies && Object.keys(params.dependencies).length > 0) {
-    url.searchParams.set('dependencies', JSON.stringify(params.dependencies));
+    const dependencyList = Object.entries(params.dependencies)
+      .map(([name, version]) => `${name}@${version}`)
+      .join(',');
+    url.searchParams.set('dependencies', dependencyList);
   }
 
   return url.toString();
