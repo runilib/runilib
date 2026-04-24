@@ -58,6 +58,12 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
     },
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
+  authors: [{ name: 'runilib' }],
+  creator: 'runilib',
+  publisher: 'runilib',
   icons: {
     icon: [
       { url: FAVICON_ICO_URL, type: 'image/x-icon', sizes: 'any' },
