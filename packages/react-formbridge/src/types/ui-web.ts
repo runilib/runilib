@@ -10,10 +10,16 @@ import type {
   TextareaHTMLAttributes,
 } from 'react';
 
-import type { FileValue } from '../core/field-builders/file/types';
-import type { PasswordRule, StrengthResult } from '../core/field-builders/password/types';
-import type { PhoneValue } from '../core/field-builders/phone/countries';
-import type { CountryInfo, PhoneCountryLayout } from '../core/field-builders/phone/types';
+import type { FileValue } from '../core/field-descriptors/file/types';
+import type {
+  PasswordRule,
+  StrengthResult,
+} from '../core/field-descriptors/password/types';
+import type { PhoneValue } from '../core/field-descriptors/phone/countries';
+import type {
+  CountryInfo,
+  PhoneCountryLayout,
+} from '../core/field-descriptors/phone/types';
 import type { FieldAutoComplete } from './autoComplete';
 import type {
   FieldRenderersProps,

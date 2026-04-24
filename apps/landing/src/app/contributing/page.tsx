@@ -80,7 +80,7 @@ git checkout main
 git pull origin main
 
 # Use descriptive branch names
-git checkout -b feat/formbridge-valibot-resolver
+git checkout -b feat/formbridge-valibot-bridge
 git checkout -b fix/walkit-ios-scroll-crash
 git checkout -b docs/contributing-guide
 git checkout -b chore/update-styled-components-v6`;

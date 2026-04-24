@@ -2,8 +2,8 @@ import type React from 'react';
 
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { field } from '../core/field-builders/field';
-import type { MaskedDescriptor } from '../core/field-builders/mask/types';
+import { field } from '../core/field-descriptors/field';
+import type { MaskedDescriptor } from '../core/field-descriptors/mask/types';
 import { MaskedInput } from '../renderers/web/MaskedInput';
 
 function renderMaskedInput(

@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge';
+import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge';
 
 import { z } from 'zod';
+import { BridgeExampleCard } from './BridgeExampleCard';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { ResolverExampleCard } from './ResolverExampleCard';
 import { createNativeFieldProps, simulateSubmitDelay } from './shared';
 
-export function ZodResolverExample() {
+export function ZodBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
   const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
@@ -33,15 +33,15 @@ export function ZodResolverExample() {
     [],
   );
 
-  const resolver = useMemo(
-    () => zodResolver(schema as Parameters<typeof zodResolver>[0], { mode: 'sync' }),
+  const bridge = useMemo(
+    () => zodBridge(schema as Parameters<typeof zodBridge>[0], { mode: 'sync' }),
     [schema],
   );
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    validatorResolver: resolver,
+    validatorBridge: bridge,
   });
 
   const { Form, fields, state, watchAll } = form;
@@ -49,8 +49,8 @@ export function ZodResolverExample() {
   const liveValues = watchAll();
 
   return (
-    <ResolverExampleCard
-      resolverName="Zod"
+    <BridgeExampleCard
+      bridgeName="Zod"
       accent="#fb923c"
       title="Product launch intake"
       description="One schema validates raw inputs and returns a typed payload to the submit handler."
@@ -110,6 +110,6 @@ export function ZodResolverExample() {
           Validate with Zod
         </Form.Submit>
       </Form>
-    </ResolverExampleCard>
+    </BridgeExampleCard>
   );
 }

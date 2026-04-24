@@ -114,7 +114,7 @@ export function TutorialResultScreen() {
 - We begin with a tiny newsletter-style form
 - Then we add more fields and reactive state
 - Then we add conditional business fields, stronger validation, and better submit behavior
-- Finally, the later tutorial pages branch into checkout, custom UI, resolvers, wizard flows, and native screens
+- Finally, the later tutorial pages branch into checkout, custom UI, bridges, wizard flows, and native screens
 
 The preview above is the kind of final form we are aiming for on both web and mobile.`,
     },
@@ -253,7 +253,7 @@ export function NewsletterSignupScreen() {
 
 1. \`Tutorial: signup form\` for multi-field schemas, conditional sections, and live state
 2. \`Tutorial: checkout flow\` for masks, persistence, denser layouts, and previews
-3. \`Tutorial: validation & resolvers\` for Zod, Yup, Joi, Valibot, and async options
+3. \`Tutorial: validation & bridges\` for Zod, Yup, Joi, Valibot, and async options
 4. \`Tutorial: custom UI & styling\` for \`fieldController(name)\`, \`field.custom()\`, and styling systems
 5. \`Tutorial: advanced flows\` for wizards, dynamic forms, readonly review screens, analytics, and route-driven mobile flows`,
     },

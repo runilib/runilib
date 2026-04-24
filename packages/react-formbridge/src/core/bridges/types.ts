@@ -1,33 +1,33 @@
-export type ResolverValues = Record<string, unknown>;
-export type ResolverPathSegment = string | number;
+export type BridgeValues = Record<string, unknown>;
+export type BridgePathSegment = string | number;
 
-export type ResolverPathInput =
-  | ResolverPathSegment
-  | ResolverPathSegment[]
+export type BridgePathInput =
+  | BridgePathSegment
+  | BridgePathSegment[]
   | null
   | string
   | undefined;
 
-export type ResolverErrorMode = 'first' | 'join' | 'last';
+export type BridgeErrorMode = 'first' | 'join' | 'last';
 
 export const FORM_ROOT_ERROR_KEY = '_root';
 
-export interface ResolverIssueMapResult {
-  path?: ResolverPathInput;
+export interface BridgeIssueMapResult {
+  path?: BridgePathInput;
   message?: string | null;
 }
 
-export interface ResolverIssueContext<TIssue = unknown> {
+export interface BridgeIssueContext<TIssue = unknown> {
   issue: TIssue;
   index: number;
-  values: ResolverValues;
+  values: BridgeValues;
   defaultMessage: string;
-  defaultPath: ResolverPathSegment[];
+  defaultPath: BridgePathSegment[];
   defaultPathKey: string | null;
   rootKey: string | null;
 }
 
-export interface ResolverAdapterOptions<TIssue = unknown> {
+export interface BridgeAdapterOptions<TIssue = unknown> {
   /**
    * Where pathless errors should land.
    * Set to `null` to drop form-level errors entirely.
@@ -36,7 +36,7 @@ export interface ResolverAdapterOptions<TIssue = unknown> {
   /**
    * How to aggregate multiple messages targeting the same field.
    */
-  errorMode?: ResolverErrorMode;
+  errorMode?: BridgeErrorMode;
   /**
    * Separator used when `errorMode` is `join`.
    */
@@ -44,17 +44,17 @@ export interface ResolverAdapterOptions<TIssue = unknown> {
   /**
    * Customize the final key written in the error bag.
    */
-  formatPath?: (path: ResolverPathSegment[], issue: TIssue) => string | null | undefined;
+  formatPath?: (path: BridgePathSegment[], issue: TIssue) => string | null | undefined;
   /**
    * Customize or skip an issue before it is added to the error bag.
    */
   mapIssue?: (
-    context: ResolverIssueContext<TIssue>,
-  ) => ResolverIssueMapResult | null | undefined;
+    context: BridgeIssueContext<TIssue>,
+  ) => BridgeIssueMapResult | null | undefined;
   /**
    * Final message normalization hook.
    */
   normalizeMessage?: (message: string, issue: TIssue) => string;
 }
 
-export type ResolverMode = 'async' | 'auto' | 'sync';
+export type BridgeMode = 'async' | 'auto' | 'sync';

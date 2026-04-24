@@ -42,7 +42,7 @@ export const useFormBridgeSection: LibraryDoc['sections'][number] = {
 } = useFormBridge(schema, {
   validateOn: 'onBlur',
   revalidateOn: 'onChange',
-  resolver,
+  validatorBridge,
   persist,
   formKey: 'checkout-step-1',
   initialValues: { quantity: 2 },

@@ -21,11 +21,11 @@ const LIBRARIES = [
     title: '@runilib/react-formbridge',
     eyebrow: 'Form platform',
     description:
-      'Generated fields, route-based wizard flows, masks, styling patterns, resolvers, and async options.',
+      'Generated fields, route-based wizard flows, masks, styling patterns, bridges, and async options.',
     route: '/formbridge',
     accent: '#60a5fa',
     surface: '#ffffff',
-    bullets: ['Checkout flow', 'Cross-screen wizard', 'Masks', 'Resolvers', 'Styling'],
+    bullets: ['Checkout flow', 'Cross-screen wizard', 'Masks', 'Bridges', 'Styling'],
   },
 ] as const;
 

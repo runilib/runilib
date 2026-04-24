@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import styles from './FormExamples.module.css';
 import { formatDemoJson } from './shared';
 
-interface ResolverExampleFrameProps {
-  resolverName: string;
+interface BridgeExampleFrameProps {
+  bridgeName: string;
   accent: string;
   title: string;
   description: string;
@@ -17,8 +17,8 @@ interface ResolverExampleFrameProps {
   children: ReactNode;
 }
 
-export const ResolverExampleFrame = ({
-  resolverName,
+export const BridgeExampleFrame = ({
+  bridgeName,
   accent,
   title,
   description,
@@ -29,7 +29,7 @@ export const ResolverExampleFrame = ({
   submitError,
   footer,
   children,
-}: ResolverExampleFrameProps) => {
+}: BridgeExampleFrameProps) => {
   return (
     <div className={styles.resolverFrame}>
       <div className={styles.resolverOverview}>
@@ -41,7 +41,7 @@ export const ResolverExampleFrame = ({
             borderColor: `${accent}2b`,
           }}
         >
-          {resolverName} resolver
+          {bridgeName} bridge
         </span>
 
         <div>
@@ -75,7 +75,7 @@ export const ResolverExampleFrame = ({
             <pre className={styles.resolverJson}>
               {parsedSubmission
                 ? formatDemoJson(parsedSubmission)
-                : 'Submit the form to inspect the normalized resolver output.'}
+                : 'Submit the form to inspect the normalized bridge output.'}
             </pre>
           </div>
         </div>

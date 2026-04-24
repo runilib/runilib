@@ -3,8 +3,8 @@ import {
   STRENGTH_CONFIG_FR,
   STRENGTH_CONFIG_SIMPLE,
   STRENGTH_CONFIG_STRICT,
-} from '../core/field-builders/password/constant';
-import { scorePassword } from '../core/field-builders/password/strength';
+} from '../core/field-descriptors/password/constant';
+import { scorePassword } from '../core/field-descriptors/password/strength';
 
 describe('scorePassword - default config', () => {
   it('returns score 0 for empty string', () => {

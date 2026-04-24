@@ -301,7 +301,7 @@ export function createUseFormBridgeWizard<TPlatform extends Platform>(
       initialValues: stepInitialValues,
       validateOn: stepFormOptions?.validateOn ?? validateOn,
       revalidateOn: stepFormOptions?.revalidateOn ?? revalidateOn,
-      validatorResolver: stepFormOptions?.validatorResolver,
+      validatorBridge: stepFormOptions?.validatorBridge,
       persist: stepPersist,
       analytics: stepFormOptions?.analytics,
       globalDefaults: stepFormOptions?.globalDefaults,

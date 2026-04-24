@@ -3,51 +3,50 @@ import { Text, TouchableOpacity, View } from 'react-native';
 
 import * as Haptics from 'expo-haptics';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { JoiResolverExample } from './JoiResolverExample';
-import { ValibotResolverExample } from './ValibotResolverExample';
-// import { YupResolverExample } from './YupResolverExample';
-import { ZodResolverExample } from './ZodResolverExample';
+import { JoiBridgeExample } from './JoiBridgeExample';
+import { ValibotBridgeExample } from './ValibotBridgeExample';
+// import { YupBridgeExample } from './YupBridgeExample';
+import { ZodBridgeExample } from './ZodBridgeExample';
 
-const RESOLVER_TABS = [
+const BRIDGE_TABS = [
   {
     id: 'zod',
     label: 'Zod',
     note: 'Typed parsing',
-    component: ZodResolverExample,
+    component: ZodBridgeExample,
   },
   // {
   //   id: 'yup',
   //   label: 'Yup',
   //   note: 'Chainable rules',
-  //   component: YupResolverExample,
+  //   component: YupBridgeExample,
   // },
   {
     id: 'joi',
     label: 'Joi',
     note: 'Strict business rules',
-    component: JoiResolverExample,
+    component: JoiBridgeExample,
   },
   {
     id: 'valibot',
     label: 'Valibot',
     note: 'Composable pipelines',
-    component: ValibotResolverExample,
+    component: ValibotBridgeExample,
   },
 ] as const;
 
-type ResolverTabId = (typeof RESOLVER_TABS)[number]['id'];
+type BridgeTabId = (typeof BRIDGE_TABS)[number]['id'];
 
-export function ResolverExamplesShowcase() {
-  const [activeTab, setActiveTab] = useState<ResolverTabId>('zod');
-  const activeEntry =
-    RESOLVER_TABS.find((item) => item.id === activeTab) ?? RESOLVER_TABS[0];
+export function BridgeExamplesShowcase() {
+  const [activeTab, setActiveTab] = useState<BridgeTabId>('zod');
+  const activeEntry = BRIDGE_TABS.find((item) => item.id === activeTab) ?? BRIDGE_TABS[0];
   const ActiveExample = activeEntry.component;
 
   return (
     <View style={s.resolverShowcaseCard}>
       <View style={s.resolverHeader}>
         <View style={s.resolverEyebrow}>
-          <Text style={s.resolverEyebrowText}>resolver demos</Text>
+          <Text style={s.resolverEyebrowText}>bridge demos</Text>
         </View>
 
         <View>
@@ -59,7 +58,7 @@ export function ResolverExamplesShowcase() {
         </View>
 
         <View style={s.resolverSwitchRow}>
-          {RESOLVER_TABS.map((item) => (
+          {BRIDGE_TABS.map((item) => (
             <TouchableOpacity
               key={item.id}
               style={[s.resolverSwitch, item.id === activeTab && s.resolverSwitchActive]}

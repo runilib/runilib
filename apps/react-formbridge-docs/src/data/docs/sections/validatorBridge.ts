@@ -7,8 +7,8 @@ import {
 export const adaptersSection: LibraryDoc['sections'][number] = {
   id: 'fb-adapters',
 
-  title: 'Schema validator resolver (zod, yup, joi, valibot)',
-  content: `Use the \`resolver\` option when your real validation source of truth already lives in Zod, Yup, Valibot, Joi, or another schema library.
+  title: 'Schema validator bridge (zod, yup, joi, valibot)',
+  content: `Use the \`bridge\` option when your real validation source of truth already lives in Zod, Yup, Valibot, Joi, or another schema library.
 
 - The schema builders still drive rendering and UX metadata
 - The external schema owns the final values/errors decision
@@ -16,10 +16,10 @@ export const adaptersSection: LibraryDoc['sections'][number] = {
 - This is often the cleanest path in domains that already share validation with the backend`,
   codeTabs: [
     {
-      filename: 'zod-resolver.ts',
+      filename: 'zod-bridge.ts',
       lang: 'ts',
       code: `import { z } from 'zod'
-import { field, useFormBridge, zodResolver } from '@runilib/react-formbridge'
+import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge'
 
 const schema = {
   email: field.email('Email').required(),
@@ -32,14 +32,14 @@ const zodSchema = z.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: zodResolver(zodSchema),
+  validatorBridge: zodBridge(zodSchema),
 })`,
     },
     {
-      filename: 'yup-resolver.ts',
+      filename: 'yup-bridge.ts',
       lang: 'ts',
       code: `import * as yup from 'yup'
-import { field, useFormBridge, yupResolver } from '@runilib/react-formbridge'
+import { field, useFormBridge, yupBridge } from '@runilib/react-formbridge'
 
 const schema = {
   name: field.text('Full name').required(),
@@ -52,14 +52,14 @@ const yupSchema = yup.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: yupResolver(yupSchema),
+  validatorBridge: yupBridge(yupSchema),
 })`,
     },
     {
-      filename: 'joi-resolver.ts',
+      filename: 'joi-bridge.ts',
       lang: 'ts',
       code: `import Joi from 'joi'
-import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge'
+import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   email: field.email('Email').required(),
@@ -72,17 +72,17 @@ const joiSchema = Joi.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: joiResolver(joiSchema),
+  validatorBridge: joiBridge(joiSchema),
 })`,
     },
     {
-      filename: 'valibot-resolver.ts',
+      filename: 'valibot-bridge.ts',
       lang: 'ts',
       code: `import * as v from 'valibot'
 import {
   field,
   useFormBridge,
-  valibotResolver,
+  valibotBridge,
 } from '@runilib/react-formbridge'
 
 const schema = {
@@ -96,7 +96,7 @@ const valibotSchema = v.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: valibotResolver(valibotSchema),
+  validatorBridge: valibotBridge(valibotSchema),
 })`,
     },
   ],
@@ -108,9 +108,9 @@ const form = useFormBridge(schema, {
 
 ${RESOLVER_SHARED_OPTIONS_SURFACE}`,
       code: {
-        filename: 'resolver-options.ts',
+        filename: 'bridge-options.ts',
         lang: 'ts',
-        code: `import { field, joiResolver, useFormBridge } from '@runilib/react-formbridge'
+        code: `import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge'
 import Joi from 'joi'
 
 const schema = {
@@ -124,7 +124,7 @@ const joiSchema = Joi.object({
 })
 
 const form = useFormBridge(schema, {
-  resolver: joiResolver(joiSchema, {
+  validatorBridge: joiBridge(joiSchema, {
     rootKey: 'form',
     errorMode: 'join',
     joinMessagesWith: ' · ',
@@ -155,11 +155,11 @@ ${RESOLVER_LIBRARY_OPTIONS_SURFACE}
       title: 'Tips',
       content: `| Tip | Details |
 | --- | --- |
-| Resolver contract | Must return \`{ values, errors }\` - the built-in adapters already handle this for you |
-| Prefer built-ins | Customize an existing adapter before writing a custom resolver from scratch |
+| Bridge contract | Must return \`{ values, errors }\` - the built-in adapters already handle this for you |
+| Prefer built-ins | Customize an existing adapter before writing a custom bridge from scratch |
 | Root errors | Default to \`'_root'\` - useful for banner-level or submit-level failures |
-| Cross-platform | A resolver works with the same \`useFormBridge()\` API on web and native |
-| When to reach for a resolver | Business validation already exists elsewhere - otherwise prefer builder rules |
+| Cross-platform | A bridge works with the same \`useFormBridge()\` API on web and native |
+| When to reach for a bridge | Business validation already exists elsewhere - otherwise prefer builder rules |
 | Valibot specifics | Expects \`valibot\` installed in the consumer app, or passed explicitly via \`module: v\` |`,
     },
   ],

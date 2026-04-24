@@ -74,9 +74,9 @@ export function SchemaRefinementExample() {
           <span className={styles.customerEyebrow}>createSchema() refinements</span>
           <h2 className={styles.customerTitle}>Cross-field validation</h2>
           <p className={styles.customerIntro}>
-            Four built-in helpers - no Zod, no Yup, no resolver. Each one is a single
-            chain call on the value returned by <code>createSchema()</code>, and errors
-            are routed to the right field automatically.
+            Four built-in helpers - no Zod, no Yup, no bridge. Each one is a single chain
+            call on the value returned by <code>createSchema()</code>, and errors are
+            routed to the right field automatically.
           </p>
 
           <div className={styles.points}>

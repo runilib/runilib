@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { FieldDescriptor, FieldType } from '../../types/field';
-import { field } from '../field-builders/field';
+import { field } from '../field-descriptors/field';
 import { validateField } from './engine';
 
 const desc = <TValue, TType extends FieldType>(builder: {

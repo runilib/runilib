@@ -2,8 +2,8 @@ import type React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { field } from '../../../core/field-builders/field';
-import type { FileValue } from '../../../core/field-builders/file/types';
+import { field } from '../../../core/field-descriptors/field';
+import type { FileValue } from '../../../core/field-descriptors/file/types';
 import { FileField } from '../FileField';
 
 function renderFileField(

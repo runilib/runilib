@@ -2,7 +2,7 @@ import type React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { field } from '../../../core/field-builders/field';
+import { field } from '../../../core/field-descriptors/field';
 import { AsyncAutocompleteField } from '../AsyncAutocompleteField';
 
 describe('Native AsyncAutocompleteField', () => {

@@ -1,9 +1,9 @@
 export const DOC_PREVIEWS = {
-  resolver: {
-    src: '/docs/formbridge/formbridge-resolver.svg',
+  bridge: {
+    src: '/docs/formbridge/formbridge-bridge.svg',
     alt: 'Preview representing schema adapter and external validation integration.',
     caption:
-      'External schema resolvers let you keep Zod or Yup as the source of truth while still using formbridge renderers.',
+      'External schema bridges let you keep Zod or Yup as the source of truth while still using formbridge renderers.',
     maxWidth: 720,
     maxHeight: 420,
   },
@@ -387,8 +387,8 @@ export const USE_FORM_BRIDGE_OPTIONS_SURFACE = [
       "Follow-up trigger after first interaction. Default `'onChange'`",
     ],
     [
-      '`resolver?`',
-      '`SchemaValidatorResolver`',
+      '`validatorBridge?`',
+      '`SchemaValidatorBridge`',
       'Async `(values) => ({ values, errors })`. When present, becomes the validation source of truth',
     ],
     [
@@ -876,7 +876,7 @@ export const VALIDATION_RUNTIME_SURFACE = [
       'Merge server-side validation into the same runtime',
     ],
     [
-      '`resolver`',
+      '`validatorBridge`',
       '`(values) => { values, errors }`',
       'Let an external schema engine own the final `{ values, errors }` result',
     ],
@@ -884,7 +884,7 @@ export const VALIDATION_RUNTIME_SURFACE = [
 ].join('\n');
 
 export const RESOLVER_SHARED_OPTIONS_SURFACE = [
-  'Shared adapter options (`ResolverAdapterOptions`) supported by all built-in resolvers:',
+  'Shared adapter options (`BridgeAdapterOptions`) supported by all built-in bridges:',
   '',
   buildMethodsTable([
     [
@@ -913,26 +913,26 @@ export const RESOLVER_SHARED_OPTIONS_SURFACE = [
 ].join('\n');
 
 export const RESOLVER_LIBRARY_OPTIONS_SURFACE = [
-  'Library-specific resolver options:',
+  'Library-specific bridge options:',
   '',
   buildMethodsTable([
     [
-      '`zodResolver`',
+      '`zodBridge`',
       '`(schema, { mode?, parseOptions?, ...shared })`',
       "`mode?: 'auto' \\| 'sync' \\| 'async'` + Zod `parseOptions`",
     ],
     [
-      '`yupResolver`',
+      '`yupBridge`',
       '`(schema, { mode?, validateOptions?, ...shared })`',
       "`mode?: 'auto' \\| 'sync' \\| 'async'` + Yup `validateOptions`",
     ],
     [
-      '`joiResolver`',
+      '`joiBridge`',
       '`(schema, { mode?, validateOptions?, stripQuotes?, ...shared })`',
       "`mode?: 'auto' \\| 'sync' \\| 'async'` + Joi `validateOptions` + `stripQuotes`",
     ],
     [
-      '`valibotResolver`',
+      '`valibotBridge`',
       '`(schema, { mode?, parseOptions?, module?, ...shared })`',
       "`mode?: 'auto' \\| 'sync' \\| 'async'` + Valibot `parseOptions` + `module`",
     ],
@@ -1766,7 +1766,7 @@ export const WIZARD_STEP_SURFACE = [
     [
       '`formOptions?`',
       '`Partial<UseFormBridgeOptions<S, TPlatform>>`',
-      'Per-step overrides forwarded to the underlying `useFormBridge()` - `validateOn`, `revalidateOn`, `validatorResolver`, `analytics`, `globalDefaults`, `persist`, `initialValues` (merged with accumulated wizard values)',
+      'Per-step overrides forwarded to the underlying `useFormBridge()` - `validateOn`, `revalidateOn`, `validatorBridge`, `analytics`, `globalDefaults`, `persist`, `initialValues` (merged with accumulated wizard values)',
     ],
   ]),
   '',

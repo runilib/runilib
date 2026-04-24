@@ -7,7 +7,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { field } from '../core/field-builders/field';
+import { field } from '../core/field-descriptors/field';
 import { createSchema } from '../core/validators/createSchema';
 import { useFormBridgeContext } from '../hooks/shared/form-context';
 import { useFormBridge } from '../hooks/useFormBridge.web';

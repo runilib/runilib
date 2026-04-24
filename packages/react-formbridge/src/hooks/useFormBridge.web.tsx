@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import { isFileDescriptor } from '../core/field-builders/file/FileFieldBuilder';
-import { isMaskedDescriptor } from '../core/field-builders/mask/MaskedFieldBuilder';
-import { isStrengthDescriptor } from '../core/field-builders/password/PasswordWithStrength';
-import { isPhoneDescriptor } from '../core/field-builders/phone/PhoneFieldBuilder';
+import { isFileDescriptor } from '../core/field-descriptors/file/FileFieldBuilder';
+import { isMaskedDescriptor } from '../core/field-descriptors/mask/MaskedFieldBuilder';
+import { isStrengthDescriptor } from '../core/field-descriptors/password/PasswordWithStrength';
+import { isPhoneDescriptor } from '../core/field-descriptors/phone/PhoneFieldBuilder';
 import { WEB_ERROR_COLOR } from '../renderers/web/shared';
 import type {
   FieldComponents,

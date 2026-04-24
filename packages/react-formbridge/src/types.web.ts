@@ -22,6 +22,7 @@ import type {
 
 export type {
   AsyncValidator,
+  BridgeResult,
   FieldController,
   FieldReference,
   FieldRenderProps,
@@ -35,8 +36,7 @@ export type {
   PasswordRule,
   PhoneCountryLayout,
   PhoneValue,
-  ResolverResult,
-  SchemaValidatorResolver,
+  SchemaValidatorBridge,
   SchemaValues,
   SelectOption,
   SelectPickerRenderContext,

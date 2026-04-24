@@ -1,14 +1,14 @@
 // import { useMemo, useState } from 'react';
 // import { Text, View } from 'react-native';
 
-// import { field, useFormBridge, yupResolver } from '@runilib/react-formbridge';
+// import { field, useFormBridge, yupBridge } from '@runilib/react-formbridge';
 
 // import * as yup from 'yup';
 // import { formExampleStyles as s } from './FormExamples.styles';
-// import { ResolverExampleCard } from './ResolverExampleCard';
+// import { BridgeExampleCard } from './BridgeExampleCard';
 // import { createNativeFieldProps, simulateSubmitDelay } from './shared';
 
-// export function YupResolverExample() {
+// export function YupBridgeExample() {
 //   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 //   const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
@@ -47,12 +47,12 @@
 //     [],
 //   );
 
-//   const resolver = useMemo(() => yupResolver(schema, { mode: 'sync' }), [schema]);
+//   const bridge = useMemo(() => yupBridge(schema, { mode: 'sync' }), [schema]);
 
 //   const form = useFormBridge(formSchema, {
 //     validateOn: 'onBlur',
 //     revalidateOn: 'onChange',
-//     validatorResolver:resolver,
+//     validatorBridge:resolver,
 //   });
 
 //   const { Form, fields, state, watchAll } = form;
@@ -60,8 +60,8 @@
 //   const liveValues = watchAll();
 
 //   return (
-//     <ResolverExampleCard
-//       resolverName="Yup"
+//     <BridgeExampleCard
+//       bridgeName="Yup"
 //       accent="#34d399"
 //       title="Pilot qualification form"
 //       description="Readable chained rules with casting for common business flows."
@@ -113,7 +113,7 @@
 //           Validate with Yup
 //         </Form.Submit>
 //       </Form>
-//     </ResolverExampleCard>
+//     </BridgeExampleCard>
 //   );
 // }
 export {};

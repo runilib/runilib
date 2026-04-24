@@ -20,7 +20,7 @@ export type ValidationTrigger = 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched'
 
 /**
  * The options bag passed to `useFormBridge(schema, options)`. Controls
- * validation timing, schema resolvers, draft persistence, analytics, and
+ * validation timing, schema bridges, draft persistence, analytics, and
  * global Config overrides.
  *
  * @typeParam S - The form schema.
@@ -47,11 +47,11 @@ export interface UseFormBridgeOptions<
    */
   revalidateOn?: ValidationTrigger;
   /**
-   * Schema-level resolver (Zod, Yup, Joi, Valibot). When provided,
+   * Schema-level bridge (Zod, Yup, Joi, Valibot). When provided,
    * field-level validators defined via the builder API are bypassed and the
-   * resolver becomes the single source of truth.
+   * bridge becomes the single source of truth.
    */
-  validatorResolver?: SchemaValidatorResolver;
+  validatorBridge?: SchemaValidatorBridge;
   /**
    * Show field errors inline immediately:
    *
@@ -153,16 +153,16 @@ export interface globalDefaultsContext<
   platform: TPlatform;
 }
 
-// ─── Resolver ───────────────────────────────────────────────────────────────────
+// ─── Bridge ─────────────────────────────────────────────────────────────────────
 
 /**
- * Shape returned by a {@link SchemaValidatorResolver}. `values` holds the (possibly
+ * Shape returned by a {@link SchemaValidatorBridge}. `values` holds the (possibly
  * coerced) values FormBridge should use going forward; `errors` holds
  * per-field error messages, keyed by field name.
  */
-export interface ResolverResult {
+export interface BridgeResult {
   /**
-   * Possibly-transformed values. Resolvers can coerce input (e.g. Zod
+   * Possibly-transformed values. Bridges can coerce input (e.g. Zod
    * `.transform()`) and the returned values are what FormBridge writes back
    * to state.
    */
@@ -176,11 +176,11 @@ export interface ResolverResult {
 /**
  * Function signature for plugging a schema library (Zod, Yup, Joi, Valibot)
  * into FormBridge. Called on every validation trigger with the current values;
- * must resolve to a {@link ResolverResult}.
+ * must resolve to a {@link BridgeResult}.
  */
-export type SchemaValidatorResolver = (
+export type SchemaValidatorBridge = (
   values: Record<string, unknown>,
-) => Promise<ResolverResult>;
+) => Promise<BridgeResult>;
 
 // ─── Options fetcher ────────────────────────────────────────────────────────────
 

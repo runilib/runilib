@@ -4,8 +4,8 @@ import { Text, View } from 'react-native';
 import { formExampleStyles as s } from './FormExamples.styles';
 import { formatDemoJson } from './shared';
 
-interface ResolverExampleCardProps {
-  resolverName: string;
+interface BridgeExampleCardProps {
+  bridgeName: string;
   accent: string;
   title: string;
   description: string;
@@ -18,8 +18,8 @@ interface ResolverExampleCardProps {
   children: ReactNode;
 }
 
-export function ResolverExampleCard({
-  resolverName,
+export function BridgeExampleCard({
+  bridgeName,
   accent,
   title,
   description,
@@ -30,7 +30,7 @@ export function ResolverExampleCard({
   submitError,
   footer,
   children,
-}: ResolverExampleCardProps) {
+}: BridgeExampleCardProps) {
   return (
     <View style={s.resolverCard}>
       <View
@@ -50,7 +50,7 @@ export function ResolverExampleCard({
             },
           ]}
         >
-          {resolverName} resolver
+          {bridgeName} bridge
         </Text>
       </View>
 
@@ -86,7 +86,7 @@ export function ResolverExampleCard({
         <Text style={s.payloadCode}>
           {parsedSubmission
             ? formatDemoJson(parsedSubmission)
-            : 'Submit the form to inspect the normalized resolver output.'}
+            : 'Submit the form to inspect the normalized bridge output.'}
         </Text>
       </View>
 

@@ -23,9 +23,9 @@ export const schemaApiSection: LibraryDoc['sections'][number] = {
 - "If \`role === 'admin'\`, then \`managerApproval\` is required."
 - etc.
 
-Without \`createSchema()\` you would either scatter these checks across ad-hoc \`useEffect\` hooks, duplicate them in \`onSubmit\` handlers, or pull in an external resolver library (Zod, Yup, Joi, Valibot) just to express a handful of rules. \`createSchema()\` gives you a first-class, chainable place for those rules that runs through the same validation pipeline as every other field errors land in \`state.errors\`, touch/dirty tracking still works, and form-level errors surface under \`state.formLevelError\`.
+Without \`createSchema()\` you would either scatter these checks across ad-hoc \`useEffect\` hooks, duplicate them in \`onSubmit\` handlers, or pull in an external bridge library (Zod, Yup, Joi, Valibot) just to express a handful of rules. \`createSchema()\` gives you a first-class, chainable place for those rules that runs through the same validation pipeline as every other field errors land in \`state.errors\`, touch/dirty tracking still works, and form-level errors surface under \`state.formLevelError\`.
 
-The design goal is stated plainly: **FormBridge should be self-sufficient.** Built-in validation is the complete path, not a stepping stone to an external resolver.`,
+The design goal is stated plainly: **FormBridge should be self-sufficient.** Built-in validation is the complete path, not a stepping stone to an external bridge.`,
     },
     {
       id: 'fb-schema-when-to-use',
@@ -451,7 +451,7 @@ allOrNone(
 1. **Nested paths.** Plain string keys only work for top-level fields. \`ref('profile.phone')\` walks into a nested object during cross-field checks.
 2. **Self-documenting intent.** \`ref('profile.phone')\` inside an \`atLeastOne\` or \`exactlyOne\` call reads unambiguously as "this field path", while a bare string can look like ordinary text.
 
-You can mix \`ref()\` and plain string keys freely inside \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, and other custom validation logic. Under the hood the resolver uses \`getValueAtPath\` with dot-notation, so deeply nested schemas work transparently.`,
+You can mix \`ref()\` and plain string keys freely inside \`atLeastOne\`, \`exactlyOne\`, \`allOrNone\`, and other custom validation logic. Under the hood the bridge uses \`getValueAtPath\` with dot-notation, so deeply nested schemas work transparently.`,
     },
     {
       id: 'fb-schema-error-routing',

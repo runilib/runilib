@@ -126,8 +126,8 @@ const USE_FORM_BRIDGE_OPTIONS: FeatureOptionRow[] = [
   },
   {
     description: 'Optional schema adapter for Zod, Yup, Joi, or Valibot validation.',
-    property: 'validatorResolver',
-    type: 'SchemaValidatorResolver',
+    property: 'validatorBridge',
+    type: 'SchemaValidatorBridge',
   },
   {
     description:

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { MASKS } from '../core/field-builders/mask/constants';
+import { MASKS } from '../core/field-descriptors/mask/constants';
 import {
   applyMask,
   extractRaw,
   maskCompleteValidator,
   parsePattern,
-} from '../core/field-builders/mask/masks';
+} from '../core/field-descriptors/mask/masks';
 
 describe('parsePattern', () => {
   it('parses digit tokens', () => {

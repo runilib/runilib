@@ -19,7 +19,7 @@ const LIBRARIES = [
     description:
       'Schema-driven forms, route-based wizard flows, masks, validators, styling overrides, and async field data.',
     accent: 'blue',
-    examples: ['Checkout form', 'Route-based wizard', 'Masks', 'Resolvers', 'Styling'],
+    examples: ['Checkout form', 'Route-based wizard', 'Masks', 'Bridges', 'Styling'],
   },
 ] as const;
 

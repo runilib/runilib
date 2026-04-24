@@ -1,9 +1,9 @@
 import type { CSSProperties } from 'react';
 import { Fragment, useMemo, useState } from 'react';
 
-import type { PasswordStrengthMeta } from '../../core/field-builders/password/PasswordWithStrength';
-import { scorePassword } from '../../core/field-builders/password/strength';
-import type { StrengthResult } from '../../core/field-builders/password/types';
+import type { PasswordStrengthMeta } from '../../core/field-descriptors/password/PasswordWithStrength';
+import { scorePassword } from '../../core/field-descriptors/password/strength';
+import type { StrengthResult } from '../../core/field-descriptors/password/types';
 import type { FocusableFieldHandle } from '../../types';
 import type { WebPasswordFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';

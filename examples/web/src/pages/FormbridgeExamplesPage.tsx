@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { BridgeExamplesShowcase } from '../components/form-examples/BridgeExamplesShowcase';
 import { BrutTestExample } from '../components/form-examples/BrutTest';
 import { CustomerCheckoutExample } from '../components/form-examples/CustomerCheckoutExample';
 import { CustomMaskExamplesShowcase } from '../components/form-examples/CustomMaskExamplesShowcase';
@@ -6,7 +7,6 @@ import { CustomStorageAdapterExample } from '../components/form-examples/CustomS
 import { FieldVariantsShowcase } from '../components/form-examples/FieldVariantsShowcase';
 import { PasswordVariantsExample } from '../components/form-examples/PasswordVariantsExample';
 import { PhoneVariantsExample } from '../components/form-examples/PhoneVariantsExample';
-import { ResolverExamplesShowcase } from '../components/form-examples/ResolverExamplesShowcase';
 import { StylingExamplesShowcase } from '../components/form-examples/StylingExamplesShowcase';
 import { DemoAsyncCityForm } from './DemoAsyncCityForm';
 
@@ -37,8 +37,8 @@ export const FormbridgeExamplesPage = ({
         <h1>Build forms you will actually enjoy shipping.</h1>
         <p>
           Every `react-formbridge` demo lives here now, from route-based wizards and
-          production-style checkout flows to masks, styling overrides, resolvers, and
-          async option loading.
+          production-style checkout flows to masks, styling overrides, bridges, and async
+          option loading.
         </p>
         <div className="library-form-love-panel">
           <div className="library-form-love-copy">
@@ -53,7 +53,7 @@ export const FormbridgeExamplesPage = ({
           <div className="library-form-love-points">
             <span>Schema-first field builders</span>
             <span>Polished defaults with easy overrides</span>
-            <span>Masks, async options, and resolvers built in</span>
+            <span>Masks, async options, and bridges built in</span>
             <span>One mental model for web and native</span>
           </div>
         </div>
@@ -94,7 +94,7 @@ export const FormbridgeExamplesPage = ({
             <li>Phone picker recipes for support, sales, and directory flows</li>
             <li>File upload recipes for previews, bundles, and imports</li>
             <li>Mask demos for adaptive inputs, license plates, and badges</li>
-            <li>Styling patterns and resolver integrations</li>
+            <li>Styling patterns and bridge integrations</li>
             <li>Async remote option loading</li>
           </ul>
         </article>
@@ -152,7 +152,7 @@ export const FormbridgeExamplesPage = ({
             <span className="tag tag-blue">Generated field patterns</span>
             <h2>
               Passwords, phone flows, field variants, uploads, masks, styling, and
-              resolvers.
+              bridges.
             </h2>
             <p>
               The rest of the page is organized by concern so you can compare patterns
@@ -166,7 +166,7 @@ export const FormbridgeExamplesPage = ({
           <FieldVariantsShowcase />
           <CustomMaskExamplesShowcase />
           <StylingExamplesShowcase />
-          <ResolverExamplesShowcase />
+          <BridgeExamplesShowcase />
           {/* <SignupForm /> */}
         </div>
       </section>

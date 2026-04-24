@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inferFromObject, inferFromType } from '../core/field-builders/infer';
+import { inferFromObject, inferFromType } from '../core/field-descriptors/infer';
 
 describe('inferFromObject', () => {
   it('infers text type for plain string values', () => {

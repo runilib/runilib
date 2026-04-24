@@ -10,8 +10,8 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import type { PasswordStrengthMeta } from '../../core/field-builders/password/PasswordWithStrength';
-import { scorePassword } from '../../core/field-builders/password/strength';
+import type { PasswordStrengthMeta } from '../../core/field-descriptors/password/PasswordWithStrength';
+import { scorePassword } from '../../core/field-descriptors/password/strength';
 import type {
   ExtraFieldProps,
   FieldRenderProps,

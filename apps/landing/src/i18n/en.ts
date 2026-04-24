@@ -289,8 +289,8 @@ export const en: Translations = {
         },
         {
           tag: 'help wanted',
-          title: 'formbridge: Valibot resolver',
-          desc: 'Implement a resolver adapter for Valibot schema validation library.',
+          title: 'formbridge: Valibot bridge',
+          desc: 'Implement a bridge adapter for Valibot schema validation library.',
           color: 'blue',
         },
         {

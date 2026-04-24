@@ -7,16 +7,16 @@ import React, {
   useState,
 } from 'react';
 
-import type { PhoneValue } from '../../core/field-builders/phone/countries';
+import type { PhoneValue } from '../../core/field-descriptors/phone/countries';
 import {
   buildPhoneValue,
   COUNTRIES_SORTED,
   getCountry,
   parseStoredPhoneValue,
   searchCountries,
-} from '../../core/field-builders/phone/countries';
-import type { PhoneDescriptor } from '../../core/field-builders/phone/PhoneFieldBuilder';
-import type { CountryInfo } from '../../core/field-builders/phone/types';
+} from '../../core/field-descriptors/phone/countries';
+import type { PhoneDescriptor } from '../../core/field-descriptors/phone/PhoneFieldBuilder';
+import type { CountryInfo } from '../../core/field-descriptors/phone/types';
 import type { FocusableFieldHandle } from '../../types';
 import type { WebPhoneFieldPropsOverrides } from '../../types/ui-web';
 import type { ExtraFieldProps, FieldRenderProps } from '../../types.web';
