@@ -13,12 +13,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 1,
     },
-    {
-      url: absoluteUrl('/feedback'),
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
     ...getAllDocEntries().map((entry) => ({
       url: absoluteUrl(entry.href),
       lastModified: now,
