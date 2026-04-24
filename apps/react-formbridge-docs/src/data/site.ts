@@ -1,9 +1,11 @@
 import type { CodeSnippet, FaqItem, FeatureCard, SiteStat, UseCaseCard } from '@/types';
 
+import { formbridgePackageVersion } from './packageVersion';
+
 export const libraryInfo = {
   name: 'react-formbridge',
   packageName: '@runilib/react-formbridge',
-  version: '1.0.0',
+  version: formbridgePackageVersion,
   tagline: 'Schema-driven form builder for React and React Native',
   description:
     'Schema-first forms for React and React Native. One TypeScript schema, typed fields, built-in validation, conditional logic, draft persistence, and multi-step flows.',

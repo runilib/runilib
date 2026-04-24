@@ -356,6 +356,11 @@ yarn workspace @examples/web add @runilib/my-lib@workspace:*
 
 Pick at least one real consumer. For a cross-platform library, testing both web and mobile is strongly recommended.
 
+If the consumer app displays the package version in the UI:
+- do **not** hardcode the version string
+- read it from the library `package.json` instead so the landing pages and docs stay aligned automatically after each release
+- follow the existing pattern used in `apps/landing/src/data/packageVersions.ts` and `apps/react-formbridge-docs/src/data/packageVersion.ts`
+
 Then run:
 
 ```bash
@@ -414,7 +419,13 @@ If the package will eventually be published:
 3. confirm `prepublishOnly` passes
 4. follow [RELEASING.md](/Users/m989281/Documents/PROJECTS/runilib-monorepo/RELEASING.md)
 
-If the package must also be mirrored to its own GitHub repository, add it to [.github/mirror-packages.json](/Users/m989281/Documents/PROJECTS/runilib-monorepo/.github/mirror-packages.json).
+If the package must also be mirrored to its own GitHub repository:
+
+1. add it to [.github/mirror-packages.json](/Users/m989281/Documents/PROJECTS/runilib-monorepo/.github/mirror-packages.json)
+2. create a matching folder under [.github/mirror-issue-drafts](/Users/m989281/Documents/PROJECTS/runilib-monorepo/.github/mirror-issue-drafts) using the mirror repo folder name
+3. add a package-specific `README.md` plus any issue drafts you want to publish later
+
+The issue publishing CLI discovers mirrored packages from `mirror-packages.json`, so new mirrored packages become supported automatically by `yarn issues:publish`.
 
 ## Copy Checklist
 

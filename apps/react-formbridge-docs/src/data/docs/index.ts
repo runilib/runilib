@@ -1,4 +1,5 @@
 import type { LibraryDoc } from '../../types';
+import { formbridgePackageVersion } from '../packageVersion';
 import { actionsSection } from './sections/actions';
 import { analyticsSection } from './sections/analytics';
 import { baseFieldBuilderSection } from './sections/baseFieldBuilder';
@@ -57,7 +58,7 @@ import { docSidebar } from './sidebar';
 
 export const formbridgeDocs: LibraryDoc = {
   libId: 'formbridge',
-  versions: ['1.0.0'],
+  versions: [formbridgePackageVersion],
   sidebar: docSidebar,
   sections: [
     introductionSection,

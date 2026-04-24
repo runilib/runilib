@@ -1,4 +1,5 @@
 import type { LibraryDoc } from '../../types';
+import { landingPackageVersions } from '../packageVersions';
 
 const DOC_PREVIEWS = {
   webBasic: {
@@ -37,7 +38,7 @@ const DOC_PREVIEWS = {
 
 export const reactWalkitDocs: LibraryDoc = {
   libId: 'react-walkit',
-  versions: ['1.0.0'],
+  versions: [landingPackageVersions.walkit],
   sidebar: [
     {
       group: 'Getting started',
