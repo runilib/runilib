@@ -116,7 +116,7 @@ export function App() {
 
 ## Documentation
 
-- Docs and guides: https://runilib.dev/docs/react-walkit
+- Docs and guides: https://runilib.dev/libraries/walkit
 
 ## Contributing
 

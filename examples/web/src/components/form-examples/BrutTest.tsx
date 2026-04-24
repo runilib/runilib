@@ -132,7 +132,6 @@ export function BrutTestExample() {
             className={styles.formColumn}
             onSubmit={async (values) => {
               setLastSubmission(values);
-              console.log('FDDFDDSQD', values);
             }}
           >
             <div className={styles.formRow}>

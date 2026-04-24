@@ -18,11 +18,13 @@ useFormBridge(schema, {
 })
 \`\`\`
 
-- **It's a function**, not a static object. You receive the live \`FormState<S>\` (\`isSubmitting\`, \`isValid\`, \`isDirty\`, \`errors\`, \`values\`, \`submitError\`, …) and return an options bag. This means the theme can **react to form state**: highlight the form red on submit error, change the submit label while submitting, dim fields while the form is busy, etc.
-- **Local field props still win.** Anything you pass directly on \`<fields.email classNames={...} />\` overrides the matching key from \`globalDefaults.field\`. The merge order is: builder \`behavior\` → \`globalDefaults\` → local field props → \`fieldController\` / custom render.
+- **It's a function**, not a static object. You receive the live \`FormState<S>\` (\`isSubmitting\`, \`isValid\`, \`isDirty\`, \`errors\`, \`values\`, \`submitError\`, …) and return an options bag. This means the theme can **react to form state**: highlight the form red on submit error, change the submit label while submitting, dim fields while the form is busy, etc.\n
+
+- **Local field props still win.** Anything you pass directly on \`<fields.email classNames={...} />\` overrides the matching key from \`globalDefaults.field\`. The merge order is: builder \`behavior\` → \`globalDefaults\` → local field props → \`fieldController\` / custom render.\n
+
 - **Platform-aware typing.** On web, generated fields expose slot maps such as \`classNames\` / \`styles\`, plus DOM passthrough props like \`wrapperProps\` and \`inputProps\`. On native, fields expose RN-friendly \`styles\`, \`wrapperProps\`, \`keyboardType\`, \`secureTextEntry\`, and submit-specific props such as \`containerStyle\`, \`textStyle\`, and \`indicatorColor\`. The hook variant you import (\`useFormBridge\` web vs native) selects the correct shape automatically.
 
-> Prefer \`globalDefaults\` over per-field overrides as soon as two or more fields need the same look. Reach for local field props only for genuine one-off exceptions. For full custom chrome beyond styling, see [\`fieldController\`](/docs/fieldcontroller) or [\`field.custom()\`](/docs/field-custom).`,
+Prefer \`globalDefaults\` over per-field overrides as soon as two or more fields need the same look. Reach for local field props only for genuine one-off exceptions. For full custom chrome beyond styling, see [fieldController](/docs/fieldcontroller) or [field.custom()](/docs/field-custom).`,
   codeTabs: [
     {
       filename: 'ReactiveTheme.web.tsx',
@@ -124,7 +126,7 @@ const s = StyleSheet.create({ /* … */ })`,
 globalDefaults?(state: FormState<S>): FormBridgeOptions<TPlatform>
 \`\`\`
 
-**Fields available on \`state\`** (non-exhaustive - see the [\`useFormBridge()\`](/docs/useformbridge) section for the full list):
+**Fields available on state** (non-exhaustive - see the [useFormBridge()](/docs/useformbridge) section for the full list):
 
 | Field | Description |
 | --- | --- |
@@ -227,7 +229,7 @@ Declare those directly on the specific \`<fields.*>\` call site.`,
     },
     {
       id: 'fb-global-props-form',
-      title: 'form - overrides applied to the <Form> wrapper',
+      title: 'form: overrides applied to the <Form> wrapper',
       content: `Attach styling and passthrough props to the \`<Form>\` wrapper element.
 
 **Web**
@@ -262,7 +264,7 @@ Event handlers like \`onSubmit\`, \`onError\`, and \`onSubmitError\` are set on 
     },
     {
       id: 'fb-global-props-submit',
-      title: 'submit - overrides applied to Form.Submit',
+      title: 'submit: overrides applied to Form.Submit',
       content: `Style the submit button and drive its loading copy from form state.
 
 **Web**
