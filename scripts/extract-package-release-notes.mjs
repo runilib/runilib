@@ -49,8 +49,11 @@ function trimEmptyLines(lines) {
 
 function extractReleaseNotes(changelogContent, version) {
   const lines = changelogContent.split(/\r?\n/);
-  const versionHeading = new RegExp(`^## \\[${version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\](?:\\s*[—-]\\s*.+)?$`);
-  const nextHeading = /^## \[[^\]]+\](?:\s*[—-]\s*.+)?$/;
+  const escapedVersion = version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const versionHeading = new RegExp(
+    `^##\\s+(?:\\[${escapedVersion}\\]|${escapedVersion})(?:\\s*[—-]\\s*.+)?$`,
+  );
+  const nextHeading = /^##\s+(?:\[[^\]]+\]|[^\s].*)$/;
 
   const sectionStart = lines.findIndex((line) => versionHeading.test(line.trim()));
 

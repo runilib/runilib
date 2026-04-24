@@ -2,17 +2,23 @@
 
 [![good first issues](https://img.shields.io/github/issues/runilib/react-walkit/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-walkit/labels/good%20first%20issue)
 
-Cross-platform onboarding tours and guided walkthroughs for React and React Native.
+> This repository is mirrored from the runilib monorepo.
+> Active development happens in the monorepo.
+> Open or in-progress work may appear here as automated draft PRs for visibility, and issues opened here can be mirrored back to the monorepo.
 
-`@runilib/react-walkit` helps you highlight UI, attach contextual popovers, and run guided tours with the same API across web and native, including cross-page and cross-screen flows.
+Cross-platform onboarding tours, guided walkthroughs, and standalone tooltips for React and React Native.
+
+`@runilib/react-walkit` helps you highlight UI, attach contextual popovers, and run guided tours or simple feature tooltips with the same API across web and native, including cross-page and cross-screen flows.
 
 Full documentation: https://runilib.dev/libraries/walkit
 
 ## Demo Previews
 
+### React Web walkthrough
+
 <a href="https://res.cloudinary.com/dca7plrqk/video/upload/v1775404915/web-walkit-onboarding-tour-examples_p2hogt.mov">
   <img
-    src="https://res.cloudinary.com/dca7plrqk/video/upload/fl_awebp,fl_animated,c_limit,w_720,q_auto/v1775404915/web-walkit-onboarding-tour-examples_p2hogt.webp"
+    src="https://res.cloudinary.com/dca7plrqk/video/upload/e_loop,fl_awebp,fl_animated,c_limit,w_720,q_auto/v1775404915/web-walkit-onboarding-tour-examples_p2hogt.webp"
     alt="Animated WebP preview of the React web walkthrough with spotlight overlay and popover."
     width="720"
   />
@@ -20,23 +26,53 @@ Full documentation: https://runilib.dev/libraries/walkit
 
 Desktop preview of the default Walkit onboarding flow on React web. Click the animation to open the full video.
 
-<a href="https://res.cloudinary.com/dca7plrqk/video/upload/v1775404485/mobile-onboarding-tour-exemple_pxdui3.mov">
+### React Web tooltip
+
+<a href="https://res.cloudinary.com/dca7plrqk/video/upload/web-tooltip-example_q3ne1e.mp4">
   <img
-    src="https://res.cloudinary.com/dca7plrqk/video/upload/fl_awebp,fl_animated,c_limit,w_340,q_auto/v1775404485/mobile-onboarding-tour-exemple_pxdui3.webp"
-    alt="Animated WebP preview of the React Native walkthrough with spotlight overlay and popover."
-    width="340"
+    src="https://res.cloudinary.com/dca7plrqk/video/upload/e_loop,fl_awebp,fl_animated,c_limit,w_720,q_auto/web-tooltip-example_q3ne1e.webp"
+    alt="Animated WebP preview of the standalone React web tooltip."
+    width="720"
   />
 </a>
 
-Mobile preview of the same onboarding tour running on React Native. Click the animation to open the full video.
+Desktop preview of the standalone `Tooltip` component on React web. Click the animation to open the full video.
 
-> This repository is mirrored from the runilib monorepo.
-> Active development happens in the monorepo.
-> Open or in-progress work may appear here as automated draft PRs for visibility, and issues opened here can be mirrored back to the monorepo.
+### React Native previews
+
+<table>
+  <tr>
+    <td align="center" valign="top">
+      <a href="https://res.cloudinary.com/dca7plrqk/video/upload/v1775404485/mobile-onboarding-tour-exemple_pxdui3.mov">
+        <img
+          src="https://res.cloudinary.com/dca7plrqk/video/upload/e_loop,fl_awebp,fl_animated,c_limit,w_340,q_auto/v1775404485/mobile-onboarding-tour-exemple_pxdui3.webp"
+          alt="Animated WebP preview of the React Native walkthrough with spotlight overlay and popover."
+          width="340"
+        />
+      </a>
+      <br />
+      React Native walkthrough demo
+    </td>
+    <td align="center" valign="top">
+      <a href="https://res.cloudinary.com/dca7plrqk/video/upload/v1775404484/mobile-tooltip-exemple_wykp1s.mov">
+        <img
+          src="https://res.cloudinary.com/dca7plrqk/video/upload/e_loop,fl_awebp,fl_animated,c_limit,w_340,q_auto/v1775404484/mobile-tooltip-exemple_wykp1s.webp"
+          alt="Animated WebP preview of the standalone React Native tooltip."
+          width="340"
+        />
+      </a>
+      <br />
+      React Native tooltip demo
+    </td>
+  </tr>
+</table>
+
+Side-by-side mobile previews of the full onboarding flow and the standalone tooltip primitive on React Native. Click an animation to open the full video.
 
 ## What It Solves
 
 - Product tours and onboarding flows
+- Standalone tooltips for contextual help and feature announcements
 - Spotlight + tooltip guidance around real UI elements
 - One API for React web and React Native
 - Cross-page and cross-screen navigation with a shared flow model
@@ -81,7 +117,6 @@ export function App() {
 ## Documentation
 
 - Docs and guides: https://runilib.dev/docs/react-walkit
-- API reference: https://runilib.dev/docs/react-walkit
 
 ## Contributing
 

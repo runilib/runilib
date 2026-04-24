@@ -1,0 +1,41 @@
+name: Release Mirror Manually
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: Workspace name (for example @runilib/react-walkit)
+        required: true
+        type: string
+      package_path:
+        description: Package path inside the monorepo (for example packages/react-walkit)
+        required: true
+        type: string
+      target_repo:
+        description: Mirror repository (for example runilib/react-walkit)
+        required: true
+        type: string
+      target_branch:
+        description: Mirror branch to update
+        required: false
+        default: main
+        type: string
+      version:
+        description: Published package version to release on the mirror repo
+        required: true
+        type: string
+
+jobs:
+  release:
+    if: github.repository == 'runilib/runilib'
+    uses: ./.github/workflows/release-mirrored-package.yml
+    with:
+      workspace: ${{ inputs.workspace }}
+      package_path: ${{ inputs.package_path }}
+      target_repo: ${{ inputs.target_repo }}
+      target_branch: ${{ inputs.target_branch }}
+      version: ${{ inputs.version }}
+    secrets:
+      mirror_push_token: ${{ secrets.MIRROR_PUSH_TOKEN }}
+      mirror_git_user_name_secret: ${{ secrets.MIRROR_GIT_USER_NAME }}
+      mirror_git_user_email_secret: ${{ secrets.MIRROR_GIT_USER_EMAIL }}
