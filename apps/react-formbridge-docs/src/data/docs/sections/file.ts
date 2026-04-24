@@ -125,25 +125,212 @@ export const fileSection: LibraryDoc['sections'][number] = {
   codeTabs: [
     {
       filename: 'File.web.tsx',
+      label: 'Web',
+      interactive: true,
       lang: 'tsx',
+      code: `import { useState } from 'react'
+import { field, useFormBridge, type FileValue } from '@runilib/react-formbridge'
 
-      code: `const schema = {
+const schema = {
   avatar: field.file('Avatar')
-    .accept(['image/jpeg','image/png'])
+    .accept(['image/jpeg', 'image/png', 'image/webp'])
     .maxSize(5 * 1024 * 1024)
-    .preview(120)
+    .preview(140)
     .required('Please upload a photo.'),
+  attachments: field.file('Attachments')
+    .multiple(3)
+    .accept(['image/png', 'image/jpeg', 'application/pdf'])
+    .maxSize(2 * 1024 * 1024)
+    .dragLabel('Drop up to 3 files here (PNG, JPG, PDF · 2 MB each)'),
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+}
+
+function summarize(value: FileValue | FileValue[] | null): string {
+  if (!value) return 'empty'
+  const list = Array.isArray(value) ? value : [value]
+  if (list.length === 0) return 'empty'
+  return list
+    .map((file) => \`\${file.name} · \${file.type} · \${formatSize(file.size)}\`)
+    .join('\\n')
+}
+
+export function FilePlaygroundWeb() {
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+  const { Form, fields, state } = useFormBridge(schema, {
+    validateOn: 'onBlur',
+    revalidateOn: 'onChange',
+  })
+
+  return (
+    <div
+      style={{
+        fontFamily: 'sans-serif',
+        padding: 20,
+        background: '#f5f7fb',
+        display: 'grid',
+        gap: 16,
+      }}
+    >
+      <div>
+        <h3 style={{ margin: '0 0 8px' }}>Interactive file uploads</h3>
+        <p style={{ margin: 0, color: '#4b5563' }}>
+          Pick an avatar and a few attachments, then submit to inspect the
+          platform-agnostic <code>FileValue</code> payload FormBridge exposes.
+        </p>
+      </div>
+
+      <Form onSubmit={async (values) => setSubmitted(values)}>
+        <div style={{ display: 'grid', gap: 16 }}>
+          <fields.avatar />
+          <fields.attachments />
+          <Form.Submit disabled={!state.isValid}>Upload</Form.Submit>
+        </div>
+      </Form>
+
+      <div style={{ display: 'grid', gap: 12 }}>
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Live summary</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+{\`avatar:
+\${summarize(state.values.avatar)}
+
+attachments:
+\${summarize(state.values.attachments)}\`}
+          </pre>
+        </div>
+
+        <div
+          style={{
+            border: '1px solid #d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            background: '#fff',
+          }}
+        >
+          <strong>Last submit (raw FileValue payload)</strong>
+          <pre style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+            {JSON.stringify(
+              submitted,
+              (key, value) =>
+                key === 'base64' && typeof value === 'string'
+                  ? \`<\${value.length} chars>\`
+                  : value,
+              2,
+            )}
+          </pre>
+        </div>
+      </div>
+    </div>
+  )
 }`,
     },
     {
       filename: 'File.native.tsx',
+      label: 'App',
+      interactive: true,
       lang: 'tsx',
-      code: `const schema = {
+      code: `import { useState } from 'react'
+import { ScrollView, Text, View } from 'react-native'
+import {
+  field,
+  useFormBridge,
+  type FileValue,
+} from '@runilib/react-formbridge'
+
+const schema = {
   identityCard: field.file('Identity card')
     .accept(['image/jpeg', 'image/png', 'application/pdf'])
     .source('documents')
     .withBase64()
-    .maxSize(10 * 1024 * 1024),
+    .maxSize(10 * 1024 * 1024)
+    .hint('JPG, PNG or PDF up to 10 MB'),
+}
+
+// Mock picker so the demo is self-contained.
+// In production, wire \`pickFiles\` to expo-document-picker /
+// expo-image-picker / react-native-image-picker.
+const MOCK_ID_CARD: FileValue = {
+  uri: 'file:///mock/identity-card.pdf',
+  name: 'identity-card.pdf',
+  type: 'application/pdf',
+  size: 842_315,
+  base64: 'JVBERi0xLjQKJeLjz9MKNCAw…(truncated)',
+}
+
+export function FilePlaygroundApp() {
+  const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
+  const { Form, fields, state } = useFormBridge(schema, {
+    validateOn: 'onBlur',
+  })
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
+      <View style={{ padding: 16, gap: 16 }}>
+        <View style={{ gap: 6 }}>
+          <Text style={{ fontSize: 18, fontWeight: '600' }}>
+            Identity card upload
+          </Text>
+          <Text style={{ color: '#4b5563' }}>
+            Tap the picker to simulate a document selection, then submit to
+            inspect the FileValue payload (base64 is truncated for readability).
+          </Text>
+        </View>
+
+        <Form onSubmit={async (values) => setSubmitted(values)}>
+          <View style={{ gap: 12 }}>
+            <fields.identityCard
+              pickFiles={async () => MOCK_ID_CARD}
+            />
+            <Form.Submit disabled={!state.isValid}>Submit</Form.Submit>
+          </View>
+        </Form>
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            backgroundColor: '#fff',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: '600' }}>Live values</Text>
+          <Text>
+            {state.values.identityCard
+              ? \`\${state.values.identityCard.name} · \${state.values.identityCard.type}\`
+              : 'Nothing picked yet'}
+          </Text>
+        </View>
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: '#d6d9e0',
+            borderRadius: 12,
+            padding: 12,
+            backgroundColor: '#fff',
+            gap: 8,
+          }}
+        >
+          <Text style={{ fontWeight: '600' }}>Last submit</Text>
+          <Text>{JSON.stringify(submitted, null, 2)}</Text>
+        </View>
+      </View>
+    </ScrollView>
+  )
 }`,
     },
   ],

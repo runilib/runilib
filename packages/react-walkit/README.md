@@ -2,15 +2,17 @@
 
 [![good first issues](https://img.shields.io/github/issues-search/runilib/react-walkit?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-walkit/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 
+> Part of the [**runilib**](https://runilib.dev) ecosystem — React & React Native libraries that share the same API on web and native.
+>
 > This repository is mirrored from the runilib monorepo.
 > Active development happens in the monorepo.
 > Open or in-progress work may appear here as automated draft PRs for visibility, and issues opened here can be mirrored back to the monorepo.
 
 Cross-platform onboarding tours, guided walkthroughs, and standalone tooltips for React and React Native.
 
-`@runilib/react-walkit` helps you highlight UI, attach contextual popovers, and run guided tours or simple feature tooltips with the same API across web and native, including cross-page and cross-screen flows.
+`@runilib/react-walkit` is the onboarding & tooltips package of runilib. It helps you highlight UI, attach contextual popovers, and run guided tours or simple feature tooltips with the same API across web and native, including cross-page and cross-screen flows.
 
-Full documentation: https://runilib.dev/libraries/walkit
+Full documentation: <https://runilib.dev/libraries/walkit>
 
 ## Demo Previews
 

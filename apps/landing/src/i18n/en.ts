@@ -9,7 +9,7 @@ export const en: Translations = {
     github: 'GitHub',
   },
   hero: {
-    badge: 'React UNIversal LIBs · A growing collection · Open Source · MIT',
+    badge: 'runilib · React UNIversal LIBs · Open Source · MIT',
     title: 'Build it once in TypeScript.',
     titleAccent: 'Run it everywhere React runs.',
     subtitle:
