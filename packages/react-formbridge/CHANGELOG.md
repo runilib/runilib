@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- [#97](https://github.com/runilib/runilib/pull/97) [`0ca21cc`](https://github.com/runilib/runilib/commit/0ca21cc23d2344ae70dbe9ea773c0ce5be2af5f7) Thanks [@akladekouassi](https://github.com/akladekouassi)! - fix field.phone country modal bug on native
+
 ## 1.0.0
 
 ### Major Changes
