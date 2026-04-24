@@ -40,7 +40,7 @@ export function Footer() {
         { label: 'GitHub', ext: 'https://github.com/runilib/runilib' },
         { label: 'npm', ext: 'https://npmjs.com/~runilib' },
         { label: 'Twitter', ext: 'https://twitter.com/runilib' },
-        { label: 'Discord', ext: '#' },
+        { label: 'Discord', ext: 'https://discord.gg/sHz9WnFs2t' },
       ],
     },
     {

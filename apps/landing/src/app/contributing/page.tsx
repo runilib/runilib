@@ -360,7 +360,7 @@ export default function Contributing() {
                 icon: <DiscordIcon />,
                 name: 'Discord',
                 desc: 'Real-time chat, questions, dev logs and #contributing channel.',
-                href: '#',
+                href: 'https://discord.gg/sHz9WnFs2t',
                 color: 'purple',
                 cta: 'Join Discord',
               },

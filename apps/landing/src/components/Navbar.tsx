@@ -55,7 +55,12 @@ export function Navbar() {
       title: 'GitHub',
       icon: <GithubSvg />,
     },
-    { href: '#', label: 'Discord', title: 'Discord', icon: <DiscordSvg /> },
+    {
+      href: 'https://discord.gg/sHz9WnFs2t',
+      label: 'Discord',
+      title: 'Discord',
+      icon: <DiscordSvg />,
+    },
   ];
 
   return (
