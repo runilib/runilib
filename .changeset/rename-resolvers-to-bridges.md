@@ -1,5 +1,5 @@
 ---
-'@runilib/react-formbridge': major
+'@runilib/react-formbridge': patch
 ---
 
 **Breaking:** Schema adapters renamed from `*Resolver` to `*Bridge` to align with the library's identity.
