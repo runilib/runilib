@@ -1,6 +1,6 @@
 # @runilib/react-formbridge
 
-[![good first issues](https://img.shields.io/github/issues/runilib/react-formbridge/good%20first%20issue?color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-formbridge/labels/good%20first%20issue)
+[![good first issues](https://img.shields.io/github/issues-search/runilib/react-formbridge?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-formbridge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 
 Schema-first forms for React and React Native.
 
@@ -90,6 +90,14 @@ To make TypeScript and your IDE resolve the native type surface, enable the `rea
 ## Contributing
 
 Bug reports and feature requests are welcome in [this repo's issues](https://github.com/runilib/react-formbridge/issues). They are mirrored to the monorepo where the work happens.
+
+If you want to change the package itself, work from the monorepo and use this flow before opening a PR:
+
+1. Make the code, docs, and test updates in `packages/react-formbridge`.
+2. Run `yarn changeset` from the monorepo root and include `@runilib/react-formbridge`.
+3. Run `yarn check`, `yarn typecheck`, and `yarn test`.
+4. Optionally run `npm run --prefix packages/react-formbridge prepublishOnly` for an extra publish-safety check.
+5. Open the PR against the monorepo `main` branch. Releases are created automatically after merge through the Changesets release PR flow.
 
 Looking for something to start with? Browse [good first issues](https://github.com/runilib/react-formbridge/labels/good%20first%20issue).
 

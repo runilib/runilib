@@ -14,7 +14,14 @@ export const tutorialProductionSection: LibraryDoc['sections'][number] = {
       filename: 'WizardRoute.web.tsx',
       lang: 'tsx',
       code: `import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import {
+  MemoryRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridgeWizard } from '@runilib/react-formbridge'
 
@@ -69,6 +76,17 @@ export function SignupWizardRoute() {
       {'companyName' in fields && <fields.companyName />}
       <Form.Submit>{wizard.isLastStep ? 'Finish' : 'Next'}</Form.Submit>
     </Form>
+  )
+}
+
+export default function App() {
+  return (
+    <MemoryRouter initialEntries={['/signup/account']}>
+      <Routes>
+        <Route path="/" element={<Navigate replace to="/signup/account" />} />
+        <Route path="/signup/:stepId" element={<SignupWizardRoute />} />
+      </Routes>
+    </MemoryRouter>
   )
 }`,
     },
