@@ -149,10 +149,10 @@ Return the same shape regardless of state - React just re-renders the theme each
       title: 'Merge order & precedence',
       content: `FormBridge merges style/behavior from **four layers**, always in the same order:
 
-1. **Builder \`behavior\`** - anything declared on the schema builder itself (e.g. \`field.text().placeholder('…').hint('…')\`). Lowest precedence.
-2. **\`globalDefaults\`**: the function documented here. Covers every field, the form wrapper, and the submit button.
+1. **Builder behavior** - anything declared on the schema builder itself (e.g. \`field.text().placeholder('…').hint('…')\`). Lowest precedence.
+2. **globalDefaults**: the function documented here. Covers every field, the form wrapper, and the submit button.
 3. **Local field props** - anything passed directly on \`<fields.name classNames={...} />\` or on a \`<Form ...>\` / \`<Form.Submit ...>\` call site. Wins over global config.
-4. **\`fieldController\` / \`field.custom().render(...)\`** - fully custom render layer. Wins over everything above because at that point FormBridge is no longer rendering the chrome itself.
+4. **fieldController / field.custom().render(...)** - fully custom render layer. Wins over everything above because at that point FormBridge is no longer rendering the chrome itself.
 
 Practical consequences:
 
@@ -227,7 +227,7 @@ Declare those directly on the specific \`<fields.*>\` call site.`,
     },
     {
       id: 'fb-global-props-form',
-      title: '`form` - overrides applied to the `<Form>` wrapper',
+      title: 'form - overrides applied to the <Form> wrapper',
       content: `Attach styling and passthrough props to the \`<Form>\` wrapper element.
 
 **Web**
@@ -238,7 +238,7 @@ Declare those directly on the specific \`<fields.*>\` call site.`,
 | \`style?\` | \`CSSProperties\` | Inline style merged onto the \`<form>\` element |
 | \`props?\` | \`HTMLFormAttributes\` | Passthrough attributes spread on \`<form>\` (minus FormBridge-owned: \`children\`, \`onSubmit\`, \`className\`, \`style\`) |
 
-**Native (\`NativeFormPropsOverrides\`)**
+**Native**
 
 | Key | Type | Description |
 | --- | --- | --- |
@@ -262,7 +262,7 @@ Event handlers like \`onSubmit\`, \`onError\`, and \`onSubmitError\` are set on 
     },
     {
       id: 'fb-global-props-submit',
-      title: '`submit` - overrides applied to `Form.Submit`',
+      title: 'submit - overrides applied to Form.Submit',
       content: `Style the submit button and drive its loading copy from form state.
 
 **Web**
