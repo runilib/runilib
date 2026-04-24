@@ -46,7 +46,8 @@
     "version-packages": "changeset version",
     "release": "node ./scripts/changeset-publish.mjs",
     "release:with-maps": "node ./scripts/changeset-publish.mjs --with-published-sourcemaps",
-    "changeset:status": "changeset status"
+    "changeset:status": "changeset status",
+    "issues:publish": "node ./scripts/publish-mirror-issues.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css,scss,html}": [
