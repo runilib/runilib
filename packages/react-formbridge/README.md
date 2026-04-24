@@ -1,10 +1,18 @@
-# @runilib/react-formbridge
+<p align="center">
+  <img alt="react-formbridge" src="./assets/logo-blue.svg" width="760" />
+</p>
 
-[![good first issues](https://img.shields.io/github/issues-search/runilib/react-formbridge?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-formbridge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+<p align="center">
+  <strong>Schema-first forms for React and React Native.</strong>
+</p>
 
-> Part of the [**runilib**](https://runilib.dev) ecosystem — React & React Native libraries that share the same API on web and native.
+<p align="center">
+  <a href="https://www.npmjs.com/package/@runilib/react-formbridge"><img alt="npm version" src="https://img.shields.io/npm/v/@runilib/react-formbridge?color=0f6fdc"></a>
+  <a href="https://react-formbridge.runilib.dev"><img alt="docs" src="https://img.shields.io/badge/docs-react--formbridge.runilib.dev-0f6fdc"></a>
+  <a href="https://github.com/runilib/react-formbridge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22"><img alt="good first issues" src="https://img.shields.io/github/issues-search/runilib/react-formbridge?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues"></a>
+</p>
 
-Schema-first forms for React and React Native.
+> Part of the [**runilib**](https://runilib.dev) ecosystem - React & React Native libraries that share the same API on web and native.
 
 `@runilib/react-formbridge` is the forms package of runilib. It lets you define a form once and reuse the same API across web and native. It generates fields from a schema and handles validation, conditional logic, persistence, async options, and multi-step flows.
 
