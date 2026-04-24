@@ -8,6 +8,28 @@ Cross-platform onboarding tours and guided walkthroughs for React and React Nati
 
 Full documentation: https://runilib.dev/libraries/walkit
 
+## Demo Previews
+
+<a href="https://res.cloudinary.com/dca7plrqk/video/upload/v1775404915/web-walkit-onboarding-tour-examples_p2hogt.mov">
+  <img
+    src="https://res.cloudinary.com/dca7plrqk/video/upload/fl_awebp,fl_animated,c_limit,w_720,q_auto/v1775404915/web-walkit-onboarding-tour-examples_p2hogt.webp"
+    alt="Animated WebP preview of the React web walkthrough with spotlight overlay and popover."
+    width="720"
+  />
+</a>
+
+Desktop preview of the default Walkit onboarding flow on React web. Click the animation to open the full video.
+
+<a href="https://res.cloudinary.com/dca7plrqk/video/upload/v1775404485/mobile-onboarding-tour-exemple_pxdui3.mov">
+  <img
+    src="https://res.cloudinary.com/dca7plrqk/video/upload/fl_awebp,fl_animated,c_limit,w_340,q_auto/v1775404485/mobile-onboarding-tour-exemple_pxdui3.webp"
+    alt="Animated WebP preview of the React Native walkthrough with spotlight overlay and popover."
+    width="340"
+  />
+</a>
+
+Mobile preview of the same onboarding tour running on React Native. Click the animation to open the full video.
+
 > This repository is mirrored from the runilib monorepo.
 > Active development happens in the monorepo.
 > Open or in-progress work may appear here as automated draft PRs for visibility, and issues opened here can be mirrored back to the monorepo.
