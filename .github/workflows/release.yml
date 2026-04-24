@@ -107,6 +107,7 @@ jobs:
 
       - name: Prepare package release changes
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKSPACE: ${{ matrix.workspace }}
           PREP_RESULT_PATH: ${{ runner.temp }}/package-release.json
         run: |
