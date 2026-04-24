@@ -84,7 +84,7 @@ To make TypeScript and your IDE resolve the native type surface, enable the `rea
 
 ## Documentation
 
-- Docs and guides: https://react-formbridge.runilib.dev
+- Website: https://react-formbridge.runilib.dev
 - API reference: https://react-formbridge.runilib.dev/docs
 
 ## Contributing

@@ -132,6 +132,6 @@
   "bugs": {
     "url": "https://github.com/runilib/react-walkit/issues"
   },
-  "homepage": "https://github.com/runilib/react-walkit#readme",
+  "homepage": "https://runilib.dev/libraries/walkit",
   "sideEffects": false
 }
