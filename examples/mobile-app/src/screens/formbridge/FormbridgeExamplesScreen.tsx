@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CreateSchemaAdvancedExample } from '../../components/formbridge-examples/CreateSchemaAdvancedExample';
 import { CustomerCheckoutExample } from '../../components/formbridge-examples/CustomerCheckoutExample';
 import { CustomMaskExamplesShowcase } from '../../components/formbridge-examples/CustomMaskExamplesShowcase';
 import { CustomStorageAdapterExample } from '../../components/formbridge-examples/CustomStorageAdapterExample';
@@ -77,17 +78,19 @@ export function FormbridgeExamplesScreen() {
         <View style={s.sectionCard}>
           <Text style={s.sectionEyebrow}>Field systems</Text>
           <Text style={s.sectionTitle}>
-            Passwords, phone flows, variants, uploads, masks, styling, and resolvers.
+            Passwords, phone flows, schema rules, masks, styling, and resolvers.
           </Text>
           <Text style={s.sectionText}>
             The rest of the examples are grouped by concern so the package behavior is
-            easier to compare at a glance.
+            easier to compare at a glance, including one advanced `createSchema` scenario
+            to exercise cross-field mobile validation.
           </Text>
           <PasswordVariantsExample />
           <PhoneVariantsExample />
           <FieldVariantsShowcase />
           <CustomMaskExamplesShowcase />
           <StylingExamplesShowcase />
+          <CreateSchemaAdvancedExample />
           <ResolverExamplesShowcase />
         </View>
       </ScrollView>
@@ -97,7 +100,7 @@ export function FormbridgeExamplesScreen() {
 
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#f4f7fc' },
-  content: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 28, gap: 18 },
+  content: { paddingHorizontal: 5, paddingTop: 16, paddingBottom: 28, gap: 5 },
   hero: {
     backgroundColor: '#ffffff',
     borderRadius: 28,

@@ -81,24 +81,76 @@ yarn size @runilib/react-walkit
 
 See [ADD_LIBRARY.md](ADD_LIBRARY.md) for the full step-by-step guide to create a new package, wire it into apps/examples, and validate it end to end.
 
-## Publish to npm
+## Before Opening a PR
 
-### Add a changeset
+If your branch changes code under `packages/*`, use this checklist before opening a pull request:
+
+If your PR only touches `apps/*`, docs, workflows, or internal tooling, you normally do not need a changeset.
+
+1. Add or update the package code, docs, examples, and tests.
+2. Create a changeset from the monorepo root:
 
 ```bash
 yarn changeset
 ```
 
-### Bump versions
+3. Pick the bump level for each changed package:
+   - `patch` for fixes and backward-compatible polish
+   - `minor` for new backward-compatible features
+   - `major` for breaking changes
+4. If the package changed but should not create a release, create an empty changeset instead:
 
 ```bash
-yarn version-packages
+yarn changeset --empty
 ```
 
-### Publish
+5. Run the repo-wide checks:
 
 ```bash
+yarn check
+yarn typecheck
+yarn test
+```
+
+6. Optionally run the package publish hook when you touched a published package:
+
+```bash
+npm run --prefix packages/<name> prepublishOnly
+```
+
+7. Open the PR against `main`.
+
+## How Releases Work
+
+Releases are automated from GitHub Actions.
+
+1. Merge a PR with one or more changesets into `main`.
+2. The `Release Packages` workflow creates or updates one automated release PR per changed package.
+3. Each package release PR runs `yarn version-packages` for that package only and keeps the other pending changesets untouched.
+4. Review and merge only the package release PRs you want to publish now.
+5. GitHub Actions publishes only the packages whose versions changed on `main`.
+6. The same workflow then creates the matching GitHub release in the monorepo and on the affected mirror repository.
+
+For first-time publication, manual publish flows, and mirror backfills, see [RELEASING.md](RELEASING.md).
+
+## Useful Release Commands
+
+These are useful mostly for local inspection or exceptional manual release work:
+
+```bash
+yarn changeset
+yarn changeset:status
+yarn version-packages
 yarn release
+```
+
+For ordinary package work, contributors usually only need:
+
+```bash
+yarn changeset
+yarn check
+yarn typecheck
+yarn test
 ```
 
 ## Mirror repositories

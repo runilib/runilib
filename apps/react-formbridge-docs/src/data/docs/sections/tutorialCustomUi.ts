@@ -12,7 +12,9 @@ export const tutorialCustomUiSection: LibraryDoc['sections'][number] = {
     {
       filename: 'web.tsx',
       lang: 'tsx',
-      code: `const schema = {
+      code: `import { field, useFormBridge } from '@runilib/react-formbridge'
+
+const schema = {
   workspaceName: field.text('Workspace').required(),
   launchAccessCode: field
     .masked('OPS-9999-LL')
@@ -56,6 +58,7 @@ export function MissionControlForm() {
       filename: 'native.tsx',
       lang: 'tsx',
       code: `import { Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
   workspaceName: field.text('Workspace').required(),

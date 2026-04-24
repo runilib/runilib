@@ -10,6 +10,8 @@ on:
       - 'package.json'
       - 'yarn.lock'
       - 'turbo.jsonc'
+      - 'scripts/**'
+      - '.github/mirror-packages.json'
       - '.github/workflows/release.yml'
       - '.github/actions/setup-monorepo/action.yml'
   workflow_dispatch:
@@ -28,12 +30,13 @@ env:
   TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
-  release:
+  validate_and_prepare_release_prs:
+    name: Validate and Prepare Release PRs
     if: github.repository == 'runilib/runilib'
     runs-on: ubuntu-latest
     outputs:
-      published: ${{ steps.changesets.outputs.published }}
-      published_packages: ${{ steps.changesets.outputs.publishedPackages }}
+      release_matrix: ${{ steps.pending.outputs.matrix }}
+      has_release_packages: ${{ steps.pending.outputs.has_packages }}
 
     steps:
       - name: Checkout repository
@@ -59,63 +62,12 @@ jobs:
       - name: Run size budgets
         run: yarn size:check
 
-      - name: Create release PR or publish packages
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: yarn version-packages
-          publish: yarn release
-          createGithubReleases: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  prepare_mirror_releases:
-    name: Prepare Mirror Release Matrix
-    needs: release
-    if: github.repository == 'runilib/runilib' && github.event_name == 'push' && needs.release.outputs.published == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
-      has_packages: ${{ steps.matrix.outputs.has_packages }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build mirror release matrix
-        id: matrix
-        env:
-          PUBLISHED_PACKAGES: ${{ needs.release.outputs.published_packages }}
+      - name: Build package release matrix
+        id: pending
         run: |
           set -euo pipefail
 
-          config_file=".github/mirror-packages.json"
-          empty_matrix='{"include":[]}'
-
-          if [ ! -f "$config_file" ]; then
-            echo "matrix=${empty_matrix}" >> "$GITHUB_OUTPUT"
-            echo "has_packages=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if [ -z "${PUBLISHED_PACKAGES:-}" ] || [ "$PUBLISHED_PACKAGES" = "[]" ]; then
-            echo "matrix=${empty_matrix}" >> "$GITHUB_OUTPUT"
-            echo "has_packages=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          matrix="$(jq -c --argjson published "$PUBLISHED_PACKAGES" '
-            {
-              include: [
-                .packages[] as $pkg
-                | $published[]
-                | select(.name == $pkg.workspace)
-                | $pkg + { version: .version }
-              ]
-            }
-          ' "$config_file")"
+          matrix="$(node ./scripts/list-pending-release-packages.mjs)"
 
           if [ "$(echo "$matrix" | jq '.include | length')" -gt 0 ]; then
             echo "has_packages=true" >> "$GITHUB_OUTPUT"
@@ -125,13 +77,216 @@ jobs:
 
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
 
-  release_mirrors:
-    name: Release ${{ matrix.workspace }} mirror
-    needs: prepare_mirror_releases
-    if: needs.prepare_mirror_releases.outputs.has_packages == 'true'
+  create_release_prs:
+    name: Create Release PRs
+    needs: validate_and_prepare_release_prs
+    if: needs.validate_and_prepare_release_prs.outputs.has_release_packages == 'true'
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson(needs.prepare_mirror_releases.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.validate_and_prepare_release_prs.outputs.release_matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup monorepo
+        uses: ./.github/actions/setup-monorepo
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Prepare branch
+        env:
+          BRANCH_NAME: ${{ matrix.branch_name }}
+        run: git checkout -B "$BRANCH_NAME"
+
+      - name: Prepare package release changes
+        env:
+          WORKSPACE: ${{ matrix.workspace }}
+          PREP_RESULT_PATH: ${{ runner.temp }}/package-release.json
+        run: |
+          set -euo pipefail
+          node ./scripts/prepare-package-release-pr.mjs --workspace "$WORKSPACE" > "$PREP_RESULT_PATH"
+          cat "$PREP_RESULT_PATH"
+
+      - name: Detect release diff
+        id: diff
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push release branch
+        if: steps.diff.outputs.has_changes == 'true'
+        env:
+          BRANCH_NAME: ${{ matrix.branch_name }}
+          COMMIT_MESSAGE: ${{ matrix.commit_message }}
+        run: |
+          set -euo pipefail
+
+          git add -A
+          git commit -m "$COMMIT_MESSAGE"
+          git push origin "HEAD:${BRANCH_NAME}" --force
+
+      - name: Create or update release PR
+        if: steps.diff.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ matrix.branch_name }}
+          PR_TITLE: ${{ matrix.pr_title }}
+          PR_BODY: ${{ matrix.pr_body }}
+        run: |
+          set -euo pipefail
+
+          existing_pr="$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --state open \
+            --json number \
+            --jq '.[0].number // ""')"
+
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base main \
+              --head "$BRANCH_NAME" \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY"
+          fi
+
+  prepare_publish_matrix:
+    name: Prepare Publish Matrix
+    needs: validate_and_prepare_release_prs
+    if: github.repository == 'runilib/runilib' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      publish_matrix: ${{ steps.matrix.outputs.publish_matrix }}
+      has_packages: ${{ steps.matrix.outputs.has_packages }}
+      mirror_matrix: ${{ steps.matrix.outputs.mirror_matrix }}
+      has_mirror_packages: ${{ steps.matrix.outputs.has_mirror_packages }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build publish matrix
+        id: matrix
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          publish_matrix="$(node ./scripts/list-version-bumped-packages.mjs --before "${BEFORE_SHA:-}")"
+          mirror_matrix="$(echo "$publish_matrix" | jq -c '{include: [.include[] | select(.target_repo != null)]}')"
+
+          if [ "$(echo "$publish_matrix" | jq '.include | length')" -gt 0 ]; then
+            echo "has_packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_packages=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ "$(echo "$mirror_matrix" | jq '.include | length')" -gt 0 ]; then
+            echo "has_mirror_packages=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_mirror_packages=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "publish_matrix=$publish_matrix" >> "$GITHUB_OUTPUT"
+          echo "mirror_matrix=$mirror_matrix" >> "$GITHUB_OUTPUT"
+
+  publish_packages:
+    name: Publish ${{ matrix.workspace }}
+    needs: prepare_publish_matrix
+    if: needs.prepare_publish_matrix.outputs.has_packages == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare_publish_matrix.outputs.publish_matrix) }}
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup monorepo
+        uses: ./.github/actions/setup-monorepo
+
+      - name: Configure npm auth
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+
+      - name: Publish package if needed
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PACKAGE_PATH: ${{ matrix.package_path }}
+          PUBLISH_RESULT_PATH: ${{ runner.temp }}/publish-result.json
+        run: |
+          set -euo pipefail
+          node ./scripts/publish-package.mjs --package-path "$PACKAGE_PATH" > "$PUBLISH_RESULT_PATH"
+          cat "$PUBLISH_RESULT_PATH"
+
+      - name: Sync monorepo GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKSPACE: ${{ matrix.workspace }}
+          PACKAGE_PATH: ${{ matrix.package_path }}
+          PACKAGE_VERSION: ${{ matrix.version }}
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+        run: |
+          set -euo pipefail
+
+          node ./scripts/extract-package-release-notes.mjs \
+            --package-path "$PACKAGE_PATH" \
+            --version "$PACKAGE_VERSION" \
+            --output "$RELEASE_NOTES_PATH"
+
+          tag_name="${WORKSPACE}@${PACKAGE_VERSION}"
+
+          if gh release view "$tag_name" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release edit "$tag_name" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$tag_name" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          else
+            gh release create "$tag_name" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$tag_name" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          fi
+
+  release_mirrors:
+    name: Release ${{ matrix.workspace }} mirror
+    needs:
+      - prepare_publish_matrix
+      - publish_packages
+    if: needs.prepare_publish_matrix.outputs.has_mirror_packages == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare_publish_matrix.outputs.mirror_matrix) }}
     uses: ./.github/workflows/release-mirrored-package.yml
     with:
       workspace: ${{ matrix.workspace }}
