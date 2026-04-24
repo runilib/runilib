@@ -32,7 +32,7 @@
     "react-hooks",
     "expo"
   ],
-  "homepage": "https://runilib.dev/docs/react-formbridge",
+  "homepage": "https://react-formbridge.runilib.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/runilib/react-formbridge"

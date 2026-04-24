@@ -229,21 +229,35 @@ const schema = {
   country: field.select('Country').options(['FR', 'US', 'GB']),
 }
 
-export function ReviewCard({ values, original }: { values: any; original?: any }) {
-  const readonly = useFormBridgeReadonly(schema, {
-    values,
-    originalValues: original,
-    mode: original ? 'diff' : 'readonly',
+const originalValues = {
+  fullName: 'Ava Martin',
+  email: 'ava@runilib.dev',
+  country: 'FR',
+}
+
+const editedValues = {
+  fullName: 'Ava Martin',
+  email: 'ava.martin@runilib.dev',
+  country: 'GB',
+}
+
+export default function ReviewCard() {
+  const { ReadonlyFields, changedFields, hasChanges } = useFormBridgeReadonly(schema, {
+    values: editedValues,
+    originalValues,
+    mode: 'diff',
   })
 
-  const { ReadonlyFields, changedFields, hasChanges } = readonly
-
   return (
-    <section>
+    <section style={{ display: 'grid', gap: 12, padding: 16, fontFamily: 'sans-serif' }}>
       <ReadonlyFields.fullName />
       <ReadonlyFields.email />
       <ReadonlyFields.country />
-      {hasChanges ? <p>{changedFields.length} fields changed.</p> : null}
+      {hasChanges ? (
+        <p style={{ margin: 0, color: '#0369a1' }}>
+          {changedFields.length} field(s) changed.
+        </p>
+      ) : null}
     </section>
   )
 }`,
