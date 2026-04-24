@@ -14,7 +14,8 @@ import { useThemeMode } from './ThemeProviders';
 const MONO_STACK = `'DM Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace`;
 const BODY_STACK = `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
 const FORMBRIDGE_PACKAGE_NAME = '@runilib/react-formbridge';
-const FORMBRIDGE_PUBLISHED_VERSION = 'latest';
+const FORMBRIDGE_PUBLISHED_VERSION = '1.0.0';
+const SNACK_SDK_VERSION = '52.0.0';
 const LOCAL_FORMBRIDGE_ENDPOINT = '/api/sandpack/react-formbridge';
 
 const darkSandpackTheme: SandpackTheme = {
@@ -175,9 +176,11 @@ function buildSnackUrl(params: {
   const url = new URL(SNACK_EMBED_BASE);
 
   url.searchParams.set('platform', params.nativePreview);
+  url.searchParams.set('sdkVersion', SNACK_SDK_VERSION);
   url.searchParams.set('theme', params.theme);
   url.searchParams.set('name', params.name);
   url.searchParams.set('preview', 'true');
+  url.searchParams.set('supportedPlatforms', 'ios,android,web');
 
   if (params.description) {
     url.searchParams.set('description', params.description);
