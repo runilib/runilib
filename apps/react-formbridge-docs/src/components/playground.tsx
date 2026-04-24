@@ -361,7 +361,7 @@ export function Playground({
   activeFile,
   theme: themeOverride,
   platform = 'web',
-  nativePreview = 'ios',
+  nativePreview = 'web',
   snackName = 'Example',
   snackDescription,
 }: PlaygroundProps) {
