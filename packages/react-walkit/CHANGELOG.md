@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- [#43](https://github.com/runilib/runilib/pull/43) [`115b0c3`](https://github.com/runilib/runilib/commit/115b0c357154fb1ba9d2793c4ffc9673ffdd85d1) Thanks [@akladekouassi](https://github.com/akladekouassi)! - add demo preview in the readme.
+
 ## 1.0.0
 
 ### Major Changes
