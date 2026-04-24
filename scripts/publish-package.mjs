@@ -27,7 +27,7 @@ function parseArgs(argv) {
 
 function run(command, commandArgs, options = {}) {
   const result = spawnSync(command, commandArgs, {
-    cwd: process.cwd(),
+    cwd: options.cwd ?? process.cwd(),
     stdio: options.capture ? ['ignore', 'pipe', 'pipe'] : 'inherit',
     env: {
       ...process.env,
@@ -77,7 +77,7 @@ if (lookup.status === 0) {
   process.exit(0);
 }
 
-const publish = run('npm', ['publish', '--prefix', packagePath, '--access', 'public']);
+const publish = run('npm', ['publish', '--access', 'public'], { cwd: packagePath });
 
 if (publish.status !== 0) {
   process.exit(publish.status ?? 1);
