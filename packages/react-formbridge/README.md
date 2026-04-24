@@ -97,7 +97,7 @@ If you want to change the package itself, work from the monorepo and use this fl
 2. Run `yarn changeset` from the monorepo root and include `@runilib/react-formbridge`.
 3. Run `yarn check`, `yarn typecheck`, and `yarn test`.
 4. Optionally run `npm run --prefix packages/react-formbridge prepublishOnly` for an extra publish-safety check.
-5. Open the PR against the monorepo `main` branch. Releases are created automatically after merge through the Changesets release PR flow.
+5. Open the PR against the monorepo `main` branch. After merge, GitHub creates a package-specific release PR so this library can be published independently from the others.
 
 Looking for something to start with? Browse [good first issues](https://github.com/runilib/react-formbridge/labels/good%20first%20issue).
 

@@ -121,53 +121,53 @@ yarn changeset:status
 
 Use this to confirm which packages will be bumped.
 
-### 5. Prepare the versioned release
+### 5. Merge the feature PR
 
-From the monorepo root:
+Merge the PR with the pending changeset files into `main`.
+
+### 6. Let GitHub create package-scoped release PRs
+
+After the merge, the `Release Packages` workflow:
+- scans `.changeset/*.md`
+- groups pending changes by package
+- creates or updates one release PR per package
+
+Examples:
+- `changeset-release/runilib-react-walkit/main`
+- `changeset-release/runilib-react-formbridge/main`
+
+Each automated release PR:
+- runs `yarn version-packages` only for its target package
+- updates that package `package.json` and `CHANGELOG.md`
+- leaves the other pending package changesets in place
+
+### 7. Review and merge only the package release PR you want
+
+This is the key difference from the old aggregated flow:
+- you do **not** have to publish every changed package together
+- you can merge the `react-walkit` release PR now
+- and keep the `react-formbridge` release PR for later
+
+### 8. Publish
+
+When a package release PR is merged into `main`, GitHub Actions:
+- detects which package version changed on that push
+- publishes only that package to npm
+- creates or updates the GitHub release in the monorepo
+- creates or updates the corresponding GitHub release in the mirror repository
+
+## Manual versioning and publishing commands
+
+These remain useful for exceptional local workflows, backfills, or debugging:
 
 ```bash
 yarn version-packages
-```
-
-This runs:
-
-```bash
-changeset version
-```
-
-It will:
-- bump versions in `package.json`
-- update package `CHANGELOG.md`
-- consume the pending `.changeset/*.md` entries
-
-### 6. Commit the version changes
-
-Commit the version and changelog updates created by Changesets.
-
-### 7. Publish
-
-From the monorepo root:
-
-```bash
 yarn release
+yarn release:with-maps
 ```
-
-This runs:
-
-```bash
-node ./scripts/changeset-publish.mjs
-```
-
-It publishes the versions currently present in the package manifests.
 
 By default, `yarn release` publishes packages **without** sourcemaps in the npm tarball.
 The build still produces sourcemaps locally in `dist/`; they are just removed during `pack` / `publish`.
-
-If you explicitly want to publish sourcemaps too, use:
-
-```bash
-yarn release:with-maps
-```
 
 ## First publication of a package
 
@@ -209,16 +209,17 @@ Why:
 
 ### Case B: the package is unpublished and you want Changesets to determine the first version
 
-If the package has not been published yet and its version still needs to be prepared through the normal release process, use the standard Changesets flow from the root:
+If the package has not been published yet and its version still needs to be prepared through the normal release process, use the standard automated flow from the root:
 
 ```bash
 yarn changeset
 yarn changeset:status
-yarn version-packages
-yarn release
+# merge the feature PR into main
+# let GitHub create the package-specific release PR
+# merge that release PR when you are ready to publish
 ```
 
-Use this only if you intentionally want Changesets to produce the publishable version.
+Use this only if you intentionally want Changesets to produce the publishable version through the automated release PR.
 
 ## Publish only one package manually
 
@@ -263,14 +264,16 @@ If you want to use Changesets and only one package should be released:
 - stay at the monorepo root
 - create a changeset that mentions only that package
 - verify with `yarn changeset:status`
+- merge the feature PR into `main`
+- merge only that package's automated release PR
 
 Flow:
 
 ```bash
 yarn changeset
 yarn changeset:status
-yarn version-packages
-yarn release
+# merge the feature PR into main
+# merge the generated release PR for the package you want
 ```
 
 For this mode, do not switch into the package directory for the versioning steps.
@@ -378,9 +381,9 @@ yarn check
 yarn typecheck
 yarn test
 yarn changeset:status
-yarn version-packages
-git commit -am "chore: version packages"
-yarn release
+# merge the feature PR into main
+# let GitHub create one release PR per package
+# merge only the package release PR you want to publish
 ```
 
 ## Note about non-publishable workspaces
@@ -401,7 +404,7 @@ This repository is set up so release and deployment automation stays generic as 
 - `CI`
   - runs repo-wide checks, typecheck, tests, builds, and changeset validation on pull requests
 - `Release Packages`
-  - runs from the monorepo root and uses Changesets to create release PRs or publish versioned packages
+  - runs from the monorepo root and creates package-specific release PRs, then publishes only the package versions that changed on `main`
 - `Deploy Landing to Vercel`
   - deploys the landing app previews for pull requests and production on `main`
 - `Mirror Packages`

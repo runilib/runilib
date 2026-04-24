@@ -125,11 +125,11 @@ npm run --prefix packages/<name> prepublishOnly
 Releases are automated from GitHub Actions.
 
 1. Merge a PR with one or more changesets into `main`.
-2. The `Release Packages` workflow creates or updates the release PR `changeset-release/main`.
-3. That workflow runs `yarn version-packages` for you inside the automated release PR.
-4. Review and merge that release PR.
-5. GitHub Actions publishes the versioned packages to npm.
-6. The same workflow then creates the matching GitHub release on the affected mirror repository.
+2. The `Release Packages` workflow creates or updates one automated release PR per changed package.
+3. Each package release PR runs `yarn version-packages` for that package only and keeps the other pending changesets untouched.
+4. Review and merge only the package release PRs you want to publish now.
+5. GitHub Actions publishes only the packages whose versions changed on `main`.
+6. The same workflow then creates the matching GitHub release in the monorepo and on the affected mirror repository.
 
 For first-time publication, manual publish flows, and mirror backfills, see [RELEASING.md](RELEASING.md).
 
