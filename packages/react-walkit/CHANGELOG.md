@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- [#45](https://github.com/runilib/runilib/pull/45) [`43e1173`](https://github.com/runilib/runilib/commit/43e117392f64af43c1f09fd9446b7581a34b1b15) Thanks [@akladekouassi](https://github.com/akladekouassi)! - update readme to support looping demo preview
+
 ## 1.0.1
 
 ### Patch Changes
