@@ -9,7 +9,7 @@ export const fr: Translations = {
     github: 'GitHub',
   },
   hero: {
-    badge: 'Une collection qui grandit · Open Source · MIT',
+    badge: 'runilib · React UNIversal LIBs · Open Source · MIT',
     title: 'Une petite bande de librairies React & React Native.',
     titleAccent: 'Un seul code. Web et Native.',
     subtitle:

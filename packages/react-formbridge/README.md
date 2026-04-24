@@ -2,9 +2,11 @@
 
 [![good first issues](https://img.shields.io/github/issues-search/runilib/react-formbridge?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-formbridge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 
+> Part of the [**runilib**](https://runilib.dev) ecosystem — React & React Native libraries that share the same API on web and native.
+
 Schema-first forms for React and React Native.
 
-`@runilib/react-formbridge` lets you define a form once and reuse the same API across web and native. It generates fields from a schema and handles validation, conditional logic, persistence, async options, and multi-step flows.
+`@runilib/react-formbridge` is the forms package of runilib. It lets you define a form once and reuse the same API across web and native. It generates fields from a schema and handles validation, conditional logic, persistence, async options, and multi-step flows.
 
 Full documentation: https://react-formbridge.runilib.dev
 
@@ -86,6 +88,7 @@ To make TypeScript and your IDE resolve the native type surface, enable the `rea
 
 - Website: https://react-formbridge.runilib.dev
 - API reference: https://react-formbridge.runilib.dev/docs
+- runilib ecosystem overview: <https://runilib.dev>
 
 ## Contributing
 
