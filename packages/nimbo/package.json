@@ -26,7 +26,7 @@
     "url": "https://github.com/runilib/runilib/issues"
   },
   "license": "MIT",
-  "author": "AKS <tech-founder@gonextstep.io>",
+  "author": "Aklade Kouassi Sosthene (https://github.com/akladekouassi)",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
