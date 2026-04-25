@@ -51,8 +51,25 @@ function Notepad({ seedTitle }) {
     snippet: `const nikeCart = cartStore.scope('nike');
 const appleCart = cartStore.scope('apple');
 
-nikeCart.actions.add({ id: 'air-max', name: 'Air Max', price: 180 });
-appleCart.actions.add({ id: 'iphone', name: 'iPhone 16', price: 999 });
+nikeCart.actions.add({
+  id: 'air-max',
+  name: 'Air Max',
+  price: 180,
+  category: 'shoes',
+});
+
+appleCart.actions.add({
+  id: 'iphone',
+  name: 'iPhone 16',
+  price: 999,
+  category: 'devices',
+});
+
+// Parameterized view
+const shoesTotal = nikeCart.view('totalByCategory', 'shoes');
+
+// Memoized computed view
+const discountedTotal = nikeCart.view('discountedTotal', 0.1);
 
 // Different state instances, same definition.`,
     Demo: ScopedCartsDemo,

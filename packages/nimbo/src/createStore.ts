@@ -1,8 +1,8 @@
 import { bindAsyncActions } from './async/actions';
 import { createAsyncStatusRegistry } from './async/status';
 import { createActionContext, createActions } from './core/actions';
+import { readSelector } from './core/selector';
 import { createStateContainer } from './core/state';
-import { readView } from './core/views';
 import { useNimboSelector } from './react/hooks';
 import { createStoreProvider } from './react/provider';
 import { createScopeRegistry } from './scope/registry';
@@ -12,6 +12,7 @@ import type {
   NimboEquality,
   NimboScopeId,
   NimboSelector,
+  NimboSelectorMap,
   NimboStore,
   NimboStoreDefinition,
 } from './types';
@@ -19,13 +20,13 @@ import type {
 function createStoreInstance<
   TState,
   TActions extends object,
-  TViews extends object,
+  TSelectors extends NimboSelectorMap<TState>,
   TAsyncActions extends NimboAsyncActionMap<TState>,
 >(
   name: string,
-  definition: NimboStoreDefinition<TState, TActions, TViews, TAsyncActions>,
+  definition: NimboStoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
   scopeId: NimboScopeId | null = null,
-): NimboStore<TState, TActions, TViews, TAsyncActions> {
+): NimboStore<TState, TActions, TSelectors, TAsyncActions> {
   const storeName = scopeId === null ? name : `${name}:${String(scopeId)}`;
   const container = createStateContainer(definition.state);
   const actionContext = createActionContext(container);
@@ -38,9 +39,9 @@ function createStoreInstance<
     scopeId,
   );
 
-  let store: NimboStore<TState, TActions, TViews, TAsyncActions>;
+  let store: NimboStore<TState, TActions, TSelectors, TAsyncActions>;
 
-  const scopedStores = createScopeRegistry<TState, TActions, TViews, TAsyncActions>(
+  const scopedStores = createScopeRegistry<TState, TActions, TSelectors, TAsyncActions>(
     (nextScopeId) => createStoreInstance(name, definition, nextScopeId),
   );
 
@@ -72,23 +73,24 @@ function createStoreInstance<
     patchState: container.patchState,
     reset: container.resetState,
     subscribe: container.subscribe,
-    view(viewName) {
-      return readView(
+    selector(selectorName, ...args) {
+      return readSelector(
         storeName,
-        definition.views,
+        definition.selectors,
         container.getState(),
-        viewName,
-      ) as TViews[typeof viewName];
+        selectorName,
+        ...args,
+      );
     },
-    use: useFromStore as NimboStore<TState, TActions, TViews, TAsyncActions>['use'],
+    use: useFromStore as NimboStore<TState, TActions, TSelectors, TAsyncActions>['use'],
     useActions() {
       return useStoreInstance().actions;
     },
-    useView(viewName) {
+    useSelector(selectoName, ...args) {
       const resolvedStore = useStoreInstance();
 
       return useNimboSelector(resolvedStore.getState, resolvedStore.subscribe, () =>
-        resolvedStore.view(viewName),
+        resolvedStore.selector(selectoName, ...args),
       );
     },
     useAsyncAction(actionName) {
@@ -141,11 +143,11 @@ function createStoreInstance<
 export function createStore<
   TState,
   TActions extends object = object,
-  TViews extends object = object,
+  TSelectors extends NimboSelectorMap<TState> = NimboSelectorMap<TState>,
   TAsyncActions extends NimboAsyncActionMap<TState> = NimboAsyncActionMap<TState>,
 >(
   name: string,
-  definition: NimboStoreDefinition<TState, TActions, TViews, TAsyncActions>,
-): NimboStore<TState, TActions, TViews, TAsyncActions> {
+  definition: NimboStoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
+): NimboStore<TState, TActions, TSelectors, TAsyncActions> {
   return createStoreInstance(name, definition);
 }

@@ -8,12 +8,18 @@
 
 # Nimbo
 
+> [!WARNING]
+> **Nimbo is currently in active development.**
+>
+> The package is not published yet, the API may change quickly, and it should not
+> be used in production applications until the first public release is announced.
+
 Nimbo is a small state management package for cases where you want reusable state
 logic without reducers, action strings, providers everywhere, or storage-first
 mental models.
 
 ```tsx
-import { createStore } from "@runilib/nimbo";
+import { computed, createStore } from "@runilib/nimbo";
 
 const counter = createStore("counter", {
   state: () => ({ count: 0 }),
@@ -25,14 +31,14 @@ const counter = createStore("counter", {
       patch((state) => ({ count: state.count - 1 }));
     },
   }),
-  views: {
+  selectors: {
     isEmpty: (state) => state.count === 0,
   },
 });
 
 export function Counter() {
   const count = counter.use((state) => state.count);
-  const isEmpty = counter.useView("isEmpty");
+  const isEmpty = counter.useSelector("isEmpty");
   const { increment, decrement } = counter.useActions();
 
   return (
@@ -46,13 +52,93 @@ export function Counter() {
 }
 ```
 
+## Parameterized Selectors
+
+Selectors can receive business parameters.
+
+```tsx
+const cartStore = createStore("cart", {
+  state: () => ({
+    items: [] as Array<{
+      id: string;
+      category: "hardware" | "merch";
+      price: number;
+    }>,
+  }),
+  selectors: {
+    total: (state) => state.items.reduce((sum, item) => sum + item.price, 0),
+    totalWithTax: (state, taxRate: number) =>
+      state.items.reduce((sum, item) => sum + item.price, 0) * (1 + taxRate),
+    itemsByCategory: (state, category: "hardware" | "merch") =>
+      state.items.filter((item) => item.category === category),
+  },
+});
+
+const total = cartStore.selector("total");
+const totalWithTax = cartStore.selector("totalWithTax", 0.2);
+const hardwareItems = cartStore.selector("itemsByCategory", "hardware");
+```
+
+The same API works in React:
+
+```tsx
+function CartSummary() {
+  const totalWithTax = cartStore.useSelector("totalWithTax", 0.2);
+  const hardwareItems = cartStore.useSelector("itemsByCategory", "hardware");
+
+  return (
+    <p>
+      {hardwareItems.length} hardware items · {totalWithTax}
+    </p>
+  );
+}
+```
+
+## Computed Selectors
+
+Use `computed()` when a derived read is expensive and should be memoized by
+state reference and selector arguments.
+
+```tsx
+const cartStore = createStore("cart", {
+  state: () => ({
+    items: [] as Array<{ category: string; price: number }>,
+  }),
+  selectors: {
+    totalByCategory: computed((state, category: string) =>
+      state.items
+        .filter((item) => item.category === category)
+        .reduce((sum, item) => sum + item.price, 0),
+    ),
+  },
+});
+
+const hardwareTotal = cartStore.selector("totalByCategory", "hardware");
+```
+
+You can provide a custom cache key for parameterized computed selectors:
+
+```tsx
+selectors: {
+  totalByCategory: computed(
+    (state, category: string) =>
+      state.items
+        .filter((item) => item.category === category)
+        .reduce((sum, item) => sum + item.price, 0),
+    {
+      key: (category) => category,
+    },
+  ),
+}
+```
+
 ## Mental Model
 
 A Nimbo store is a typed module with:
 
 - `state`: the source values
 - `actions`: the only public way to mutate state
-- `views`: derived reads
+- `selectors`: derived reads
 - `scope(id)`: isolated state instances from the same definition
 
 The same store definition can be used globally, locally, or by scope.
@@ -92,7 +178,7 @@ Same definition, different scope id, different state instance.
 ## Current Status
 
 This package is initialized for active development. The first implementation
-includes the core store API, React subscriptions, views, actions, and scoped
+includes the core store API, React subscriptions, selectors, actions, and scoped
 stores.
 
 Current MVP surface:
@@ -100,11 +186,13 @@ Current MVP surface:
 - `createStore(name, definition)`
 - `state`
 - `actions`
-- `views`
+- `selectors`
+- parameterized selectors
+- `computed()` memoized selectors
 - `asyncActions`
 - `store.use(selector)`
 - `store.useActions()`
-- `store.useView(name)`
+- `store.useSelector(name)`
 - `store.getState()`
 - `store.setState()`
 - `store.subscribe()`
@@ -121,7 +209,7 @@ Current MVP surface:
 
 ## Composing modules
 
-When a project wants a Redux/MobX-style root view without giving up the
+When a project wants a Redux/MobX-style root selector without giving up the
 per-module mental model, `composeStores` exposes a read-only composite over
 several stores:
 

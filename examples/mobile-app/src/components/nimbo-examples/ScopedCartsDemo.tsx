@@ -43,7 +43,7 @@ export function ScopedCartsDemo() {
   );
 }
 
-function ShopCart({
+const ShopCart = ({
   shopId,
   label,
   accent,
@@ -53,12 +53,12 @@ function ShopCart({
   label: string;
   accent: string;
   catalog: readonly CartProduct[];
-}) {
+}) => {
   const scoped = cartStore.scope(shopId);
 
   const items = scoped.use((state) => state.items);
-  const total = scoped.useView('total');
-  const count = scoped.useView('count');
+  const total = scoped.useSelector('total');
+  const count = scoped.useSelector('count');
   const { add, remove, clear } = scoped.useActions();
 
   return (
@@ -129,7 +129,7 @@ function ShopCart({
       </View>
     </View>
   );
-}
+};
 
 const s = StyleSheet.create({
   intro: {

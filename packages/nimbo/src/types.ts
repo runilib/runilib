@@ -34,8 +34,43 @@ export type NimboActionFactory<TState, TActions> = (
   context: NimboActionContext<TState>,
 ) => TActions;
 
-export type NimboViewFactory<TState, TViews> = {
-  [Key in keyof TViews]: (state: TState) => TViews[Key];
+export type NimboSelectorRun<
+  TState,
+  TArgs extends unknown[] = unknown[],
+  TResult = unknown,
+> = (state: TState, ...args: TArgs) => TResult;
+
+export type NimboSelectorMap<TState> = Record<
+  string,
+  // biome-ignore lint/suspicious/noExplicitAny: selector arguments and results must remain inferable from user functions.
+  NimboSelectorRun<TState, any[], any>
+>;
+
+export type NimboSelectorArgs<TSelector> = TSelector extends (
+  state: never,
+  ...args: infer TArgs
+) => unknown
+  ? TArgs
+  : never;
+
+export type NimboSelectorResult<TSelector> = TSelector extends (
+  state: never,
+  ...args: unknown[]
+) => infer TResult
+  ? TResult
+  : never;
+
+export type NimboComputedSelectorOptions<TArgs extends unknown[]> = {
+  key?: (...args: TArgs) => string;
+};
+
+export type NimboComputedSelector<
+  TState,
+  TArgs extends unknown[] = unknown[],
+  TResult = unknown,
+> = NimboSelectorRun<TState, TArgs, TResult> & {
+  readonly __nimboComputed: true;
+  readonly __nimboComputedOptions: NimboComputedSelectorOptions<TArgs>;
 };
 
 export type NimboAsyncActionContext<TState> = NimboActionContext<TState> & {
@@ -109,21 +144,31 @@ export type NimboAsyncStatus = {
 export type NimboStoreDefinition<
   TState,
   TActions,
-  TViews,
+  TSelectors extends NimboSelectorMap<TState>,
   TAsyncActions extends NimboAsyncActionMap<TState>,
 > = {
   state: NimboStateInitializer<TState>;
   actions?: NimboActionFactory<TState, TActions>;
-  views?: NimboViewFactory<TState, TViews>;
+  selectors?: TSelectors;
   asyncActions?: TAsyncActions;
 };
 
-export type NimboProviderProps<TState, TActions, TViews, TAsyncActions> = {
+export type NimboProviderProps<
+  TState,
+  TActions,
+  TSelectors extends NimboSelectorMap<TState>,
+  TAsyncActions,
+> = {
   children: ReactNode;
-  store?: NimboStore<TState, TActions, TViews, TAsyncActions>;
+  store?: NimboStore<TState, TActions, TSelectors, TAsyncActions>;
 };
 
-export type NimboStore<TState, TActions, TViews, TAsyncActions> = {
+export type NimboStore<
+  TState,
+  TActions,
+  TSelectors extends NimboSelectorMap<TState>,
+  TAsyncActions,
+> = {
   readonly name: string;
   readonly actions: TActions;
   readonly asyncActions: NimboBoundAsyncActions<TAsyncActions>;
@@ -135,7 +180,10 @@ export type NimboStore<TState, TActions, TViews, TAsyncActions> = {
   patchState: NimboPatchState<TState>;
   reset: () => void;
   subscribe: (listener: NimboListener) => () => void;
-  view: <Key extends keyof TViews>(name: Key) => TViews[Key];
+  selector: <Key extends keyof TSelectors>(
+    name: Key,
+    ...args: NimboSelectorArgs<TSelectors[Key]>
+  ) => NimboSelectorResult<TSelectors[Key]>;
   use: {
     (): TState;
     <TValue>(
@@ -144,7 +192,10 @@ export type NimboStore<TState, TActions, TViews, TAsyncActions> = {
     ): TValue;
   };
   useActions: () => TActions;
-  useView: <Key extends keyof TViews>(name: Key) => TViews[Key];
+  useSelector: <Key extends keyof TSelectors>(
+    name: Key,
+    ...args: NimboSelectorArgs<TSelectors[Key]>
+  ) => NimboSelectorResult<TSelectors[Key]>;
   useAsyncAction: <Key extends keyof TAsyncActions>(
     name: Key,
   ) => NimboBoundAsyncActions<TAsyncActions>[Key];
@@ -154,8 +205,10 @@ export type NimboStore<TState, TActions, TViews, TAsyncActions> = {
     name: Key,
   ) => NimboAsyncResult<TAsyncActions, Key> | undefined;
   clearError: (name?: keyof TAsyncActions) => void;
-  scope: (scopeId: NimboScopeId) => NimboStore<TState, TActions, TViews, TAsyncActions>;
+  scope: (
+    scopeId: NimboScopeId,
+  ) => NimboStore<TState, TActions, TSelectors, TAsyncActions>;
   Provider: (
-    props: NimboProviderProps<TState, TActions, TViews, TAsyncActions>,
+    props: NimboProviderProps<TState, TActions, TSelectors, TAsyncActions>,
   ) => ReactNode;
 };

@@ -31,7 +31,7 @@ export const themeStore = createStore('demo:theme', {
       set({ mode: 'light', fontScale: 1 });
     },
   }),
-  views: {
+  selectors: {
     accent: (state) => ACCENTS[state.mode],
     label: (state) =>
       `${state.mode.charAt(0).toUpperCase()}${state.mode.slice(1)} · ${state.fontScale.toFixed(1)}x`,

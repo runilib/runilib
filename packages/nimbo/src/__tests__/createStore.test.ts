@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { computed } from '../core/selector';
 import { createStore } from '../createStore';
 
 describe('createStore', () => {
@@ -32,7 +33,7 @@ describe('createStore', () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
-  it('reads derived views', () => {
+  it('reads derived selectors', () => {
     const cart = createStore('cart', {
       state: {
         items: [
@@ -40,12 +41,74 @@ describe('createStore', () => {
           { label: 'Mouse', price: 80 },
         ],
       },
-      views: {
+      selectors: {
         total: (state) => state.items.reduce((sum, item) => sum + item.price, 0),
       },
     });
 
-    expect(cart.view('total')).toBe(200);
+    expect(cart.selector('total')).toBe(200);
+  });
+
+  it('reads parameterized selectors', () => {
+    const cart = createStore('cart', {
+      state: {
+        items: [
+          { label: 'Keyboard', category: 'hardware', price: 120 },
+          { label: 'Mouse', category: 'hardware', price: 80 },
+          { label: 'Sticker', category: 'merch', price: 5 },
+        ],
+      },
+      selectors: {
+        totalWithTax: (state, taxRate: number) =>
+          state.items.reduce((sum, item) => sum + item.price, 0) * (1 + taxRate),
+        itemsByCategory: (state, category: string) =>
+          state.items.filter((item) => item.category === category),
+      },
+    });
+
+    expect(cart.selector('totalWithTax', 0.2)).toBe(246);
+    expect(cart.selector('itemsByCategory', 'hardware')).toHaveLength(2);
+  });
+
+  it('memoizes computed selectors by state reference and arguments', () => {
+    const totalByCategory = vi.fn(
+      (state: { items: Array<{ category: string; price: number }> }, category: string) =>
+        state.items
+          .filter((item) => item.category === category)
+          .reduce((sum, item) => sum + item.price, 0),
+    );
+
+    const cart = createStore('cart', {
+      state: {
+        items: [
+          { category: 'hardware', price: 120 },
+          { category: 'hardware', price: 80 },
+          { category: 'merch', price: 5 },
+        ],
+      },
+      actions: ({ patch }) => ({
+        add(category: string, price: number) {
+          patch((state) => ({
+            items: [...state.items, { category, price }],
+          }));
+        },
+      }),
+      selectors: {
+        totalByCategory: computed(totalByCategory),
+      },
+    });
+
+    expect(cart.selector('totalByCategory', 'hardware')).toBe(200);
+    expect(cart.selector('totalByCategory', 'hardware')).toBe(200);
+    expect(totalByCategory).toHaveBeenCalledTimes(1);
+
+    expect(cart.selector('totalByCategory', 'merch')).toBe(5);
+    expect(totalByCategory).toHaveBeenCalledTimes(2);
+
+    cart.actions.add('hardware', 50);
+
+    expect(cart.selector('totalByCategory', 'hardware')).toBe(250);
+    expect(totalByCategory).toHaveBeenCalledTimes(3);
   });
 
   it('creates isolated scoped stores', () => {

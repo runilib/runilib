@@ -4,19 +4,23 @@ import type {
   NimboEquality,
   NimboListener,
   NimboSelector,
+  NimboSelectorMap,
   NimboStore,
 } from '../types';
 
 // biome-ignore lint/suspicious/noExplicitAny: store map must remain shape-agnostic.
 type AnyAsyncMap = NimboAsyncActionMap<any>;
 
-// biome-ignore lint/suspicious/noExplicitAny: composed stores accept any nimbo store regardless of state, actions, views, or async-action shape.
-export type NimboAnyStore = NimboStore<any, any, any, AnyAsyncMap>;
+// biome-ignore lint/suspicious/noExplicitAny: store map must remain shape-agnostic.
+type AnySelectorMap = NimboSelectorMap<any>;
+
+// biome-ignore lint/suspicious/noExplicitAny: composed stores accept any nimbo store regardless of state, actions, Selectors, or async-action shape.
+export type NimboAnyStore = NimboStore<any, any, AnySelectorMap, AnyAsyncMap>;
 
 export type NimboStoreMap = Record<string, NimboAnyStore>;
 
-// biome-ignore lint/suspicious/noExplicitAny: only TState is recovered; other generics stay open.
-type ExtractState<S> = S extends NimboStore<infer T, any, any, AnyAsyncMap> ? T : never;
+type ExtractState<S> =
+  S extends NimboStore<infer T, unknown, AnySelectorMap, AnyAsyncMap> ? T : never;
 
 export type NimboComposedState<TStores extends NimboStoreMap> = {
   [Key in keyof TStores]: ExtractState<TStores[Key]>;
