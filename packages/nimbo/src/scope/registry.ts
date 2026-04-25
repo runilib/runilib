@@ -1,30 +1,30 @@
-import type { NimboScopeId, NimboSelectorMap, NimboStore } from '../types';
+import type { ListenerTypeAlias, SelectorMap, Store } from '../types';
 
 export function createScopeRegistry<
   TState,
   TActions,
-  TSelectors extends NimboSelectorMap<TState>,
+  TSelectors extends SelectorMap<TState>,
   TAsyncActions,
 >(
   createScopedStore: (
-    scopeId: NimboScopeId,
-  ) => NimboStore<TState, TActions, TSelectors, TAsyncActions>,
+    Listener: ListenerTypeAlias,
+  ) => Store<TState, TActions, TSelectors, TAsyncActions>,
 ) {
   const stores = new Map<
-    NimboScopeId,
-    NimboStore<TState, TActions, TSelectors, TAsyncActions>
+    ListenerTypeAlias,
+    Store<TState, TActions, TSelectors, TAsyncActions>
   >();
 
   return {
-    get(scopeId: NimboScopeId) {
-      const existingStore = stores.get(scopeId);
+    get(Listener: ListenerTypeAlias) {
+      const existingStore = stores.get(Listener);
 
       if (existingStore) {
         return existingStore;
       }
 
-      const store = createScopedStore(scopeId);
-      stores.set(scopeId, store);
+      const store = createScopedStore(Listener);
+      stores.set(Listener, store);
 
       return store;
     },

@@ -3,31 +3,31 @@ import { createAsyncStatusRegistry } from './async/status';
 import { createActionContext, createActions } from './core/actions';
 import { readSelector } from './core/selector';
 import { createStateContainer } from './core/state';
-import { useNimboSelector } from './react/hooks';
+import { useSelector } from './react/hooks';
 import { createStoreProvider } from './react/provider';
 import { createScopeRegistry } from './scope/registry';
 import type {
-  NimboAsyncActionMap,
-  NimboAsyncResult,
-  NimboEquality,
-  NimboScopeId,
-  NimboSelector,
-  NimboSelectorMap,
-  NimboStore,
-  NimboStoreDefinition,
+  AsyncActionMap,
+  AsyncResult,
+  Equality,
+  ListenerTypeAlias,
+  Selector,
+  SelectorMap,
+  Store,
+  StoreDefinition,
 } from './types';
 
 function createStoreInstance<
   TState,
   TActions extends object,
-  TSelectors extends NimboSelectorMap<TState>,
-  TAsyncActions extends NimboAsyncActionMap<TState>,
+  TSelectors extends SelectorMap<TState>,
+  TAsyncActions extends AsyncActionMap<TState>,
 >(
   name: string,
-  definition: NimboStoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
-  scopeId: NimboScopeId | null = null,
-): NimboStore<TState, TActions, TSelectors, TAsyncActions> {
-  const storeName = scopeId === null ? name : `${name}:${String(scopeId)}`;
+  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
+  Listener: ListenerTypeAlias | null = null,
+): Store<TState, TActions, TSelectors, TAsyncActions> {
+  const storeName = Listener === null ? name : `${name}:${String(Listener)}`;
   const container = createStateContainer(definition.state);
   const actionContext = createActionContext(container);
   const actions = createActions(definition.actions, actionContext);
@@ -36,24 +36,24 @@ function createStoreInstance<
     definition.asyncActions,
     actionContext,
     asyncStatuses,
-    scopeId,
+    Listener,
   );
 
-  let store: NimboStore<TState, TActions, TSelectors, TAsyncActions>;
+  let store: Store<TState, TActions, TSelectors, TAsyncActions>;
 
   const scopedStores = createScopeRegistry<TState, TActions, TSelectors, TAsyncActions>(
-    (nextScopeId) => createStoreInstance(name, definition, nextScopeId),
+    (nextListener) => createStoreInstance(name, definition, nextListener),
   );
 
   const { Provider, useStoreInstance } = createStoreProvider(() => store);
 
   const useFromStore = <TValue = TState>(
-    selector?: NimboSelector<TState, TValue>,
-    equality?: NimboEquality<TValue>,
+    selector?: Selector<TState, TValue>,
+    equality?: Equality<TValue>,
   ) => {
     const resolvedStore = useStoreInstance();
 
-    return useNimboSelector(
+    return useSelector(
       resolvedStore.getState,
       resolvedStore.subscribe,
       selector,
@@ -82,14 +82,14 @@ function createStoreInstance<
         ...args,
       );
     },
-    use: useFromStore as NimboStore<TState, TActions, TSelectors, TAsyncActions>['use'],
+    use: useFromStore as Store<TState, TActions, TSelectors, TAsyncActions>['use'],
     useActions() {
       return useStoreInstance().actions;
     },
     useSelector(selectoName, ...args) {
       const resolvedStore = useStoreInstance();
 
-      return useNimboSelector(resolvedStore.getState, resolvedStore.subscribe, () =>
+      return useSelector(resolvedStore.getState, resolvedStore.subscribe, () =>
         resolvedStore.selector(selectoName, ...args),
       );
     },
@@ -97,7 +97,7 @@ function createStoreInstance<
       return useStoreInstance().asyncActions[actionName];
     },
     usePending(actionName) {
-      return useNimboSelector(
+      return useSelector(
         () => asyncStatuses.getStatus(String(actionName ?? '*')),
         asyncStatuses.subscribe,
         () =>
@@ -107,27 +107,27 @@ function createStoreInstance<
       );
     },
     useError(actionName) {
-      return useNimboSelector(
+      return useSelector(
         () => asyncStatuses.getStatus(String(actionName)),
         asyncStatuses.subscribe,
         () => asyncStatuses.getStatus(String(actionName)).error,
       );
     },
     useResult(actionName) {
-      return useNimboSelector(
+      return useSelector(
         () => asyncStatuses.getStatus(String(actionName)),
         asyncStatuses.subscribe,
         () =>
           asyncStatuses.getStatus(String(actionName)).result as
-            | NimboAsyncResult<TAsyncActions, typeof actionName>
+            | AsyncResult<TAsyncActions, typeof actionName>
             | undefined,
       );
     },
     clearError(actionName) {
       asyncStatuses.clearError(actionName ? String(actionName) : undefined);
     },
-    scope(scopeIdValue) {
-      return scopedStores.get(scopeIdValue);
+    scope(ListenerValue) {
+      return scopedStores.get(ListenerValue);
     },
     Provider(props) {
       return Provider({
@@ -143,11 +143,11 @@ function createStoreInstance<
 export function createStore<
   TState,
   TActions extends object = object,
-  TSelectors extends NimboSelectorMap<TState> = NimboSelectorMap<TState>,
-  TAsyncActions extends NimboAsyncActionMap<TState> = NimboAsyncActionMap<TState>,
+  TSelectors extends SelectorMap<TState> = SelectorMap<TState>,
+  TAsyncActions extends AsyncActionMap<TState> = AsyncActionMap<TState>,
 >(
   name: string,
-  definition: NimboStoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
-): NimboStore<TState, TActions, TSelectors, TAsyncActions> {
+  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
+): Store<TState, TActions, TSelectors, TAsyncActions> {
   return createStoreInstance(name, definition);
 }

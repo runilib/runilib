@@ -1,31 +1,28 @@
 import type {
-  NimboActionContext,
-  NimboAsyncActionDefinition,
-  NimboAsyncActionMap,
-  NimboBoundAsyncActions,
-  NimboScopeId,
+  ActionContext,
+  AsyncActionDefinition,
+  AsyncActionMap,
+  BoundAsyncActions,
+  ListenerTypeAlias,
 } from '../types';
-import type { NimboAsyncStatusRegistry } from './status';
+import type { AsyncStatusRegistry } from './status';
 
 type AsyncActionRuntime = {
   controller: AbortController | null;
   pendingPromise: Promise<unknown> | null;
 };
 
-export function bindAsyncActions<
-  TState,
-  TAsyncActions extends NimboAsyncActionMap<TState>,
->(
+export function bindAsyncActions<TState, TAsyncActions extends AsyncActionMap<TState>>(
   definitions: TAsyncActions | undefined,
-  context: NimboActionContext<TState>,
-  statuses: NimboAsyncStatusRegistry,
-  scopeId: NimboScopeId | null,
-): NimboBoundAsyncActions<TAsyncActions> {
+  context: ActionContext<TState>,
+  statuses: AsyncStatusRegistry,
+  Listener: ListenerTypeAlias | null,
+): BoundAsyncActions<TAsyncActions> {
   const runtimes = new Map<string, AsyncActionRuntime>();
   const boundActions: Record<string, (...args: unknown[]) => Promise<unknown>> = {};
 
   for (const [name, definition] of Object.entries(definitions ?? {})) {
-    const actionDefinition = definition as NimboAsyncActionDefinition<
+    const actionDefinition = definition as AsyncActionDefinition<
       TState,
       unknown[],
       unknown
@@ -61,7 +58,7 @@ export function bindAsyncActions<
         {
           ...context,
           signal: controller.signal,
-          scope: scopeId,
+          scope: Listener,
           action: name,
         },
         ...args,
@@ -88,5 +85,5 @@ export function bindAsyncActions<
     };
   }
 
-  return boundActions as NimboBoundAsyncActions<TAsyncActions>;
+  return boundActions as BoundAsyncActions<TAsyncActions>;
 }
