@@ -6,7 +6,11 @@ import path from 'node:path';
 
 const DRAFTS_ROOT = path.join('.github', 'mirror-issue-drafts');
 const MIRROR_CONFIG_PATH = path.join('.github', 'mirror-packages.json');
-const IGNORED_FILE_NAMES = new Set(['README.md', 'ROADMAP_ISSUES.md']);
+const IGNORED_FILE_NAMES = new Set([
+  'README.md',
+  'ROADMAP_ISSUES.md',
+  'CONDITIONAL_LOGI_FUTURE.md',
+]);
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
