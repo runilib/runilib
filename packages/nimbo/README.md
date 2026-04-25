@@ -123,3 +123,6 @@ Planned next areas:
 - persistence adapters
 - devtools hooks
 - middleware
+- store composition — `composeStores({ user: userStore, cart: cartStore })`
+  to read several modules through a single selector when a project wants a
+  Redux/MobX-style root view without giving up the per-module mental model

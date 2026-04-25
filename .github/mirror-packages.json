@@ -1,6 +1,12 @@
 {
   "packages": [
     {
+      "workspace": "@runilib/nimbo",
+      "package_path": "packages/nimbo",
+      "target_repo": "runilib/nimbo",
+      "target_branch": "main"
+    },
+    {
       "workspace": "@runilib/react-formbridge",
       "package_path": "packages/react-formbridge",
       "target_repo": "runilib/react-formbridge",

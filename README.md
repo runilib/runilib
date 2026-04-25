@@ -13,6 +13,7 @@ runilib-monorepo/
 │  ├─ web/                      # web sandbox for the libraries
 │  └─ mobile-app/               # Expo sandbox for the libraries
 ├─ packages/
+│  ├─ nimbo/                    # tiny typed state modules (React / RN)
 │  ├─ react-formbridge/         # schema-first forms (React / RN)
 │  └─ react-walkit/             # onboarding tours (React / RN)
 ├─ package.json
@@ -157,6 +158,7 @@ yarn test
 
 Each published package has a read-only mirror repository for discoverability and issue tracking:
 
+- [runilib/nimbo](https://github.com/runilib/nimbo)
 - [runilib/react-formbridge](https://github.com/runilib/react-formbridge)
 - [runilib/react-walkit](https://github.com/runilib/react-walkit)
 

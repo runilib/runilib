@@ -1,0 +1,197 @@
+name: Sync Issues to Monorepo
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+      - labeled
+      - unlabeled
+      - closed
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: sync-issues-to-monorepo-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+env:
+  MONOREPO_REPO: runilib/runilib
+  PACKAGE_WORKSPACE: '@runilib/nimbo'
+  PACKAGE_PATH: packages/nimbo
+
+jobs:
+  sync:
+    if: github.event.issue.pull_request == null
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Resolve linked monorepo issue
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_SYNC_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+
+          test -n "${GH_TOKEN:-}" || { echo "Missing MONOREPO_SYNC_TOKEN secret"; exit 1; }
+
+          marker="<!-- mirror-source: ${GITHUB_REPOSITORY}#${ISSUE_NUMBER} -->"
+          monorepo_issue_number="$(
+            gh api --paginate "repos/${MONOREPO_REPO}/issues?state=all&per_page=100" \
+              | jq -r --arg marker "$marker" '.[] | select(.pull_request == null) | select((.body // "") | contains($marker)) | .number' \
+              | head -n 1
+          )"
+          echo "number=${monorepo_issue_number}" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update monorepo issue
+        if: github.event.action != 'closed'
+        id: upsert
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_SYNC_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_LABELS_JSON: ${{ toJson(github.event.issue.labels.*.name) }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          EXISTING_MONOREPO_ISSUE: ${{ steps.resolve.outputs.number }}
+        run: |
+          set -euo pipefail
+
+          test -n "${GH_TOKEN:-}" || { echo "Missing MONOREPO_SYNC_TOKEN secret"; exit 1; }
+
+          label_color() {
+            case "$1" in
+              bug) echo "d73a4a" ;;
+              docs|documentation) echo "0075ca" ;;
+              enhancement) echo "a2eeef" ;;
+              "good first issue") echo "7057ff" ;;
+              "help wanted") echo "008672" ;;
+              *) echo "ededed" ;;
+            esac
+          }
+
+          ensure_label_exists() {
+            local label="$1"
+            local encoded
+
+            encoded="$(jq -rn --arg value "$label" '$value | @uri')"
+
+            if gh api "repos/${MONOREPO_REPO}/labels/${encoded}" > /dev/null 2>&1; then
+              return 0
+            fi
+
+            gh api "repos/${MONOREPO_REPO}/labels" \
+              -X POST \
+              -f name="$label" \
+              -f color="$(label_color "$label")" > /dev/null
+          }
+
+          sync_issue_labels() {
+            local issue_number="$1"
+            local labels_json
+            local payload_file
+
+            labels_json="$(printf '%s' "${ISSUE_LABELS_JSON:-[]}" | jq -c 'map(select(type == "string" and length > 0)) | unique')"
+
+            while IFS= read -r label; do
+              [ -n "${label:-}" ] || continue
+              ensure_label_exists "$label"
+            done < <(printf '%s' "$labels_json" | jq -r '.[]')
+
+            payload_file="$(mktemp)"
+            jq -n --argjson labels "$labels_json" '{labels: $labels}' > "$payload_file"
+
+            gh api -X PATCH "repos/${MONOREPO_REPO}/issues/${issue_number}" \
+              --input "$payload_file" > /dev/null
+          }
+
+          body_file="$(mktemp)"
+
+          {
+            echo "This issue was automatically mirrored from a standalone package repository."
+            echo
+            echo "Mirror source:"
+            echo "- Repo: ${GITHUB_REPOSITORY}"
+            echo "- Issue: #${ISSUE_NUMBER}"
+            echo "- URL: ${ISSUE_URL}"
+            echo "- Workspace: ${PACKAGE_WORKSPACE}"
+            echo "- Package path: \`${PACKAGE_PATH}\`"
+            echo
+            echo "<!-- mirror-source: ${GITHUB_REPOSITORY}#${ISSUE_NUMBER} -->"
+            echo "<!-- mirror-source-url: ${ISSUE_URL} -->"
+            echo "<!-- mirror-workspace: ${PACKAGE_WORKSPACE} -->"
+            echo "<!-- mirror-package-path: ${PACKAGE_PATH} -->"
+            echo
+            echo "---"
+            echo
+            if [ -n "${ISSUE_BODY:-}" ]; then
+              printf '%s\n' "${ISSUE_BODY}"
+            else
+              echo "_No description provided._"
+            fi
+          } > "$body_file"
+
+          title="[mirror:${PACKAGE_WORKSPACE}] ${ISSUE_TITLE}"
+
+          if [ -n "${EXISTING_MONOREPO_ISSUE:-}" ]; then
+            gh issue edit "${EXISTING_MONOREPO_ISSUE}" \
+              --repo "${MONOREPO_REPO}" \
+              --title "$title" \
+              --body-file "$body_file" > /dev/null
+            gh api -X PATCH "repos/${MONOREPO_REPO}/issues/${EXISTING_MONOREPO_ISSUE}" \
+              -F state=open > /dev/null
+            monorepo_issue_number="${EXISTING_MONOREPO_ISSUE}"
+          else
+            monorepo_issue_url="$(gh issue create \
+              --repo "${MONOREPO_REPO}" \
+              --title "$title" \
+              --body-file "$body_file")"
+            monorepo_issue_number="${monorepo_issue_url##*/}"
+          fi
+
+          sync_issue_labels "${monorepo_issue_number}"
+
+          echo "number=${monorepo_issue_number}" >> "$GITHUB_OUTPUT"
+
+      - name: Close linked monorepo issue
+        if: github.event.action == 'closed' && steps.resolve.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ secrets.MONOREPO_SYNC_TOKEN }}
+          EXISTING_MONOREPO_ISSUE: ${{ steps.resolve.outputs.number }}
+        run: |
+          set -euo pipefail
+
+          gh api -X PATCH "repos/${MONOREPO_REPO}/issues/${EXISTING_MONOREPO_ISSUE}" \
+            -F state=closed > /dev/null
+
+      - name: Add or update mirror issue link comment
+        if: github.event.action != 'closed' && steps.upsert.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          MONOREPO_ISSUE_NUMBER: ${{ steps.upsert.outputs.number }}
+        run: |
+          set -euo pipefail
+
+          comment_body="$(cat <<EOF
+          <!-- monorepo-issue-link -->
+
+          Mirrored to monorepo issue: https://github.com/${MONOREPO_REPO}/issues/${MONOREPO_ISSUE_NUMBER}
+          EOF
+          )"
+
+          existing_comment_id="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" --jq '.[] | select(.body | contains("<!-- monorepo-issue-link -->")) | .id' | head -n 1)"
+
+          if [ -n "${existing_comment_id:-}" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing_comment_id}" \
+              -F body="$comment_body" > /dev/null
+          else
+            gh issue comment "${ISSUE_NUMBER}" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --body "$comment_body"
+          fi
