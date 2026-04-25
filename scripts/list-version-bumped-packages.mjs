@@ -58,6 +58,14 @@ for (const pkg of listPackageManifests()) {
   const previousVersion = previousManifest?.version ?? null;
   const currentVersion = pkg.version;
 
+  if (previousVersion === null) {
+    // The package did not exist at the previous SHA. Treating "no previous
+    // version" as a version bump would auto-publish the seed version (often
+    // 0.0.0) the first time a new package lands on main. New packages must go
+    // through a real changeset bump to be published.
+    continue;
+  }
+
   if (previousVersion === currentVersion) {
     continue;
   }

@@ -6,6 +6,13 @@
  * import { createStore } from '@runilib/nimbo';
  */
 
+export {
+  composeStores,
+  type NimboAnyStore,
+  type NimboComposedState,
+  type NimboComposedStore,
+  type NimboStoreMap,
+} from './compose/composeStores';
 export { createStore } from './createStore';
 export { useLocalStore } from './react/useLocalStore';
 export type {

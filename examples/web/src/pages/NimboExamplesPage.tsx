@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ComposedRootDemo } from '../components/nimbo-examples/ComposedRootDemo';
 import { GlobalThemeDemo } from '../components/nimbo-examples/GlobalThemeDemo';
 import { LocalNotepadDemo } from '../components/nimbo-examples/LocalNotepadDemo';
 import { ScopedCartsDemo } from '../components/nimbo-examples/ScopedCartsDemo';
@@ -55,6 +56,28 @@ appleCart.actions.add({ id: 'iphone', name: 'iPhone 16', price: 999 });
 
 // Different state instances, same definition.`,
     Demo: ScopedCartsDemo,
+  },
+  {
+    id: 'composed',
+    eyebrow: 'Composed root view',
+    title: 'Many modules. One read selector.',
+    description:
+      'composeStores aggregates several stores into a read-only composite. One subscribe, one selector across the whole tree — useful for headers, layout summaries, or any component that needs to read from several modules at once. Mutations still go through each module.',
+    snippet: `import { composeStores } from '@runilib/nimbo';
+
+const root = composeStores({
+  user: userStore,
+  theme: themeStore,
+  cart: cartStore.scope('nike'),
+});
+
+function Header() {
+  const summary = root.use(
+    (state) => \`\${state.user.name} · \${state.cart.items.length} items\`,
+  );
+  return <span>{summary}</span>;
+}`,
+    Demo: ComposedRootDemo,
   },
 ] as const;
 

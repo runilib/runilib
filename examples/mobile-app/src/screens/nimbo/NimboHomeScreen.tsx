@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { ComposedRootDemo } from '@/src/components/nimbo-examples/ComposedRootDemo';
 import { GlobalThemeDemo } from '@/src/components/nimbo-examples/GlobalThemeDemo';
 import { LocalNotepadDemo } from '@/src/components/nimbo-examples/LocalNotepadDemo';
 import { ScopedCartsDemo } from '@/src/components/nimbo-examples/ScopedCartsDemo';
@@ -32,6 +33,14 @@ const SECTIONS = [
     description:
       'cartStore.scope("nike") and cartStore.scope("apple") share behavior but each owns its own state.',
     Demo: ScopedCartsDemo,
+  },
+  {
+    id: 'composed',
+    eyebrow: 'Composed root view',
+    title: 'Many modules. One read selector.',
+    description:
+      'composeStores aggregates several stores into a read-only composite. One subscribe, one selector across the whole tree. Mutations still go through each module.',
+    Demo: ComposedRootDemo,
   },
 ] as const;
 
