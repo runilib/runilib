@@ -1,23 +1,23 @@
 import type {
-  NimboComputedSelector,
-  NimboComputedSelectorOptions,
-  NimboSelectorArgs,
-  NimboSelectorMap,
-  NimboSelectorResult,
-  NimboSelectorRun,
+  ComputedSelector,
+  ComputedSelectorOptions,
+  SelectorArgs,
+  SelectorMap,
+  SelectorResult,
+  SelectorRun,
 } from '../types';
 
 const computedCache = new WeakMap<
-  NimboComputedSelector<unknown, unknown[], unknown>,
+  ComputedSelector<unknown, unknown[], unknown>,
   Map<string, { state: unknown; value: unknown }>
 >();
 
 export function computed<TState, TArgs extends unknown[], TResult>(
-  run: NimboSelectorRun<TState, TArgs, TResult>,
-  options: NimboComputedSelectorOptions<TArgs> = {},
-): NimboComputedSelector<TState, TArgs, TResult> {
+  run: SelectorRun<TState, TArgs, TResult>,
+  options: ComputedSelectorOptions<TArgs> = {},
+): ComputedSelector<TState, TArgs, TResult> {
   const computedSelector = ((state: TState, ...args: TArgs) =>
-    run(state, ...args)) as NimboComputedSelector<TState, TArgs, TResult>;
+    run(state, ...args)) as ComputedSelector<TState, TArgs, TResult>;
 
   Object.defineProperties(computedSelector, {
     __nimboComputed: {
@@ -33,15 +33,15 @@ export function computed<TState, TArgs extends unknown[], TResult>(
 
 export function readSelector<
   TState,
-  TSelectors extends NimboSelectorMap<TState>,
+  TSelectors extends SelectorMap<TState>,
   Key extends keyof TSelectors,
 >(
   storeName: string,
   selectors: TSelectors | undefined,
   state: TState,
   name: Key,
-  ...args: NimboSelectorArgs<TSelectors[Key]>
-): NimboSelectorResult<TSelectors[Key]> {
+  ...args: SelectorArgs<TSelectors[Key]>
+): SelectorResult<TSelectors[Key]> {
   const selector = selectors?.[name];
 
   if (!selector) {
@@ -49,30 +49,25 @@ export function readSelector<
   }
 
   if (isComputedSelector(selector)) {
-    return readComputedSelector(selector, state, args) as NimboSelectorResult<
-      TSelectors[Key]
-    >;
+    return readComputedSelector(selector, state, args) as SelectorResult<TSelectors[Key]>;
   }
 
-  return selector(state, ...args) as NimboSelectorResult<TSelectors[Key]>;
+  return selector(state, ...args) as SelectorResult<TSelectors[Key]>;
 }
 
 function readComputedSelector<TState, TArgs extends unknown[], TResult>(
-  selector: NimboComputedSelector<TState, TArgs, TResult>,
+  selector: ComputedSelector<TState, TArgs, TResult>,
   state: TState,
   args: TArgs,
 ): TResult {
   const key = selector.__nimboComputedOptions.key?.(...args) ?? JSON.stringify(args);
   let cache = computedCache.get(
-    selector as NimboComputedSelector<unknown, unknown[], unknown>,
+    selector as ComputedSelector<unknown, unknown[], unknown>,
   );
 
   if (!cache) {
     cache = new Map();
-    computedCache.set(
-      selector as NimboComputedSelector<unknown, unknown[], unknown>,
-      cache,
-    );
+    computedCache.set(selector as ComputedSelector<unknown, unknown[], unknown>, cache);
   }
 
   const cached = cache.get(key);
@@ -88,7 +83,7 @@ function readComputedSelector<TState, TArgs extends unknown[], TResult>(
 }
 
 function isComputedSelector<TState, TArgs extends unknown[], TResult>(
-  selector: NimboSelectorRun<TState, TArgs, TResult>,
-): selector is NimboComputedSelector<TState, TArgs, TResult> {
+  selector: SelectorRun<TState, TArgs, TResult>,
+): selector is ComputedSelector<TState, TArgs, TResult> {
   return '__nimboComputed' in selector && selector.__nimboComputed === true;
 }

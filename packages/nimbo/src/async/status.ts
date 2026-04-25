@@ -1,18 +1,18 @@
-import type { NimboAsyncStatus, NimboListener } from '../types';
+import type { AsyncStatus, Listener } from '../types';
 
-export type NimboAsyncStatusRegistry = {
-  getStatus: (name: string) => NimboAsyncStatus;
+export type AsyncStatusRegistry = {
+  getStatus: (name: string) => AsyncStatus;
   getAnyPending: () => boolean;
   setPending: (name: string, pending: boolean) => void;
   setError: (name: string, error: unknown | null) => void;
   setResult: (name: string, result: unknown) => void;
   clearError: (name?: string) => void;
-  subscribe: (listener: NimboListener) => () => void;
+  subscribe: (listener: Listener) => () => void;
 };
 
-export function createAsyncStatusRegistry(): NimboAsyncStatusRegistry {
-  const statuses = new Map<string, NimboAsyncStatus>();
-  const listeners = new Set<NimboListener>();
+export function createAsyncStatusRegistry(): AsyncStatusRegistry {
+  const statuses = new Map<string, AsyncStatus>();
+  const listeners = new Set<Listener>();
 
   const emit = () => {
     for (const listener of listeners) {
@@ -27,7 +27,7 @@ export function createAsyncStatusRegistry(): NimboAsyncStatusRegistry {
       return existingStatus;
     }
 
-    const status: NimboAsyncStatus = {
+    const status: AsyncStatus = {
       pending: false,
       error: null,
       result: undefined,

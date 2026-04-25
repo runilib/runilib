@@ -1,9 +1,9 @@
-import type { NimboActionContext, NimboActionFactory } from '../types';
-import type { NimboStateContainer } from './state';
+import type { ActionContext, ActionFactory } from '../types';
+import type { StateContainer } from './state';
 
 export function createActionContext<TState>(
-  container: NimboStateContainer<TState>,
-): NimboActionContext<TState> {
+  container: StateContainer<TState>,
+): ActionContext<TState> {
   return {
     get: container.getState,
     getState: container.getState,
@@ -16,8 +16,8 @@ export function createActionContext<TState>(
 }
 
 export function createActions<TState, TActions>(
-  factory: NimboActionFactory<TState, TActions> | undefined,
-  context: NimboActionContext<TState>,
+  factory: ActionFactory<TState, TActions> | undefined,
+  context: ActionContext<TState>,
 ): TActions {
   return factory?.(context) ?? ({} as TActions);
 }

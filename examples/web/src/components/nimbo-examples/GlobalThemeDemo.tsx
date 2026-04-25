@@ -137,7 +137,7 @@ function ThemeReadout() {
           background: accent,
         }}
       />
-      <span>themeStore.useView('label') → {label}</span>
+      <span>themeStore.useSelector('label') → {label}</span>
     </div>
   );
 }

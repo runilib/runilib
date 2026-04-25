@@ -1,59 +1,59 @@
-import { useNimboSelector } from '../react/hooks';
+import { useSelector } from '../react/hooks';
 import type {
-  NimboAsyncActionMap,
-  NimboEquality,
-  NimboListener,
-  NimboSelector,
-  NimboSelectorMap,
-  NimboStore,
+  AsyncActionMap,
+  Equality,
+  Listener,
+  Selector,
+  SelectorMap,
+  Store,
 } from '../types';
 
 // biome-ignore lint/suspicious/noExplicitAny: store map must remain shape-agnostic.
-type AnyAsyncMap = NimboAsyncActionMap<any>;
+type AnyAsyncMap = AsyncActionMap<any>;
 
 // biome-ignore lint/suspicious/noExplicitAny: store map must remain shape-agnostic.
-type AnySelectorMap = NimboSelectorMap<any>;
+type AnySelectorMap = SelectorMap<any>;
 
 // biome-ignore lint/suspicious/noExplicitAny: composed stores accept any nimbo store regardless of state, actions, Selectors, or async-action shape.
-export type NimboAnyStore = NimboStore<any, any, AnySelectorMap, AnyAsyncMap>;
+export type AnyStore = Store<any, any, AnySelectorMap, AnyAsyncMap>;
 
-export type NimboStoreMap = Record<string, NimboAnyStore>;
+export type StoreMap = Record<string, AnyStore>;
 
 type ExtractState<S> =
-  S extends NimboStore<infer T, unknown, AnySelectorMap, AnyAsyncMap> ? T : never;
+  S extends Store<infer T, unknown, AnySelectorMap, AnyAsyncMap> ? T : never;
 
-export type NimboComposedState<TStores extends NimboStoreMap> = {
+export type ComposedState<TStores extends StoreMap> = {
   [Key in keyof TStores]: ExtractState<TStores[Key]>;
 };
 
-export type NimboComposedStore<TStores extends NimboStoreMap> = {
+export type ComposedStore<TStores extends StoreMap> = {
   readonly stores: TStores;
-  getState: () => NimboComposedState<TStores>;
-  subscribe: (listener: NimboListener) => () => void;
+  getState: () => ComposedState<TStores>;
+  subscribe: (listener: Listener) => () => void;
   use: {
-    (): NimboComposedState<TStores>;
+    (): ComposedState<TStores>;
     <TValue>(
-      selector: NimboSelector<NimboComposedState<TStores>, TValue>,
-      equality?: NimboEquality<TValue>,
+      selector: Selector<ComposedState<TStores>, TValue>,
+      equality?: Equality<TValue>,
     ): TValue;
   };
 };
 
-export function composeStores<TStores extends NimboStoreMap>(
+export function composeStores<TStores extends StoreMap>(
   stores: TStores,
-): NimboComposedStore<TStores> {
+): ComposedStore<TStores> {
   const keys = Object.keys(stores) as Array<keyof TStores>;
-  let cached: NimboComposedState<TStores> | null = null;
+  let cached: ComposedState<TStores> | null = null;
 
-  const getState = (): NimboComposedState<TStores> => {
+  const getState = (): ComposedState<TStores> => {
     // Reuse the cached composite reference when every per-key state is still
     // the same. Without this, useSyncExternalStore would see a new object on
     // every snapshot read and trigger an infinite render loop.
-    const next = {} as NimboComposedState<TStores>;
+    const next = {} as ComposedState<TStores>;
     let stillSame = cached !== null;
 
     for (const key of keys) {
-      const value = stores[key].getState() as NimboComposedState<TStores>[typeof key];
+      const value = stores[key].getState() as ComposedState<TStores>[typeof key];
       next[key] = value;
 
       if (stillSame && cached?.[key] !== value) {
@@ -70,7 +70,7 @@ export function composeStores<TStores extends NimboStoreMap>(
     return next;
   };
 
-  const subscribe = (listener: NimboListener) => {
+  const subscribe = (listener: Listener) => {
     const unsubscribers = keys.map((key) => stores[key].subscribe(listener));
 
     return () => {
@@ -81,15 +81,15 @@ export function composeStores<TStores extends NimboStoreMap>(
   };
 
   const use = ((
-    selector?: NimboSelector<NimboComposedState<TStores>, unknown>,
-    equality?: NimboEquality<unknown>,
+    selector?: Selector<ComposedState<TStores>, unknown>,
+    equality?: Equality<unknown>,
   ) =>
-    useNimboSelector(
+    useSelector(
       getState,
       subscribe,
       selector,
       equality,
-    )) as NimboComposedStore<TStores>['use'];
+    )) as ComposedStore<TStores>['use'];
 
   return {
     stores,

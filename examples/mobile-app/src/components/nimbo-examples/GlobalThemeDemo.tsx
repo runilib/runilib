@@ -1,5 +1,6 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { useSelector } from '../../../../../packages/nimbo/src/react/hooks';
 import { type ThemeMode, themeStore } from './themeStore';
 
 const MODES: ThemeMode[] = ['light', 'dark', 'sepia'];
@@ -137,7 +138,7 @@ function ThemeReadout() {
         }}
       />
       <Text style={{ fontFamily: 'Menlo', fontSize: 12 }}>
-        themeStore.useView('label') → {label}
+        themeStore.useSelector('label') → {label}
       </Text>
     </View>
   );

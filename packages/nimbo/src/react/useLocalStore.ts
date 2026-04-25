@@ -1,27 +1,20 @@
 import { useRef } from 'react';
 
 import { createStore } from '../createStore';
-import type {
-  NimboAsyncActionMap,
-  NimboSelectorMap,
-  NimboStore,
-  NimboStoreDefinition,
-} from '../types';
+import type { AsyncActionMap, SelectorMap, Store, StoreDefinition } from '../types';
 
 export function useLocalStore<
   TState,
   TActions extends object = object,
-  TSelectors extends NimboSelectorMap<TState> = NimboSelectorMap<TState>,
-  TAsyncActions extends NimboAsyncActionMap<TState> = NimboAsyncActionMap<TState>,
+  TSelectors extends SelectorMap<TState> = SelectorMap<TState>,
+  TAsyncActions extends AsyncActionMap<TState> = AsyncActionMap<TState>,
 >(
   name: string,
-  definition: NimboStoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
-): NimboStore<TState, TActions, TSelectors, TAsyncActions> {
-  const storeRef = useRef<NimboStore<TState, TActions, TSelectors, TAsyncActions>>();
+  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
+): Store<TState, TActions, TSelectors, TAsyncActions> {
+  const storeRef = useRef<Store<TState, TActions, TSelectors, TAsyncActions>>();
 
-  if (!storeRef.current) {
-    storeRef.current = createStore(name, definition);
-  }
+  storeRef.current ??= createStore(name, definition);
 
   return storeRef.current;
 }

@@ -1,25 +1,25 @@
 import type {
-  NimboListener,
-  NimboPatchState,
-  NimboSetState,
-  NimboStateInitializer,
-  NimboStateUpdater,
+  Listener,
+  PatchState,
+  SetState,
+  StateInitializer,
+  StateUpdater,
 } from '../types';
 
-export type NimboStateContainer<TState> = {
+export type StateContainer<TState> = {
   getState: () => TState;
-  setState: NimboSetState<TState>;
-  patchState: NimboPatchState<TState>;
+  setState: SetState<TState>;
+  patchState: PatchState<TState>;
   resetState: () => void;
-  subscribe: (listener: NimboListener) => () => void;
+  subscribe: (listener: Listener) => () => void;
 };
 
 export function createStateContainer<TState>(
-  initializer: NimboStateInitializer<TState>,
-): NimboStateContainer<TState> {
+  initializer: StateInitializer<TState>,
+): StateContainer<TState> {
   let state = resolveInitialState(initializer);
   const initialState = cloneState(state);
-  const listeners = new Set<NimboListener>();
+  const listeners = new Set<Listener>();
 
   const emit = () => {
     for (const listener of listeners) {
@@ -29,7 +29,7 @@ export function createStateContainer<TState>(
 
   const getState = () => state;
 
-  const setState = (updater: NimboStateUpdater<TState>) => {
+  const setState = (updater: StateUpdater<TState>) => {
     const nextState = reduceState(state, updater);
 
     if (Object.is(state, nextState)) {
@@ -40,7 +40,7 @@ export function createStateContainer<TState>(
     emit();
   };
 
-  const patchState: NimboPatchState<TState> = (updater) => {
+  const patchState: PatchState<TState> = (updater) => {
     const patch =
       typeof updater === 'function'
         ? (updater as (currentState: TState) => Partial<TState>)(state)
@@ -53,7 +53,7 @@ export function createStateContainer<TState>(
     setState(cloneState(initialState));
   };
 
-  const subscribe = (listener: NimboListener) => {
+  const subscribe = (listener: Listener) => {
     listeners.add(listener);
 
     return () => {
@@ -70,9 +70,7 @@ export function createStateContainer<TState>(
   };
 }
 
-export function resolveInitialState<TState>(
-  state: NimboStateInitializer<TState>,
-): TState {
+export function resolveInitialState<TState>(state: StateInitializer<TState>): TState {
   if (typeof state === 'function') {
     return (state as () => TState)();
   }
@@ -98,7 +96,7 @@ export function cloneState<TState>(state: TState): TState {
 
 function reduceState<TState>(
   currentState: TState,
-  updater: NimboStateUpdater<TState>,
+  updater: StateUpdater<TState>,
 ): TState {
   return typeof updater === 'function'
     ? (updater as (state: TState) => TState)(currentState)
