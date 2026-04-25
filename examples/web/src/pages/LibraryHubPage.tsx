@@ -21,6 +21,16 @@ const LIBRARIES = [
     accent: 'blue',
     examples: ['Checkout form', 'Route-based wizard', 'Masks', 'Bridges', 'Styling'],
   },
+  {
+    slug: 'nimbo',
+    route: '/nimbo',
+    eyebrow: 'State modules',
+    title: '@runilib/nimbo',
+    description:
+      'Tiny typed state modules. Same definition, used as global singleton, per-component local store, or scoped instances.',
+    accent: 'blue',
+    examples: ['Global theme store', 'Local notepads', 'Scoped shop carts'],
+  },
 ] as const;
 
 export function LibraryHubPage() {

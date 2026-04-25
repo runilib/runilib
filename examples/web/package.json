@@ -17,6 +17,7 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
+    "@runilib/nimbo": "workspace:*",
     "@runilib/react-formbridge": "workspace:*",
     "@runilib/react-walkit": "workspace:*",
     "joi": "^18.1.1",

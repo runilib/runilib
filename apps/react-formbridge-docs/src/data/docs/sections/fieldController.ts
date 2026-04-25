@@ -214,7 +214,7 @@ return (
 - The default generated component doesn't fit - you need custom chrome, imperative focus, a modal/sheet trigger, extra buttons, a composite widget, or a shared design-system wrapper.
 - You still want the renderer to be driven by reactive state (value, error, touched, validating, visible) so conditional rules, persistence, and analytics keep working.
 
-If you only need to restyle the default renderer, prefer [\`globalDefaults\`](/docs/globalDefaults) or per-field props first. If you need a **brand new field type** that no builder covers, jump to [\`field.custom()\`](/docs/field-custom) instead.`,
+If you only need to restyle the default renderer, prefer [globalDefaults](/docs/globalDefaults) or per-field props first. If you need a **brand new field type** that no builder covers, jump to [field.custom()](/docs/field-custom) instead.`,
     },
     {
       id: 'fb-field-controller-surface',
@@ -247,10 +247,10 @@ Once registered, FormBridge can drive focus from anywhere - auto-focus on mount,
     {
       id: 'fb-field-controller-notes',
       title: 'How it compares to other escape hatches',
-      content: `- Prefer \`fieldController(name)\` over [\`field.custom()\`](/docs/field-custom) when you still want a built-in field type such as \`select\`, \`masked\`, \`phone\`, or \`otp\`.
+      content: `- Prefer \`fieldController(name)\` over [field.custom()](/docs/field-custom) when you still want a built-in field type such as \`select\`, \`masked\`, \`phone\`, or \`otp\`.
 - Prefer \`fieldController(name)\` over builder-level \`.render(fn)\` when the custom UI needs surrounding layout, external buttons, modal state, or imperative focus control from outside the field.
 - Prefer \`renderPicker\` (on \`field.select\` / \`field.radio\` / \`field.date\`) over \`fieldController(name)\` when only the picker surface changes and the built-in field trigger is already good enough.
-- Prefer [\`globalDefaults\`](/docs/globalDefaults) or per-field props over \`fieldController\` when the change is purely visual - styling, spacing, label alignment - and the underlying markup is fine.`,
+- Prefer [globalDefaults](/docs/globalDefaults) or per-field props over \`fieldController\` when the change is purely visual - styling, spacing, label alignment - and the underlying markup is fine.`,
     },
   ],
 };

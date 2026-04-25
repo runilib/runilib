@@ -16,6 +16,7 @@
     "clean": "rimraf coverage .expo"
   },
   "dependencies": {
+    "@runilib/nimbo": "workspace:*",
     "@runilib/react-formbridge": "workspace:*",
     "@runilib/react-walkit": "workspace:*",
     "escape-string-regexp": "^5.0.0",
