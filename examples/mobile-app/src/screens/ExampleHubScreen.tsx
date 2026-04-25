@@ -27,6 +27,17 @@ const LIBRARIES = [
     surface: '#ffffff',
     bullets: ['Checkout flow', 'Cross-screen wizard', 'Masks', 'Bridges', 'Styling'],
   },
+  {
+    id: 'nimbo',
+    title: '@runilib/nimbo',
+    eyebrow: 'State modules',
+    description:
+      'Tiny typed state. Same definition used as global singleton, per-component local store, or scoped instances.',
+    route: '/nimbo',
+    accent: '#1d4ed8',
+    surface: '#ffffff',
+    bullets: ['Global theme store', 'Local notepads', 'Scoped shop carts'],
+  },
 ] as const;
 
 export function ExampleHubScreen() {

@@ -1,0 +1,97 @@
+{
+  "name": "@runilib/nimbo",
+  "version": "0.0.0",
+  "description": "Part of the runilib ecosystem (https://runilib.dev). Tiny typed state modules for React and React Native with global, local, scoped, and async-ready state primitives.",
+  "keywords": [
+    "runilib",
+    "runilib-ecosystem",
+    "nimbo",
+    "react",
+    "react-native",
+    "state",
+    "state-management",
+    "hooks",
+    "typescript",
+    "typed-state",
+    "scoped-state",
+    "global-state",
+    "local-state"
+  ],
+  "homepage": "https://runilib.dev/libraries/nimbo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/runilib/nimbo"
+  },
+  "bugs": {
+    "url": "https://github.com/runilib/runilib/issues"
+  },
+  "license": "MIT",
+  "author": "AKS <tech-founder@gonextstep.io>",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "react-native": "./dist/index.native.mjs",
+  "exports": {
+    ".": {
+      "react-native": {
+        "types": "./dist/index.native.d.mts",
+        "default": "./dist/index.native.mjs"
+      },
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "rimraf dist coverage",
+    "dev": "tsup --watch --config tsup.config.ts",
+    "build": "rimraf dist && tsup --config tsup.config.ts",
+    "lint": "biome lint src .",
+    "lint:fix": "biome lint --write src .",
+    "check": "biome check src .",
+    "check:fix": "biome check --write src .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "tsc:build": "tsc -b tsconfig-build.json",
+    "tsc:check": "tsc --noEmit",
+    "tsc:watch": "tsc --noEmit --watch",
+    "prepack": "node ../../scripts/package-pack-sourcemaps.mjs hide",
+    "postpack": "node ../../scripts/package-pack-sourcemaps.mjs restore",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-native": ">=0.73.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
+    "@types/node": "^25.5.0",
+    "@types/react": "^18.2.0",
+    "@vitest/coverage-v8": "^4.1.1",
+    "react": "^18.2.0",
+    "react-native": "^0.76.0",
+    "rimraf": "^6.1.3",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^4.1.1"
+  }
+}

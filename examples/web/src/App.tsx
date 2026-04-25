@@ -7,6 +7,7 @@ import './App.css';
 import { Dashboard } from './pages/Dashboard';
 import { FormbridgeExamplesPage } from './pages/FormbridgeExamplesPage';
 import { LibraryHubPage } from './pages/LibraryHubPage';
+import { NimboExamplesPage } from './pages/NimboExamplesPage';
 import { SETTINGS_STEPS, Settings } from './pages/Settings';
 import { Wizard } from './pages/Wizard';
 import { STEPS, TOUR_LABELS, TOUR_THEME } from './tourConfig';
@@ -80,6 +81,10 @@ export default function App() {
         <Route
           path="/formbridge/wizard/:stepId"
           element={<Wizard onBack={() => navigate('/formbridge')} />}
+        />
+        <Route
+          path="/nimbo"
+          element={<NimboExamplesPage />}
         />
         <Route
           path="*"

@@ -2,10 +2,11 @@
 
 This folder contains GitHub issue drafts split into one file per issue.
 
-The CLI publisher discovers mirrored packages from [.github/mirror-packages.json](../mirror-packages.json), so it works for `react-formbridge`, `react-walkit`, and any future mirrored package added there.
+The CLI publisher discovers mirrored packages from [.github/mirror-packages.json](../mirror-packages.json), so it works for `nimbo`, `react-formbridge`, `react-walkit`, and any future mirrored package added there.
 
 ## Repositories
 
+- [nimbo](./nimbo/README.md)
 - [react-formbridge](./react-formbridge/README.md)
 - [react-walkit](./react-walkit/README.md)
 
