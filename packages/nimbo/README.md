@@ -19,7 +19,7 @@ logic without reducers, action strings, providers everywhere, or storage-first
 mental models.
 
 ```tsx
-import { computed, createStore } from "@runilib/nimbo";
+import { createStore } from "@runilib/nimbo";
 
 const counter = createStore("counter", {
   state: () => ({ count: 0 }),
@@ -206,37 +206,3 @@ Current MVP surface:
 - `takeLatest`
 - abort signal support
 - `composeStores({ user: userStore, cart: cartStore })`
-
-## Composing modules
-
-When a project wants a Redux/MobX-style root selector without giving up the
-per-module mental model, `composeStores` exposes a read-only composite over
-several stores:
-
-```tsx
-import { composeStores } from "@runilib/nimbo";
-
-const root = composeStores({
-  user: userStore,
-  cart: cartStore,
-  theme: themeStore,
-});
-
-function Header() {
-  const summary = root.use(
-    (state) => `${state.user.name} · ${state.cart.items.length} items`,
-  );
-
-  return <span>{summary}</span>;
-}
-```
-
-The composed object only exposes `getState`, `subscribe`, and `use`. Mutations
-still go through each underlying store's `actions`, so the per-module model
-stays intact — `composeStores` is a read aggregator, not a new owner of state.
-
-Planned next areas:
-
-- persistence adapters
-- devtools hooks
-- middleware
