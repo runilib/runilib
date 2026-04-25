@@ -31,6 +31,15 @@
       "localWebRuntimeGzip": 70000,
       "_comment_localNativeRuntimeGzip": "60000 bytes ~= 58.6 KiB (~60 kB). gzip size of local dist/index.native.mjs.",
       "localNativeRuntimeGzip": 60000
+    },
+    "@runilib/nimbo": {
+      "_comment": "Package-specific thresholds, still expressed in raw bytes.",
+      "_comment_publishedTarballSize": "50000 bytes ~= 175.8 KiB (~180 kB). npm compressed download size.",
+      "publishedTarballSize": 50000,
+      "_comment_localWebRuntimeGzip": "20000 bytes ~= 68.4 KiB (~70 kB). gzip size of local dist/index.mjs.",
+      "localWebRuntimeGzip": 20000,
+      "_comment_localNativeRuntimeGzip": "18000 bytes ~= 58.6 KiB (~60 kB). gzip size of local dist/index.native.mjs.",
+      "localNativeRuntimeGzip": 18000
     }
   }
 }
