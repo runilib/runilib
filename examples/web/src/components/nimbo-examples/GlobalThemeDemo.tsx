@@ -65,7 +65,7 @@ function ThemeControls() {
 }
 
 function ThemePreview() {
-  const accent = themeStore.useView('accent');
+  const accent = themeStore.useSelector('accent');
   const fontScale = themeStore.use((state) => state.fontScale);
   const mode = themeStore.use((state) => state.mode);
 
@@ -112,8 +112,8 @@ function ThemePreview() {
 }
 
 function ThemeReadout() {
-  const label = themeStore.useView('label');
-  const accent = themeStore.useView('accent');
+  const label = themeStore.useSelector('label');
+  const accent = themeStore.useSelector('accent');
 
   return (
     <div

@@ -1,21 +1,24 @@
 import { createContext, createElement, useContext } from 'react';
 
-import type { NimboProviderProps, NimboStore } from '../types';
+import type { NimboProviderProps, NimboSelectorMap, NimboStore } from '../types';
 
-export function createStoreProvider<TState, TActions, TViews, TAsyncActions>(
-  getFallbackStore: () => NimboStore<TState, TActions, TViews, TAsyncActions>,
-) {
+export function createStoreProvider<
+  TState,
+  TActions,
+  TSelectors extends NimboSelectorMap<TState>,
+  TAsyncActions,
+>(getFallbackStore: () => NimboStore<TState, TActions, TSelectors, TAsyncActions>) {
   const StoreContext = createContext<NimboStore<
     TState,
     TActions,
-    TViews,
+    TSelectors,
     TAsyncActions
   > | null>(null);
 
   const Provider = ({
     children,
     store = getFallbackStore(),
-  }: NimboProviderProps<TState, TActions, TViews, TAsyncActions>) =>
+  }: NimboProviderProps<TState, TActions, TSelectors, TAsyncActions>) =>
     createElement(StoreContext.Provider, { value: store }, children);
 
   const useStoreInstance = () => useContext(StoreContext) ?? getFallbackStore();

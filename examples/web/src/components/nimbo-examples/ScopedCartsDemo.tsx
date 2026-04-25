@@ -6,8 +6,8 @@ const SHOPS = [
     label: 'Nike',
     accent: '#0f172a',
     catalog: [
-      { id: 'air-max', name: 'Air Max', price: 180 },
-      { id: 'pegasus', name: 'Pegasus', price: 130 },
+      { id: 'air-max', name: 'Air Max', price: 180, category: 'shoes' },
+      { id: 'pegasus', name: 'Pegasus', price: 130, category: 'shoes' },
     ],
   },
   {
@@ -15,8 +15,8 @@ const SHOPS = [
     label: 'Apple',
     accent: '#1d4ed8',
     catalog: [
-      { id: 'iphone', name: 'iPhone 16', price: 999 },
-      { id: 'airpods', name: 'AirPods Pro', price: 249 },
+      { id: 'iphone', name: 'iPhone 16', price: 999, category: 'devices' },
+      { id: 'airpods', name: 'AirPods Pro', price: 249, category: 'audio' },
     ],
   },
 ] as const;
@@ -43,7 +43,7 @@ export function ScopedCartsDemo() {
   );
 }
 
-function ShopCart({
+const ShopCart = ({
   shopId,
   label,
   accent,
@@ -53,12 +53,15 @@ function ShopCart({
   label: string;
   accent: string;
   catalog: readonly CartProduct[];
-}) {
+}) => {
   const scoped = cartStore.scope(shopId);
 
   const items = scoped.use((state) => state.items);
-  const total = scoped.useView('total');
-  const count = scoped.useView('count');
+  const total = scoped.useSelector('total');
+  const count = scoped.useSelector('count');
+  const categoryForExample = catalog[0]?.category ?? 'shoes';
+  const categoryTotal = scoped.useSelector('totalByCategory', categoryForExample);
+  const discountedTotal = scoped.useSelector('discountedTotal', 0.1);
   const { add, remove, clear } = scoped.useActions();
 
   return (
@@ -182,29 +185,49 @@ function ShopCart({
       <footer
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          flexDirection: 'column',
+          gap: 8,
           paddingTop: 8,
           borderTop: '1px solid rgba(15,23,42,0.06)',
         }}
       >
-        <span style={{ fontWeight: 800 }}>Total: ${total}</span>
-        <button
-          type="button"
-          onClick={clear}
-          disabled={items.length === 0}
+        <div
           style={{
-            border: 'none',
-            background: 'transparent',
-            color: items.length === 0 ? '#cbd5e1' : '#b91c1c',
+            display: 'grid',
+            gap: 4,
             fontSize: 12,
-            fontWeight: 700,
-            cursor: items.length === 0 ? 'not-allowed' : 'pointer',
+            color: '#475569',
           }}
         >
-          Clear
-        </button>
+          <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 800 }}>
+            Total: ${total}
+          </span>
+          <span>
+            parameterized view · <code>totalByCategory("{categoryForExample}")</code>: $
+            {categoryTotal}
+          </span>
+          <span>
+            computed view · <code>discountedTotal(0.1)</code>: ${discountedTotal}
+          </span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={clear}
+            disabled={items.length === 0}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              color: items.length === 0 ? '#cbd5e1' : '#b91c1c',
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: items.length === 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            Clear
+          </button>
+        </div>
       </footer>
     </div>
   );
-}
+};

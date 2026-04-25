@@ -25,7 +25,7 @@ function Notepad({ seedTitle }: { seedTitle: string }) {
         patch({ body: '' });
       },
     }),
-    views: {
+    selectors: {
       wordCount: (state) =>
         state.body.trim().length === 0 ? 0 : state.body.trim().split(/\s+/).length,
     },
@@ -33,7 +33,7 @@ function Notepad({ seedTitle }: { seedTitle: string }) {
 
   const title = store.use((state) => state.title);
   const body = store.use((state) => state.body);
-  const wordCount = store.useView('wordCount');
+  const wordCount = store.useSelector('wordCount');
   const { setTitle, setBody, clear } = store.useActions();
 
   return (

@@ -1,13 +1,18 @@
-import type { NimboScopeId, NimboStore } from '../types';
+import type { NimboScopeId, NimboSelectorMap, NimboStore } from '../types';
 
-export function createScopeRegistry<TState, TActions, TViews, TAsyncActions>(
+export function createScopeRegistry<
+  TState,
+  TActions,
+  TSelectors extends NimboSelectorMap<TState>,
+  TAsyncActions,
+>(
   createScopedStore: (
     scopeId: NimboScopeId,
-  ) => NimboStore<TState, TActions, TViews, TAsyncActions>,
+  ) => NimboStore<TState, TActions, TSelectors, TAsyncActions>,
 ) {
   const stores = new Map<
     NimboScopeId,
-    NimboStore<TState, TActions, TViews, TAsyncActions>
+    NimboStore<TState, TActions, TSelectors, TAsyncActions>
   >();
 
   return {

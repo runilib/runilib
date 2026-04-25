@@ -33,7 +33,7 @@ function RootHeader() {
     (state) =>
       `${state.user.loggedIn ? state.user.name : 'Guest'} · ${state.theme.mode} · ${state.cart.items.length} item${state.cart.items.length === 1 ? '' : 's'}`,
   );
-  const accent = themeStore.useView('accent');
+  const accent = themeStore.useSelector('accent');
 
   return (
     <View

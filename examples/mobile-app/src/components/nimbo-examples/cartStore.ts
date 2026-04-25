@@ -31,7 +31,7 @@ export const cartStore = createStore('demo:cart', {
       patch({ items: [] });
     },
   }),
-  views: {
+  selectors: {
     total: (state) => state.items.reduce((sum, item) => sum + item.price, 0),
     count: (state) => state.items.length,
   },

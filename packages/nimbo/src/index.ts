@@ -13,6 +13,7 @@ export {
   type NimboComposedStore,
   type NimboStoreMap,
 } from './compose/composeStores';
+export { computed } from './core/selector';
 export { createStore } from './createStore';
 export { useLocalStore } from './react/useLocalStore';
 export type {
@@ -27,16 +28,21 @@ export type {
   NimboAsyncResult,
   NimboAsyncStatus,
   NimboBoundAsyncActions,
+  NimboComputedSelector,
+  NimboComputedSelectorOptions,
   NimboEquality,
   NimboListener,
   NimboPatchState,
   NimboProviderProps,
   NimboScopeId,
   NimboSelector,
+  NimboSelectorArgs,
+  NimboSelectorMap,
+  NimboSelectorResult,
+  NimboSelectorRun,
   NimboSetState,
   NimboStateInitializer,
   NimboStateUpdater,
   NimboStore,
   NimboStoreDefinition,
-  NimboViewFactory,
 } from './types';
