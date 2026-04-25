@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "packageManager": "yarn@4.13.0",
+  "author": "Aklade Kouassi Sosthene (https://github.com/akladekouassi)",
   "workspaces": [
     "apps/*",
     "examples/*",

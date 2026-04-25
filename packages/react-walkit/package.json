@@ -5,6 +5,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "author": "Aklade Kouassi Sosthene (https://github.com/akladekouassi)",
   "main": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "react-native": "./dist/index.native.mjs",
@@ -80,7 +81,6 @@
     "intro.js",
     "intro"
   ],
-  "author": "AKS <akladekouassi@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
     "react": ">=17.0.0",
