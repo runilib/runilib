@@ -73,7 +73,7 @@ function createStoreInstance<
     patchState: container.patchState,
     reset: container.resetState,
     subscribe: container.subscribe,
-    selector(selectorName, ...args) {
+    select(selectorName, ...args) {
       return readSelector(
         storeName,
         definition.selectors,
@@ -90,7 +90,7 @@ function createStoreInstance<
       const resolvedStore = useStoreInstance();
 
       return useSelector(resolvedStore.getState, resolvedStore.subscribe, () =>
-        resolvedStore.selector(selectoName, ...args),
+        resolvedStore.select(selectoName, ...args),
       );
     },
     useAsyncAction(actionName) {

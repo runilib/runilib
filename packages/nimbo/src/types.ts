@@ -178,7 +178,7 @@ export type Store<
   patchState: PatchState<TState>;
   reset: () => void;
   subscribe: (listener: Listener) => () => void;
-  selector: <Key extends keyof TSelectors>(
+  select: <Key extends keyof TSelectors>(
     name: Key,
     ...args: SelectorArgs<TSelectors[Key]>
   ) => SelectorResult<TSelectors[Key]>;

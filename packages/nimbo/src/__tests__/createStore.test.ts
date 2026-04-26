@@ -46,7 +46,7 @@ describe('createStore', () => {
       },
     });
 
-    expect(cart.selector('total')).toBe(200);
+    expect(cart.select('total')).toBe(200);
   });
 
   it('reads parameterized selectors', () => {
@@ -66,8 +66,8 @@ describe('createStore', () => {
       },
     });
 
-    expect(cart.selector('totalWithTax', 0.2)).toBe(246);
-    expect(cart.selector('itemsByCategory', 'hardware')).toHaveLength(2);
+    expect(cart.select('totalWithTax', 0.2)).toBe(246);
+    expect(cart.select('itemsByCategory', 'hardware')).toHaveLength(2);
   });
 
   it('memoizes computed selectors by state reference and arguments', () => {
@@ -98,16 +98,16 @@ describe('createStore', () => {
       },
     });
 
-    expect(cart.selector('totalByCategory', 'hardware')).toBe(200);
-    expect(cart.selector('totalByCategory', 'hardware')).toBe(200);
+    expect(cart.select('totalByCategory', 'hardware')).toBe(200);
+    expect(cart.select('totalByCategory', 'hardware')).toBe(200);
     expect(totalByCategory).toHaveBeenCalledTimes(1);
 
-    expect(cart.selector('totalByCategory', 'merch')).toBe(5);
+    expect(cart.select('totalByCategory', 'merch')).toBe(5);
     expect(totalByCategory).toHaveBeenCalledTimes(2);
 
     cart.actions.add('hardware', 50);
 
-    expect(cart.selector('totalByCategory', 'hardware')).toBe(250);
+    expect(cart.select('totalByCategory', 'hardware')).toBe(250);
     expect(totalByCategory).toHaveBeenCalledTimes(3);
   });
 
