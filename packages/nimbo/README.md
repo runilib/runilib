@@ -3,10 +3,8 @@
 </p>
 
 <p align="center">
-  <strong>Tiny typed state modules for React and React Native.</strong>
+  <strong>One body, many tentacles. Typed state, anywhere it lands.</strong>
 </p>
-
-# Nimbo
 
 > [!WARNING]
 > **Nimbo is currently in active development.**

@@ -199,6 +199,7 @@ export type LibStatus = 'stable' | 'beta' | 'planned';
 export interface LibraryInfo {
   id: string;
   name: string;
+  packageName: string;
   tagline: string;
   desc: string;
   color: LibColor;
