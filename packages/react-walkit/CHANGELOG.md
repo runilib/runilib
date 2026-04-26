@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- [#47](https://github.com/runilib/runilib/pull/47) [`83a4cc1`](https://github.com/runilib/runilib/commit/83a4cc14b0dea01a63f50874522bd8eac217a696) Thanks [@akladekouassi](https://github.com/akladekouassi)! - update readme files
+
 ## 1.0.2
 
 ### Patch Changes
