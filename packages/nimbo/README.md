@@ -6,6 +6,15 @@
   <strong>One body, many tentacles. Typed state, anywhere it lands.</strong>
 </p>
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@runilib/nimbo"><img alt="npm version" src="https://img.shields.io/npm/v/@runilib/nimbo?color=1d4ed8"></a>
+  <a href="https://www.npmjs.com/package/@runilib/nimbo"><img alt="downloads per week" src="https://img.shields.io/npm/dw/@runilib/nimbo?color=22c55e&label=downloads%2Fweek"></a>
+  <a href="https://www.npmjs.com/package/@runilib/nimbo"><img alt="total downloads" src="https://img.shields.io/npm/dt/@runilib/nimbo?color=22c55e&label=downloads"></a>
+  <a href="./LICENSE"><img alt="license" src="https://img.shields.io/npm/l/@runilib/nimbo?color=10b981"></a>
+  <a href="https://runilib.dev/libraries/nimbo"><img alt="docs" src="https://img.shields.io/badge/docs-runilib.dev%2Flibraries%2Fnimbo-1d4ed8"></a>
+  <a href="https://github.com/runilib/nimbo/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22"><img alt="good first issues" src="https://img.shields.io/github/issues-search/runilib/nimbo?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues"></a>
+</p>
+
 > [!WARNING]
 > **Nimbo is currently in active development.**
 >
