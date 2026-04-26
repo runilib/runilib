@@ -24,6 +24,7 @@ export const LIBRARIES: LibraryInfo[] = [
   {
     id: 'walkit',
     name: 'react-walkit',
+    packageName: '@runilib/react-walkit',
     tagline: 'Cross-platform product tours, onboarding flows and tooltips',
     desc: 'Build product tours, user onboarding walkthroughs, feature discovery flows and tooltips with the same API on React web and React Native. Includes spotlight overlays, customizable popovers, analytics hooks and programmatic control.',
     color: 'amber',
@@ -56,6 +57,7 @@ export const LIBRARIES: LibraryInfo[] = [
   {
     id: 'formbridge',
     name: 'react-formbridge',
+    packageName: '@runilib/react-formbridge',
     tagline: 'Schema-driven form builder for React and React Native',
     desc: 'Build schema-driven forms for React and React Native with TypeScript. Define one shared schema, then generate fields, validation, form state, multi-step flows and UI patterns for web and mobile.',
     color: 'blue',
@@ -87,30 +89,3 @@ export const LIBRARIES: LibraryInfo[] = [
     docsUrl: FORM_BRIDGE_DOCS_URL,
   },
 ];
-
-export const ROADMAP_LIBS = [
-  {
-    name: 'storex',
-    tagline: 'Unified AsyncStorage / localStorage',
-    color: 'purple',
-    icon: '🗄️',
-  },
-  {
-    name: 'toastly',
-    tagline: 'Cross-platform toast notifications',
-    color: 'green',
-    icon: '🔔',
-  },
-  {
-    name: 'modalkit',
-    tagline: 'Unified modals and bottom sheets',
-    color: 'blue',
-    icon: '🪟',
-  },
-  {
-    name: 'motionkit',
-    tagline: 'Framer Motion + Reanimated unified',
-    color: 'amber',
-    icon: '✨',
-  },
-] as const;

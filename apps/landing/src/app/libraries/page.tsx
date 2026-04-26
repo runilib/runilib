@@ -3,16 +3,16 @@
 import Link from 'next/link';
 import styled from 'styled-components';
 import { useApp } from '../../context/AppContext';
-import {
-  getLibraryHref,
-  getNewTabLinkProps,
-  LIBRARIES,
-  ROADMAP_LIBS,
-} from '../../data/libraries';
+import { getLibraryHref, getNewTabLinkProps, LIBRARIES } from '../../data/libraries';
+import { formatDownloadsCompact, useNpmDownloads } from '../../hooks/useNpmDownloads';
 import type { LibColor } from '../../types';
 
 export default function Libraries() {
   const { t } = useApp();
+  const { downloads, loading: downloadsLoading } = useNpmDownloads({
+    packages: LIBRARIES.map((lib) => lib.packageName),
+    period: 'last-week',
+  });
 
   return (
     <Wrap>
@@ -39,6 +39,22 @@ export default function Libraries() {
                         ? t.libraryPage.stable
                         : t.libraryPage.beta}
                     </RowStatus>
+                    <DownloadsBadge
+                      href={`${lib.npmUrl}?activeTab=versions`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`Weekly downloads on npm for ${lib.packageName}`}
+                    >
+                      <DownloadsArrow aria-hidden>↓</DownloadsArrow>
+                      <DownloadsValue>
+                        {downloadsLoading && downloads[lib.packageName] === undefined
+                          ? '…'
+                          : downloads[lib.packageName] !== undefined
+                            ? formatDownloadsCompact(downloads[lib.packageName])
+                            : '—'}
+                      </DownloadsValue>
+                      <DownloadsUnit>/wk</DownloadsUnit>
+                    </DownloadsBadge>
                   </RowNameRow>
                   <RowTagline>{lib.tagline}</RowTagline>
                   <RowDesc>{lib.desc}</RowDesc>
@@ -85,20 +101,6 @@ export default function Libraries() {
             </LibRow>
           ))}
         </LibList>
-        <RoadmapBlock>
-          <SectionLabel>Roadmap - Coming next</SectionLabel>
-          <RoadTitle>Expanding the ecosystem</RoadTitle>
-          <RoadGrid>
-            {ROADMAP_LIBS.map((lib) => (
-              <RoadCard key={lib.name}>
-                <RoadIcon $color={lib.color as LibColor}>{lib.icon}</RoadIcon>
-                <RoadName>{lib.name}</RoadName>
-                <RoadDesc>{lib.tagline}</RoadDesc>
-                <PlannedTag>Planned</PlannedTag>
-              </RoadCard>
-            ))}
-          </RoadGrid>
-        </RoadmapBlock>
       </Body>
     </Wrap>
   );
@@ -122,6 +124,10 @@ const RowInfo = styled.div`flex: 1; min-width: 0;`;
 const RowNameRow = styled.div`display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 5px;`;
 const RowName = styled.div`font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 800; color: ${({ theme }) => theme.textPrimary};`;
 const RowVer = styled.div`font-family: 'DM Mono', monospace; font-size: 10px; color: ${({ theme }) => theme.textMuted}; padding: 2px 6px; background: ${({ theme }) => theme.border}; border-radius: 3px;`;
+const DownloadsBadge = styled.a`display: inline-flex; align-items: baseline; gap: 4px; font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 10px; background: ${({ theme }) => theme.tealDim}; color: ${({ theme }) => theme.teal}; border: 1px solid ${({ theme }) => theme.teal}33; text-decoration: none; transition: opacity 0.2s; &:hover { opacity: 0.85; }`;
+const DownloadsArrow = styled.span`font-size: 9px; line-height: 1;`;
+const DownloadsValue = styled.span`font-weight: 700; font-size: 10.5px;`;
+const DownloadsUnit = styled.span`font-size: 9px; opacity: 0.75;`;
 const RowStatus = styled.div<{
   $status: string;
 }>`font-family: 'DM Mono', monospace; font-size: 9.5px; padding: 2px 7px; border-radius: 10px; ${({ theme, $status }) => ($status === 'stable' ? `background:${theme.greenDim};color:${theme.green};border:1px solid ${theme.green}33;` : `background:${theme.amberDim};color:${theme.amber};border:1px solid ${theme.amber}33;`)}`;
@@ -141,13 +147,3 @@ const DocBtn = styled(
   Link,
 )`flex: 1; text-align: center; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 8px; text-decoration: none; background: ${({ theme }) => theme.teal}; color: #080a0e; transition: all 0.2s; &:hover { opacity: 0.9; transform: translateY(-1px); }`;
 const GhBtn = styled.a`font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: 8px; text-decoration: none; border: 1px solid ${({ theme }) => theme.border}; color: ${({ theme }) => theme.textSecondary}; transition: all 0.2s; &:hover { border-color: ${({ theme }) => theme.teal}; color: ${({ theme }) => theme.teal}; }`;
-const RoadmapBlock = styled.div``;
-const RoadTitle = styled.h2`font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; color: ${({ theme }) => theme.textPrimary}; margin-bottom: 20px;`;
-const RoadGrid = styled.div`display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; @media (max-width: 860px) { grid-template-columns: repeat(2, 1fr); } @media (max-width: 500px) { grid-template-columns: 1fr; }`;
-const RoadCard = styled.div`background: ${({ theme }) => theme.bgCard}; border: 1px dashed ${({ theme }) => theme.border}; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 8px; opacity: 0.65;`;
-const RoadIcon = styled.div<{
-  $color: LibColor;
-}>`font-size: 22px; width: 42px; height: 42px; border-radius: 10px; background: ${({ theme, $color }) => theme[`${$color}Dim` as keyof typeof theme] as string}; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;`;
-const RoadName = styled.div`font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: ${({ theme }) => theme.textPrimary};`;
-const RoadDesc = styled.div`font-family: 'Sora', sans-serif; font-size: 12px; color: ${({ theme }) => theme.textSecondary}; line-height: 1.5;`;
-const PlannedTag = styled.div`font-family: 'DM Mono', monospace; font-size: 9.5px; color: ${({ theme }) => theme.textMuted}; border: 1px dashed ${({ theme }) => theme.border}; padding: 2px 7px; border-radius: 10px; width: fit-content; margin-top: 4px;`;
