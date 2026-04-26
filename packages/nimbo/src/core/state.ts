@@ -6,6 +6,17 @@ import type {
   StateUpdater,
 } from '../types';
 
+/**
+ * The persistent state holder backing every {@link import('../types').Store}.
+ *
+ * Owns:
+ * - the live state value (mutated by `setState`/`patchState`/`resetState`)
+ * - the listener set fired on every real change
+ * - the initial-state snapshot used by `resetState`
+ *
+ * `Object.is` is used to short-circuit no-op updates: if the next state is
+ * referentially identical to the current one, listeners are not notified.
+ */
 export type StateContainer<TState> = {
   getState: () => TState;
   setState: SetState<TState>;
@@ -14,10 +25,18 @@ export type StateContainer<TState> = {
   subscribe: (listener: Listener) => () => void;
 };
 
+/**
+ * Builds a fresh {@link StateContainer} from an initializer (value or
+ * factory). The initializer is resolved once; the resulting value is also
+ * cloned and kept aside so `resetState` can restore it without retaining a
+ * reference to user-mutable input.
+ */
 export function createStateContainer<TState>(
   initializer: StateInitializer<TState>,
 ): StateContainer<TState> {
   let state = resolveInitialState(initializer);
+  // Cloned snapshot so a later `resetState` cannot be polluted by external
+  // mutations to the original value.
   const initialState = cloneState(state);
   const listeners = new Set<Listener>();
 
@@ -32,6 +51,9 @@ export function createStateContainer<TState>(
   const setState = (updater: StateUpdater<TState>) => {
     const nextState = reduceState(state, updater);
 
+    // No-op guard: identical reference → no listeners fired. This is what
+    // lets composeStores cache its merged snapshot safely (see
+    // useSyncExternalStore semantics).
     if (Object.is(state, nextState)) {
       return;
     }
@@ -70,6 +92,11 @@ export function createStateContainer<TState>(
   };
 }
 
+/**
+ * Resolves a {@link StateInitializer} to a concrete value. Factory form is
+ * called once; value form is deep-cloned so the store does not share its
+ * private state reference with whatever the caller passed in.
+ */
 export function resolveInitialState<TState>(state: StateInitializer<TState>): TState {
   if (typeof state === 'function') {
     return (state as () => TState)();
@@ -78,6 +105,13 @@ export function resolveInitialState<TState>(state: StateInitializer<TState>): TS
   return cloneState(state);
 }
 
+/**
+ * Best-effort deep clone used by {@link resolveInitialState} and
+ * `resetState`. Uses `structuredClone` when available (modern runtimes),
+ * falls back to a shallow copy for arrays and plain objects, and returns
+ * primitives untouched. Not a general-purpose deep clone — it is only
+ * meant to defend against the most common reset-state aliasing bugs.
+ */
 export function cloneState<TState>(state: TState): TState {
   if (typeof globalThis.structuredClone === 'function') {
     return globalThis.structuredClone(state);
@@ -94,6 +128,7 @@ export function cloneState<TState>(state: TState): TState {
   return state;
 }
 
+/** Applies a {@link StateUpdater} (value or function) against the current state. */
 function reduceState<TState>(
   currentState: TState,
   updater: StateUpdater<TState>,

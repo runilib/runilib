@@ -17,6 +17,15 @@ import type {
   StoreDefinition,
 } from './types';
 
+/**
+ * Internal builder shared by both the public {@link createStore} and the
+ * scope registry. Wires every subsystem (state container, action context,
+ * actions, async actions + status, selectors, React provider, scope
+ * registry) onto a single {@link Store} object.
+ *
+ * When called with a non-null `Listener`, the resulting store represents a
+ * scoped instance and its `name` becomes `"<base>:<Listener>"`.
+ */
 function createStoreInstance<
   TState,
   TActions extends object,
@@ -41,12 +50,21 @@ function createStoreInstance<
 
   let store: Store<TState, TActions, TSelectors, TAsyncActions>;
 
+  // Lazy registry of scoped children. Keyed by scope id; same id always
+  // returns the same instance (memoized below in createScopeRegistry).
   const scopedStores = createScopeRegistry<TState, TActions, TSelectors, TAsyncActions>(
     (nextListener) => createStoreInstance(name, definition, nextListener),
   );
 
+  // The Provider/useStoreInstance pair lets a subtree override which store
+  // the React hooks below resolve to (e.g. a scoped or local instance).
   const { Provider, useStoreInstance } = createStoreProvider(() => store);
 
+  /**
+   * Implementation backing `store.use()`. Reads the contextual store (via
+   * `useStoreInstance`) so the same call site works whether the consumer is
+   * inside a `store.Provider` (scoped/local) or not (global).
+   */
   const useFromStore = <TValue = TState>(
     selector?: Selector<TState, TValue>,
     equality?: Equality<TValue>,
@@ -97,6 +115,8 @@ function createStoreInstance<
       return useStoreInstance().asyncActions[actionName];
     },
     usePending(actionName) {
+      // Two read modes: a specific action's `pending` flag, or "is anything
+      // running right now?" when no name is passed.
       return useSelector(
         () => asyncStatuses.getStatus(String(actionName ?? '*')),
         asyncStatuses.subscribe,
@@ -140,6 +160,47 @@ function createStoreInstance<
   return store;
 }
 
+/**
+ * Creates a typed store from a {@link StoreDefinition}.
+ *
+ * The returned {@link Store} can be consumed in three ways:
+ *
+ * - **Globally** — use the singleton returned by `createStore` directly.
+ * - **Scoped** — call `store.scope(id)` to get an isolated instance built
+ *   from the same definition (one cart per shop, one form per document, …).
+ * - **Locally** — wrap the definition in
+ *   {@link import('./react/useLocalStore').useLocalStore} to get a fresh
+ *   per-component instance.
+ *
+ * @param name Display name of the store. Used to label scoped children
+ *   (`"<name>:<scopeId>"`) and to format error messages.
+ * @param definition The state initializer plus optional `actions`,
+ *   `selectors`, and `asyncActions` blocks.
+ *
+ * @example
+ * ```ts
+ * import { createStore } from '@runilib/nimbo';
+ *
+ * const counter = createStore('counter', {
+ *   state: () => ({ count: 0 }),
+ *   actions: ({ patch }) => ({
+ *     increment() { patch((s) => ({ count: s.count + 1 })); },
+ *   }),
+ *   selectors: {
+ *     isEmpty: (state) => state.count === 0,
+ *   },
+ * });
+ *
+ * // Outside React:
+ * counter.actions.increment();
+ * counter.getState();         // { count: 1 }
+ * counter.select('isEmpty');  // false
+ *
+ * // Inside React:
+ * const count = counter.use((s) => s.count);
+ * const { increment } = counter.useActions();
+ * ```
+ */
 export function createStore<
   TState,
   TActions extends object = object,
