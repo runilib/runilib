@@ -258,6 +258,33 @@ npm run --prefix packages/<name> prepublishOnly
 npm publish --prefix packages/<name> --access public
 ```
 
+## Publish only one package from GitHub Actions
+
+Use this when the automatic `Release Packages` workflow skipped a publish you expected (CI bug, matrix glitch, etc.) and you do not want to bump the version a second time just to retrigger CI.
+
+The workflow is `Release Publish Manually` (`.github/workflows/release-publish-manual.yml`).
+
+To run it:
+
+1. Go to the **Actions** tab on the monorepo on GitHub.
+2. Pick **Release Publish Manually** in the left sidebar.
+3. Click **Run workflow** and fill in:
+   - `workspace` — for example `@runilib/react-walkit`
+   - `package_path` — for example `packages/react-walkit`
+   - `version` — must match the workspace `package.json` (safety check)
+   - `run_prepublish_checks` — leave `true` unless you have a reason to skip
+4. Click **Run workflow**.
+
+The workflow:
+- verifies the input version matches `package.json` (refuses otherwise)
+- runs `prepublishOnly` (typecheck, lint, test, build)
+- publishes to npm using the `NPM_TOKEN` org secret
+- creates or updates the matching GitHub release (`<workspace>@<version>`) on the monorepo
+
+It does **not** push to the standalone mirror repository. To update the mirror after publishing, trigger `Release Mirror Manually` (`.github/workflows/release-mirror-manual.yml`) with the same workspace, version, target repo, and target branch.
+
+The publish itself is idempotent — `scripts/publish-package.mjs` checks `npm view <name>@<version>` first and exits early if the version already exists, so it is safe to re-run.
+
 ## Publish only one package with Changesets
 
 If you want to use Changesets and only one package should be released:
