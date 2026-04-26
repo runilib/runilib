@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
+import path from 'node:path';
 
 import {
   listPackageManifests,
@@ -27,22 +28,43 @@ function parseArgs(argv) {
   };
 }
 
-function readPreviousManifest(beforeSha, packageJsonPath) {
+function readPreviousManifest(beforeSha, repoRelativeManifestPath) {
   if (!beforeSha || /^0+$/.test(beforeSha)) {
     return null;
   }
 
   try {
-    const content = execFileSync('git', ['show', `${beforeSha}:${packageJsonPath}`], {
-      cwd: process.cwd(),
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    });
+    const content = execFileSync(
+      'git',
+      ['show', `${beforeSha}:${repoRelativeManifestPath}`],
+      {
+        cwd: process.cwd(),
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      },
+    );
 
     return JSON.parse(content);
   } catch {
     return null;
   }
+}
+
+function packageExistedAtBeforeSha(beforeSha, repoRelativeManifestPath) {
+  if (!beforeSha || /^0+$/.test(beforeSha)) {
+    return false;
+  }
+
+  const result = spawnSync(
+    'git',
+    ['cat-file', '-e', `${beforeSha}:${repoRelativeManifestPath}`],
+    {
+      cwd: process.cwd(),
+      stdio: 'ignore',
+    },
+  );
+
+  return result.status === 0;
 }
 
 const { before } = parseArgs(process.argv);
@@ -54,19 +76,30 @@ for (const pkg of listPackageManifests()) {
     continue;
   }
 
-  const previousManifest = readPreviousManifest(before, pkg.packageJsonPath);
+  // git show / cat-file want repo-relative paths, not the absolute one stored
+  // on `pkg.packageJsonPath`. Recompute it cleanly off `pkg.packagePath`.
+  const repoRelativeManifestPath = path
+    .join(pkg.packagePath, 'package.json')
+    .split(path.sep)
+    .join('/');
+
+  const previousManifest = readPreviousManifest(before, repoRelativeManifestPath);
   const previousVersion = previousManifest?.version ?? null;
   const currentVersion = pkg.version;
 
   if (previousVersion === null) {
-    // The package did not exist at the previous SHA. Treating "no previous
-    // version" as a version bump would auto-publish the seed version (often
-    // 0.0.0) the first time a new package lands on main. New packages must go
-    // through a real changeset bump to be published.
-    continue;
-  }
+    // Distinguish "package did not exist at BEFORE_SHA" from "manifest lookup
+    // failed for another reason" (e.g. shallow clone, malformed JSON).
+    // Only the truly-new case warrants skipping — otherwise we still need to
+    // publish a real version bump.
+    const existedBefore = packageExistedAtBeforeSha(before, repoRelativeManifestPath);
 
-  if (previousVersion === currentVersion) {
+    if (!existedBefore) {
+      // New package landing on main. Don't auto-publish the seed version
+      // (typically 0.0.0); the first real release should come from a changeset.
+      continue;
+    }
+  } else if (previousVersion === currentVersion) {
     continue;
   }
 

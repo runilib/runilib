@@ -1,0 +1,139 @@
+name: Release Publish Manually
+
+# Manually publish a single workspace to npm and sync the matching GitHub
+# release in the monorepo. Mirrors the convenience pattern of
+# `release-mirror-manual.yml`, but for the npm registry side.
+#
+# Use this when the automatic `Release Packages` workflow skipped a publish
+# (e.g. because of a script bug or a CI hiccup) and you want to push that
+# specific version without bumping again.
+#
+# This workflow does NOT push to the standalone mirror repository — for that,
+# trigger `release-mirror-manual.yml` after this one completes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: Workspace name (for example @runilib/react-walkit)
+        required: true
+        type: string
+      package_path:
+        description: Package path inside the monorepo (for example packages/react-walkit)
+        required: true
+        type: string
+      version:
+        description: Version to publish — must match the workspace package.json
+        required: true
+        type: string
+      run_prepublish_checks:
+        description: Run typecheck, lint, tests, and build before publishing
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: release-publish-manual-${{ inputs.workspace }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  CI: true
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  publish:
+    name: Publish ${{ inputs.workspace }}@${{ inputs.version }}
+    if: github.repository == 'runilib/runilib'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup monorepo
+        uses: ./.github/actions/setup-monorepo
+
+      - name: Verify version matches package.json
+        env:
+          PACKAGE_PATH: ${{ inputs.package_path }}
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          test -d "$PACKAGE_PATH"
+          test -f "$PACKAGE_PATH/package.json"
+
+          actual_version="$(node -p "require('./${PACKAGE_PATH}/package.json').version")"
+
+          if [ "$actual_version" != "$EXPECTED_VERSION" ]; then
+            echo "::error::Version mismatch for ${PACKAGE_PATH}: input=${EXPECTED_VERSION}, package.json=${actual_version}"
+            echo "::error::Refusing to publish. Update package.json or pass the matching version as input."
+            exit 1
+          fi
+
+      - name: Run prepublish checks
+        if: inputs.run_prepublish_checks
+        env:
+          WORKSPACE: ${{ inputs.workspace }}
+        run: |
+          set -euo pipefail
+          yarn workspace "$WORKSPACE" run prepublishOnly
+
+      - name: Configure npm auth
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${NPM_TOKEN:-}" ]; then
+            echo "::error::NPM_TOKEN secret is empty."
+            exit 1
+          fi
+
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+
+      - name: Publish package if needed
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PACKAGE_PATH: ${{ inputs.package_path }}
+          PUBLISH_RESULT_PATH: ${{ runner.temp }}/publish-result.json
+        run: |
+          set -euo pipefail
+          node ./scripts/publish-package.mjs --package-path "$PACKAGE_PATH" > "$PUBLISH_RESULT_PATH"
+          cat "$PUBLISH_RESULT_PATH"
+
+      - name: Sync monorepo GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKSPACE: ${{ inputs.workspace }}
+          PACKAGE_PATH: ${{ inputs.package_path }}
+          PACKAGE_VERSION: ${{ inputs.version }}
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+        run: |
+          set -euo pipefail
+
+          node ./scripts/extract-package-release-notes.mjs \
+            --package-path "$PACKAGE_PATH" \
+            --version "$PACKAGE_VERSION" \
+            --output "$RELEASE_NOTES_PATH"
+
+          tag_name="${WORKSPACE}@${PACKAGE_VERSION}"
+
+          if gh release view "$tag_name" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release edit "$tag_name" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$tag_name" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          else
+            gh release create "$tag_name" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$tag_name" \
+              --notes-file "$RELEASE_NOTES_PATH"
+          fi
