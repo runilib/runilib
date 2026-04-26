@@ -489,8 +489,8 @@ const UseFormBridgeFeaturePage = ({
           <h2>Return Value</h2>
         </div>
         <p className="doc-feature-section__lede">
-          `useFormBridge()` returns the runtime surface needed to render forms, inspect
-          live state, and drop into custom UI where needed.
+          useFormBridge() returns the runtime surface needed to render forms, inspect live
+          state, and drop into custom UI where needed.
         </p>
 
         <div className="doc-return-grid">

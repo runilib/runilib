@@ -6,6 +6,7 @@ export interface GitHubIssue {
   desc: string;
   color: string;
   url: string;
+  repo?: string;
 }
 
 interface UseGitHubIssuesOptions {
@@ -39,6 +40,7 @@ interface GitHubApiIssue {
   number: number;
   pull_request?: unknown;
   title: string;
+  repo: string;
 }
 
 function buildCacheKey(reposKey: string, labelsKey: string, perPage: number) {
@@ -151,7 +153,10 @@ export function useGitHubIssues({
         throw new Error(`GitHub API ${response.status}`);
       }
 
-      return (await response.json()) as GitHubApiIssue[];
+      return ((await response.json()) as GitHubApiIssue[]).map((item) => ({
+        ...item,
+        repo: targetRepo,
+      }));
     };
 
     const requests = requestRepos.flatMap((targetRepo) =>
@@ -185,6 +190,7 @@ export function useGitHubIssues({
             desc: issue.body ? issue.body.slice(0, 120).replace(/\n/g, ' ').trim() : '',
             color: pickColor(issue.labels),
             url: issue.html_url,
+            repo: issue.repo,
           }));
 
         if (mapped.length > 0) {
