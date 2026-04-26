@@ -8,6 +8,9 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@runilib/react-formbridge"><img alt="npm version" src="https://img.shields.io/npm/v/@runilib/react-formbridge?color=0f6fdc"></a>
+  <a href="https://www.npmjs.com/package/@runilib/react-formbridge"><img alt="downloads per week" src="https://img.shields.io/npm/dw/@runilib/react-formbridge?color=22c55e&label=downloads%2Fweek"></a>
+  <a href="https://www.npmjs.com/package/@runilib/react-formbridge"><img alt="total downloads" src="https://img.shields.io/npm/dt/@runilib/react-formbridge?color=22c55e&label=downloads"></a>
+  <a href="./LICENSE"><img alt="license" src="https://img.shields.io/npm/l/@runilib/react-formbridge?color=10b981"></a>
   <a href="https://react-formbridge.runilib.dev"><img alt="docs" src="https://img.shields.io/badge/docs-react--formbridge.runilib.dev-0f6fdc"></a>
   <a href="https://github.com/runilib/react-formbridge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22"><img alt="good first issues" src="https://img.shields.io/github/issues-search/runilib/react-formbridge?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues"></a>
 </p>
