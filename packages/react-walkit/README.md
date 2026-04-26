@@ -1,6 +1,21 @@
-# @runilib/react-walkit
+<p align="center">
+  <img alt="react-walkit" src="./assets/logo.svg" width="760" />
+</p>
 
-[![good first issues](https://img.shields.io/github/issues-search/runilib/react-walkit?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues)](https://github.com/runilib/react-walkit/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+<p align="center">
+  <strong>Lead the flock. Cross-platform tours, walkthroughs, and tooltips for React and React Native.</strong>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@runilib/react-walkit"><img alt="npm version" src="https://img.shields.io/npm/v/@runilib/react-walkit?color=d97706"></a>
+  <a href="https://www.npmjs.com/package/@runilib/react-walkit"><img alt="downloads per week" src="https://img.shields.io/npm/dw/@runilib/react-walkit?color=22c55e&label=downloads%2Fweek"></a>
+  <a href="https://www.npmjs.com/package/@runilib/react-walkit"><img alt="total downloads" src="https://img.shields.io/npm/dt/@runilib/react-walkit?color=22c55e&label=downloads"></a>
+  <a href="./LICENSE"><img alt="license" src="https://img.shields.io/npm/l/@runilib/react-walkit?color=10b981"></a>
+  <a href="https://runilib.dev/libraries/walkit"><img alt="docs" src="https://img.shields.io/badge/docs-runilib.dev%2Flibraries%2Fwalkit-d97706"></a>
+  <a href="https://github.com/runilib/react-walkit/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22"><img alt="good first issues" src="https://img.shields.io/github/issues-search/runilib/react-walkit?query=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22&color=7057ff&label=good%20first%20issues"></a>
+</p>
+
+# @runilib/react-walkit
 
 > Part of the [**runilib**](https://runilib.dev) ecosystem — React & React Native libraries that share the same API on web and native.
 >
