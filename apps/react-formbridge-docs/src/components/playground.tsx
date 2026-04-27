@@ -368,7 +368,7 @@ export function Playground({
   activeFile,
   theme: themeOverride,
   platform = 'web',
-  nativePreview = 'web',
+  nativePreview = 'ios',
   snackName = 'Example',
   snackDescription,
 }: PlaygroundProps) {
@@ -500,9 +500,9 @@ export function Playground({
         $height={height}
         $theme={resolvedTheme}
       >
-        Impossible de charger le bundle local de <code>{FORMBRIDGE_PACKAGE_NAME}</code>.
-        Lance <code>yarn workspace @runilib/react-formbridge dev</code> ou{' '}
-        <code>build</code>, puis recharge la page.
+        Unable to load the local bundle from <code>{FORMBRIDGE_PACKAGE_NAME}</code>. Run{' '}
+        <code>yarn workspace @runilib/react-formbridge dev</code> or <code>build</code>,
+        then reload the page.
       </PlaygroundState>
     );
   }
@@ -513,8 +513,7 @@ export function Playground({
         $height={height}
         $theme={resolvedTheme}
       >
-        Chargement du package local <code>{FORMBRIDGE_PACKAGE_NAME}</code> pour
-        Sandpack...
+        Loading the local package <code>{FORMBRIDGE_PACKAGE_NAME}</code> for Sandpack...
       </PlaygroundState>
     );
   }
