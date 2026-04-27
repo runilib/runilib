@@ -40,7 +40,7 @@ export function CustomerCheckout() {
   const { Form, fields, watchAll } = useFormBridge(checkoutSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    persist: { key: 'customer-checkout', storage: 'local' },
+    persist: { key: 'customer-checkout', storage: 'local', exclude: ['cvv'] },
   })
 
   const liveValues = watchAll()

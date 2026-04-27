@@ -2,52 +2,10 @@
 
 Target repository: `runilib/react-formbridge`
 
-## Drafts
+These drafts cover the field-coverage roadmap documented in
+[`packages/react-formbridge/FIELDS_ROADMAP.md`](../../../packages/react-formbridge/FIELDS_ROADMAP.md).
+Each file is one publishable issue: a `# Title`, a `Repository:` line, a
+`Suggested labels:` line, and an `## Issue Body` section parsed by the
+`yarn issues:publish` CLI.
 
-- [01 - Add `minFiles(count)` to `field.file()`](./01-add-min-files.md)
-- [02 - Add `maxTotalSize(bytes)` to `field.file()`](./02-add-max-total-size.md)
-- [03 - Support file extensions in `field.file().accept()`](./03-support-file-extensions.md)
-- [04 - Add `allowedCountries(codes)` to `field.phone()`](./04-add-allowed-countries.md)
-- [05 - Add `lettersOnly()` and `alphanumeric()` to `field.otp()`](./05-add-otp-letters-only.md)
-- [06 - Add grouped options support to `field.select()`](./06-add-grouped-options.md)
-- [07 - Add `clearable()` support to `field.select()`](./07-add-clearable-select.md)
-- [08 - Add `onExpire` support to persisted drafts and wizard state](./08-add-persist-on-expire.md)
-- [09 - Add `beforeStepChange` support to `useFormBridgeWizard()`](./09-add-before-step-change-guard.md)
-- [10 - Add bulk paste support for OTP fields](./10-add-otp-bulk-paste.md)
-- [11 - Add schema shape utilities: `partial()`, `pick()`, `omit()`, `extend()`, `merge()`](./11-add-schema-shape-utilities.md)
-- [12 - Add `field.object()` / `field.array()` with nested path-aware validation](./12-add-object-array-nested-validation.md)
-- [13 - Add advanced structural field types (`tuple`, `union`, `record`, etc.)](./13-add-advanced-structural-types.md)
-- [14 - Add warning-aware validation issues with `ctx.addWarning()` and `ctx.abort()`](./14-add-warning-context.md)
-- [15 - Add validator composition primitives and custom validator factories](./15-add-validator-composition-primitives.md)
-- [16 - Expand string validator coverage](./16-add-string-validator-expansion.md)
-- [17 - Expand number, date/time, and boolean validator coverage](./17-add-number-date-boolean-validator-expansion.md)
-- [18 - Complete select, radio, and multi-select validation helpers](./18-add-choice-field-completeness.md)
-- [19 - Expand file and media validation helpers](./19-add-file-media-validation-expansion.md)
-- [20 - Add advanced phone, password, and OTP validators](./20-add-phone-password-otp-advanced-validators.md)
-- [21 - Add advanced cross-field helpers and complete reference comparisons](./21-add-cross-field-and-reference-helpers.md)
-- [22 - Add a remote validation runtime with abort, dedupe, debounce, and TTL caching](./22-add-remote-validation-runtime.md)
-- [23 - Add locale scoping and a message API on top of `errorMap()`](./23-add-locale-and-message-api.md)
-- [24 - Expose the advanced conditional DSL and reusable rule packs](./24-add-conditional-dsl-and-rule-packs.md)
-- [25 - Add schema introspection, export, and validation debug tooling](./25-add-schema-introspection-export-and-devtools.md)
-- [26 - Allow passing `onSubmit` at the hook level](./26-add-hook-level-onsubmit.md)
-- [27 - Add `field.array()` for dynamic repeatable field groups](./27-add-field-array-repeaters.md)
-- [28 - Add file upload progress with a pluggable upload adapter](./28-add-file-upload-adapter-progress.md)
-- [29 - Add `@runilib/react-formbridge-devtools`](./29-add-formbridge-devtools.md)
-- [30 - Add built-in locale packs and runtime locale switching](./30-add-built-in-locales-and-runtime-switching.md)
-- [31 - Clarify and lock disabled condition composition semantics](./31-clarify-disabled-condition-semantics.md)
-- [32 - Add `optionalWhen(...)` conditional required helpers](./32-add-optional-when.md)
-- [33 - Add `requiredWhenNot`, `requiredWhenTruthy`, and `requiredWhenFalsy`](./33-add-required-symmetric-helpers.md)
-- [34 - Add `disabledWhenAny(...)`](./34-add-disabled-when-any.md)
-- [35 - Add `disabledWhenNot`, `disabledWhenTruthy`, and `disabledWhenFalsy`](./35-add-disabled-symmetric-helpers.md)
-- [36 - Add conditional `readOnlyWhen(...)` support](./36-add-readonly-when.md)
-- [37 - Add submit omission policy for hidden and disabled fields](./37-add-submit-policy-for-hidden-and-disabled-fields.md)
-- [38 - Add `setOnHide(...)` and `transformOnHide(...)`](./38-add-set-or-transform-on-hide.md)
-- [39 - Add a temporary `stashOnHide()` hidden value strategy](./39-add-stash-on-hide.md)
-- [40 - Expose condition comparators already supported by the runtime](./40-expose-runtime-condition-comparators.md)
-- [41 - Add `present` and `empty` conditional helpers](./41-add-present-empty-condition-helpers.md)
-- [42 - Add array and multi-select conditional helpers](./42-add-array-and-multiselect-condition-helpers.md)
-- [43 - Add readability aliases for common conditional rules](./43-add-conditional-aliases.md)
-- [44 - Add meta-state cleanup helpers for hidden fields](./44-add-hide-meta-state-helpers.md)
-- [45 - Add generic conditional matcher helpers](./45-add-generic-condition-matchers.md)
-- [46 - Add nested conditional group helpers](./46-add-nested-condition-groups.md)
-- [47 - Add a `ctx` argument to conditional predicates](./47-add-condition-predicate-context.md)
+## Standard inputs (HTML / native pickers)
