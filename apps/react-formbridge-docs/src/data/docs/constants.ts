@@ -1355,7 +1355,7 @@ export const ANALYTICS_TRACKER_SURFACE = [
   '- Returns `null` when `opts` is `undefined` (analytics disabled).',
   '- Otherwise returns the live tracker instance so you can drive it imperatively from code that does not live inside `useFormBridge()` - useful when wiring a third-party field component that needs to notify the tracker manually.',
   '',
-  '**When you pass `analytics` directly to `useFormBridge(schema, { analytics })`, you never touch this instance - the core wires every handler for you.** The surface below only matters if you call the standalone hook as an escape hatch.',
+  '**When you pass analytics directly to useFormBridge(schema, { analytics }), you never touch this instance - the core wires every handler for you.** The surface below only matters if you call the standalone hook as an escape hatch.',
   '',
   '**Core imperative methods**',
   '',

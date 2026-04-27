@@ -120,7 +120,7 @@ export default function Contributing() {
   const { issues, loading } = useGitHubIssues({
     repos: ['runilib/react-formbridge', 'runilib/react-walkit'],
     labels: ['good first issue', 'help wanted', 'docs'],
-    perPage: 6,
+    perPage: 20,
     fallback: fallbackIssues,
   });
 
@@ -329,6 +329,9 @@ export default function Contributing() {
                   <IssueTop>
                     <IssueTag $color={TAG_COLORS[issue.tag] || 'teal'}>
                       {issue.tag}
+                    </IssueTag>
+                    <IssueTag $color={TAG_COLORS[issue.tag] || 'teal'}>
+                      {issue.repo}
                     </IssueTag>
                     <IssueColor $color={issue.color} />
                   </IssueTop>

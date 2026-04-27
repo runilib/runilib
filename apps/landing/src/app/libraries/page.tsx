@@ -106,7 +106,11 @@ export default function Libraries() {
   );
 }
 
-const Wrap = styled.div`padding-top: 64px; min-height: 100vh;`;
+const Wrap = styled.div`
+padding-top: 64px;
+min-height: 100vh;
+`;
+
 const PageHeader = styled.div`background: ${({ theme }) => theme.bgSurface}; border-bottom: 1px solid ${({ theme }) => theme.border}; padding: 60px 24px 40px;`;
 const HeaderInner = styled.div`max-width: 1240px; margin: 0 auto;`;
 const Label = styled.div`font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: ${({ theme }) => theme.teal}; margin-bottom: 14px;`;

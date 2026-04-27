@@ -106,7 +106,7 @@ Form-level errors (any issue without a \`path\`) surface under \`state.formLevel
 
 If the schema object lives in a module that is also imported by server-side code, define that module with \`@runilib/react-formbridge/schema\` and keep \`useFormBridge\` imported from the main package in your client components.
 
-**For the complete API reference, options, signatures and examples, see the dedicated [\`createSchema() API\`](/docs/schema-api) section.**`,
+**For the complete API reference, options, signatures and examples, see the dedicated createSchema() API section.**`,
       code: {
         filename: 'schema-validation.ts',
         lang: 'ts',
@@ -215,11 +215,11 @@ Pick \`'onTouched'\` for the smoothest UX: no premature errors while the user is
 | \`joiBridge\` | \`(schema, options?)\` | Reuse an existing Joi schema |
 | \`valibotBridge\` | \`(schema, options?)\` | Reuse an existing Valibot schema |
 
-All bridges share the same options surface documented in the [\`Schema adapters\`](/docs/schema-adapters-zod-yup-joi-valibot) section.
+All bridges share the same options surface documented in the [Schema adapters](/docs/schema-adapters-zod-yup-joi-valibot) section.
 
 ${RESOLVER_SHARED_OPTIONS_SURFACE}
 
-> You do **not** need a bridge to get cross-field validation, async checks, or i18n - \`createSchema()\` covers all of that natively. Reach for a bridge only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
+You do **not** need a bridge to get cross-field validation, async checks, or i18n - \`createSchema()\` covers all of that natively. Reach for a bridge only when you have an *existing* Zod/Yup/Joi/Valibot schema you want to reuse as-is.`,
       code: {
         filename: 'bridge.tsx',
         lang: 'tsx',
@@ -253,7 +253,7 @@ const { Form, fields, state } = useFormBridge(formSchema, {
 | \`validate\` | \`(values) => data\` | Strict variant - throws \`FormBridgeSchemaValidationError\` on failure |
 | \`validateAsync\` | \`(values) => Promise<data>\` | Async strict variant |
 
-The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formLevelErrors\` (array of form-level messages). See the [\`createSchema() API\`](/docs/schema-api) section for the full result shape.
+The returned \`ValidationResult\` carries \`errorsByField\` (drop-in compatible with \`state.errors\`) and \`formLevelErrors\` (array of form-level messages). See the [createSchema() API](/docs/schema-api) section for the full result shape.
 
 If that schema module is imported by server code, define it with \`@runilib/react-formbridge/schema\` so only the non-React surface is pulled into the server module graph.`,
       code: {

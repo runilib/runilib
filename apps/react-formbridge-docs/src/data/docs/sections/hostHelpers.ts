@@ -188,8 +188,8 @@ Because the host just forwards, you can combine \`styled(FieldHost).attrs({ clas
       title: 'Gotchas',
       content: `- **You must pass the runtime component explicitly.** Host helpers do not read from context - \`<FieldHost field={form.fields.email} />\` is mandatory. There is no "current field" fallback.
 - **Define the styled host at module scope, never inside a component.** Redefining \`const StyledField = styled(FieldHost)\` on every render brings back the exact identity problem the helpers were designed to solve.
-- **Keep the \`field\` / \`submit\` / \`form\` prop reference stable** across renders. \`form.fields.email\` from the same \`useFormBridge()\` call is stable within a single render tree; do not recreate the hook conditionally above it.
-- **Host helpers do not work for fully custom UI.** If you need to replace the markup entirely, use [\`fieldController()\`](/docs/fieldcontroller). Host helpers only help you *wrap* the generated components.
+- **Keep the field / submit / form prop reference stable** across renders. \`form.fields.email\` from the same \`useFormBridge()\` call is stable within a single render tree; do not recreate the hook conditionally above it.
+- **Host helpers do not work for fully custom UI.** If you need to replace the markup entirely, use [fieldController()](/docs/fieldcontroller). Host helpers only help you *wrap* the generated components.
 - **Field override props still apply.** Inline-styling with props like \`classNames\`, \`styles\`, \`inputProps\` (or with \`globalDefaults\`) keeps working inside a host-wrapped component; wrapper styles compose on top of - not in place of - FormBridge's own rendering.`,
     },
   ],

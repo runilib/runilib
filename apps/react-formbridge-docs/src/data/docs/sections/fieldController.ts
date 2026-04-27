@@ -237,12 +237,12 @@ Once registered, FormBridge can drive focus from anywhere - auto-focus on mount,
     {
       id: 'fb-field-controller-gotchas',
       title: 'Gotchas & best practices',
-      content: `- **Always call \`onBlur()\`** after the user finishes interacting with a custom trigger (closing a modal, leaving a popover). Without it, \`touched\` stays \`false\` and \`validateOn: 'onBlur'\` / \`'onTouched'\` never fires.
-- **Respect \`visible\`** - when a conditional rule hides the field, either render nothing or render it \`disabled\`. Hidden fields still hold a value but should not be editable.
-- **Respect \`disabled\`** - the runtime sets it from the schema and from conditional rules; forwarding it keeps the form consistent with other fields.
-- **Prefer \`onChange\` over \`setValue\`** for user-driven edits: \`onChange\` fires the full update pipeline (change handlers, validation, analytics), while \`setValue\` is meant for imperative updates (presets, paste handlers, resets).
-- **Don't read \`state.values[name]\` directly** for rendering - read \`controller.value\`. The controller subscribes the component to that field only, avoiding re-renders on unrelated updates.
-- **Use \`controller.descriptor\`** (advanced) when you need to inspect the resolved builder descriptor - for example to read the mask pattern, the min/max of a \`field.number()\`, or the accepted MIME types of a \`field.file()\` - without re-declaring them in the renderer.`,
+      content: `- **Always call onBlur()** after the user finishes interacting with a custom trigger (closing a modal, leaving a popover). Without it, \`touched\` stays \`false\` and \`validateOn: 'onBlur'\` / \`'onTouched'\` never fires.
+- **Respect visible** - when a conditional rule hides the field, either render nothing or render it \`disabled\`. Hidden fields still hold a value but should not be editable.
+- **Respect disabled** - the runtime sets it from the schema and from conditional rules; forwarding it keeps the form consistent with other fields.
+- **Prefer onChange over setValue** for user-driven edits: \`onChange\` fires the full update pipeline (change handlers, validation, analytics), while \`setValue\` is meant for imperative updates (presets, paste handlers, resets).
+- **Don't read state.values[name] directly** for rendering - read \`controller.value\`. The controller subscribes the component to that field only, avoiding re-renders on unrelated updates.
+- **Use controller.descriptor** (advanced) when you need to inspect the resolved builder descriptor - for example to read the mask pattern, the min/max of a \`field.number()\`, or the accepted MIME types of a \`field.file()\` - without re-declaring them in the renderer.`,
     },
     {
       id: 'fb-field-controller-notes',

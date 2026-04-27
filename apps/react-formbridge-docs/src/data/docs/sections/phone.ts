@@ -403,7 +403,7 @@ ${FENCE}
 
 ${PHONE_TEXT_OVERRIDES_TABLE}
 
-**Render overrides** — each receives a \`defaultContent\` node so you can wrap the built-in UI or replace it entirely.
+**Render overrides** - each receives a \`defaultContent\` node so you can wrap the built-in UI or replace it entirely.
 
 ${PHONE_RENDER_OVERRIDES_TABLE}
 
