@@ -15,7 +15,7 @@ export const libraryInfo = {
   npmUrl: 'https://www.npmjs.com/package/@runilib/react-formbridge',
   githubUrl: 'https://github.com/runilib/react-formbridge',
   monorepoUrl: 'https://github.com/runilib/runilib/tree/main/packages/react-formbridge',
-  repoIssuesUrl: 'https://github.com/runilib/runilib/issues',
+  repoIssuesUrl: 'https://github.com/runilib/react-formbridge/issues',
   discordUrl: 'https://discord.gg/sHz9WnFs2t',
 };
 
