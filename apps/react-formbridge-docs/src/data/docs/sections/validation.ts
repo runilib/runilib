@@ -215,7 +215,7 @@ Pick \`'onTouched'\` for the smoothest UX: no premature errors while the user is
 | \`joiBridge\` | \`(schema, options?)\` | Reuse an existing Joi schema |
 | \`valibotBridge\` | \`(schema, options?)\` | Reuse an existing Valibot schema |
 
-All bridges share the same options surface documented in the [Schema adapters](/docs/schema-adapters-zod-yup-joi-valibot) section.
+All bridges share the same options surface documented in the [Schema adapters](/docs/schema-validator-bridge-zod-yup-joi-valibot) section.
 
 ${RESOLVER_SHARED_OPTIONS_SURFACE}
 

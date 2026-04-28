@@ -6,7 +6,7 @@ import { getDocsLandingHref } from '@/lib/docs';
 import Link from 'next/link';
 import styled from 'styled-components';
 
-const changelogUrl = `${libraryInfo.monorepoUrl.replace('/tree/main/', '/blob/main/')}/CHANGELOG.md`;
+const changelogUrl = 'https://github.com/runilib/react-formbridge/releases';
 
 export function SiteFooter() {
   const docsHref = getDocsLandingHref();
