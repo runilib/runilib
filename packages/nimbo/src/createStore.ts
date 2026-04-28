@@ -1,6 +1,7 @@
 import { bindAsyncActions } from './async/actions';
 import { createAsyncStatusRegistry } from './async/status';
 import { createActionContext, createActions } from './core/actions';
+import { createEffectController } from './core/effects';
 import { readSelector } from './core/selector';
 import { createStateContainer } from './core/state';
 import { useSelector } from './react/hooks';
@@ -9,6 +10,7 @@ import { createScopeRegistry } from './scope/registry';
 import type {
   AsyncActionMap,
   AsyncResult,
+  EffectMap,
   Equality,
   ListenerTypeAlias,
   Selector,
@@ -31,9 +33,10 @@ function createStoreInstance<
   TActions extends object,
   TSelectors extends SelectorMap<TState>,
   TAsyncActions extends AsyncActionMap<TState>,
+  TEffects extends EffectMap,
 >(
   name: string,
-  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
+  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions, TEffects>,
   Listener: ListenerTypeAlias | null = null,
 ): Store<TState, TActions, TSelectors, TAsyncActions> {
   const storeName = Listener === null ? name : `${name}:${String(Listener)}`;
@@ -45,6 +48,12 @@ function createStoreInstance<
     definition.asyncActions,
     actionContext,
     asyncStatuses,
+    Listener,
+  );
+  const effectController = createEffectController(
+    definition.effects,
+    actionContext,
+    container,
     Listener,
   );
 
@@ -146,6 +155,12 @@ function createStoreInstance<
     clearError(actionName) {
       asyncStatuses.clearError(actionName ? String(actionName) : undefined);
     },
+    startEffects() {
+      effectController.start();
+    },
+    stopEffects() {
+      effectController.stop();
+    },
     scope(ListenerValue) {
       return scopedStores.get(ListenerValue);
     },
@@ -156,6 +171,8 @@ function createStoreInstance<
       });
     },
   };
+
+  effectController.start();
 
   return store;
 }
@@ -206,9 +223,10 @@ export function createStore<
   TActions extends object = object,
   TSelectors extends SelectorMap<TState> = SelectorMap<TState>,
   TAsyncActions extends AsyncActionMap<TState> = AsyncActionMap<TState>,
+  TEffects extends EffectMap = EffectMap,
 >(
   name: string,
-  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
+  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions, TEffects>,
 ): Store<TState, TActions, TSelectors, TAsyncActions> {
   return createStoreInstance(name, definition);
 }

@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>One body, many tentacles. Typed state, anywhere it lands.</strong>
+  <strong>Typed stores for global, local, and scoped state.</strong>
 </p>
 
 <p align="center">
@@ -81,9 +81,9 @@ const cartStore = createStore("cart", {
   },
 });
 
-const total = cartStore.selector("total");
-const totalWithTax = cartStore.selector("totalWithTax", 0.2);
-const hardwareItems = cartStore.selector("itemsByCategory", "hardware");
+const total = cartStore.select("total");
+const totalWithTax = cartStore.select("totalWithTax", 0.2);
+const hardwareItems = cartStore.select("itemsByCategory", "hardware");
 ```
 
 The same API works in React:
@@ -120,7 +120,7 @@ const cartStore = createStore("cart", {
   },
 });
 
-const hardwareTotal = cartStore.selector("totalByCategory", "hardware");
+const hardwareTotal = cartStore.select("totalByCategory", "hardware");
 ```
 
 You can provide a custom cache key for parameterized computed selectors:
@@ -139,6 +139,86 @@ selectors: {
 }
 ```
 
+## Effects
+
+Effects let a store react to lifecycle and selected state changes without
+mounting a React component or scattering manual subscriptions through an app.
+
+```tsx
+const sessionStore = createStore("session", {
+  state: () => ({ user: null as { id: string } | null }),
+  actions: ({ patch }) => ({
+    setUser(user: { id: string } | null) {
+      patch({ user });
+    },
+  }),
+  effects: ({ watch }) => ({
+    syncUser() {
+      return watch(
+        (state) => state.user?.id,
+        (userId) => {
+          analytics.identify(userId ?? null);
+        },
+      );
+    },
+  }),
+});
+```
+
+Effects start automatically when a store instance is created, including scoped
+instances. `watch(selector, callback)` runs the callback only when the selected
+value changes by `Object.is`; pass `{ equality }` for custom comparisons or
+`{ immediate: true }` to run once at startup.
+
+`watch` also supports:
+
+- `{ once: true }` to stop after the first callback
+- `{ debounce: 300 }` to wait for changes to settle before running
+- `{ throttle: 100 }` to limit callback frequency while keeping a trailing run
+- `{ onError(error) { ... } }` to handle callback or cleanup errors
+
+```tsx
+effects: ({ watch }) => ({
+  sendWelcomeOnce() {
+    return watch(
+      (state) => state.user?.id,
+      (userId) => {
+        if (userId) analytics.track("welcome_seen", { userId });
+      },
+      { once: true },
+    );
+  },
+
+  persistDraft() {
+    return watch(
+      (state) => state.draft,
+      (draft) => storage.setItem("draft", draft),
+      { debounce: 500 },
+    );
+  },
+
+  syncPresence() {
+    return watch(
+      (state) => state.cursor,
+      (cursor) => presence.send(cursor),
+      { throttle: 100 },
+    );
+  },
+
+  reportFailures() {
+    return watch(
+      (state) => state.user?.id,
+      (userId) => riskyAnalytics.identify(userId),
+      { onError: (error) => logger.error(error) },
+    );
+  },
+});
+```
+
+Effects and watcher callbacks may return cleanup functions. Call
+`store.stopEffects()` to tear down an instance's effects, and
+`store.startEffects()` to start them again.
+
 ## Mental Model
 
 A Nimbo store is a typed module with:
@@ -146,6 +226,7 @@ A Nimbo store is a typed module with:
 - `state`: the source values
 - `actions`: the only public way to mutate state
 - `selectors`: derived reads
+- `effects`: side effects that react to lifecycle or selected state changes
 - `scope(id)`: isolated state instances from the same definition
 
 The same store definition can be used globally, locally, or by scope.
@@ -194,6 +275,7 @@ Current MVP surface:
 - `state`
 - `actions`
 - `selectors`
+- `effects`
 - parameterized selectors
 - `computed()` memoized selectors
 - `asyncActions`
@@ -203,6 +285,8 @@ Current MVP surface:
 - `store.getState()`
 - `store.setState()`
 - `store.subscribe()`
+- `store.startEffects()`
+- `store.stopEffects()`
 - `store.scope(id)`
 - `store.Provider`
 - `useLocalStore`

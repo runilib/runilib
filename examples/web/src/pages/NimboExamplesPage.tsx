@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ComposedRootDemo } from '../components/nimbo-examples/ComposedRootDemo';
+import { EffectsDemo } from '../components/nimbo-examples/EffectsDemo';
 import { GlobalThemeDemo } from '../components/nimbo-examples/GlobalThemeDemo';
 import { LocalNotepadDemo } from '../components/nimbo-examples/LocalNotepadDemo';
 import { ScopedCartsDemo } from '../components/nimbo-examples/ScopedCartsDemo';
@@ -96,6 +97,51 @@ function Header() {
 }`,
     Demo: ComposedRootDemo,
   },
+  {
+    id: 'effects',
+    eyebrow: 'Store effects',
+    title: 'React to changes without a component.',
+    description:
+      'effects run with the store instance, not with a mounted component. Use watch(selector, callback) for persistence, analytics, cross-store cleanup, or background work tied to state transitions.',
+    snippet: `const sessionStore = createStore('session', {
+  state: () => ({ user: null as User | null }),
+  actions: ({ patch }) => ({
+    logout() { patch({ user: null }); },
+  }),
+  effects: ({ watch }) => ({
+    identifyUser() {
+      return watch(
+        (state) => state.user?.id ?? null,
+        (userId) => analytics.identify(userId),
+        { immediate: true },
+      );
+    },
+    clearDraftOnLogout() {
+      return watch(
+        (state) => state.user === null,
+        (loggedOut) => {
+          if (loggedOut) draftStore.actions.clear();
+        },
+      );
+    },
+    persistDraft() {
+      return watch((state) => state.draft, saveDraft, { debounce: 500 });
+    },
+    syncActivity() {
+      return watch((state) => state.activityCount, syncActivity, { throttle: 1000 });
+    },
+    welcomeOnce() {
+      return watch((state) => state.user?.id, sendWelcome, { once: true });
+    },
+    reportErrors() {
+      return watch((state) => state.user?.id, riskySync, {
+        onError: reportEffectError,
+      });
+    },
+  }),
+});`,
+    Demo: EffectsDemo,
+  },
 ] as const;
 
 export function NimboExamplesPage() {
@@ -126,10 +172,11 @@ export function NimboExamplesPage() {
         <span className="library-eyebrow">Nimbo examples</span>
         <h1>Tiny typed state modules — global, local, scoped.</h1>
         <p>
-          Three live demos, one mental model. The same store definition can be used as a
-          global singleton, instantiated locally per component with{' '}
-          <code>useLocalStore</code>, or split into isolated state instances with{' '}
-          <code>store.scope(id)</code>.
+          Live demos, one mental model. The same store definition can be used as a global
+          singleton, instantiated locally per component with <code>useLocalStore</code>,
+          or split into isolated state instances with <code>store.scope(id)</code>.
+          Effects add a first-class place for side effects that should follow the store
+          rather than a component.
         </p>
       </section>
 

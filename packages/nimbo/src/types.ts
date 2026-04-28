@@ -271,6 +271,66 @@ export type AsyncStatus = {
   result: unknown;
 };
 
+/** Cleanup returned by a store effect or a watcher callback. */
+export type EffectCleanup = () => void;
+
+// biome-ignore lint/suspicious/noConfusingVoidType: effect APIs should allow natural `void` handlers or return a cleanup.
+export type EffectResult = void | EffectCleanup;
+
+/**
+ * Options for {@link EffectContext.watch}.
+ *
+ * `equality` controls whether a selected value changed. `immediate` runs the
+ * callback once when the watcher starts, before waiting for the next state
+ * change. `once` stops the watcher after the first callback. `debounce` and
+ * `throttle` control callback frequency in milliseconds. `onError` receives
+ * errors thrown by the watcher callback or its cleanup.
+ */
+export type WatchOptions<TValue> = {
+  debounce?: number;
+  equality?: Equality<TValue>;
+  immediate?: boolean;
+  once?: boolean;
+  onError?: (error: unknown) => void;
+  throttle?: number;
+};
+
+/**
+ * Callback fired by {@link EffectContext.watch} when its selected value
+ * changes. Returning a cleanup lets one transition tear down work before the
+ * next transition runs, and when the owning store effects are stopped.
+ */
+export type WatchCallback<TState, TValue> = (
+  value: TValue,
+  previousValue: TValue,
+  state: TState,
+) => EffectResult;
+
+/**
+ * Toolbox passed to a store's `effects` factory. It includes the same state
+ * mutation helpers as actions plus `watch`, a selector-aware subscription
+ * primitive for side effects that live outside React.
+ */
+export type EffectContext<TState> = ActionContext<TState> & {
+  scope: ListenerTypeAlias | null;
+  watch: <TValue>(
+    selector: Selector<TState, TValue>,
+    callback: WatchCallback<TState, TValue>,
+    options?: WatchOptions<TValue>,
+  ) => EffectCleanup;
+};
+
+/** Body of a store effect. */
+export type EffectRun = () => EffectResult;
+
+/** Definition shape for the `effects` block of a store. */
+export type EffectMap = Record<string, EffectRun>;
+
+/** Function that produces the effects object from an {@link EffectContext}. */
+export type EffectFactory<TState, TEffects extends EffectMap> = (
+  context: EffectContext<TState>,
+) => TEffects;
+
 /**
  * The full definition object accepted by {@link import('./createStore').createStore}.
  *
@@ -280,17 +340,20 @@ export type AsyncStatus = {
  * - `selectors` → `store.select()` + `store.useSelector()`
  * - `asyncActions` → `store.asyncActions` + the `usePending` / `useError` /
  *   `useResult` status hooks
+ * - `effects` → selector-aware side effects started outside React
  */
 export type StoreDefinition<
   TState,
   TActions,
   TSelectors extends SelectorMap<TState>,
   TAsyncActions extends AsyncActionMap<TState>,
+  TEffects extends EffectMap,
 > = {
   state: StateInitializer<TState>;
   actions?: ActionFactory<TState, TActions>;
   selectors?: TSelectors;
   asyncActions?: TAsyncActions;
+  effects?: EffectFactory<TState, TEffects>;
 };
 
 /**
@@ -423,6 +486,20 @@ export type Store<
    * name is provided.
    */
   clearError: (name?: keyof TAsyncActions) => void;
+
+  /**
+   * Starts this store instance's effects. Effects are started automatically
+   * when the store is created, but this method lets consumers restart them
+   * after an explicit {@link Store.stopEffects}.
+   */
+  startEffects: () => void;
+
+  /**
+   * Stops this store instance's effects and runs every registered cleanup,
+   * including active watchers. Scoped stores clean up independently from the
+   * root store.
+   */
+  stopEffects: () => void;
 
   /**
    * Returns a separate store instance built from the same definition,
