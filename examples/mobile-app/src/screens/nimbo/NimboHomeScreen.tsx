@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ComposedRootDemo } from '@/src/components/nimbo-examples/ComposedRootDemo';
+import { EffectsDemo } from '@/src/components/nimbo-examples/EffectsDemo';
 import { GlobalThemeDemo } from '@/src/components/nimbo-examples/GlobalThemeDemo';
 import { LocalNotepadDemo } from '@/src/components/nimbo-examples/LocalNotepadDemo';
 import { ScopedCartsDemo } from '@/src/components/nimbo-examples/ScopedCartsDemo';
@@ -42,6 +43,14 @@ const SECTIONS = [
       'composeStores aggregates several stores into a read-only composite. One subscribe, one selector across the whole tree. Mutations still go through each module.',
     Demo: ComposedRootDemo,
   },
+  {
+    id: 'effects',
+    eyebrow: 'Store effects',
+    title: 'React to changes without a component.',
+    description:
+      'effects run with the store instance. watch(selector, callback) is useful for persistence, analytics, cross-store cleanup, and background work tied to state transitions.',
+    Demo: EffectsDemo,
+  },
 ] as const;
 
 export function NimboHomeScreen() {
@@ -74,7 +83,8 @@ export function NimboHomeScreen() {
           <Text style={s.subtitle}>
             Three live demos, one mental model. Same store definition used as a global
             singleton, as a per-component instance with useLocalStore, or split into
-            isolated state instances with store.scope(id).
+            isolated state instances with store.scope(id). Effects add side effects that
+            follow the store rather than a screen.
           </Text>
         </View>
 

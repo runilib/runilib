@@ -1,7 +1,13 @@
 import { useRef } from 'react';
 
 import { createStore } from '../createStore';
-import type { AsyncActionMap, SelectorMap, Store, StoreDefinition } from '../types';
+import type {
+  AsyncActionMap,
+  EffectMap,
+  SelectorMap,
+  Store,
+  StoreDefinition,
+} from '../types';
 
 /**
  * Per-component store. Builds a fresh {@link Store} the first time the
@@ -32,9 +38,10 @@ export function useLocalStore<
   TActions extends object = object,
   TSelectors extends SelectorMap<TState> = SelectorMap<TState>,
   TAsyncActions extends AsyncActionMap<TState> = AsyncActionMap<TState>,
+  TEffects extends EffectMap = EffectMap,
 >(
   name: string,
-  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions>,
+  definition: StoreDefinition<TState, TActions, TSelectors, TAsyncActions, TEffects>,
 ): Store<TState, TActions, TSelectors, TAsyncActions> {
   const storeRef = useRef<Store<TState, TActions, TSelectors, TAsyncActions>>();
 
