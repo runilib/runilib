@@ -22,8 +22,6 @@ const DOC_PREVIEWS = {
     src: 'https://res.cloudinary.com/dca7plrqk/video/upload/web-tooltip-example_q3ne1e.mp4',
     alt: 'Preview of the standalone Tooltip component.',
     caption: 'Standalone tooltip preview anchored to a single target element.',
-    // maxWidth: 680,
-    // maxHeight: 360,
     video: true,
   },
   tooltipNative: {
