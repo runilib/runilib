@@ -18,6 +18,7 @@ import type {
 import { computeSimpleTooltipPosition } from '../../utils/Tooltip.positioning';
 
 const WEB_PORTAL_ID = '__react_walkit_tooltip_portal__';
+let tooltipIdSeed = 0;
 
 function getOrCreatePortal(): HTMLElement {
   let element = document.getElementById(WEB_PORTAL_ID);
@@ -38,6 +39,25 @@ type WebRect = {
   height: number;
 };
 
+function useStableTooltipId(providedId?: string): string {
+  const generatedIdRef = useRef<string | null>(null);
+
+  if (!generatedIdRef.current) {
+    tooltipIdSeed += 1;
+    generatedIdRef.current = `react-walkit-tooltip-${tooltipIdSeed}`;
+  }
+
+  return providedId ?? generatedIdRef.current;
+}
+
+function getAccessibleText(node: ReactNode): string | undefined {
+  if (typeof node === 'string' || typeof node === 'number') {
+    return String(node);
+  }
+
+  return undefined;
+}
+
 export const Tooltip: React.FC<TooltipProps> = ({
   children,
   anchor,
@@ -49,6 +69,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
   openOnHover = false,
   openOnPress = false,
   closeOnOutsidePress = true,
+  id,
+  ariaLabel,
+  ariaDescribedBy = 'visible',
+  closeOnEscape = true,
+  interactive = false,
   maxWidth = 280,
   zIndex = 1000000,
   tooltipStyle,
@@ -65,6 +90,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const [shellSize, setShellSize] = useState({ width: maxWidth, height: 60 });
 
   const trigger = anchor ?? children;
+  const tooltipId = useStableTooltipId(id);
 
   const measureAnchor = useCallback(() => {
     const element = triggerWrapperRef.current;
@@ -115,8 +141,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
       visible,
       hide,
       show,
+      tooltipId,
     }),
-    [toggle, visible, hide, show],
+    [toggle, visible, hide, show, tooltipId],
   );
 
   useLayoutEffect(() => {
@@ -199,6 +226,25 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
   }, [visible, closeOnOutsidePress, hide]);
 
+  useEffect(() => {
+    if (!visible || !closeOnEscape) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        hide();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [visible, closeOnEscape, hide]);
+
   const computedPosition = useMemo(() => {
     if (!visible || !anchorRect) {
       return null;
@@ -218,6 +264,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
     typeof trigger === 'function' ? trigger(api) : trigger;
 
   const renderedContent = renderContent?.(api) ?? content ?? null;
+  const accessibleText = ariaLabel ?? getAccessibleText(renderedContent);
+  const shouldDescribeTrigger =
+    ariaDescribedBy === 'always' || (ariaDescribedBy === 'visible' && visible);
 
   const defaultBackground =
     ((tooltipStyle as CSSProperties | undefined)?.backgroundColor as
@@ -246,10 +295,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
       }
 
       if (event.key === 'Escape') {
+        if (!closeOnEscape) {
+          return;
+        }
+
         hide();
       }
     },
-    [hide, openOnPress, toggle],
+    [closeOnEscape, hide, openOnPress, toggle],
   );
 
   const shellStyle: CSSProperties = {
@@ -276,12 +329,15 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <>
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: The wrapper preserves arbitrary inline trigger markup, so we keep a neutral span and add explicit keyboard support when it becomes pressable. */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useAriaPropsSupportedByRole: The wrapper preserves arbitrary inline trigger markup, and press semantics are applied conditionally when requested. */}
       <span
         ref={triggerWrapperRef}
         style={wrapperStyle}
         role={openOnPress ? 'button' : undefined}
         tabIndex={openOnPress ? 0 : undefined}
+        aria-describedby={shouldDescribeTrigger ? tooltipId : undefined}
+        aria-expanded={openOnPress ? visible : undefined}
+        aria-haspopup={openOnPress && interactive ? 'dialog' : undefined}
         onMouseEnter={openOnHover ? show : undefined}
         onMouseLeave={openOnHover ? hide : undefined}
         onClick={openOnPress ? toggle : undefined}
@@ -290,13 +346,26 @@ export const Tooltip: React.FC<TooltipProps> = ({
         {renderedTrigger}
       </span>
 
+      {ariaDescribedBy === 'always' && !visible && accessibleText && (
+        <span
+          id={tooltipId}
+          hidden
+        >
+          {accessibleText}
+        </span>
+      )}
+
       {visible &&
         renderedContent &&
         ReactDOM.createPortal(
+          // biome-ignore lint/a11y/useAriaPropsSupportedByRole: The role switches between tooltip and dialog depending on whether the tooltip content is interactive.
           <div
             ref={shellRef}
+            id={tooltipId}
             style={shellStyle}
-            role="tooltip"
+            role={interactive ? 'dialog' : 'tooltip'}
+            aria-label={ariaLabel}
+            aria-live={interactive ? undefined : 'polite'}
           >
             {renderContent ? (
               renderedContent
@@ -306,6 +375,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
             {showAnchor && computedPosition && (
               <div
+                aria-hidden="true"
                 style={buildWebAnchorStyle({
                   placement: computedPosition.placement,
                   offset: computedPosition.anchorOffset,

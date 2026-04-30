@@ -50,6 +50,7 @@ export function SharedWalkitOverlayBridge({
     walkitStepIndex: currentIndex,
     totalWalkitSteps: totalSteps,
     renderPopover: currentStep?.renderPopover ?? props.renderPopover,
+    stopOnOutsideClick: currentStep?.stopOnOutsideClick ?? props.stopOnOutsideClick,
     onNext: handleNext,
     onPrev: handlePrev,
     onStop: stop,

@@ -286,6 +286,12 @@ export interface WalkitStepData {
    */
   renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
 
+  /**
+   * Optional step-level override for the provider-level outside press/click
+   * dismissal behavior.
+   */
+  stopOnOutsideClick?: boolean;
+
   spotlightPaddingOverride?: SpotlightPadding;
   spotlightBorderRadiusOverride?: number;
 }
@@ -696,6 +702,15 @@ interface WalkitStepPropsBase {
    * `renderPopover` while this step is active.
    */
   renderPopover?: (props: RenderWalkitStepProps) => ReactNode;
+
+  /**
+   * Optional step-level override for the provider-level
+   * `stopOnOutsideClick` behavior.
+   *
+   * Use `false` for steps where users must choose Next, Back, or Skip
+   * explicitly, even if the provider normally allows outside dismissal.
+   */
+  stopOnOutsideClick?: boolean;
 
   spotlightPaddingOverride?: SpotlightPadding;
 

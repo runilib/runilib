@@ -153,6 +153,31 @@ describe('WalkitStep (web)', () => {
     expect(step.placement).toBe('bottom');
   });
 
+  it('registers a step-level outside-click override', async () => {
+    let ctx!: WalkitContextValue;
+
+    await act(async () => {
+      render(
+        <Wrapper
+          onCapture={(c) => {
+            ctx = c;
+          }}
+        >
+          <WalkitStep
+            id="confirm-delete"
+            sequence={1}
+            title="Confirm delete"
+            stopOnOutsideClick={false}
+          >
+            <button type="button">Delete</button>
+          </WalkitStep>
+        </Wrapper>,
+      );
+    });
+
+    expect(ctx.sortedSteps[0].stopOnOutsideClick).toBe(false);
+  });
+
   it('attaches data-walkit-step attribute to the child element', async () => {
     const { container } = render(
       <WalkitContextProvider config={{}}>

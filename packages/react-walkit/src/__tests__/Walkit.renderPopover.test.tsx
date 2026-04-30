@@ -26,6 +26,7 @@ function makeStep(
   id: string,
   sequence: number,
   renderPopover?: (props: RenderWalkitStepProps) => ReactNode,
+  stopOnOutsideClick?: boolean,
 ): WalkitStepData {
   return withWalkitSequence(
     {
@@ -35,6 +36,7 @@ function makeStep(
       placement: 'auto',
       measure: () => Promise.resolve({ x: 0, y: 0, width: 100, height: 50 }),
       renderPopover,
+      stopOnOutsideClick,
     },
     sequence,
   );
@@ -125,5 +127,116 @@ describe('Walkit renderPopover resolution', () => {
 
     expect(overlayProps.currentWalkitStep?.id).toBe('account');
     expect(overlayProps.renderPopover).toBe(providerRenderPopover);
+  });
+});
+
+describe('Walkit stopOnOutsideClick resolution', () => {
+  it('prefers a step-level false override over a provider true default', async () => {
+    let ctx!: WalkitContextValue;
+    let overlayProps!: OverlayProps;
+
+    await act(async () => {
+      render(
+        <WalkitContextProvider config={{}}>
+          <Inspector
+            onCapture={(nextCtx) => {
+              ctx = nextCtx;
+            }}
+          />
+          <SharedWalkitOverlayBridge
+            OverlayComponent={(props) => {
+              overlayProps = props;
+              return null;
+            }}
+            animationType="slide"
+            spotlightPadding={8}
+            spotlightBorderRadius={8}
+            stopOnOutsideClick
+            labels={{}}
+          />
+        </WalkitContextProvider>,
+      );
+    });
+
+    await act(async () => {
+      ctx.registerStep(makeStep('account', 1));
+      ctx.registerStep(makeStep('danger-zone', 2, undefined, false));
+      await ctx.start('danger-zone');
+    });
+
+    expect(overlayProps.currentWalkitStep?.id).toBe('danger-zone');
+    expect(overlayProps.stopOnOutsideClick).toBe(false);
+  });
+
+  it('prefers a step-level true override over a provider false default', async () => {
+    let ctx!: WalkitContextValue;
+    let overlayProps!: OverlayProps;
+
+    await act(async () => {
+      render(
+        <WalkitContextProvider config={{}}>
+          <Inspector
+            onCapture={(nextCtx) => {
+              ctx = nextCtx;
+            }}
+          />
+          <SharedWalkitOverlayBridge
+            OverlayComponent={(props) => {
+              overlayProps = props;
+              return null;
+            }}
+            animationType="slide"
+            spotlightPadding={8}
+            spotlightBorderRadius={8}
+            stopOnOutsideClick={false}
+            labels={{}}
+          />
+        </WalkitContextProvider>,
+      );
+    });
+
+    await act(async () => {
+      ctx.registerStep(makeStep('account', 1, undefined, true));
+      await ctx.start('account');
+    });
+
+    expect(overlayProps.currentWalkitStep?.id).toBe('account');
+    expect(overlayProps.stopOnOutsideClick).toBe(true);
+  });
+
+  it('falls back to the provider value when the active step has no override', async () => {
+    let ctx!: WalkitContextValue;
+    let overlayProps!: OverlayProps;
+
+    await act(async () => {
+      render(
+        <WalkitContextProvider config={{}}>
+          <Inspector
+            onCapture={(nextCtx) => {
+              ctx = nextCtx;
+            }}
+          />
+          <SharedWalkitOverlayBridge
+            OverlayComponent={(props) => {
+              overlayProps = props;
+              return null;
+            }}
+            animationType="slide"
+            spotlightPadding={8}
+            spotlightBorderRadius={8}
+            stopOnOutsideClick
+            labels={{}}
+          />
+        </WalkitContextProvider>,
+      );
+    });
+
+    await act(async () => {
+      ctx.registerStep(makeStep('account', 1));
+      await ctx.start('account');
+    });
+
+    expect(overlayProps.currentWalkitStep?.id).toBe('account');
+    expect(overlayProps.stopOnOutsideClick).toBe(true);
   });
 });

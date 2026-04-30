@@ -5,6 +5,10 @@ import { Tooltip } from '@runilib/react-walkit';
 export function TooltipCustomContentNative() {
   return (
     <Tooltip
+      id="native-accessible-helper"
+      ariaLabel="Native accessible helper. Ideal for richer helper cards with multiple actions."
+      ariaDescribedBy="always"
+      interactive
       placement="top"
       anchorColor="#1d4ed8"
       renderContent={({ hide, visible }) => (
@@ -30,6 +34,8 @@ export function TooltipCustomContentNative() {
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <Pressable
               onPress={hide}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss native helper"
               style={{
                 paddingHorizontal: 12,
                 paddingVertical: 8,
@@ -40,6 +46,8 @@ export function TooltipCustomContentNative() {
               <Text style={{ color: '#fff', fontWeight: '700' }}>Dismiss</Text>
             </Pressable>
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Learn more about native helper cards"
               style={{
                 paddingHorizontal: 12,
                 paddingVertical: 8,
@@ -56,6 +64,8 @@ export function TooltipCustomContentNative() {
       {({ toggle }) => (
         <Pressable
           onPress={toggle}
+          accessibilityRole="button"
+          accessibilityLabel="Open accessible custom tooltip"
           style={{
             alignSelf: 'flex-start',
             paddingHorizontal: 14,
