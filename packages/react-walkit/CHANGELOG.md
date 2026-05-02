@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- [#192](https://github.com/runilib/runilib/pull/192) [`2dcf880`](https://github.com/runilib/runilib/commit/2dcf8800f6dcadb25500796b2e8f95ffd56967f0) Thanks [@akladekouassi](https://github.com/akladekouassi)! - Improve Tooltip accessibility controls and add per-step outside-dismiss overrides.
+
+  Tooltip now supports stable ids, ARIA description wiring, Escape dismissal, interactive dialog semantics, and native announcements for TalkBack and VoiceOver. WalkitStep can also override provider-level `stopOnOutsideClick` behavior for stricter or looser dismissal on individual tour steps.
+
 ## 1.0.3
 
 ### Patch Changes
