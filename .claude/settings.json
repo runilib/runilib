@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn install *)",
+      "Bash(yarn workspace *)",
+      "Bash(yarn typecheck *)",
+      "Bash(echo \"---EXIT $?---\")",
+      "Bash(yarn check:fix)",
+      "Bash(lsof -nP -iTCP:3002 -sTCP:LISTEN)",
+      "Bash(pkill -f \"next dev --turbopack --port 3019\")"
+    ]
+  }
+}
