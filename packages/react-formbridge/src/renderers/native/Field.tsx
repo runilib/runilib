@@ -13,6 +13,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { getOtpCharsetPattern } from '../../core/field-descriptors/otp/OtpFieldBuilder';
 import type {
   ExtraFieldProps,
   FieldDescriptor,
@@ -553,6 +554,14 @@ export const NativeField: React.FC<Props> = ({
             : [descriptor._otpLength ?? 6];
         const separator = descriptor._otpSeparator ?? '-';
         const maskChar = descriptor._otpMaskChar;
+        const charsetPattern = descriptor._otpCharset
+          ? getOtpCharsetPattern(descriptor._otpCharset).single
+          : null;
+        const otpKeyboardType =
+          (inputBehavior.keyboardType as TextInputProps['keyboardType']) ??
+          (descriptor._otpCharset && descriptor._otpCharset !== 'digits'
+            ? 'default'
+            : 'number-pad');
         const length = groups.reduce((sum, size) => sum + size, 0);
         const chars = getStringValue(p.value).split('');
 
@@ -576,10 +585,7 @@ export const NativeField: React.FC<Props> = ({
                 }}
                 value={displayChar}
                 maxLength={1}
-                keyboardType={
-                  (inputBehavior.keyboardType as TextInputProps['keyboardType']) ??
-                  'number-pad'
-                }
+                keyboardType={otpKeyboardType}
                 textAlign="center"
                 style={sx(
                   defaultOtpInputStyle,
@@ -600,6 +606,16 @@ export const NativeField: React.FC<Props> = ({
                   }
 
                   const typed = char.slice(-1);
+
+                  if (
+                    typed &&
+                    typed !== maskChar &&
+                    charsetPattern &&
+                    !charsetPattern.test(typed)
+                  ) {
+                    return;
+                  }
+
                   const next = [...chars];
                   next[index] = typed === maskChar ? (chars[index] ?? '') : typed;
                   p.onChange(next.join(''));

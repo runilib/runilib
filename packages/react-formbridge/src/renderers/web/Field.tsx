@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 
+import { getOtpCharsetPattern } from '../../core/field-descriptors/otp/OtpFieldBuilder';
 import type {
   FieldDescriptor,
   FieldRenderProps,
@@ -498,6 +499,14 @@ const renderInput = (
           : [descriptor._otpLength ?? 6];
       const separator = descriptor._otpSeparator ?? '-';
       const maskChar = descriptor._otpMaskChar;
+      const charsetPattern = descriptor._otpCharset
+        ? getOtpCharsetPattern(descriptor._otpCharset).single
+        : null;
+      const otpInputMode =
+        inputBehavior.inputMode ??
+        (descriptor._otpCharset && descriptor._otpCharset !== 'digits'
+          ? 'text'
+          : 'numeric');
       const len = groups.reduce((sum, size) => sum + size, 0);
       const chars = String(restProps.value ?? '').split('');
 
@@ -535,7 +544,7 @@ const renderInput = (
               // biome-ignore lint/a11y/noAutofocus: form builders expose autofocus intentionally.
               autoFocus={i === 0 ? inputBehavior.autoFocus : undefined}
               spellCheck={inputBehavior.spellCheck}
-              inputMode={inputBehavior.inputMode ?? 'numeric'}
+              inputMode={otpInputMode}
               enterKeyHint={inputBehavior.enterKeyHint}
               maxLength={1}
               value={displayChar}
@@ -554,6 +563,16 @@ const renderInput = (
                 }
 
                 const typed = e.target.value.slice(-1);
+
+                if (
+                  typed &&
+                  typed !== maskChar &&
+                  charsetPattern &&
+                  !charsetPattern.test(typed)
+                ) {
+                  return;
+                }
+
                 const next = [...chars];
                 next[i] = typed === maskChar ? (chars[i] ?? '') : typed;
 

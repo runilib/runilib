@@ -131,6 +131,67 @@ export function App() {
 }
 ```
 
+## Accessible Tooltips
+
+Use a stable `id` when the tooltip describes a control that users may revisit.
+On web, `Tooltip` applies that id to the rendered tooltip surface and links the
+trigger wrapper with `aria-describedby` while the tooltip is visible by default.
+Use `ariaDescribedBy="always"` when the trigger should expose the description
+before the tooltip is opened.
+
+```tsx
+import { Tooltip } from '@runilib/react-walkit';
+
+export function BillingHelp() {
+  return (
+    <Tooltip
+      id="billing-help"
+      ariaLabel="Billing help"
+      closeOnEscape
+      openOnPress
+      content="This appears on your invoice."
+    >
+      <button type="button">?</button>
+    </Tooltip>
+  );
+}
+```
+
+- Prefer `openOnPress` for keyboard, touch, TalkBack, and VoiceOver parity. Hover-only tooltips are useful as a visual enhancement, but they should not be the only way to reach important information.
+- Keep descriptive tooltips non-interactive. If the content contains links, buttons, form fields, or other focusable controls, set `interactive` so web uses dialog semantics instead of `role="tooltip"`.
+- Leave `closeOnEscape` enabled for web unless the tooltip is fully controlled by your own state. Escape closes the open tooltip even when focus has moved away from the trigger.
+- For custom triggers, make the trigger itself focusable and named. Use a native `<button>` on web or a named pressable control on React Native whenever possible.
+- On React Native, text content or `ariaLabel` is announced when the tooltip opens, and press triggers expose expansion state plus an accessibility hint when `ariaDescribedBy` is active.
+
+## Step-level Outside Dismissal
+
+`stopOnOutsideClick` can be configured globally on `WalkitProvider` and
+overridden by a single `WalkitStep`. The current step override wins when it is
+defined; otherwise Walkit uses the provider value.
+
+```tsx
+<WalkitProvider stopOnOutsideClick>
+  <WalkitStep
+    id="danger-zone"
+    sequence={3}
+    title="Review this action"
+    content="Choose Next, Back, or Skip explicitly before leaving this step."
+    stopOnOutsideClick={false}
+  >
+    <button type="button">Delete workspace</button>
+  </WalkitStep>
+</WalkitProvider>
+```
+
+## Testing Accessibility
+
+- Web keyboard: tab to the trigger, open with Enter or Space, close with Escape, and confirm focus remains usable.
+- Web ARIA: verify `aria-describedby` points to the tooltip `id`; use `role="tooltip"` for descriptive content and `interactive` for dialog-like content.
+- Web screen readers: test with VoiceOver, NVDA, or JAWS and confirm the trigger name plus description are announced clearly.
+- Native screen readers: test TalkBack and VoiceOver; focus the trigger, activate it, and confirm `content` or `ariaLabel` is announced.
+- Native custom content: give every actionable `Pressable` an `accessibilityRole` and a clear `accessibilityLabel`.
+- Automated checks: assert roles, ids, `aria-describedby`, Escape dismissal, `closeOnEscape={false}`, and per-step `stopOnOutsideClick` fallback/override behavior with Testing Library.
+
 ## Documentation
 
 - Docs and guides: https://runilib.dev/libraries/walkit

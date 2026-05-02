@@ -65,6 +65,7 @@ export function WalkitStep({
   onBeforeShow,
   autoStart,
   renderPopover,
+  stopOnOutsideClick,
 }: Readonly<PropsWithChildren<WalkitStepProps>>): React.ReactElement {
   const targetElementRef = useRef<HTMLElement | null>(null);
   const idRef = useRef(id);
@@ -232,6 +233,7 @@ export function WalkitStep({
           ensureVisible,
           autoStart: resolvedAutoStart,
           renderPopover: hasCustomRenderPopover ? resolvedRenderPopover : undefined,
+          stopOnOutsideClick,
           spotlightPaddingOverride: resolvedSpotlightPaddingOverride,
           spotlightBorderRadiusOverride,
         },
@@ -253,6 +255,7 @@ export function WalkitStep({
     spotlightBorderRadiusOverride,
     resolvedSequence,
     resolvedAutoStart,
+    stopOnOutsideClick,
     hasCustomRenderPopover,
     registerStep,
     unregisterStep,

@@ -13,6 +13,16 @@ const OTP_METHODS_TABLE = buildMethodsTable([
     'Rejects non-digit characters and hints a numeric keyboard.',
   ],
   [
+    '`lettersOnly(message?)`',
+    '`message?: string`',
+    'Restricts the value to ASCII letters (`A-Z`, `a-z`). Disallowed keystrokes are dropped before reaching form state.',
+  ],
+  [
+    '`alphanumeric(message?)`',
+    '`message?: string`',
+    'Allows letters and digits (`A-Z`, `a-z`, `0-9`). Useful for invitation codes mixing both.',
+  ],
+  [
     '`mask(char?)`',
     "`char?: string` (default `'•'`)",
     'Renders each filled cell with a masking character while the real value stays in form state.',
@@ -30,7 +40,7 @@ export const otpSection: LibraryDoc['sections'][number] = {
   content: `One-time-password builder for short verification codes. Renders individual character cells instead of a single input.
 
 - \`length()\` fixes the exact code length and the renderer shows that many cells
-- \`digitsOnly()\` restricts to numeric input and hints a numeric keyboard
+- \`digitsOnly()\`, \`lettersOnly()\` and \`alphanumeric()\` restrict the accepted character set; renderers also pick the matching keyboard hint and drop disallowed keystrokes before they reach form state
 - \`mask()\` hides the typed value behind a display character (e.g. \`•\`) while keeping the real value in form state
 - \`groups()\` splits the code into groups with a non-editable separator between them, like \`___-__\`
 - Combine with \`validateOn: 'onChange'\` at hook level for instant validation as the user types`,
@@ -257,11 +267,25 @@ const schema = {
 }
 ${FENCE}
 
-**Alphanumeric backup code**
+**Alphanumeric invitation code**
 
-${FENCE}tsx BackupCode.tsx
+${FENCE}tsx InviteCode.tsx
 const schema = {
-  backupCode: field.otp('Backup code').length(8).required(),
+  inviteCode: field.otp('Invitation code')
+    .length(6)
+    .alphanumeric()
+    .required(),
+}
+${FENCE}
+
+**Letters-only access code**
+
+${FENCE}tsx AccessCode.tsx
+const schema = {
+  accessCode: field.otp('Access code')
+    .length(4)
+    .lettersOnly()
+    .required(),
 }
 ${FENCE}
 

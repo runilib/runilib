@@ -146,6 +146,7 @@ export function WalkitStep({
   scrollViewRef,
   autoStart,
   renderPopover,
+  stopOnOutsideClick,
   spotlightPaddingOverride,
   spotlightBorderRadiusOverride,
 }: NativeWalkitStepProps): React.ReactElement {
@@ -428,6 +429,7 @@ export function WalkitStep({
           ensureVisible,
           autoStart: resolvedAutoStart,
           renderPopover: hasCustomRenderPopover ? resolvedRenderPopover : undefined,
+          stopOnOutsideClick,
           spotlightPaddingOverride: resolvedSpotlightPaddingOverride,
           spotlightBorderRadiusOverride,
         },
@@ -451,6 +453,7 @@ export function WalkitStep({
     resolvedSequence,
     resolvedSpotlightPaddingOverride,
     resolvedAutoStart,
+    stopOnOutsideClick,
     hasCustomRenderPopover,
     unregisterStep,
     spotlightBorderRadiusOverride,

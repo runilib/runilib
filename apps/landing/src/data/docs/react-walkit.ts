@@ -22,8 +22,6 @@ const DOC_PREVIEWS = {
     src: 'https://res.cloudinary.com/dca7plrqk/video/upload/web-tooltip-example_q3ne1e.mp4',
     alt: 'Preview of the standalone Tooltip component.',
     caption: 'Standalone tooltip preview anchored to a single target element.',
-    // maxWidth: 680,
-    // maxHeight: 360,
     video: true,
   },
   tooltipNative: {
@@ -89,7 +87,7 @@ export const reactWalkitDocs: LibraryDoc = {
 - Public surface: \`WalkitProvider\`, \`WalkitStep\`, \`useWalkit\`, \`useWalkitEvent\`, \`Tooltip\`, \`ANIMATION_TYPES\`.`,
       codeTabs: [
         {
-          filename: 'TourExample.tsx',
+          filename: 'web.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.webBasic,
           code: `import { WalkitProvider, WalkitStep, useWalkit } from '@runilib/react-walkit'
@@ -131,7 +129,7 @@ function Dashboard() {
 }`,
         },
         {
-          filename: 'QuickStart.native.tsx',
+          filename: 'native.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.nativeBasic,
           code: `import { SafeAreaView, Text, View, Button } from 'react-native'
@@ -213,7 +211,7 @@ pnpm add @runilib/react-walkit`,
 - The overlay closes when it reaches the last step or when you call \`stop()\`.`,
       codeTabs: [
         {
-          filename: 'QuickStart.web.tsx',
+          filename: 'web.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.webBasic,
           code: `import { WalkitProvider, WalkitStep, useWalkit } from '@runilib/react-walkit'
@@ -249,7 +247,7 @@ function Content() {
 }`,
         },
         {
-          filename: 'QuickStart.native.tsx',
+          filename: 'native.tsx',
           lang: 'tsx',
           preview: DOC_PREVIEWS.nativeBasic,
           code: `import { SafeAreaView, Text, View, Button } from 'react-native'
@@ -304,6 +302,7 @@ function Dashboard() {
 - Native note: on React Native Android, the built-in popover favors stability over motion and enters without a visible popover animation to avoid jitter during step transitions.
 - Flow orchestration: \`steps\`, \`onFlowStepChange\`, and \`stepMountTimeoutMs\` let one tour continue across routes/screens where all target steps are not mounted at once.
 - Resolution rule: provider \`renderPopover\` applies to every step by default, but a step-level \`renderPopover\` can override it for one specific step.
+- Outside-dismiss resolution: provider \`stopOnOutsideClick\` is the default, but a step-level \`stopOnOutsideClick\` can force a stricter or looser behavior for the active step.
 - If neither the provider nor the active step defines \`renderPopover\`, Walkit uses the built-in popover UI.
 - Lifecycle: \`onStart\`, \`onStop\`, \`onStepChange\`.`,
       subsections: [
@@ -318,7 +317,7 @@ function Dashboard() {
 - \`walkitStyle\` (object): style overrides for default popover shell.
 - \`theme\` (WalkitTheme): colors/shape for built-in popover (see Theme section).
 - \`labels\` (WalkitLabels): button text overrides (next/prev/finish/close).
-- \`stopOnOutsideClick\` (boolean, default false): close tour when clicking/pressing backdrop.
+- \`stopOnOutsideClick\` (boolean, default false): close tour when clicking/pressing backdrop; individual \`WalkitStep\` items can override this while active.
 - \`steps\` (Array<{ id: string; sequence: number; route?: string }>): optional global flow definition when a tour spans multiple routes/screens.
 - \`renderPopover\` ((RenderWalkitStepProps) => ReactNode): global custom popover renderer for all steps in this provider, unless a step overrides it locally.
 - \`onFlowStepChange\` (({ action, toStep, fromStep }) => void | Promise<void>): called when the next requested flow step is not mounted and the app must navigate or reveal UI before the tour can continue.
@@ -340,7 +339,7 @@ function Dashboard() {
       ],
       codeTabs: [
         {
-          filename: 'Provider.web.tsx',
+          filename: 'WalkitProvider.web.tsx',
           lang: 'tsx',
           code: `<WalkitProvider
   animationType="zoom"
@@ -367,7 +366,7 @@ function Dashboard() {
 </WalkitProvider>`,
         },
         {
-          filename: 'Provider.native.tsx',
+          filename: 'WalkitProvider.native.tsx',
           lang: 'tsx',
           code: `<WalkitProvider
   animationType="bounce"
@@ -404,7 +403,7 @@ function Dashboard() {
 - Required: \`id\` (string), \`sequence\` (number).
 - Display: \`title\`, \`content\`, \`route\`, \`placement\` ('auto' | 'top' | 'bottom' | 'left' | 'right').
 - Participation: \`active\` (skip when false), \`autoStart\` (optionally start automatically when this step mounts).
-- Custom UI: \`renderPopover\` can override the provider renderer for this step only.
+- Custom UI and behavior: \`renderPopover\` and \`stopOnOutsideClick\` can override the provider defaults for this step only.
 - Web-only wrappers: \`asChild\` (reuse the child element as the ref), \`wrapperElement\` ('div' | 'span'), \`wrapperClassName\`, \`wrapperStyle\`.
 - Spotlight overrides: \`spotlightPaddingOverride\`, \`spotlightBorderRadiusOverride\` per step.
 - Pre-display: \`onBeforeShow\` runs before measuring; useful to scroll, expand, or stabilize UI before the popover is shown.`,
@@ -426,6 +425,7 @@ function Dashboard() {
 - \`onBeforeShow\` (() => void | Promise<void>): runs before measuring; can scroll, expand, or prepare layout before the step is shown.
 - \`autoStart\` (boolean | 'always' | 'once' | { mode?: 'always' | 'once'; key?: string; delay?: number }): start the tour automatically from this step when it mounts.
 - \`renderPopover\` ((RenderWalkitStepProps) => ReactNode): custom renderer for this step only; overrides provider \`renderPopover\` while this step is active.
+- \`stopOnOutsideClick\` (boolean): overrides provider \`stopOnOutsideClick\` while this step is active.
 - \`spotlightPaddingOverride\` (number): per-step padding for spotlight.
 - \`spotlightBorderRadiusOverride\` (number): per-step radius for spotlight.`,
         },
@@ -436,8 +436,49 @@ function Dashboard() {
 
 - No \`autoStart\`: the step only participates in the tour when you call \`start()\` manually.
 - No step \`renderPopover\`: the step inherits the provider \`renderPopover\` if one exists.
+- No step \`stopOnOutsideClick\`: the step inherits the provider \`stopOnOutsideClick\` value.
 - No provider \`renderPopover\` and no step \`renderPopover\`: Walkit falls back to the built-in popover UI.
-- Step \`renderPopover\` should be treated as an override, not the default place to define your whole tour design.`,
+- Step \`renderPopover\` and \`stopOnOutsideClick\` should be treated as overrides, not the default place to define your whole tour design.`,
+        },
+        {
+          id: 'rw-step-outside-dismiss',
+          title: 'Per-step outside dismissal',
+          content: `Use step-level \`stopOnOutsideClick\` when one step needs different dismissal rules than the rest of the tour.
+
+- \`WalkitProvider stopOnOutsideClick\`: outside clicks or presses stop the tour by default.
+- \`<WalkitStep stopOnOutsideClick={false}>\`: the active step cannot be dismissed from the backdrop; users must choose Next, Back, or Skip.
+- \`<WalkitStep stopOnOutsideClick>\`: the active step can be dismissed from the backdrop even if the provider default is false.
+- The current step override always wins over the provider value on both web and React Native.`,
+          code: {
+            filename: 'CriticalStep.tsx',
+            lang: 'tsx',
+            code: `import { WalkitProvider, WalkitStep } from '@runilib/react-walkit'
+
+export function SettingsTour() {
+  return (
+    <WalkitProvider stopOnOutsideClick>
+      <WalkitStep
+        id="profile"
+        sequence={0}
+        title="Profile"
+        content="Most steps can be dismissed by clicking the backdrop."
+      >
+        <ProfileCard />
+      </WalkitStep>
+
+      <WalkitStep
+        id="danger-zone"
+        sequence={1}
+        title="Review destructive actions"
+        content="Choose Next, Back, or Skip explicitly before leaving this step."
+        stopOnOutsideClick={false}
+      >
+        <DeleteWorkspaceButton />
+      </WalkitStep>
+    </WalkitProvider>
+  )
+}`,
+          },
         },
       ],
       codeTabs: [
@@ -507,7 +548,8 @@ import { WalkitStep } from '@runilib/react-walkit'
 - Content source: \`content\` for the built-in bubble, or \`renderContent\` for fully custom UI.
 - Positioning is collision-aware on both web and native; \`placement="auto"\` picks the side that fits best and explicit sides still fall back when space is tight.
 - Interaction model: \`openOnHover\` is best for desktop web, \`openOnPress\` is the default touch-friendly pattern, and render-function triggers let you call \`{ toggle, visible }\` manually.
-- The Trigger render functions and Custom content receive \`{ toggle, visible }\`.`,
+- Accessibility API: stable \`id\`, \`ariaLabel\`, \`ariaDescribedBy\`, \`closeOnEscape\`, and \`interactive\` help wire production tooltips for keyboard, screen reader, TalkBack, and VoiceOver usage.
+- Trigger and custom content render functions receive \`{ toggle, visible, hide, show, tooltipId }\`.`,
       codeTabs: [
         {
           filename: 'Tooltip.basic.web.tsx',
@@ -571,12 +613,189 @@ export function StorageHintNative() {
 - \`openOnHover\` (default false): desktop-web hover trigger.
 - \`openOnPress\` (default false): wrapper-level click / press trigger; ideal for touch UIs or quick click hints.
 - \`closeOnOutsidePress\` (default true): dismiss when interacting outside the tooltip shell.
+- \`id\` (string): stable tooltip surface id; used for the web tooltip shell and native \`nativeID\`.
+- \`ariaLabel\` (string): accessible label for the tooltip surface; useful for custom or interactive content.
+- \`ariaDescribedBy\` ('visible' | 'always' | false, default 'visible'): controls whether the web trigger wrapper receives \`aria-describedby\`.
+- \`closeOnEscape\` (boolean, default true): closes an open web tooltip when Escape is pressed.
+- \`interactive\` (boolean, default false): use dialog-like semantics for tooltip content that contains links, buttons, fields, or other focusable controls.
 - \`maxWidth\`, \`zIndex\`: layout and stacking controls.
 - \`tooltipStyle\`: styles the built-in bubble.
 - \`triggerWrapperStyle\`: styles the wrapper created around the trigger.
 - \`showAnchor\`, \`anchorSize\`, \`anchorColor\`: arrow visibility and appearance.
-- Render-function trigger API: \`{ toggle, visible }\`.
-- Render-function content API: \`{ toggle, visible }\`.`,
+- Render-function trigger API: \`{ toggle, visible, hide, show, tooltipId }\`.
+- Render-function content API: \`{ toggle, visible, hide, show, tooltipId }\`.`,
+        },
+        {
+          id: 'rw-tooltip-accessibility',
+          title: 'Accessibility patterns',
+          content: `Use the accessibility props when tooltip content matters for task completion or compliance.
+
+- Prefer \`openOnPress\` for information that must work across keyboard, mouse, touch, TalkBack, and VoiceOver.
+- Hover-only tooltips can be a desktop enhancement, but important information should also be available through focus, press, or visible page text.
+- On web, \`id\` lets the tooltip surface stay stable and \`ariaDescribedBy\` links the trigger wrapper to the tooltip while it is visible by default.
+- Use \`ariaDescribedBy="always"\` when the trigger should expose a stable description before the tooltip opens; this works best when the content is plain text or \`ariaLabel\` is provided.
+- Keep simple descriptive tooltips non-interactive. If the content contains buttons, links, or form fields, set \`interactive\` so web uses dialog semantics.
+- Keep \`closeOnEscape\` enabled unless you are intentionally managing dismissal yourself.
+- On React Native, plain text content or \`ariaLabel\` is announced when the tooltip opens; press triggers expose expansion state and an accessibility hint when description wiring is active.`,
+          codeTabs: [
+            {
+              filename: 'AccessibleTooltip.web.tsx',
+              lang: 'tsx',
+              code: `import { Tooltip } from '@runilib/react-walkit'
+
+export function BillingHelp() {
+  return (
+    <Tooltip
+      id="billing-help"
+      ariaLabel="Billing help"
+      ariaDescribedBy="always"
+      closeOnEscape
+      openOnPress
+      content="This appears on your invoice."
+    >
+      <button type="button">?</button>
+    </Tooltip>
+  )
+}`,
+            },
+            {
+              filename: 'InteractiveTooltip.web.tsx',
+              lang: 'tsx',
+              code: `import { Tooltip } from '@runilib/react-walkit'
+
+export function PolicyHelp() {
+  return (
+    <Tooltip
+      id="policy-help"
+      ariaLabel="Billing policy actions"
+      interactive
+      openOnPress
+      renderContent={({ hide }) => (
+        <div>
+          <p>Review billing policy details before changing your plan.</p>
+          <a href="/billing-policy">Read policy</a>
+          <button type="button" onClick={hide}>Close</button>
+        </div>
+      )}
+    >
+      <button type="button">Billing policy</button>
+    </Tooltip>
+  )
+}`,
+            },
+            {
+              filename: 'AccessibleTooltip.native.tsx',
+              lang: 'tsx',
+              code: `import { Pressable, Text } from 'react-native'
+import { Tooltip } from '@runilib/react-walkit'
+
+export function BillingHelpNative() {
+  return (
+    <Tooltip
+      id="billing-help"
+      ariaLabel="Billing help. This appears on your invoice."
+      openOnPress
+      content="This appears on your invoice."
+    >
+      <Pressable accessibilityRole="button">
+        <Text>Billing help</Text>
+      </Pressable>
+    </Tooltip>
+  )
+}`,
+            },
+          ],
+        },
+        {
+          id: 'rw-tooltip-accessibility-testing',
+          title: 'How to test accessibility properly',
+          content: `Use automated checks for regressions, but always pair them with keyboard and assistive technology passes.
+
+Web checklist:
+
+- Keyboard: tab to the trigger, press Enter or Space when \`openOnPress\` is enabled, confirm the tooltip opens, then press Escape and confirm it closes.
+- DOM: inspect the trigger wrapper and verify \`aria-describedby\` points to the tooltip \`id\` while visible, or before opening when \`ariaDescribedBy="always"\`.
+- Roles: simple text help should expose \`role="tooltip"\`; interactive content should expose \`role="dialog"\` and have a useful \`ariaLabel\`.
+- Screen reader: with VoiceOver on macOS or NVDA/JAWS on Windows, focus the trigger and confirm the control name plus description are announced in a sensible order.
+- Automated tests: use Testing Library to assert \`getByRole('tooltip')\`, \`getByRole('dialog')\`, \`aria-describedby\`, Escape dismissal, and \`closeOnEscape={false}\`.
+- Browser audit: run axe DevTools or Lighthouse, then manually verify keyboard behavior because automated tools cannot prove the interaction is understandable.
+
+React Native checklist:
+
+- TalkBack on Android and VoiceOver on iOS: focus the press trigger, confirm it has a clear name, activate it, and confirm the tooltip text or \`ariaLabel\` is announced.
+- Check interactive content: any close or secondary action inside \`renderContent\` should have \`accessibilityRole="button"\` and a clear \`accessibilityLabel\`.
+- Confirm dismissal: tap outside when \`closeOnOutsidePress\` is enabled, use the hardware back button on Android, and verify custom close controls call \`hide\`.
+- Test both platforms when possible; announcement timing can differ between Android and iOS.
+
+Tour overlay checklist:
+
+- For \`WalkitStep stopOnOutsideClick={false}\`, click or press the backdrop and confirm the tour stays open.
+- For fallback behavior, omit the step override and confirm the provider \`stopOnOutsideClick\` value is used.
+- Always keep at least one explicit action path visible in the popover: Next, Back, Finish, or Skip.`,
+          codeTabs: [
+            {
+              filename: 'Tooltip.a11y.test.tsx',
+              lang: 'tsx',
+              code: `import { fireEvent, render, screen } from '@testing-library/react'
+import { Tooltip } from '@runilib/react-walkit'
+
+test('links the trigger and closes on Escape', () => {
+  render(
+    <Tooltip id="billing-help" content="Shown on invoices." openOnPress>
+      ?
+    </Tooltip>,
+  )
+
+  const trigger = screen.getByRole('button', { name: '?' })
+  fireEvent.click(trigger)
+
+  expect(screen.getByRole('tooltip').getAttribute('id')).toBe('billing-help')
+  expect(trigger.getAttribute('aria-describedby')).toBe('billing-help')
+
+  fireEvent.keyDown(document, { key: 'Escape' })
+  expect(screen.queryByRole('tooltip')).toBeNull()
+})`,
+            },
+            {
+              filename: 'Walkit.outside-dismiss.test.tsx',
+              lang: 'tsx',
+              code: `import { fireEvent, render, screen } from '@testing-library/react'
+import { WalkitProvider, WalkitStep, useWalkit } from '@runilib/react-walkit'
+
+test('step override wins over provider outside dismissal', async () => {
+  function StartButton() {
+    const { start, isRunning } = useWalkit()
+    return (
+      <>
+        <button type="button" onClick={() => start('danger-zone')}>Start</button>
+        <span>{isRunning ? 'running' : 'stopped'}</span>
+      </>
+    )
+  }
+
+  render(
+    <WalkitProvider stopOnOutsideClick>
+      <WalkitStep
+        id="danger-zone"
+        sequence={0}
+        title="Danger zone"
+        content="Use explicit controls to leave this step."
+        stopOnOutsideClick={false}
+      >
+        <button type="button">Delete workspace</button>
+      </WalkitStep>
+      <StartButton />
+    </WalkitProvider>,
+  )
+
+  fireEvent.click(screen.getByRole('button', { name: 'Start' }))
+  expect(await screen.findByText('running')).toBeTruthy()
+
+  const backdrop = screen.queryByRole('button', { name: 'Close tour overlay' })
+  expect(backdrop).toBeNull()
+})`,
+            },
+          ],
         },
         {
           id: 'rw-tooltip-placements',
@@ -1624,7 +1843,7 @@ export function AnimatedTour() {
 
 - Theme keys: \`primaryButtonColor\`, \`primaryButtonTextColor\`, \`background\`, \`titleColor\`, \`subTitleColor\`, \`border\`, \`shadow\`, \`borderRadius\`.
 - Labels: \`next\`, \`prev\`, \`finish\`, \`close\`.
-- Overlay: \`overlayColor\`, \`stopOnOutsideClick\`.`,
+- Overlay: \`overlayColor\`, provider-level \`stopOnOutsideClick\`, and step-level \`stopOnOutsideClick\` overrides.`,
       code: {
         filename: 'Theme.tsx',
         lang: 'tsx',
@@ -1735,14 +1954,14 @@ This makes the provider the right place for a baseline branded renderer, and the
 - Per-step overrides: \`spotlightPaddingOverride\`, \`spotlightBorderRadiusOverride\`.
 - Placement: \`placement\` defaults to \`auto\`; the engine falls back to a side that fits the viewport/screen.
 - Web: if a target is outside the viewport, \`WalkitStep\` auto-scrolls it into view (after running \`onBeforeShow\`).
-- Backdrop dismissal: \`stopOnOutsideClick\` (web + native).`,
+- Backdrop dismissal: provider \`stopOnOutsideClick\` is the fallback; active step \`stopOnOutsideClick\` overrides it on web and native.`,
       subsections: [
         {
           id: 'rw-types',
           title: 'Key types',
           content: `- \`Placement\`: 'auto' | 'top' | 'bottom' | 'left' | 'right'
 - \`TargetRect\`: { x, y, width, height }
-- \`WalkitStepData\`: normalized step { id, sequence, title?, content?, placement?, measure, ensureVisible?, autoStart?, renderPopover?, spotlightPaddingOverride?, spotlightBorderRadiusOverride? }`,
+- \`WalkitStepData\`: normalized step { id, sequence, title?, content?, placement?, measure, ensureVisible?, autoStart?, renderPopover?, stopOnOutsideClick?, spotlightPaddingOverride?, spotlightBorderRadiusOverride? }`,
         },
       ],
     },
@@ -1756,12 +1975,13 @@ This makes the provider the right place for a baseline branded renderer, and the
 
 React Native
 - Install \`react-native-svg\` (Expo: \`npx expo install react-native-svg\`).
-- Overlay uses a \`Modal\` with a StatusBar set to translucent; \`stopOnOutsideClick\` works via \`TouchableWithoutFeedback\`.
+- Overlay uses a \`Modal\` with a StatusBar set to translucent; provider and step-level \`stopOnOutsideClick\` values work via \`TouchableWithoutFeedback\`.
 - Wrap targets with \`WalkitStep\` (it renders a \`View collapsable={false}\`).
 
 Shared
 - \`onBeforeShow\` can be used on both web and native to prepare the UI before measurement.
 - Steps register/unregister on mount/unmount; sequence controls sequencing.
+- Step-level \`renderPopover\` and \`stopOnOutsideClick\` overrides are resolved before the shared web/native overlay receives props.
 - Measurement happens at render time; if a ref is missing, the step is skipped and a warning is logged.`,
     },
   ],

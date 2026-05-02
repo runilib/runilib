@@ -3,7 +3,7 @@ import type { WalkitStepProps } from '@runilib/react-walkit';
 export const TOUR_THEME = {
   primaryButtonColor: '#f0a500',
   primaryButtonTextColor: '#0f0e0b',
-  background: '#1c1a15',
+  background: '#fff',
   titleColor: '#f5efe0',
   subTitleColor: '#8a7f6a',
   border: 'rgba(255,240,200,0.1)',

@@ -7,6 +7,7 @@ export type TooltipContentApi = {
   hide: () => void;
   show: () => void;
   visible: boolean;
+  tooltipId?: string;
 };
 
 export type TooltipTrigger = ReactNode | ((api: TooltipContentApi) => ReactNode);
@@ -34,6 +35,39 @@ export type TooltipProps = {
   placement?: TooltipPlacement;
   offset?: number;
   disabled?: boolean;
+
+  /**
+   * Stable accessibility id for the tooltip surface.
+   * Web: applied to the tooltip shell and used by `aria-describedby`.
+   * Native: used as the nativeID for platforms that support accessibility
+   * relationships.
+   */
+  id?: string;
+
+  /**
+   * Accessible label for the tooltip surface.
+   * Especially useful when `interactive` makes the web surface a dialog.
+   */
+  ariaLabel?: string;
+
+  /**
+   * Link the trigger wrapper to the tooltip with aria-describedby on web.
+   * - "visible": link only while the tooltip is rendered.
+   * - "always": keep a stable relationship even before the tooltip opens.
+   * - false: do not add aria-describedby.
+   */
+  ariaDescribedBy?: 'visible' | 'always' | false;
+
+  /**
+   * Close an open tooltip when Escape is pressed on web.
+   */
+  closeOnEscape?: boolean;
+
+  /**
+   * Use dialog-like semantics for content that contains focusable controls.
+   * Keep false for descriptive, non-interactive tooltips.
+   */
+  interactive?: boolean;
 
   /**
    * Web/Native shared trigger options

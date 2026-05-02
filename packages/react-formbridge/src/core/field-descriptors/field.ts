@@ -36,6 +36,8 @@ function withLabel<T extends { label: (label: string) => T }>(
  *   country: field.select('Country').options(['FR', 'US', 'UK']).required(),
  *   terms: field.checkbox('I accept the terms').mustBeTrue(),
  *   code: field.otp('Verification code').length(6).digitsOnly(),
+ *   inviteCode: field.otp('Invite code').length(6).alphanumeric(),
+ *   accessCode: field.otp('Access code').length(4).lettersOnly(),
  * };
  */
 export const field: FieldNamespace = {

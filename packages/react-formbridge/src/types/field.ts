@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 
+import type { OtpCharset } from '../core/field-descriptors/otp/OtpFieldBuilder';
 import type { AsyncOptionsConfig } from '../hooks/shared/useAsyncOptions';
 import type { ValidatorResult } from './validation';
 
@@ -248,6 +249,12 @@ export interface FieldDescriptor<DV = unknown, FType extends FieldType = FieldTy
   _otpGroups?: number[];
   /** Visible separator inserted between OTP groups. Defaults to `-`. */
   _otpSeparator?: string;
+  /**
+   * Character set the OTP accepts. Set by builder helpers like
+   * `digitsOnly()`, `lettersOnly()` and `alphanumeric()`. Renderers use it
+   * to pick a keyboard hint and to drop disallowed keystrokes.
+   */
+  _otpCharset?: OtpCharset;
   /** Enables the built-in "strong password" rule set. */
   _strongPassword?: boolean;
   /** Trim whitespace from the value before validation runs. */

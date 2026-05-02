@@ -116,6 +116,7 @@ function areStepListsEqual(a: WalkitStepData[], b: WalkitStepData[]): boolean {
       left.route !== right.route ||
       left.placement !== right.placement ||
       left.renderPopover !== right.renderPopover ||
+      left.stopOnOutsideClick !== right.stopOnOutsideClick ||
       !isSameSpotlightPadding(
         left.spotlightPaddingOverride,
         right.spotlightPaddingOverride,
@@ -141,6 +142,7 @@ function isSameStep(a: WalkitStepData | undefined, b: WalkitStepData): boolean {
     a.route === b.route &&
     a.placement === b.placement &&
     a.renderPopover === b.renderPopover &&
+    a.stopOnOutsideClick === b.stopOnOutsideClick &&
     a.measure === b.measure &&
     a.ensureVisible === b.ensureVisible &&
     isSameSpotlightPadding(a.spotlightPaddingOverride, b.spotlightPaddingOverride) &&

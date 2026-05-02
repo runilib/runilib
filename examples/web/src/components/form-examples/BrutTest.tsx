@@ -44,6 +44,8 @@ const checkoutSchema = createSchema({
     .showMaskInPlaceholder()
     .validateComplete('Complete the CVV.'),
   code: field.otp('Enter code').required().digitsOnly().groups([3, 3, 2], '-'),
+  alphanumeric: field.otp('alphanumeric').required().length(6).alphanumeric(),
+  lettersOnly: field.otp('lettersOnly').required().length(6).lettersOnly(),
   dateDeNaissance: field.date('DATE DE NAISSANCE').required(),
 });
 
@@ -157,6 +159,8 @@ export function BrutTestExample() {
                 <fields.cvv />
               </div>
               <fields.code />
+              <fields.alphanumeric />
+              <fields.lettersOnly />
               <fields.dateDeNaissance hideLabel />
             </div>
 
