@@ -24,7 +24,7 @@ export default function Libraries() {
         </HeaderInner>
       </PageHeader>
       <Body>
-        <SectionLabel>Available · 2 libraries</SectionLabel>
+        <SectionLabel>Available · {LIBRARIES.length} libraries</SectionLabel>
         <LibList>
           {LIBRARIES.map((lib) => (
             <LibRow key={lib.id}>
