@@ -16,6 +16,7 @@ export function Footer() {
   const docsIndexPath = WEBSITE_FEATURES.docs ? FORM_BRIDGE_DOCS_URL : '/libraries';
   const formbridgeDocsPath = FORM_BRIDGE_DOCS_URL;
   const walkitDocsPath = WEBSITE_FEATURES.docs ? '/docs/walkit' : '/libraries/walkit';
+  const nimboDocsPath = 'https://github.com/runilib/nimbo#readme';
 
   const cols = [
     {
@@ -23,6 +24,7 @@ export function Footer() {
       links: [
         { label: 'formbridge', href: formbridgeDocsPath },
         { label: 'walkit', href: '/libraries/walkit' },
+        { label: 'nimbo', href: nimboDocsPath },
         { label: '→ All libs', href: '/libraries' },
       ],
     },
@@ -32,6 +34,7 @@ export function Footer() {
         { label: 'Quick start', href: docsIndexPath },
         { label: 'formbridge API', href: formbridgeDocsPath },
         { label: 'walkit API', href: walkitDocsPath },
+        { label: 'nimbo API', href: nimboDocsPath },
       ],
     },
     {

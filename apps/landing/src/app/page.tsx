@@ -155,7 +155,7 @@ export default function Home() {
           </HeroCTAs>
           <StatsRow>
             {[
-              { val: '2', key: 'libs' },
+              { val: String(LIBRARIES.length), key: 'libs' },
               { val: '100%', key: 'ts' },
               { val: '2', key: 'platforms' },
               { val: '0', key: 'config' },
