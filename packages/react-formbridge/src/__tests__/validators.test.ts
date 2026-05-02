@@ -335,6 +335,53 @@ describe('select validators', () => {
   });
 });
 
+describe('field.otp charset helpers', () => {
+  const otpDesc = (builder: any) => builder._build();
+
+  it('digitsOnly accepts digits and rejects other characters', async () => {
+    const descriptor = otpDesc(field.otp('Code').length(4).digitsOnly());
+
+    await expect(validateField(descriptor, '1234', {})).resolves.toBeNull();
+    await expect(validateField(descriptor, '12a4', {})).resolves.toBe(
+      'Only digits are allowed.',
+    );
+    expect(descriptor._otpCharset).toBe('digits');
+  });
+
+  it('lettersOnly accepts ASCII letters and rejects digits/symbols', async () => {
+    const descriptor = otpDesc(field.otp('Code').length(4).lettersOnly());
+
+    await expect(validateField(descriptor, 'abcd', {})).resolves.toBeNull();
+    await expect(validateField(descriptor, 'ABcd', {})).resolves.toBeNull();
+    await expect(validateField(descriptor, 'ab1d', {})).resolves.toBe(
+      'Only letters are allowed.',
+    );
+    await expect(validateField(descriptor, 'ab-d', {})).resolves.toBe(
+      'Only letters are allowed.',
+    );
+    expect(descriptor._otpCharset).toBe('letters');
+  });
+
+  it('alphanumeric accepts letters or digits and rejects symbols', async () => {
+    const descriptor = otpDesc(field.otp('Code').length(6).alphanumeric());
+
+    await expect(validateField(descriptor, 'AB12cd', {})).resolves.toBeNull();
+    await expect(validateField(descriptor, '123456', {})).resolves.toBeNull();
+    await expect(validateField(descriptor, 'AB12-d', {})).resolves.toBe(
+      'Only letters and digits are allowed.',
+    );
+    expect(descriptor._otpCharset).toBe('alphanumeric');
+  });
+
+  it('uses the custom message when provided', async () => {
+    const descriptor = otpDesc(
+      field.otp('Code').length(4).alphanumeric('Code invalide.'),
+    );
+
+    await expect(validateField(descriptor, 'AB-1', {})).resolves.toBe('Code invalide.');
+  });
+});
+
 // ─── validateAll ──────────────────────────────────────────────────────────────
 describe('validateAll', () => {
   it('returns empty object when all valid', async () => {

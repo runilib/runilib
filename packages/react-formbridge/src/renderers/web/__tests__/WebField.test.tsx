@@ -1,7 +1,7 @@
 import type React from 'react';
 
-import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { field } from '../../../core/field-descriptors/field';
 import { Field } from '../Field';
 
@@ -685,5 +685,93 @@ describe('WebField', () => {
     expect(otpContainer.style.gap).toBe('14px');
     expect(otpInput.style.width).toBe('64px');
     expect(otpInput.style.borderRadius).toBe('20px');
+  });
+
+  it('uses a text inputMode for non-digit OTP charsets', () => {
+    const renderOtp = (
+      builder: ReturnType<typeof field.otp>,
+    ): HTMLInputElement | null => {
+      const descriptor = builder._build();
+      const resolvedDescriptor = {
+        ...descriptor,
+        fieldPropsFromClient: {},
+      } as React.ComponentProps<typeof Field>['descriptor'];
+
+      const { container } = render(
+        <Field
+          descriptor={resolvedDescriptor}
+          name="code"
+          value=""
+          label={descriptor._label ?? ''}
+          allValues={{}}
+          error={null}
+          touched={false}
+          dirty={false}
+          validating={false}
+          disabled={false}
+          required={Boolean(descriptor._required)}
+          hint={descriptor._hint}
+          onChange={() => {}}
+          onBlur={() => {}}
+          onFocus={() => {}}
+        />,
+      );
+
+      return container.querySelector<HTMLInputElement>('[data-fb-slot="otp-input"]');
+    };
+
+    expect(renderOtp(field.otp('Numeric').length(4).digitsOnly())?.inputMode).toBe(
+      'numeric',
+    );
+    expect(renderOtp(field.otp('Letters').length(4).lettersOnly())?.inputMode).toBe(
+      'text',
+    );
+    expect(renderOtp(field.otp('Mixed').length(4).alphanumeric())?.inputMode).toBe(
+      'text',
+    );
+    expect(renderOtp(field.otp('Default').length(4))?.inputMode).toBe('numeric');
+  });
+
+  it('drops disallowed characters as the user types into an OTP cell', () => {
+    const onChange = vi.fn();
+    const descriptor = field.otp('Code').length(4).lettersOnly()._build();
+    const resolvedDescriptor = {
+      ...descriptor,
+      fieldPropsFromClient: {},
+    } as React.ComponentProps<typeof Field>['descriptor'];
+
+    const { container } = render(
+      <Field
+        descriptor={resolvedDescriptor}
+        name="code"
+        value=""
+        label={descriptor._label ?? ''}
+        allValues={{}}
+        error={null}
+        touched={false}
+        dirty={false}
+        validating={false}
+        disabled={false}
+        required={Boolean(descriptor._required)}
+        hint={descriptor._hint}
+        onChange={onChange}
+        onBlur={() => {}}
+        onFocus={() => {}}
+      />,
+    );
+
+    const firstCell = container.querySelector<HTMLInputElement>(
+      '[data-fb-otp-index="0"]',
+    );
+
+    if (!firstCell) {
+      throw new TypeError('Expected an OTP cell to render.');
+    }
+
+    fireEvent.change(firstCell, { target: { value: '4' } });
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.change(firstCell, { target: { value: 'a' } });
+    expect(onChange).toHaveBeenCalledWith('a___'.replace(/_/g, ''));
   });
 });
