@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- [#192](https://github.com/runilib/runilib/pull/192) [`2dcf880`](https://github.com/runilib/runilib/commit/2dcf8800f6dcadb25500796b2e8f95ffd56967f0) Thanks [@akladekouassi](https://github.com/akladekouassi)! - Add `lettersOnly()` and `alphanumeric()` charset helpers to `field.otp()`.
+
+  Both helpers mirror the existing `digitsOnly()` API: they validate the value and instruct web/native renderers to pick a matching keyboard hint and drop disallowed keystrokes before they reach form state. The accepted charset is exposed on the descriptor as `_otpCharset` (`'digits' | 'letters' | 'alphanumeric'`).
+
 ## 1.0.2
 
 ### Patch Changes
