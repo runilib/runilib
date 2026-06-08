@@ -7,7 +7,7 @@ import {
   field,
   SubmitHost,
   useFormBridge,
-} from '@runilib/react-formbridge';
+} from '@/src/demoFormBridge';
 
 import styled from 'styled-components/native';
 import { StylingExampleCard } from './StylingExampleCard';

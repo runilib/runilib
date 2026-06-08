@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge, valibotBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge, valibotBridge } from '@/demoFormBridge';
 
 import * as v from 'valibot';
 import { BridgeExampleFrame } from './BridgeExampleFrame';

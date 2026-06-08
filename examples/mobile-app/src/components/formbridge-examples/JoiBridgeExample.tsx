@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge';
+import { field, joiBridge, useFormBridge } from '@/src/demoFormBridge';
 
 import Joi from 'joi';
 import { BridgeExampleCard } from './BridgeExampleCard';

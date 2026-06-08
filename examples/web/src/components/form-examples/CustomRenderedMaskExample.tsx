@@ -1,7 +1,7 @@
 import { useCallback, useId, useMemo, useState } from 'react';
 
-import type { FieldController } from '@runilib/react-formbridge';
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import type { FieldController } from '@/demoFormBridge';
+import { field, useFormBridge } from '@/demoFormBridge';
 
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';

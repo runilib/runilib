@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import type { FormSchema, StorageAdapter } from '@runilib/react-formbridge';
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import type { FormSchema, StorageAdapter } from '@/src/demoFormBridge';
+import { field, useFormBridge } from '@/src/demoFormBridge';
 
 type LogEntry = { op: 'get' | 'set' | 'remove'; key: string; at: string };
 

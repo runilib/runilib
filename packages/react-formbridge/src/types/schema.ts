@@ -3,6 +3,8 @@ import type {
   BuiltFileDescriptor,
   FileFieldBuilder,
 } from '../core/field-descriptors/file/FileFieldBuilder';
+import type { MaskedFieldBuilder } from '../core/field-descriptors/mask/MaskedFieldBuilder';
+import type { MaskedDescriptor } from '../core/field-descriptors/mask/types';
 import type { AnyFieldBuilder } from '../core/field-descriptors/types';
 import type { FieldDescriptor, FieldType } from './field';
 
@@ -69,18 +71,17 @@ export type FormSchema = Record<string, FormSchemaEntry>;
  */
 type BuiltField<T> = T extends FileFieldBuilder
   ? BuiltFileDescriptor
-  : T extends BaseFieldBuilder<infer DValue, infer FType>
-    ? FieldDescriptor<DValue, FType>
-    : T;
+  : T extends MaskedFieldBuilder
+    ? MaskedDescriptor<string>
+    : T extends BaseFieldBuilder<infer DValue, infer FType>
+      ? FieldDescriptor<DValue, FType>
+      : T;
 
 /**
  * Internal: reshapes a `FieldDescriptor<V, F>` into itself, stripping any
  * non-descriptor shapes. Used as a filter after {@link BuiltField}.
  */
-type NormalizeField<T> =
-  T extends FieldDescriptor<infer DValue, infer FType>
-    ? FieldDescriptor<DValue, FType>
-    : never;
+type NormalizeField<T> = T extends FieldDescriptor<unknown, FieldType> ? T : never;
 
 /**
  * Canonical {@link FieldDescriptor} shape for a schema entry `T`, whether it

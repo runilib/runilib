@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 import { useEffect } from 'react';
 
-import type { FormSchema } from '@runilib/react-formbridge';
-import { field, useFormBridgeWizard } from '@runilib/react-formbridge';
+import type { FormSchema } from '@/demoFormBridge';
+import { field, useFormBridgeWizard } from '@/demoFormBridge';
 
 import { useNavigate, useParams } from 'react-router-dom';
 

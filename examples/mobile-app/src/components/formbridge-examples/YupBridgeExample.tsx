@@ -1,7 +1,7 @@
 // import { useMemo, useState } from 'react';
 // import { Text, View } from 'react-native';
 
-// import { field, useFormBridge, yupBridge } from '@runilib/react-formbridge';
+// import { field, useFormBridge, yupBridge } from '@/src/demoFormBridge';
 
 // import * as yup from 'yup';
 // import { formExampleStyles as s } from './FormExamples.styles';

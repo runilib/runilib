@@ -5,89 +5,67 @@ import { useFormBridge as useNativeFormBridge } from '../hooks/useFormBridge.nat
 import { useFormBridge as useWebFormBridge } from '../hooks/useFormBridge.web';
 
 function WebTypingHarness() {
-  const signupSchema = createSchema({
+  const schemaWithApi = createSchema({
+    password: field.text('Password'),
+    confirmPassword: field.text('Confirm password').sameAs(ref('password')),
+  });
+  const signupSchema = {
     name: field.text('Name'),
-    bio: field.textarea('Bio'),
     country: field.select('Country').options(['FR', 'US']),
     email: field.email('Email'),
     password: field.text('Password'),
     confirmPassword: field.text('Confirm password').sameAs(ref('password')),
-  });
+    code: field.otp('Code').length(6).digitsOnly(),
+    phone: field.masked('99 99 99 99 99').label('Phone').storeRaw(),
+  };
   const form = useWebFormBridge(signupSchema);
-  const nameController = form.fieldController('name');
-  const countryController = form.fieldController('country');
+  const nameController = form.field('name');
+  const countryController = form.field('country');
+  const codeController = form.field('code');
+  const phoneController = form.field('phone');
 
-  signupSchema.safeParse({
+  schemaWithApi.safeParse({
     password: 'secret',
     confirmPassword: 'secret',
   }).issues[0]?.code;
 
-  <form.fields.name
-    inputProps={{ maxLength: 80 }}
-    autoComplete="given-name"
-    inputMode="text"
-  />;
-  <form.fields.bio textareaProps={{ rows: 4 }} />;
-  <form.fields.country
-    autoFocus
-    readOnly
-    selectProps={{ size: 2 }}
-  />;
-  <form.fields.email autoComplete="section-checkout email" />;
-
-  // @ts-expect-error text fields should not expose selectProps
-  <form.fields.name selectProps={{ size: 2 }} />;
-  // @ts-expect-error text fields should not expose textareaProps
-  <form.fields.name textareaProps={{ rows: 4 }} />;
-  // @ts-expect-error textarea fields should not expose selectProps
-  <form.fields.bio selectProps={{ size: 2 }} />;
+  nameController.onChange('Ada');
   countryController.options?.[0]?.label;
+  codeController.otpLength;
+  codeController.digits[0];
+  codeController.setDigit(0, '1');
+  phoneController.rawValue;
+  phoneController.displayValue;
+  phoneController.format('0601020304');
+  phoneController.unmask('06 01 02 03 04');
+
   // @ts-expect-error text controllers should not expose select options
   nameController.options;
   // @ts-expect-error text controllers should not expose OTP metadata
   nameController.otpLength;
-  field.text('Work email');
-  // @ts-expect-error field ui autocomplete should only accept known tokens
-  <form.fields.email autoComplete="custom-email-token" />;
-
+  // @ts-expect-error select controllers should not expose OTP helpers
+  countryController.setDigit(0, '1');
   return null;
 }
 
 function NativeTypingHarness() {
-  const nativeSchema = createSchema({
+  const nativeSchema = {
     name: field.text('Name'),
     country: field.select('Country').options(['FR', 'US']),
-    otp: field.otp('Code'),
-  });
+    otp: field.otp('Code').length(4),
+  };
   const form = useNativeFormBridge(nativeSchema);
-  const countryController = form.fieldController('country');
-  const otpController = form.fieldController('otp');
+  const countryController = form.field('country');
+  const otpController = form.field('otp');
 
-  <form.fields.name
-    inputProps={{ maxLength: 80 }}
-    autoComplete="name"
-  />;
-  <form.fields.country
-    autoFocus
-    readOnly
-    renderPicker={() => null}
-  />;
-  <form.fields.otp autoComplete="sms-otp" />;
-
-  // @ts-expect-error native field ui should not expose web-only textareaProps
-  <form.fields.name textareaProps={{ rows: 4 }} />;
-  // @ts-expect-error native field ui should not expose web-only selectProps
-  <form.fields.country selectProps={{ size: 2 }} />;
-  // @ts-expect-error native field ui should not expose className
-  <form.fields.name className="web-only" />;
   countryController.options?.[0]?.label;
   otpController.otpLength;
+  otpController.clear();
+
   // @ts-expect-error select controllers should not expose OTP metadata
   countryController.otpLength;
   // @ts-expect-error OTP controllers should not expose select options
   otpController.options;
-  // @ts-expect-error native autocomplete should only accept known tokens
-  <form.fields.otp autoComplete="pin-code" />;
 
   return null;
 }

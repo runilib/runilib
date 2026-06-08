@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, type PhoneValue, useFormBridge } from '@runilib/react-formbridge';
+import { field, type PhoneValue, useFormBridge } from '@/src/demoFormBridge';
 
 import { FieldVariantCard } from './FieldVariantCard';
 import { formExampleStyles as s } from './FormExamples.styles';

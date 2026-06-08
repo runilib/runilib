@@ -14,7 +14,7 @@ import {
   field,
   type SelectPickerRenderContext,
   useFormBridge,
-} from '@runilib/react-formbridge';
+} from '@/src/demoFormBridge';
 
 import * as Haptics from 'expo-haptics';
 import { FieldVariantCard } from './FieldVariantCard';

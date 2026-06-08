@@ -1,4 +1,4 @@
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@/demoFormBridge';
 
 const schema = {
   email: field.email('Email').required(),

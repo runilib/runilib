@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-import { type FormSchema, field, useFormBridgeWizard } from '@runilib/react-formbridge';
+import { type FormSchema, field, useFormBridgeWizard } from '@/src/demoFormBridge';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge, zodBridge } from '@/src/demoFormBridge';
 
 import { z } from 'zod';
 import { BridgeExampleCard } from './BridgeExampleCard';

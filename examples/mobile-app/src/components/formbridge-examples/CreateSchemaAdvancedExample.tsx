@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { createSchema, field, useFormBridge } from '@runilib/react-formbridge';
+import { createSchema, field, useFormBridge } from '@/src/demoFormBridge';
 
 import * as Haptics from 'expo-haptics';
 import { formExampleStyles as s } from './FormExamples.styles';

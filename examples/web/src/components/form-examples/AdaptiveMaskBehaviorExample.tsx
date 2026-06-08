@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { field, MASKS, useFormBridge } from '@runilib/react-formbridge';
+import { field, MASKS, useFormBridge } from '@/demoFormBridge';
 
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';

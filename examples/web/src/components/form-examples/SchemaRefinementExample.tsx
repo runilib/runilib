@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { createSchema, field, useFormBridge } from '@runilib/react-formbridge';
+import { createSchema, field, useFormBridge } from '@/demoFormBridge';
 
 import styles from './FormExamples.module.css';
 import { createDemoFormUi, simulateSubmitDelay } from './shared';
@@ -41,9 +41,9 @@ const tripSchema = createSchema({
     if (
       values.password &&
       values.email &&
-      values.password
+      String(values.password)
         .toLowerCase()
-        .includes(values.email.split('@')[0]?.toLowerCase() ?? '__')
+        .includes(String(values.email).split('@')[0]?.toLowerCase() ?? '__')
     ) {
       ctx.addIssue({
         path: 'password',

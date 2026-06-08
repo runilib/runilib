@@ -10,6 +10,7 @@ export type UseDynamicFormOptions<S extends FormSchema> = SharedUseDynamicFormOp
   S,
   'native'
 >;
-export type UseDynamicFormReturn = SharedUseDynamicFormReturn<'native'>;
+export type UseDynamicFormReturn<S extends FormSchema = FormSchema> =
+  SharedUseDynamicFormReturn<S, 'native'>;
 
 export const useDynamicFormBridge = createUseDynamicFormBridge(useFormBridge);

@@ -2,7 +2,7 @@ import type {
   GlobaleDefaultsProps,
   OptionsFetcherContext,
   SelectOption,
-} from '@runilib/react-formbridge';
+} from '@/src/demoFormBridge';
 
 import { formExampleStyles as s } from './FormExamples.styles';
 

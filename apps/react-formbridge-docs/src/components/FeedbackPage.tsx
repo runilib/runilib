@@ -2,7 +2,6 @@
 
 import { type CSSProperties, useCallback, useMemo, useState } from 'react';
 
-import { type GlobaleDefaultsProps, useFormBridge } from '@runilib/react-formbridge';
 import {
   type FeedbackSubmissionValues,
   getInitialFeedbackValues,
@@ -13,6 +12,7 @@ import { FEEDBACK_SCHEMA, type FeedbackFormValues } from '@/lib/feedbackSchema';
 
 import Link from 'next/link';
 import styled, { css, type DefaultTheme, useTheme } from 'styled-components';
+import { type GlobaleDefaultsProps, useFormBridge } from '../demoFormBridge';
 
 function getFeedbackFieldStyles(theme: DefaultTheme): GlobaleDefaultsProps {
   const errorColor = theme.mode === 'dark' ? '#ff9fb0' : '#d1435b';
@@ -144,7 +144,7 @@ export const FeedbackPage = ({
   );
 
   const feedbackForm = useFormBridge(FEEDBACK_SCHEMA, {
-    globalDefaults: (state) => ({
+    globalDefaults: (state: { state: { isSubmitting: boolean } }) => ({
       field: {
         ...getFeedbackFieldStyles(theme).field,
       },
@@ -172,8 +172,17 @@ export const FeedbackPage = ({
       setDidSendFeedback(false);
 
       const payload: FeedbackSubmissionValues = {
-        ...values,
         feedbackType: normalizeFeedbackType(String(values.feedbackType ?? 'general')),
+        subject: String(values.subject ?? ''),
+        area: String(values.area ?? ''),
+        relevantPage: String(values.relevantPage ?? ''),
+        name: String(values.name ?? ''),
+        email: String(values.email ?? ''),
+        message: String(values.message ?? ''),
+        expectedBehavior: String(values.expectedBehavior ?? ''),
+        actualBehavior: String(values.actualBehavior ?? ''),
+        reproductionSteps: String(values.reproductionSteps ?? ''),
+        contactConsent: Boolean(values.contactConsent),
       };
       const response = await fetch('/api/feedback', {
         method: 'POST',

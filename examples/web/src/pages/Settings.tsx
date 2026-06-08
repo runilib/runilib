@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { type FormSchema, field, useFormBridgeWizard } from '@runilib/react-formbridge';
 import { useWalkit, WalkitStep, type WalkitStepProps } from '@runilib/react-walkit';
+import { type FormSchema, field, useFormBridgeWizard } from '@/demoFormBridge';
 
 import styles from './Settings.module.css';
 

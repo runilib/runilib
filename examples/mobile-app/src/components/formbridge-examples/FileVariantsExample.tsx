@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 
-import { type FileValue, field, useFormBridge } from '@runilib/react-formbridge';
+import { type FileValue, field, useFormBridge } from '@/src/demoFormBridge';
 
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';

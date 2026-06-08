@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@/demoFormBridge';
 
 type CityDeps = { country?: string };
 

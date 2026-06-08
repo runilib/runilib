@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge';
+import { field, joiBridge, useFormBridge } from '@/demoFormBridge';
 
 import Joi from 'joi';
 import { BridgeExampleFrame } from './BridgeExampleFrame';

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@/demoFormBridge';
 
 import styles from './FormExamples.module.css';
 import { StylingExampleFrame } from './StylingExampleFrame';

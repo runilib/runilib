@@ -1,12 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import {
-  FieldHost,
-  FormHost,
-  field,
-  SubmitHost,
-  useFormBridge,
-} from '@runilib/react-formbridge';
+import { FieldHost, FormHost, field, SubmitHost, useFormBridge } from '@/demoFormBridge';
 
 import styled from 'styled-components';
 import { StylingExampleFrame } from './StylingExampleFrame';

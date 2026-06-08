@@ -1,10 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import {
-  field,
-  type SelectPickerRenderContext,
-  useFormBridge,
-} from '@runilib/react-formbridge';
+import { field, type SelectPickerRenderContext, useFormBridge } from '@/demoFormBridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';
@@ -135,8 +131,8 @@ export function SelectVariantsExample() {
     WORKSPACE_OPTIONS.find((option) => option.value === values.defaultWorkspace)?.label ??
     'No workspace preset';
   const seatPackLabel =
-    SEAT_PACK_OPTIONS.find((option) => option.value === values.seatPack)?.label ??
-    'No seat pack yet';
+    SEAT_PACK_OPTIONS.find((option) => String(option.value) === String(values.seatPack))
+      ?.label ?? 'No seat pack yet';
   const seatPackType = typeof values.seatPack;
   const roleLabel =
     ACCESS_ROLE_OPTIONS.find((option) => option.value === values.accessRole)?.label ??

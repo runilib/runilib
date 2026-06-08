@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge, zodBridge } from '@/demoFormBridge';
 
 import { z } from 'zod';
 import { BridgeExampleFrame } from './BridgeExampleFrame';

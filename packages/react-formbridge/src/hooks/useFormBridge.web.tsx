@@ -1,33 +1,21 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import { isFileDescriptor } from '../core/field-descriptors/file/FileFieldBuilder';
 import { isMaskedDescriptor } from '../core/field-descriptors/mask/MaskedFieldBuilder';
-import { isStrengthDescriptor } from '../core/field-descriptors/password/PasswordWithStrength';
-import { isPhoneDescriptor } from '../core/field-descriptors/phone/PhoneFieldBuilder';
-import { WEB_ERROR_COLOR } from '../renderers/web/shared';
+import { applyMask, extractRaw } from '../core/field-descriptors/mask/masks';
 import type {
-  FieldComponents,
   FieldController,
   FieldErrorProps,
   FieldLabelProps,
-  FieldRenderProps,
   FieldRenderState,
   FocusableFieldHandle,
   FormComponent,
   FormSchema,
   SchemaValues,
-  SubmitButtonProps,
   UseFormBridgeOptions,
   UseFormBridgeReturn,
 } from '../types';
 import { FormBridgeProvider } from './shared/form-context';
 import { computeTransformedValues } from './shared/helpers';
-import {
-  mergeFieldStyleProps,
-  mergeWebFieldProps,
-  mergeWebFormProps,
-  mergeWebSubmitProps,
-} from './shared/ui-utils';
 import { useFormBridgeCore } from './shared/useFormBridgeCore';
 
 export function useFormBridge<const S extends FormSchema>(
@@ -58,24 +46,16 @@ export function useFormBridge<const S extends FormSchema>(
     blurField,
   } = core;
 
-  const globalDefaultsRef = useRef(options.globalDefaults);
-  globalDefaultsRef.current = options.globalDefaults;
-
-  const schemaRef = useRef(schema);
-  schemaRef.current = schema;
-
-  const resolveglobalDefaults = useCallback(
-    () =>
-      globalDefaultsRef.current?.({
-        state: stateRef.current,
-        schema: schemaRef.current,
-        platform: 'web',
-      }),
-    [stateRef],
-  );
-
   const descriptorsRef = useRef(descriptors);
   descriptorsRef.current = descriptors;
+
+  if (options.onSubmit) {
+    submitConfigRef.current = {
+      onSubmit: options.onSubmit,
+      onError: options.onError,
+      onSubmitError: options.onSubmitError,
+    };
+  }
 
   const apiRef = useRef<UseFormBridgeReturn<S, 'web'> | null>(null);
 
@@ -204,6 +184,14 @@ export function useFormBridge<const S extends FormSchema>(
     await handleSubmit();
   }, [handleSubmit]);
 
+  const handleSubmitEvent = useCallback(
+    async (event?: { preventDefault?: () => void }) => {
+      event?.preventDefault?.();
+      await handleSubmit();
+    },
+    [handleSubmit],
+  );
+
   const fieldController = useCallback(
     <K extends keyof S & string>(name: K): FieldController<S, K> => {
       const descriptor = descriptorsRef.current[name];
@@ -234,6 +222,31 @@ export function useFormBridge<const S extends FormSchema>(
       const showError = Boolean(rawError) && (touched || state.submitCount > 0);
 
       const onChange = (nextValue: SchemaValues<S>[K]) => {
+        if (isMaskedDescriptor(effectiveDescriptor)) {
+          let incoming = String(nextValue ?? '');
+          if (effectiveDescriptor._maskUppercase) incoming = incoming.toUpperCase();
+          if (effectiveDescriptor._maskLowercase) incoming = incoming.toLowerCase();
+
+          const raw = extractRaw(
+            incoming,
+            effectiveDescriptor._maskPattern,
+            effectiveDescriptor._maskTokens,
+          );
+          const masked = applyMask(raw, effectiveDescriptor._maskPattern, {
+            showPlaceholder: effectiveDescriptor._maskShowPlaceholder,
+            placeholder: effectiveDescriptor._maskPlaceholder,
+            tokens: effectiveDescriptor._maskTokens,
+          });
+
+          void handleChange(
+            name,
+            (effectiveDescriptor._maskStoreRaw
+              ? raw
+              : masked.display) as SchemaValues<S>[K],
+          );
+          return;
+        }
+
         void handleChange(name, nextValue);
       };
       const onBlur = () => {
@@ -266,8 +279,73 @@ export function useFormBridge<const S extends FormSchema>(
           : {}),
       };
 
+      const controllerExtras: Record<string, unknown> = {};
+
+      if (isMaskedDescriptor(effectiveDescriptor)) {
+        const normalize = (nextValue: string) => {
+          let incoming = nextValue;
+          if (effectiveDescriptor._maskUppercase) incoming = incoming.toUpperCase();
+          if (effectiveDescriptor._maskLowercase) incoming = incoming.toLowerCase();
+
+          const raw = extractRaw(
+            incoming,
+            effectiveDescriptor._maskPattern,
+            effectiveDescriptor._maskTokens,
+          );
+          const masked = applyMask(raw, effectiveDescriptor._maskPattern, {
+            showPlaceholder: effectiveDescriptor._maskShowPlaceholder,
+            placeholder: effectiveDescriptor._maskPlaceholder,
+            tokens: effectiveDescriptor._maskTokens,
+          });
+
+          return {
+            raw,
+            display: masked.display,
+            complete: masked.complete,
+            stored: effectiveDescriptor._maskStoreRaw ? raw : masked.display,
+          };
+        };
+        const maskState = normalize(String(value ?? ''));
+
+        controllerExtras.mask = {
+          pattern: effectiveDescriptor._maskPattern,
+          placeholder: effectiveDescriptor._maskPlaceholder,
+          placeholderText: effectiveDescriptor._maskPlaceholderText,
+          showPlaceholder: effectiveDescriptor._maskShowPlaceholder,
+          storeRaw: effectiveDescriptor._maskStoreRaw,
+        };
+        controllerExtras.rawValue = maskState.raw;
+        controllerExtras.displayValue = maskState.display;
+        controllerExtras.maskComplete = maskState.complete;
+        controllerExtras.format = (nextValue: string) => normalize(nextValue).display;
+        controllerExtras.unmask = (nextValue: string) =>
+          extractRaw(
+            nextValue,
+            effectiveDescriptor._maskPattern,
+            effectiveDescriptor._maskTokens,
+          );
+      }
+
+      if (effectiveDescriptor._type === 'otp') {
+        const otpLength = effectiveDescriptor._otpLength ?? String(value ?? '').length;
+        const digits = Array.from(String(value ?? '')).slice(0, otpLength);
+
+        controllerExtras.otpLength = otpLength;
+        controllerExtras.otpComplete = otpLength > 0 && digits.length === otpLength;
+        controllerExtras.digits = digits;
+        controllerExtras.setDigit = (index: number, nextDigit: string) => {
+          const nextDigits = [...digits];
+          nextDigits[index] = Array.from(nextDigit).at(-1) ?? '';
+          void handleChange(name, nextDigits.join('').slice(0, otpLength));
+        };
+        controllerExtras.clear = () => {
+          void handleChange(name, '');
+        };
+      }
+
       return {
         ...renderState,
+        ...controllerExtras,
         name,
         visible: runtime.visible && !effectiveDescriptor._hidden,
         setValue: onChange,
@@ -290,7 +368,7 @@ export function useFormBridge<const S extends FormSchema>(
         registerFocusable: (target: FocusableFieldHandle | null) => {
           registerFocusable(name, target);
         },
-      } as FieldController<S, K>;
+      } as unknown as FieldController<S, K>;
     },
     [
       blurField,
@@ -322,13 +400,6 @@ export function useFormBridge<const S extends FormSchema>(
         onSubmitError,
       };
 
-      const mergedUi = mergeWebFormProps(resolveglobalDefaults()?.form, className, style);
-
-      const onPress = (event?: { preventDefault?: () => void }) => {
-        event?.preventDefault?.();
-        void handleSubmit();
-      };
-
       return React.createElement(
         FormBridgeProvider,
         {
@@ -337,11 +408,10 @@ export function useFormBridge<const S extends FormSchema>(
         React.createElement(
           'form',
           {
-            ...mergedUi.props,
             ...nativeProps,
-            onSubmit: onPress,
-            className: mergedUi.className,
-            style: mergedUi.style,
+            onSubmit: handleSubmitEvent,
+            className,
+            style,
             noValidate: true,
           },
           children,
@@ -350,47 +420,8 @@ export function useFormBridge<const S extends FormSchema>(
     };
 
     FormInner.displayName = 'FormBridgeForm';
-
-    const Submit = ({
-      children,
-      className,
-      style,
-      loadingText,
-      disabled,
-      type,
-      ...nativeProps
-    }: SubmitButtonProps<'web'>) => {
-      const { status } = stateRef.current;
-      const loading = status === 'submitting' || status === 'validating';
-      const mergedUi = mergeWebSubmitProps(
-        resolveglobalDefaults()?.submit,
-        className,
-        style,
-        loadingText,
-      );
-      const label = loading
-        ? (mergedUi.loadingText ?? 'Please wait…')
-        : (children ?? 'Submit');
-
-      return React.createElement(
-        'button',
-        {
-          ...mergedUi.props,
-          ...nativeProps,
-          type: type ?? 'submit',
-          className: mergedUi.className,
-          style: mergedUi.style,
-          disabled: loading || disabled,
-        },
-        label,
-      );
-    };
-
-    Submit.displayName = 'FormBridgeSubmit';
-
-    (FormInner as unknown as FormComponent<S, 'web'>).Submit = Submit;
     return FormInner as unknown as FormComponent<S, 'web'>;
-  }, [handleSubmit, resolveglobalDefaults, stateRef, submitConfigRef]);
+  }, [handleSubmitEvent, submitConfigRef]);
 
   const FormProvider = useMemo(
     () =>
@@ -405,189 +436,6 @@ export function useFormBridge<const S extends FormSchema>(
       },
     [],
   );
-
-  const fields = useMemo((): FieldComponents<S, 'web'> => {
-    const result = {} as FieldComponents<S, 'web'>;
-
-    for (const name of Object.keys(descriptors) as Array<keyof S & string>) {
-      type LocalFieldComponent = FieldComponents<S, 'web'>[typeof name];
-      type LocalFieldProps = Parameters<LocalFieldComponent>[0];
-
-      const Field: LocalFieldComponent = (props?: LocalFieldProps) => {
-        const descriptor = descriptorsRef.current[name];
-
-        if (!descriptor) {
-          return null;
-        }
-
-        const mergedProps = mergeFieldStyleProps(
-          'web',
-          resolveglobalDefaults()?.field,
-          props,
-        );
-        const state = stateRef.current;
-        const rawValue = (state.values as Record<string, unknown>)[name];
-
-        const value =
-          rawValue ??
-          descriptor._defaultValue ??
-          (descriptor._type === 'checkbox' || descriptor._type === 'switch' ? false : '');
-
-        const error = (state.errors as Record<string, string | undefined>)[name] ?? null;
-        const touched = Boolean((state.touched as Record<string, boolean>)[name]);
-        const dirty = Boolean((state.dirty as Record<string, boolean>)[name]);
-
-        const runtime = visibilityRef.current[name] ?? {
-          visible: true,
-          required: false,
-          disabled: false,
-        };
-
-        const showError = Boolean(error) && (touched || state.submitCount > 0);
-        const mergedClientProps = mergeWebFieldProps(undefined, mergedProps);
-
-        const effectiveDescriptor = {
-          ...descriptor,
-          fieldPropsFromClient: mergedClientProps,
-          ...(mergedProps && {
-            _label: mergedProps.label ?? descriptor._label,
-            _placeholder: mergedProps.placeholder ?? descriptor._placeholder,
-            _hint: mergedProps.hint ?? descriptor._hint,
-          }),
-          _required: descriptor._required || runtime.required,
-          _disabled: descriptor._disabled || runtime.disabled,
-        };
-
-        if (effectiveDescriptor._hidden || !runtime.visible) {
-          return null;
-        }
-
-        const renderState: FieldRenderState<unknown> = {
-          name,
-          value,
-          defaultValue: effectiveDescriptor._defaultValue as string,
-          label: effectiveDescriptor._label ?? '',
-          placeholder: effectiveDescriptor._placeholder,
-          allValues: state.values as Record<string, unknown>,
-          error: showError ? error : null,
-          touched,
-          dirty,
-          validating: state.status === 'validating',
-          disabled: effectiveDescriptor._disabled,
-          required: effectiveDescriptor._required,
-          hint: effectiveDescriptor._hint,
-          ...(effectiveDescriptor._type === 'select' ||
-          effectiveDescriptor._type === 'radio'
-            ? { options: effectiveDescriptor._options }
-            : {}),
-          ...(effectiveDescriptor._type === 'otp'
-            ? { otpLength: effectiveDescriptor._otpLength }
-            : {}),
-        };
-
-        const renderProps: FieldRenderProps<unknown> = {
-          ...renderState,
-          onChange: (nextValue: unknown) => {
-            void handleChange(name, nextValue);
-          },
-          onBlur: () => {
-            void handleBlur(name);
-          },
-          onFocus: () => {
-            trackFieldFocus(name);
-          },
-        };
-        const registerFocusableForField = (target: FocusableFieldHandle | null) => {
-          registerFocusable(name, target);
-        };
-
-        if (effectiveDescriptor._customRender) {
-          return effectiveDescriptor._customRender(renderProps) as React.ReactElement;
-        }
-
-        if (isMaskedDescriptor(effectiveDescriptor)) {
-          const { MaskedInput } = require('../renderers/web/MaskedInput');
-          return React.createElement(MaskedInput, {
-            descriptor: effectiveDescriptor,
-            ...renderProps,
-            extra: mergedProps,
-            registerFocusable: registerFocusableForField,
-          });
-        }
-
-        if (isFileDescriptor(effectiveDescriptor)) {
-          const { FileField } = require('../renderers/web/FileField');
-          return React.createElement(FileField, {
-            descriptor: effectiveDescriptor,
-            ...renderProps,
-            extra: mergedProps,
-          });
-        }
-
-        if (
-          effectiveDescriptor._type === 'password' &&
-          isStrengthDescriptor(effectiveDescriptor)
-        ) {
-          const { PasswordStrength } = require('../renderers/web/PasswordStrength');
-          return React.createElement(PasswordStrength, {
-            strengthMeta: effectiveDescriptor,
-            ...renderProps,
-            extra: mergedProps,
-            registerFocusable: registerFocusableForField,
-          });
-        }
-
-        if (isPhoneDescriptor(effectiveDescriptor)) {
-          const { PhoneInput } = require('../renderers/web/PhoneInput');
-          return React.createElement(PhoneInput, {
-            descriptor: effectiveDescriptor,
-            ...renderProps,
-            extra: mergedProps,
-            registerFocusable: registerFocusableForField,
-          });
-        }
-
-        if (
-          effectiveDescriptor._type === 'select' &&
-          effectiveDescriptor._asyncOptions &&
-          effectiveDescriptor._searchable
-        ) {
-          const {
-            AsyncAutocompleteField,
-          } = require('../renderers/web/AsyncAutocompleteField');
-
-          return React.createElement(AsyncAutocompleteField, {
-            descriptor: effectiveDescriptor,
-            ...renderProps,
-            extra: mergedProps,
-            registerFocusable: registerFocusableForField,
-          });
-        }
-
-        const { Field } = require('../renderers/web/Field');
-        return React.createElement(Field, {
-          descriptor: effectiveDescriptor,
-          ...renderProps,
-          extra: mergedProps,
-          registerFocusable: registerFocusableForField,
-        });
-      };
-
-      (Field as React.FC).displayName = `FormBridgeField(${name})`;
-
-      result[name] = Field;
-    }
-
-    return result;
-  }, [
-    descriptors,
-    handleBlur,
-    handleChange,
-    registerFocusable,
-    stateRef,
-    trackFieldFocus,
-    resolveglobalDefaults,
-  ]);
 
   const FieldError = useMemo(() => {
     const FieldErrorInner = (props: FieldErrorProps<S, 'web'>) => {
@@ -610,10 +458,7 @@ export function useFormBridge<const S extends FormSchema>(
           'data-fb-slot': 'error',
           'data-fb-name': name,
           className: (rest as { className?: string }).className,
-          style: {
-            color: WEB_ERROR_COLOR,
-            ...(rest as { style?: React.CSSProperties }).style,
-          },
+          style: (rest as { style?: React.CSSProperties }).style,
         },
         error,
       );
@@ -646,7 +491,6 @@ export function useFormBridge<const S extends FormSchema>(
             'span',
             {
               'data-fb-slot': 'required-mark',
-              style: { color: WEB_ERROR_COLOR },
             },
             '*',
           ))
@@ -673,10 +517,10 @@ export function useFormBridge<const S extends FormSchema>(
   const api = {
     FormProvider,
     Form,
-    fields,
     FieldError,
     FieldLabel,
     fieldController,
+    field: fieldController,
     state: {
       ...stateRef.current,
       values: computeTransformedValues(
@@ -696,6 +540,7 @@ export function useFormBridge<const S extends FormSchema>(
     watch,
     watchAll,
     submit,
+    handleSubmit: handleSubmitEvent,
   } as unknown as UseFormBridgeReturn<S, 'web'>;
 
   apiRef.current = api;

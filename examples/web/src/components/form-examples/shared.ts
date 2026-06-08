@@ -3,7 +3,7 @@ import type {
   GlobaleDefaultsProps,
   OptionsFetcherContext,
   SelectOption,
-} from '@runilib/react-formbridge';
+} from '@/demoFormBridge';
 
 export const CUSTOMER_DEPARTMENTS = [
   { label: 'Paris (75)', value: '75' },

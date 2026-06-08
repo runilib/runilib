@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@/src/demoFormBridge';
 
 import * as Haptics from 'expo-haptics';
 import { FieldVariantCard } from './FieldVariantCard';

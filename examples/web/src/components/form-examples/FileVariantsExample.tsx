@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { type FileValue, field, useFormBridge } from '@runilib/react-formbridge';
+import { type FileValue, field, useFormBridge } from '@/demoFormBridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';

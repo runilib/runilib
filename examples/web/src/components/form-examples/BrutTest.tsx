@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { createSchema, field, MASKS, useFormBridge } from '@runilib/react-formbridge';
+import { createSchema, field, MASKS, useFormBridge } from '@/demoFormBridge';
 
 import styles from './FormExamples.module.css';
 import { QuickTestExample } from './quickTest';

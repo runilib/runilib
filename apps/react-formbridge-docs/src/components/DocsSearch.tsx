@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { FieldHost, FormHost, field, useFormBridge } from '@runilib/react-formbridge';
 import { getAllDocEntries, getFeaturedEntries } from '@/lib/docs';
 import type { DocEntry, DocSection } from '@/types';
 
 import { usePathname, useRouter } from 'next/navigation';
 import styled from 'styled-components';
+import { FieldHost, FormHost, field, useFormBridge } from '../demoFormBridge';
 
 interface SearchIndexItem {
   entry: DocEntry;

@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 import { useMemo, useState } from 'react';
 
-import type { FormSchema, StorageAdapter } from '@runilib/react-formbridge';
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import type { FormSchema, StorageAdapter } from '@/demoFormBridge';
+import { field, useFormBridge } from '@/demoFormBridge';
 
 type LogEntry = { id: number; op: 'get' | 'set' | 'remove'; key: string; at: string };
 

@@ -1,5 +1,5 @@
-import type { FormSchema } from '@runilib/react-formbridge';
-import { field, useFormBridge } from '@runilib/react-formbridge';
+import type { FormSchema } from '@/demoFormBridge';
+import { field, useFormBridge } from '@/demoFormBridge';
 
 const schema = {
   email: field.email('Work email').required().trim().lowercase(),
