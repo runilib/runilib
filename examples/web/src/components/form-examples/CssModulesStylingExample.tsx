@@ -1,10 +1,94 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
-import { field, useFormBridge } from '@/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { StylingExampleFrame } from './StylingExampleFrame';
-import { CUSTOMER_DEPARTMENTS, createDemoFormUi, simulateSubmitDelay } from './shared';
+import { CUSTOMER_DEPARTMENTS, simulateSubmitDelay } from './shared';
+
+type ManualController = {
+  name: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+  options?: Array<{ label: string; value: string | number }>;
+};
+
+function NativeField({
+  controller,
+  FieldError,
+  FieldLabel,
+  type = 'text',
+  textarea = false,
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+  FieldLabel: (props: { name: string; htmlFor: string }) => React.JSX.Element | null;
+  type?: string;
+  textarea?: boolean;
+}) {
+  const id = useId();
+  const value = controller.value ?? '';
+
+  return (
+    <div className={styles.fieldBlock}>
+      <FieldLabel name={controller.name} htmlFor={id} />
+      {textarea ? (
+        <textarea
+          id={id}
+          value={String(value)}
+          onChange={(event) => controller.onChange(event.target.value)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+      ) : (
+        <input
+          id={id}
+          type={type}
+          value={String(value)}
+          onChange={(event) => controller.onChange(event.target.value)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+      )}
+      <FieldError name={controller.name} />
+    </div>
+  );
+}
+
+function NativeSelectField({
+  controller,
+  FieldError,
+  FieldLabel,
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+  FieldLabel: (props: { name: string; htmlFor: string }) => React.JSX.Element | null;
+}) {
+  const id = useId();
+  const value = controller.value ?? '';
+
+  return (
+    <div className={styles.fieldBlock}>
+      <FieldLabel name={controller.name} htmlFor={id} />
+      <select
+        id={id}
+        value={String(value)}
+        onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
+      >
+        {controller.options?.map((option) => (
+          <option key={String(option.value)} value={String(option.value)}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <FieldError name={controller.name} />
+    </div>
+  );
+}
 
 export function CssModulesStylingExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
@@ -40,11 +124,10 @@ export function CssModulesStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
   });
 
-  const { Form, fields, state, watchAll } = form;
-  const liveValues = watchAll();
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
+  const liveValues = watchAll() as Record<string, unknown>;
   const departmentLabel =
     CUSTOMER_DEPARTMENTS.find((item) => item.value === liveValues.department)?.label ??
     'No department yet';
@@ -63,10 +146,10 @@ export function CssModulesStylingExample() {
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.projectName || 'Billing redesign'}
+            {String(liveValues.projectName ?? 'Billing redesign')}
           </p>
           <p className={styles.resolverPreviewMuted}>
-            Current owner: {liveValues.ownerEmail || 'owner@runilib.dev'}.
+            Current owner: {String(liveValues.ownerEmail ?? 'owner@runilib.dev')}.
           </p>
           <div className={styles.previewDepartment}>{departmentLabel}</div>
         </>
@@ -88,23 +171,31 @@ export function CssModulesStylingExample() {
         }}
       >
         <div className={styles.formRow}>
-          <fields.projectName />
-          <fields.ownerEmail
-            autoComplete="email"
-            inputMode="email"
+          <NativeField
+            controller={fieldController('projectName') as ManualController}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          />
+          <NativeField
+            controller={fieldController('ownerEmail') as ManualController}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            type="email"
           />
         </div>
 
-        <fields.department
-          styles={{
-            select: {
-              background: 'rgba(17, 24, 39, 0.76)',
-              borderColor: 'rgba(245, 158, 11, 0.24)',
-            },
-          }}
+        <NativeSelectField
+          controller={fieldController('department') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
         />
 
-        <fields.launchNotes />
+        <NativeField
+          controller={fieldController('launchNotes') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          textarea
+        />
 
         <div className={styles.footerRow}>
           <p className={styles.helperText}>
@@ -112,12 +203,9 @@ export function CssModulesStylingExample() {
             variation.
           </p>
 
-          <Form.Submit
-            className={styles.submitButton}
-            loadingText="Applying module theme..."
-          >
+          <button type="submit" className={styles.submitButton}>
             Save CSS recipe
-          </Form.Submit>
+          </button>
         </div>
       </Form>
     </StylingExampleFrame>

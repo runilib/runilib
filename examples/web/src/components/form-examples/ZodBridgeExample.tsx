@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge, zodBridge } from '@/demoFormBridge';
+import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge';
 
 import { z } from 'zod';
 import { BridgeExampleFrame } from './BridgeExampleFrame';
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { NativeField } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function ZodBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
@@ -41,11 +42,10 @@ export function ZodBridgeExample() {
 
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
-    globalDefaults: () => createDemoFormUi(styles),
     validatorBridge: bridge,
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
 
   const liveValues = watchAll();
 
@@ -84,13 +84,39 @@ export function ZodBridgeExample() {
         }}
       >
         <div className={styles.formRow}>
-          <fields.workspaceName />
-          <fields.contactEmail />
+          <NativeField
+            controller={fieldController('workspaceName') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
+          <NativeField
+            controller={fieldController('contactEmail') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            type="email"
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
         </div>
 
         <div className={styles.formRow}>
-          <fields.teamSize />
-          <fields.launchDate />
+          <NativeField
+            controller={fieldController('teamSize') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
+          <NativeField
+            controller={fieldController('launchDate') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            type="date"
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
         </div>
 
         <div className={styles.footerRow}>
@@ -98,12 +124,9 @@ export function ZodBridgeExample() {
             Submit and inspect how `teamSize` comes back as a real number.
           </p>
 
-          <Form.Submit
-            className={styles.submitButton}
-            loadingText="Normalizing with Zod…"
-          >
+          <button type="submit" className={styles.submitButton}>
             Validate with Zod
-          </Form.Submit>
+          </button>
         </div>
       </Form>
     </BridgeExampleFrame>

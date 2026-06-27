@@ -1,10 +1,59 @@
 import type { CSSProperties } from 'react';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
-import type { FormSchema, StorageAdapter } from '@/demoFormBridge';
-import { field, useFormBridge } from '@/demoFormBridge';
+import type { FormSchema, StorageAdapter } from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 type LogEntry = { id: number; op: 'get' | 'set' | 'remove'; key: string; at: string };
+
+type ManualController = {
+  name: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+};
+
+function ManualField({
+  controller,
+  FieldError,
+  FieldLabel,
+  type = 'text',
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+  FieldLabel: (props: { name: string; htmlFor: string }) => React.JSX.Element | null;
+  type?: string;
+}) {
+  const id = useId();
+  const value = controller.value ?? '';
+
+  return (
+    <div>
+      <FieldLabel name={controller.name} htmlFor={id} />
+      {type === 'checkbox' ? (
+        <input
+          id={id}
+          type="checkbox"
+          checked={Boolean(value)}
+          onChange={(event) => controller.onChange(event.target.checked)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+      ) : (
+        <input
+          id={id}
+          type={type}
+          value={String(value)}
+          onChange={(event) => controller.onChange(event.target.value)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+      )}
+      <FieldError name={controller.name} />
+    </div>
+  );
+}
 
 let logCounter = 0;
 
@@ -56,7 +105,7 @@ export function CustomStorageAdapterExample() {
     [],
   );
 
-  const { Form, fields } = useFormBridge(schema, {
+  const { Form, FieldError, FieldLabel, fieldController } = useFormBridge(schema, {
     persist: {
       key: 'custom-adapter-web',
       storage: adapter,
@@ -83,10 +132,24 @@ export function CustomStorageAdapterExample() {
             globalThis.alert?.(`Submitted ${values.email}. Draft will be cleared.`);
           }}
         >
-          <fields.fullName />
-          <fields.email />
-          <fields.newsletter />
-          <Form.Submit>Save profile</Form.Submit>
+          <ManualField
+            controller={fieldController('fullName') as ManualController}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          />
+          <ManualField
+            controller={fieldController('email') as ManualController}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            type="email"
+          />
+          <ManualField
+            controller={fieldController('newsletter') as ManualController}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            type="checkbox"
+          />
+          <button type="submit">Save profile</button>
         </Form>
 
         <aside style={logCardStyle}>
@@ -96,10 +159,7 @@ export function CustomStorageAdapterExample() {
           ) : (
             <ul style={logListStyle}>
               {logs.map((entry) => (
-                <li
-                  key={entry.id}
-                  style={logItemStyle}
-                >
+                <li key={entry.id} style={logItemStyle}>
                   <span style={logOpStyle(entry.op)}>{entry.op.toUpperCase()}</span>
                   <span style={logKeyStyle}>{entry.key}</span>
                   <span style={logTimeStyle}>{entry.at}</span>

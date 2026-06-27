@@ -1,9 +1,10 @@
 import { useState } from 'react';
 
-import { createSchema, field, useFormBridge } from '@/demoFormBridge';
+import { createSchema, field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSelectField } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 const tripSchema = createSchema({
   fullName: field.text().required('Full name is required').label('Full name'),
@@ -61,10 +62,9 @@ export function SchemaRefinementExample() {
   const tripForm = useFormBridge(tripSchema, {
     validateOn: 'onTouched',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
   });
 
-  const { Form, fields, state } = tripForm;
+  const { Form, FieldError, FieldLabel, fieldController, state } = tripForm;
   const formLevelError = state.formLevelError;
 
   return (
@@ -119,24 +119,74 @@ export function SchemaRefinementExample() {
               setLastSubmission(values);
             }}
           >
-            <fields.fullName />
+            <NativeField
+              controller={fieldController('fullName') as never}
+              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+              FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+              className={styles.formField}
+              inputClassName={styles.formInput}
+            />
 
             <div style={{ display: 'flex', gap: 14 }}>
-              <fields.email />
-              <fields.phone />
+              <NativeField
+                controller={fieldController('email') as never}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                type="email"
+                className={styles.formField}
+                inputClassName={styles.formInput}
+              />
+              <NativeField
+                controller={fieldController('phone') as never}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                type="tel"
+                className={styles.formField}
+                inputClassName={styles.formInput}
+              />
             </div>
 
             <div style={{ display: 'flex', gap: 14 }}>
-              <fields.departureDate />
-              <fields.returnDate />
+              <NativeField
+                controller={fieldController('departureDate') as never}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                type="date"
+                className={styles.formField}
+                inputClassName={styles.formInput}
+              />
+              <NativeField
+                controller={fieldController('returnDate') as never}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                type="date"
+                className={styles.formField}
+                inputClassName={styles.formInput}
+              />
             </div>
 
-            <fields.password />
-            <fields.confirmPassword />
+            <NativeField
+              controller={fieldController('password') as never}
+              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+              FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+              type="password"
+              className={styles.formField}
+              inputClassName={styles.formInput}
+            />
+            <NativeField
+              controller={fieldController('confirmPassword') as never}
+              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+              FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+              type="password"
+              className={styles.formField}
+              inputClassName={styles.formInput}
+            />
 
             {formLevelError ? <p className={styles.errorBox}>{formLevelError}</p> : null}
 
-            <Form.Submit className={styles.submitButton}>Book the trip</Form.Submit>
+            <button type="submit" className={styles.submitButton}>
+              Book the trip
+            </button>
           </Form>
         </div>
       </div>

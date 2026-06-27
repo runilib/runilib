@@ -458,7 +458,7 @@ export function useFormBridge<const S extends FormSchema>(
           'data-fb-slot': 'error',
           'data-fb-name': name,
           className: (rest as { className?: string }).className,
-          style: (rest as { style?: React.CSSProperties }).style,
+          style: { color: 'red', ...((rest as { style?: React.CSSProperties }).style) },
         },
         error,
       );
@@ -520,7 +520,7 @@ export function useFormBridge<const S extends FormSchema>(
     FieldError,
     FieldLabel,
     fieldController,
-    field: fieldController,
+    // field: fieldController,
     state: {
       ...stateRef.current,
       values: computeTransformedValues(

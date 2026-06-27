@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge } from '@/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { NativeCheckboxField } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function SwitchVariantsExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
@@ -32,10 +33,9 @@ export function SwitchVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onChange',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
   });
 
-  const { Form, fields, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, watchAll } = form;
   const values = watchAll();
   const activeCount = Object.values(values).filter(Boolean).length;
 
@@ -77,16 +77,28 @@ export function SwitchVariantsExample() {
           setLastSubmission(submittedValues as Record<string, unknown>);
         }}
       >
-        <fields.publicProfile />
-        <fields.pushAlerts />
-        <fields.quietHours />
+        <NativeCheckboxField
+          controller={fieldController('publicProfile') as never}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          className={styles.formField}
+        />
+        <NativeCheckboxField
+          controller={fieldController('pushAlerts') as never}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          className={styles.formField}
+        />
+        <NativeCheckboxField
+          controller={fieldController('quietHours') as never}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          className={styles.formField}
+        />
 
-        <Form.Submit
-          className={styles.submitButton}
-          loadingText="Saving switches…"
-        >
+        <button type="submit" className={styles.submitButton}>
           Save switch settings
-        </Form.Submit>
+        </button>
       </Form>
     </FieldVariantFrame>
   );

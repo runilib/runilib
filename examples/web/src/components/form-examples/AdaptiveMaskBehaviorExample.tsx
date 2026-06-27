@@ -1,14 +1,48 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
-import { field, MASKS, useFormBridge } from '@/demoFormBridge';
+import { field, MASKS, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';
-import { createDemoFieldUi, createDemoFormUi, simulateSubmitDelay } from './shared';
+import { simulateSubmitDelay } from './shared';
+
+type ManualController = {
+  name: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+};
+
+function NativeField({
+  controller,
+  FieldError,
+  FieldLabel,
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+  FieldLabel: (props: { name: string; htmlFor: string }) => React.JSX.Element | null;
+}) {
+  const id = useId();
+  const value = controller.value ?? '';
+
+  return (
+    <div>
+      <FieldLabel name={controller.name} htmlFor={id} />
+      <input
+        id={id}
+        value={String(value)}
+        onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
+      />
+      <FieldError name={controller.name} />
+    </div>
+  );
+}
 
 export function AdaptiveMaskBehaviorExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const { compactFieldUi } = createDemoFieldUi(styles);
 
   const formSchema = useMemo(
     () => ({
@@ -48,11 +82,10 @@ export function AdaptiveMaskBehaviorExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
   });
 
-  const { Form, fields, state, watchAll } = form;
-  const liveValues = watchAll();
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
+  const liveValues = watchAll() as Record<string, unknown>;
 
   return (
     <MaskExampleFrame
@@ -68,11 +101,11 @@ export function AdaptiveMaskBehaviorExample() {
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.cardNumber || '4242 4242 4242 4242'}
+            {String(liveValues.cardNumber ?? '4242 4242 4242 4242')}
           </p>
           <p className={styles.resolverPreviewMuted}>
-            Expiry {liveValues.expiry || '09/28'} · CVV {liveValues.cvv || '482'} · Member{' '}
-            {liveValues.memberCode || 'AB-4821'}
+            Expiry {String(liveValues.expiry ?? '09/28')} · CVV {String(liveValues.cvv ?? '482')} · Member{' '}
+            {String(liveValues.memberCode ?? 'AB-4821')}
           </p>
           <div className={styles.points}>
             <span className={styles.point}>Card masks claim more width</span>
@@ -99,18 +132,34 @@ export function AdaptiveMaskBehaviorExample() {
       >
         <div className={styles.maskAdaptiveStack}>
           <div className={styles.maskAdaptiveWideField}>
-            <fields.cardNumber />
+            <NativeField
+              controller={fieldController('cardNumber') as ManualController}
+              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+              FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            />
           </div>
 
           <div className={styles.maskAdaptiveInlineRow}>
             <div className={styles.maskAdaptiveField}>
-              <fields.expiry {...compactFieldUi} />
+              <NativeField
+                controller={fieldController('expiry') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
             </div>
             <div className={styles.maskAdaptiveField}>
-              <fields.cvv {...compactFieldUi} />
+              <NativeField
+                controller={fieldController('cvv') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
             </div>
             <div className={styles.maskAdaptiveField}>
-              <fields.memberCode {...compactFieldUi} />
+              <NativeField
+                controller={fieldController('memberCode') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
             </div>
           </div>
         </div>
@@ -121,12 +170,9 @@ export function AdaptiveMaskBehaviorExample() {
             member code size themselves from the pattern.
           </p>
 
-          <Form.Submit
-            className={styles.submitButton}
-            loadingText="Saving masks…"
-          >
+          <button type="submit" className={styles.submitButton}>
             Save mask setup
-          </Form.Submit>
+          </button>
         </div>
       </Form>
     </MaskExampleFrame>

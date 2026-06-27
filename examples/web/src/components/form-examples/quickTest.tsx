@@ -1,4 +1,6 @@
-import { field, useFormBridge } from '@/demoFormBridge';
+import { useId } from 'react';
+
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 const schema = {
   email: field.email('Email').required(),
@@ -11,28 +13,63 @@ const schema = {
   file: field.file('file'),
 };
 
+type ManualController = {
+  name: string;
+  value: unknown;
+  label?: string;
+  options?: Array<{ label: string; value: string | number }>;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+};
+
+function ManualField({ controller, type = 'text' }: { controller: ManualController; type?: string }) {
+  const inputId = useId();
+  const value = controller.value ?? '';
+
+  return (
+    <div>
+      <label htmlFor={inputId}>{controller.label}</label>
+      {type === 'checkbox' ? (
+        <input
+          id={inputId}
+          type="checkbox"
+          checked={Boolean(value)}
+          onChange={(event) => controller.onChange(event.target.checked)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+      ) : (
+        <input
+          id={inputId}
+          type={type}
+          value={String(value)}
+          onChange={(event) => controller.onChange(event.target.value)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+      )}
+    </div>
+  );
+}
+
 export function QuickTestExample() {
   const form = useFormBridge(schema);
+  const { Form, fieldController } = form;
 
   return (
     <section>
-      <form.Form onSubmit={(values) => console.log('save', values)}>
-        <input
-          name="email"
-          value={form.state.values.email}
-          onChange={(e) => form.setValue('email', e.target.value)}
-          onBlur={() => form.fieldController('email').onBlur()}
-        />
-        <form.fields.email />
-        <form.fields.switch />
-        <form.fields.radio />
-        <form.fields.text />
-        <form.fields.otp />
-        <form.fields.file />
-        <form.fields.password />
-        <form.fields.checkbox />
-        <form.Form.Submit>Save</form.Form.Submit>
-      </form.Form>
+      <Form onSubmit={(values) => console.log('save', values)}>
+        <ManualField controller={fieldController('email')} />
+        <ManualField controller={fieldController('switch')} type="checkbox" />
+        <ManualField controller={fieldController('radio')} />
+        <ManualField controller={fieldController('text')} />
+        <ManualField controller={fieldController('otp')} />
+        <ManualField controller={fieldController('password')} type="password" />
+        <ManualField controller={fieldController('checkbox')} type="checkbox" />
+        <ManualField controller={fieldController('file')} />
+        <button type="submit">Save</button>
+      </Form>
     </section>
   );
 }

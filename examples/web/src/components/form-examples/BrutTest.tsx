@@ -1,10 +1,48 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
-import { createSchema, field, MASKS, useFormBridge } from '@/demoFormBridge';
+import { createSchema, field, MASKS, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { QuickTestExample } from './quickTest';
-import { createDemoFieldUi, createDemoFormUi } from './shared';
+
+type ManualController = {
+  name: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+  label?: string;
+};
+
+function NativeField({
+  controller,
+  FieldError,
+  FieldLabel,
+  type = 'text',
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+  FieldLabel: (props: { name: string; htmlFor: string }) => React.JSX.Element | null;
+  type?: string;
+}) {
+  const id = useId();
+  const value = controller.value ?? '';
+
+  return (
+    <div className={styles.formField}>
+      <FieldLabel name={controller.name} htmlFor={id} />
+      <input
+        id={id}
+        type={type}
+        value={String(value)}
+        onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
+      />
+      <FieldError name={controller.name} />
+    </div>
+  );
+}
 
 const checkoutSchema = createSchema({
   firstName: field
@@ -53,21 +91,16 @@ export function BrutTestExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
     null,
   );
-  const { compactFieldUi } = createDemoFieldUi(styles);
 
   const checkoutForm = useFormBridge(checkoutSchema, {
     validateOn: 'onTouched',
     revalidateOn: 'onChange',
-    globalDefaults: () => ({
-      ...createDemoFormUi(styles),
-      field: { styles: {} },
-    }),
   });
 
-  const { Form, fields, state, watchAll } = checkoutForm;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = checkoutForm;
 
   const checkoutFieldCount = Object.keys(checkoutSchema).length;
-  const liveCheckout = watchAll();
+  const liveCheckout = watchAll() as Record<string, unknown>;
 
   const completedFields = Object.values(liveCheckout).filter((value) =>
     typeof value === 'string' ? value.trim().length > 0 : Boolean(value),
@@ -100,8 +133,8 @@ export function BrutTestExample() {
             <p className={styles.previewLabel}>Payment preview</p>
             <p className={styles.previewCardNumber}>•••• •••• •••• {cardPreview}</p>
             <div className={styles.previewMeta}>
-              <span>{liveCheckout.firstName || 'First name'} </span>
-              <span>{liveCheckout.expiry || 'MM/YY'}</span>
+              <span>{String(liveCheckout.firstName ?? 'First name')} </span>
+              <span>{String(liveCheckout.expiry ?? 'MM/YY')}</span>
             </div>
           </div>
 
@@ -133,14 +166,23 @@ export function BrutTestExample() {
           <Form
             className={styles.formColumn}
             onSubmit={async (values) => {
-              setLastSubmission(values);
+              setLastSubmission(values as Record<string, unknown>);
             }}
           >
             <div className={styles.formRow}>
-              <fields.firstName styles={{ wrapper: {} }} />
+              <NativeField
+                controller={fieldController('firstName') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
             </div>
 
-            <fields.email />
+            <NativeField
+              controller={fieldController('email') as ManualController}
+              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+              FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              type="email"
+            />
 
             <div className={styles.paymentSection}>
               <div className={styles.paymentHeader}>
@@ -154,14 +196,43 @@ export function BrutTestExample() {
               </div>
 
               <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                <fields.cardNumber />
-                <fields.expiry {...compactFieldUi} />
-                <fields.cvv />
+                <NativeField
+                  controller={fieldController('cardNumber') as ManualController}
+                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                />
+                <NativeField
+                  controller={fieldController('expiry') as ManualController}
+                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                />
+                <NativeField
+                  controller={fieldController('cvv') as ManualController}
+                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                />
               </div>
-              <fields.code />
-              <fields.alphanumeric />
-              <fields.lettersOnly />
-              <fields.dateDeNaissance hideLabel />
+              <NativeField
+                controller={fieldController('code') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
+              <NativeField
+                controller={fieldController('alphanumeric') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
+              <NativeField
+                controller={fieldController('lettersOnly') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
+              <NativeField
+                controller={fieldController('dateDeNaissance') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                type="date"
+              />
             </div>
 
             {state.submitError ? (
@@ -174,9 +245,9 @@ export function BrutTestExample() {
                 recovery included.
               </p>
 
-              <Form.Submit className={styles.submitButton}>
+              <button type="submit" className={styles.submitButton}>
                 Valider Votre element
-              </Form.Submit>
+              </button>
             </div>
           </Form>
           <QuickTestExample />

@@ -1,9 +1,7 @@
-import type {
-  FieldPropsOverrides,
-  GlobaleDefaultsProps,
-  OptionsFetcherContext,
-  SelectOption,
-} from '@/demoFormBridge';
+import type { OptionsFetcherContext, SelectOption } from '@runilib/react-formbridge';
+
+export type DemoFieldUi = Record<string, unknown>;
+export type DemoFormUi = Record<string, unknown>;
 
 export const CUSTOMER_DEPARTMENTS = [
   { label: 'Paris (75)', value: '75' },
@@ -95,7 +93,7 @@ export async function searchCityDirectory({
   );
 }
 
-function createBaseDemoFieldUi(styles: Record<string, string>): FieldPropsOverrides {
+function createBaseDemoFieldUi(styles: Record<string, string>): DemoFieldUi {
   return {
     classNames: {
       wrapper: styles.formField,
@@ -137,8 +135,8 @@ function createBaseDemoFieldUi(styles: Record<string, string>): FieldPropsOverri
 }
 
 export function createDemoFieldUi(styles: Record<string, string>): {
-  baseFieldUi: FieldPropsOverrides;
-  compactFieldUi: FieldPropsOverrides;
+  baseFieldUi: DemoFieldUi;
+  compactFieldUi: DemoFieldUi;
 } {
   const baseFieldUi = createBaseDemoFieldUi(styles);
 
@@ -157,7 +155,7 @@ export function createDemoFieldUi(styles: Record<string, string>): {
   } as const;
 }
 
-export function createDemoFormUi(styles: Record<string, string>): GlobaleDefaultsProps {
+export function createDemoFormUi(styles: Record<string, string>): DemoFormUi {
   const baseFieldUi = createBaseDemoFieldUi(styles);
 
   return {

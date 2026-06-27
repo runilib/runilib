@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 
-import { FieldHost, FormHost, field, SubmitHost, useFormBridge } from '@/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styled from 'styled-components';
 import { StylingExampleFrame } from './StylingExampleFrame';
@@ -86,11 +86,7 @@ const FooterCopy = styled.p`
   color: #5f6f88;
 `;
 
-const StudioNameFieldShell = styled(FieldHost).attrs({
-  inputProps: {
-    autoComplete: 'organization',
-  },
-})`
+const StudioNameFieldShell = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -123,18 +119,15 @@ const StudioNameFieldShell = styled(FieldHost).attrs({
   }
 `;
 
-const StudioFormComp = styled(FormHost)`
+const StudioFormComp = styled.form.attrs({
+  autoComplete: 'off',
+})`
   display: flex;
   flex-direction: column;
   gap: 16px;
 `;
 
-const ContactEmailFieldShell = styled(FieldHost).attrs({
-  inputProps: {
-    autoComplete: 'email',
-    inputMode: 'email',
-  },
-})`
+const ContactEmailFieldShell = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -163,7 +156,7 @@ const ContactEmailFieldShell = styled(FieldHost).attrs({
   }
 `;
 
-const CityFieldShell = styled(FieldHost)`
+const CityFieldShell = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -191,7 +184,7 @@ const CityFieldShell = styled(FieldHost)`
   }
 `;
 
-const LaunchNotesFieldShell = styled(FieldHost)`
+const LaunchNotesFieldShell = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -224,9 +217,7 @@ const LaunchNotesFieldShell = styled(FieldHost)`
   }
 `;
 
-const SubmitShell = styled(SubmitHost).attrs({
-  loadingText: 'Applying styled system...',
-})`
+const SubmitShell = styled.button`
   min-width: 196px;
   padding: 14px 22px;
   border: none;
@@ -270,8 +261,46 @@ export function StyledComponentsStylingExample() {
     validateOn: 'onTouched',
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, state, fieldController, watchAll } = form;
   const liveValues = watchAll();
+
+  const studioNameController = fieldController('studioName');
+  const contactEmailController = fieldController('contactEmail');
+  const cityController = fieldController('city');
+  const launchNotesController = fieldController('launchNotes');
+
+  const studioNameId = useId();
+  const contactEmailId = useId();
+  const cityId = useId();
+  const launchNotesId = useId();
+
+  const registerStudioName = useCallback(
+    (node: HTMLInputElement | null) => {
+      studioNameController.registerFocusable(node);
+    },
+    [studioNameController],
+  );
+
+  const registerContactEmail = useCallback(
+    (node: HTMLInputElement | null) => {
+      contactEmailController.registerFocusable(node);
+    },
+    [contactEmailController],
+  );
+
+  const registerCity = useCallback(
+    (node: HTMLInputElement | null) => {
+      cityController.registerFocusable(node);
+    },
+    [cityController],
+  );
+
+  const registerLaunchNotes = useCallback(
+    (node: HTMLTextAreaElement | null) => {
+      launchNotesController.registerFocusable(node);
+    },
+    [launchNotesController],
+  );
 
   return (
     <StylingExampleFrame
@@ -279,19 +308,14 @@ export function StyledComponentsStylingExample() {
       accent="#38bdf8"
       title="Style generated fields from a stable styled host"
       description="This keeps the generated field component as the source of truth, while a styled host injects the visual layer safely. It avoids the instability we hit with runtime-created styled wrappers."
-      highlights={[
-        'styled field host',
-        'styled(Form.Submit)',
-        'selectors for inner input',
-      ]}
+      highlights={['styled field host', 'native input wiring', 'manual fieldController']}
       preview={
         <PreviewStack>
-          <PreviewValue>{liveValues.studioName || 'Northwind Labs'}</PreviewValue>
+          <PreviewValue>{String(liveValues.studioName || 'Northwind Labs')}</PreviewValue>
           <PreviewCopy>
-            The host stays static, and the generated field is injected through the `field`
-            prop.
+            The host stays static, and each input is wired manually through fieldController.
           </PreviewCopy>
-          <PreviewPill>{liveValues.city || 'Lyon'} billing region</PreviewPill>
+          <PreviewPill>{`${String(liveValues.city || 'Lyon')} billing region`}</PreviewPill>
         </PreviewStack>
       }
       submittedPayload={lastSubmission}
@@ -301,10 +325,10 @@ export function StyledComponentsStylingExample() {
           : null
       }
       submitError={state.submitError}
-      footer="This is the most reliable styled-components pattern with the current generated field model: you still style the field component, but through one stable host."
+      footer="This example uses native inputs wired through fieldController() instead of generated host wrappers."
     >
       <StudioFormComp
-        form={Form}
+        as={Form}
         onSubmit={async (values) => {
           await simulateSubmitDelay();
           setLastSubmission(values);
@@ -314,25 +338,107 @@ export function StyledComponentsStylingExample() {
           <SectionTitle>Studio profile</SectionTitle>
 
           <SectionGrid>
-            <StudioNameFieldShell field={fields.studioName} />
-            <ContactEmailFieldShell field={fields.contactEmail} />
+            <StudioNameFieldShell>
+              <label htmlFor={studioNameId}>{studioNameController.label}</label>
+              <input
+                ref={registerStudioName}
+                id={studioNameId}
+                name={studioNameController.name}
+                type="text"
+                autoComplete="organization"
+                value={String(studioNameController.value ?? '')}
+                placeholder={studioNameController.placeholder ?? ''}
+                disabled={studioNameController.disabled}
+                aria-invalid={studioNameController.error ? 'true' : undefined}
+                aria-describedby={`${studioNameId}-helper`}
+                onChange={(event) => studioNameController.onChange(event.target.value)}
+                onBlur={studioNameController.onBlur}
+                onFocus={studioNameController.onFocus}
+              />
+              <span id={`${studioNameId}-helper`}>
+                {studioNameController.error ?? studioNameController.hint}
+              </span>
+            </StudioNameFieldShell>
+
+            <ContactEmailFieldShell>
+              <label htmlFor={contactEmailId}>{contactEmailController.label}</label>
+              <input
+                ref={registerContactEmail}
+                id={contactEmailId}
+                name={contactEmailController.name}
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                value={String(contactEmailController.value ?? '')}
+                placeholder={contactEmailController.placeholder ?? ''}
+                disabled={contactEmailController.disabled}
+                aria-invalid={contactEmailController.error ? 'true' : undefined}
+                aria-describedby={`${contactEmailId}-helper`}
+                onChange={(event) => contactEmailController.onChange(event.target.value)}
+                onBlur={contactEmailController.onBlur}
+                onFocus={contactEmailController.onFocus}
+              />
+              <span id={`${contactEmailId}-helper`}>
+                {contactEmailController.error ?? contactEmailController.hint}
+              </span>
+            </ContactEmailFieldShell>
           </SectionGrid>
 
-          <CityFieldShell field={fields.city} />
+          <CityFieldShell>
+            <label htmlFor={cityId}>{cityController.label}</label>
+            <input
+              ref={registerCity}
+              id={cityId}
+              name={cityController.name}
+              type="text"
+              autoComplete="address-level2"
+              value={String(cityController.value ?? '')}
+              placeholder={cityController.placeholder ?? ''}
+              disabled={cityController.disabled}
+              aria-invalid={cityController.error ? 'true' : undefined}
+              aria-describedby={`${cityId}-helper`}
+              onChange={(event) => cityController.onChange(event.target.value)}
+              onBlur={cityController.onBlur}
+              onFocus={cityController.onFocus}
+            />
+            <span id={`${cityId}-helper`}>
+              {cityController.error ?? cityController.hint}
+            </span>
+          </CityFieldShell>
         </SectionCard>
 
         <SectionCard>
           <SectionTitle>Handoff note</SectionTitle>
-          <LaunchNotesFieldShell field={fields.launchNotes} />
+          <LaunchNotesFieldShell>
+            <label htmlFor={launchNotesId}>{launchNotesController.label}</label>
+            <textarea
+              ref={registerLaunchNotes}
+              id={launchNotesId}
+              name={launchNotesController.name}
+              value={String(launchNotesController.value ?? '')}
+              placeholder={launchNotesController.placeholder ?? ''}
+              disabled={launchNotesController.disabled}
+              aria-invalid={launchNotesController.error ? 'true' : undefined}
+              aria-describedby={`${launchNotesId}-helper`}
+              onChange={(event) => launchNotesController.onChange(event.target.value)}
+              onBlur={launchNotesController.onBlur}
+              onFocus={launchNotesController.onFocus}
+            />
+            <span id={`${launchNotesId}-helper`}>
+              {launchNotesController.error ?? launchNotesController.hint}
+            </span>
+          </LaunchNotesFieldShell>
         </SectionCard>
 
         <FooterRow>
           <FooterCopy>
-            The visual layer lives on the styled host, while `fields.studioName` still
+            The visual layer lives on the styled host, while each field controller still
             owns validation, value sync, and hint/error rendering.
           </FooterCopy>
 
-          <SubmitShell submit={Form.Submit}>Save styled recipe</SubmitShell>
+          <SubmitShell type="submit" disabled={state.status === 'submitting'}>
+            {state.status === 'submitting' ? 'Saving...' : 'Save styled recipe'}
+          </SubmitShell>
         </FooterRow>
       </StudioFormComp>
     </StylingExampleFrame>

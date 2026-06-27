@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge } from '@/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { simulateSubmitDelay } from './shared';
 
 type PasswordVariantValues = {
   accountPassword: string;
@@ -95,119 +95,9 @@ export function PasswordVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => {
-      const baseUi = createDemoFormUi(styles);
-
-      return {
-        ...baseUi,
-        submit: {
-          ...baseUi.submit,
-          loadingText: 'Saving password playbook...',
-        },
-        field: {
-          ...baseUi.field,
-          styles: {
-            ...baseUi.field?.styles,
-            passwordInput: {
-              ...baseUi.field?.styles?.textInput,
-              width: '100%',
-              paddingRight: '132px',
-            },
-            wrapper: {
-              ...baseUi.field?.styles?.wrapper,
-              gap: 8,
-            },
-            passwordToggle: {
-              position: 'absolute',
-              top: '50%',
-              right: 12,
-              transform: 'translateY(-50%)',
-              minHeight: 34,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid rgba(148, 163, 184, 0.18)',
-              background: '#ffffff',
-              color: '#10203a',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 700,
-              gap: 8,
-              whiteSpace: 'nowrap',
-            },
-            passwordStrengthRow: {
-              display: 'grid',
-              gap: 10,
-              marginTop: 2,
-            },
-            passwordStrengthBar: {
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-              gap: 6,
-              alignItems: 'stretch',
-            },
-            passwordStrengthMeta: {
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-              flexWrap: 'wrap',
-            },
-            passwordStrengthFill: {
-              minHeight: 6,
-              borderRadius: 999,
-              background: 'rgba(148, 163, 184, 0.18)',
-              transition: 'background-color 120ms ease, transform 120ms ease',
-            },
-            passwordStrengthLabel: {
-              fontSize: 12,
-              fontWeight: 700,
-            },
-            passwordStrengthEntropy: {
-              fontSize: 11,
-              color: '#64748b',
-            },
-            passwordRulesList: {
-              listStyle: 'none',
-              margin: 0,
-              padding: 0,
-              display: 'grid',
-              gap: 8,
-            },
-            passwordRuleItem: {
-              display: 'grid',
-              gridTemplateColumns: '20px minmax(0, 1fr)',
-              gap: 10,
-              alignItems: 'center',
-              padding: '10px 12px',
-              borderRadius: 14,
-              border: '1px solid rgba(148, 163, 184, 0.14)',
-              background: '#ffffff',
-            },
-            passwordRuleBullet: {
-              width: 20,
-              height: 20,
-              borderRadius: 999,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(148, 163, 184, 0.16)',
-              color: '#10203a',
-              fontSize: 11,
-              fontWeight: 800,
-            },
-            passwordRuleText: {
-              fontSize: 12,
-              lineHeight: 1.45,
-              color: '#5f6f88',
-            },
-          },
-        },
-      };
-    },
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
   const values = watchAll();
   const healthyCount = (
     [
@@ -215,7 +105,7 @@ export function PasswordVariantsExample() {
       ['adminSecret', values.adminSecret],
       ['recoveryPassphrase', values.recoveryPassphrase],
     ] as const
-  ).filter(([name, value]) => Boolean(value) && !state.errors[name]).length;
+  ).filter(([, value]) => Boolean(value) && !state.errors[0]).length;
 
   return (
     <FieldVariantFrame
@@ -234,11 +124,11 @@ export function PasswordVariantsExample() {
           <p className={styles.resolverPreviewValue}>{healthyCount} flows look healthy</p>
           <p className={styles.resolverPreviewMuted}>
             Signup:{' '}
-            {describePasswordState(values.accountPassword, state.errors.accountPassword)}.
-            Admin: {describePasswordState(values.adminSecret, state.errors.adminSecret)}.
+            {describePasswordState(String(values.accountPassword ?? ''), state.errors.accountPassword)}.
+            Admin: {describePasswordState(String(values.adminSecret ?? ''), state.errors.adminSecret)}.
             Recovery:{' '}
             {describePasswordState(
-              values.recoveryPassphrase,
+              String(values.recoveryPassphrase ?? ''),
               state.errors.recoveryPassphrase,
             )}
             .
@@ -379,7 +269,9 @@ export function PasswordVariantsExample() {
           }}
         />
 
-        <Form.Submit>Save password playbook</Form.Submit>
+        <button type="submit" className={styles.submitButton}>
+          Save password playbook
+        </button>
       </Form>
     </FieldVariantFrame>
   );

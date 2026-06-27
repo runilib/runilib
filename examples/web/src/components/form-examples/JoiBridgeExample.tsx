@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 
-import { field, joiBridge, useFormBridge } from '@/demoFormBridge';
+import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge';
 
 import Joi from 'joi';
 import { BridgeExampleFrame } from './BridgeExampleFrame';
 import styles from './FormExamples.module.css';
-import { CUSTOMER_DEPARTMENTS, createDemoFormUi, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSelectField } from './nativeFormHelpers';
+import { CUSTOMER_DEPARTMENTS, simulateSubmitDelay } from './shared';
 
 export function JoiBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
@@ -64,11 +65,10 @@ export function JoiBridgeExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
     validatorBridge: bridge,
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
 
   const liveValues = watchAll();
   const departmentLabel =
@@ -108,13 +108,38 @@ export function JoiBridgeExample() {
         }}
       >
         <div className={styles.formRow}>
-          <fields.city />
-          <fields.department />
+          <NativeField
+            controller={fieldController('city') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
+          <NativeSelectField
+            controller={fieldController('department') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            className={styles.formField}
+            selectClassName={styles.formInput}
+          />
         </div>
 
         <div className={styles.formRow}>
-          <fields.phone />
-          <fields.postalCode />
+          <NativeField
+            controller={fieldController('phone') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            type="tel"
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
+          <NativeField
+            controller={fieldController('postalCode') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
         </div>
 
         <div className={styles.footerRow}>
@@ -123,12 +148,9 @@ export function JoiBridgeExample() {
             business rules.
           </p>
 
-          <Form.Submit
-            className={styles.submitButton}
-            loadingText="Routing with Joi…"
-          >
+          <button type="submit" className={styles.submitButton}>
             Validate with Joi
-          </Form.Submit>
+          </button>
         </div>
       </Form>
     </BridgeExampleFrame>

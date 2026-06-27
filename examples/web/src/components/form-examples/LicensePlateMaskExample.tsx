@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 
-import { field, useFormBridge } from '@/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';
-import { createDemoFieldUi, createDemoFormUi, simulateSubmitDelay } from './shared';
+import { NativeField } from './nativeFormHelpers';
+import { createDemoFieldUi, simulateSubmitDelay } from './shared';
 
 export function LicensePlateMaskExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
@@ -32,10 +33,9 @@ export function LicensePlateMaskExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
 
   return (
@@ -52,7 +52,7 @@ export function LicensePlateMaskExample() {
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.licensePlate || 'AB-123-CD'}
+            {String(liveValues.licensePlate ?? 'AB-123-CD')}
           </p>
           <p className={styles.resolverPreviewMuted}>
             The plate stays easy to scan for operations teams while still storing a
@@ -77,8 +77,20 @@ export function LicensePlateMaskExample() {
         }}
       >
         <div className={styles.formRow}>
-          <fields.vehicleName />
-          <fields.licensePlate {...compactFieldUi} />
+          <NativeField
+            controller={fieldController('vehicleName') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
+          <NativeField
+            controller={fieldController('licensePlate') as never}
+            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
         </div>
 
         <div className={styles.footerRow}>
@@ -86,12 +98,9 @@ export function LicensePlateMaskExample() {
             Example format: two letters, three digits, then two letters.
           </p>
 
-          <Form.Submit
-            className={styles.submitButton}
-            loadingText="Saving vehicle…"
-          >
+          <button type="submit" className={styles.submitButton}>
             Save plate
-          </Form.Submit>
+          </button>
         </div>
       </Form>
     </MaskExampleFrame>

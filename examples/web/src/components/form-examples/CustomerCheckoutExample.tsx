@@ -1,20 +1,71 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
-import { field, MASKS, useFormBridge } from '@/demoFormBridge';
+import { field, MASKS, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
-import {
-  CUSTOMER_DEPARTMENTS,
-  createDemoFieldUi,
-  createDemoFormUi,
-  simulateSubmitDelay,
-} from './shared';
+import { CUSTOMER_DEPARTMENTS, simulateSubmitDelay } from './shared';
+
+type ManualController = {
+  name: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+  options?: Array<{ label: string; value: string | number }>;
+};
+
+function NativeField({
+  controller,
+  FieldError,
+  FieldLabel,
+  type = 'text',
+  options,
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+  FieldLabel: (props: { name: string; htmlFor: string }) => React.JSX.Element | null;
+  type?: string;
+  options?: Array<{ label: string; value: string | number }>;
+}) {
+  const id = useId();
+  const value = controller.value ?? '';
+
+  return (
+    <div className={styles.formField}>
+      <FieldLabel name={controller.name} htmlFor={id} />
+      {type === 'select' ? (
+        <select
+          id={id}
+          value={String(value)}
+          onChange={(event) => controller.onChange(event.target.value)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        >
+          {options?.map((option) => (
+            <option key={String(option.value)} value={String(option.value)}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          id={id}
+          type={type}
+          value={String(value)}
+          onChange={(event) => controller.onChange(event.target.value)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+      )}
+      <FieldError name={controller.name} />
+    </div>
+  );
+}
 
 export function CustomerCheckoutExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
     null,
   );
-  const { compactFieldUi } = createDemoFieldUi(styles);
 
   const checkoutSchema = useMemo(() => {
     return {
@@ -103,17 +154,16 @@ export function CustomerCheckoutExample() {
   const checkoutForm = useFormBridge(checkoutSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
     persist: {
       key: 'dashboard-customer-checkout',
       storage: 'local',
     },
   });
 
-  const { Form, fields, state, watchAll } = checkoutForm;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = checkoutForm;
 
   const checkoutFieldCount = Object.keys(checkoutSchema).length;
-  const liveCheckout = watchAll();
+  const liveCheckout = watchAll() as Record<string, unknown>;
   const completedFields = Object.values(liveCheckout).filter((value) =>
     typeof value === 'string' ? value.trim().length > 0 : Boolean(value),
   ).length;
@@ -148,10 +198,10 @@ export function CustomerCheckoutExample() {
             <p className={styles.previewCardNumber}>•••• •••• •••• {cardPreview}</p>
             <div className={styles.previewMeta}>
               <span>
-                {liveCheckout.firstName || 'First name'}{' '}
-                {liveCheckout.lastName || 'Last name'}
+                {String(liveCheckout.firstName ?? 'First name')}{' '}
+                {String(liveCheckout.lastName ?? 'Last name')}
               </span>
-              <span>{liveCheckout.expiry || 'MM/YY'}</span>
+              <span>{String(liveCheckout.expiry ?? 'MM/YY')}</span>
             </div>
             <div className={styles.previewDepartment}>{selectedDepartment}</div>
           </div>
@@ -189,23 +239,60 @@ export function CustomerCheckoutExample() {
             }}
           >
             <div className={styles.formRow}>
-              <fields.firstName />
-              <fields.lastName />
+              <NativeField
+                controller={fieldController('firstName') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
+              <NativeField
+                controller={fieldController('lastName') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
             </div>
 
-            <fields.email />
-            <fields.entrepriseEmail />
+            <NativeField
+              controller={fieldController('email') as ManualController}
+              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+              FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              type="email"
+            />
+            <NativeField
+              controller={fieldController('entrepriseEmail') as ManualController}
+              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+              FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              type="email"
+            />
 
             <div className={styles.formRow}>
-              <fields.phone />
-              <fields.department />
+              <NativeField
+                controller={fieldController('phone') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                type="tel"
+              />
+              <NativeField
+                controller={fieldController('department') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                type="select"
+                options={CUSTOMER_DEPARTMENTS}
+              />
             </div>
 
             <div className={styles.formRow}>
               <div>
-                <fields.city />
+                <NativeField
+                  controller={fieldController('city') as ManualController}
+                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                />
               </div>
-              <fields.customerCode {...compactFieldUi} />
+              <NativeField
+                controller={fieldController('customerCode') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
             </div>
 
             <div className={styles.paymentSection}>
@@ -219,11 +306,23 @@ export function CustomerCheckoutExample() {
                 <span className={styles.paymentBadge}>PCI-style UI demo</span>
               </div>
 
-              <fields.cardNumber />
+              <NativeField
+                controller={fieldController('cardNumber') as ManualController}
+                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              />
 
               <div className={styles.formRow}>
-                <fields.expiry {...compactFieldUi} />
-                <fields.cvv />
+                <NativeField
+                  controller={fieldController('expiry') as ManualController}
+                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                />
+                <NativeField
+                  controller={fieldController('cvv') as ManualController}
+                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                />
               </div>
             </div>
 
@@ -237,12 +336,9 @@ export function CustomerCheckoutExample() {
                 recovery included.
               </p>
 
-              <Form.Submit
-                className={styles.submitButton}
-                loadingText="Saving customer…"
-              >
+              <button type="submit" className={styles.submitButton}>
                 Save customer
-              </Form.Submit>
+              </button>
             </div>
           </Form>
         </div>
