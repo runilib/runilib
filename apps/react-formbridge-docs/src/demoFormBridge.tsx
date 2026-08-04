@@ -1,56 +1,96 @@
 import type React from 'react';
 
-import {
-  type FormSchema,
-  field,
-  useFormBridge as useHeadlessFormBridge,
-} from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 export * from '@runilib/react-formbridge';
 
-export type GlobaleDefaultsProps = Record<string, any>;
-export type FieldPropsOverrides = Record<string, any>;
+export { field, useFormBridge };
+
+interface AppFieldController {
+  name: string;
+  value: unknown;
+  label: string;
+  placeholder?: string;
+  hint?: string;
+  error: string | null;
+  visible: boolean;
+  disabled: boolean;
+  required: boolean;
+  options?: Array<{ label: string; value: string | number }>;
+  displayValue?: string;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+  registerFocusable: (
+    target: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null,
+  ) => void;
+}
+
+interface AppFormBridge {
+  fieldController: (name: string) => AppFieldController;
+}
+
+export interface AppFieldProps {
+  form: unknown;
+  name: string;
+  kind?: 'input' | 'textarea';
+  hideLabel?: boolean;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  textareaProps?: React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+  textareaStyle?: React.CSSProperties;
+}
 
 function toInputValue(value: unknown): string {
   if (value === null || value === undefined) return '';
-  if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
 }
 
-function DemoField({
+/**
+ * UI adapter owned by the documentation application.
+ * It intentionally consumes only the public headless fieldController() API.
+ */
+export function AppField({
   form,
   name,
-  ...props
-}: { form: any; name: string } & Record<string, any>) {
-  const controller = form.field(name) as any;
+  kind = 'input',
+  hideLabel = false,
+  inputProps,
+  textareaProps,
+  textareaStyle,
+}: AppFieldProps) {
+  const controller = (form as AppFormBridge).fieldController(name);
 
   if (!controller.visible) return null;
 
-  const common = {
-    id: name,
-    name,
-    disabled: controller.disabled,
-    required: controller.required,
-    className: props.className,
-    style: props.style as React.CSSProperties | undefined,
-    onBlur: controller.onBlur,
-    onFocus: controller.onFocus,
-  };
+  const hasError = Boolean(controller.error);
+  const describedBy =
+    [controller.hint ? `${name}-hint` : null, controller.error ? `${name}-error` : null]
+      .filter(Boolean)
+      .join(' ') || undefined;
 
-  let control: JSX.Element;
+  let control: React.ReactNode;
 
   if (controller.options?.length) {
     control = (
       <select
-        {...common}
+        ref={controller.registerFocusable}
+        id={name}
+        name={name}
+        data-fb-slot="select"
         value={toInputValue(controller.value)}
+        disabled={controller.disabled}
+        required={controller.required}
+        aria-invalid={hasError}
+        aria-describedby={describedBy}
         onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
       >
-        <option value="">Select...</option>
-        {controller.options.map((option: any) => (
+        <option value="">Select…</option>
+        {controller.options.map((option) => (
           <option
             key={String(option.value)}
-            value={String(option.value)}
+            value={option.value}
           >
             {option.label}
           </option>
@@ -59,90 +99,106 @@ function DemoField({
     );
   } else if (typeof controller.value === 'boolean') {
     control = (
-      <label>
+      <label data-fb-slot="checkbox-label">
         <input
-          {...common}
+          ref={controller.registerFocusable}
+          id={name}
+          name={name}
           type="checkbox"
+          data-fb-slot="checkbox-input"
           checked={controller.value}
+          disabled={controller.disabled}
+          required={controller.required}
+          aria-invalid={hasError}
+          aria-describedby={describedBy}
           onChange={(event) => controller.onChange(event.target.checked)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
         />
-        {controller.label || name}
+        {controller.label}
       </label>
+    );
+  } else if (kind === 'textarea') {
+    control = (
+      <textarea
+        {...textareaProps}
+        ref={controller.registerFocusable}
+        id={name}
+        name={name}
+        data-fb-slot="textarea"
+        value={toInputValue(controller.value)}
+        placeholder={controller.placeholder}
+        disabled={controller.disabled}
+        required={controller.required}
+        aria-invalid={hasError}
+        aria-describedby={describedBy}
+        style={textareaStyle}
+        onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
+      />
     );
   } else {
     control = (
       <input
-        {...common}
-        type={name.toLowerCase().includes('email') ? 'email' : 'text'}
+        {...inputProps}
+        ref={controller.registerFocusable}
+        id={name}
+        name={name}
+        data-fb-slot="input"
         value={controller.displayValue ?? toInputValue(controller.value)}
         placeholder={controller.placeholder}
+        disabled={controller.disabled}
+        required={controller.required}
+        aria-invalid={hasError}
+        aria-describedby={describedBy}
         onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
       />
     );
   }
 
   return (
-    <div>
-      {typeof controller.value === 'boolean' ? null : <form.FieldLabel name={name} />}
+    <div
+      data-fb-field
+      data-fb-error={hasError ? '' : undefined}
+    >
+      {!hideLabel && typeof controller.value !== 'boolean' ? (
+        <label
+          htmlFor={name}
+          data-fb-slot="label"
+        >
+          {controller.label}
+          {controller.required ? (
+            <span
+              data-fb-slot="required-mark"
+              aria-hidden="true"
+            >
+              {' '}
+              *
+            </span>
+          ) : null}
+        </label>
+      ) : null}
       {control}
-      <form.FieldError name={name} />
+      {controller.hint ? (
+        <span
+          id={`${name}-hint`}
+          data-fb-slot="hint"
+        >
+          {controller.hint}
+        </span>
+      ) : null}
+      {controller.error ? (
+        <span
+          id={`${name}-error`}
+          data-fb-slot="error"
+          role="alert"
+        >
+          {controller.error}
+        </span>
+      ) : null}
     </div>
   );
 }
-
-function attachDemoUi(form: any) {
-  form.fields = new Proxy(
-    {},
-    {
-      get: (_target, key) => {
-        const name = String(key);
-        return (props?: Record<string, any>) => (
-          <DemoField
-            form={form}
-            name={name}
-            {...props}
-          />
-        );
-      },
-    },
-  );
-
-  form.Form = Object.assign(form.Form, {
-    Submit: ({ children, disabled, loadingText, ...props }: Record<string, any>) => (
-      <button
-        {...props}
-        type={props.type ?? 'submit'}
-        disabled={Boolean(disabled) || form.state.isSubmitting}
-      >
-        {String(
-          form.state.isSubmitting
-            ? (loadingText ?? children ?? 'Saving...')
-            : (children ?? 'Submit'),
-        )}
-      </button>
-    ),
-  });
-
-  return form;
-}
-
-export function useFormBridge<S extends FormSchema>(
-  schema: S,
-  options?: Record<string, any>,
-) {
-  return attachDemoUi(useHeadlessFormBridge(schema, options as never));
-}
-
-export function FieldHost({ field: Field, ...props }: Record<string, any>) {
-  return <Field {...props} />;
-}
-
-export function FormHost({ form: Form, ...props }: Record<string, any>) {
-  return <Form {...props} />;
-}
-
-export function SubmitHost({ submit: Submit, ...props }: Record<string, any>) {
-  return <Submit {...props} />;
-}
-
-export { field };

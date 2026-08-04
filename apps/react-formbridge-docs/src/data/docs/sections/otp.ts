@@ -95,15 +95,15 @@ export function OtpPlaygroundWeb() {
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <fields.code />
+          <AppField form={form} name="code" />
           <p style={{ margin: 0, color: '#4b5563' }}>
             Grouped progress: <strong>{code.length}</strong> / 6
           </p>
-          <fields.plainCode />
+          <AppField form={form} name="plainCode" />
           <p style={{ margin: 0, color: '#4b5563' }}>
             Plain progress: <strong>{plainCode.length}</strong> / 6
           </p>
-          <Form.Submit>Verify code</Form.Submit>
+          <button type="submit">Verify code</button>
         </div>
       </Form>
 
@@ -184,15 +184,15 @@ export function OtpPlaygroundApp() {
           }}
         >
           <View style={{ gap: 12 }}>
-            <fields.code />
+            <AppField form={form} name="code" />
             <Text style={{ color: '#4b5563' }}>
               Grouped progress: <Text style={{ fontWeight: '600' }}>{code.length}</Text> / 6
             </Text>
-            <fields.plainCode />
+            <AppField form={form} name="plainCode" />
             <Text style={{ color: '#4b5563' }}>
               Plain progress: <Text style={{ fontWeight: '600' }}>{plainCode.length}</Text> / 6
             </Text>
-            <Form.Submit>Verify code</Form.Submit>
+            <button type="submit">Verify code</button>
           </View>
         </Form>
 
@@ -330,7 +330,7 @@ useEffect(() => {
 }, [state.values.code, state.isValid, submit])
 
 <Form onSubmit={verifyCode}>
-  <fields.code />
+  <AppField form={form} name="code" />
 </Form>
 ${FENCE}`,
     },

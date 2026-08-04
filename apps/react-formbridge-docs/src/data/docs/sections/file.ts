@@ -186,9 +186,9 @@ export function FilePlaygroundWeb() {
 
       <Form onSubmit={async (values) => setSubmitted(values)}>
         <div style={{ display: 'grid', gap: 16 }}>
-          <fields.avatar />
-          <fields.attachments />
-          <Form.Submit disabled={!state.isValid}>Upload</Form.Submit>
+          <AppField form={form} name="avatar" />
+          <AppField form={form} name="attachments" />
+          <button type="submit" disabled={!state.isValid}>Upload</button>
         </div>
       </Form>
 
@@ -290,10 +290,10 @@ export function FilePlaygroundApp() {
 
         <Form onSubmit={async (values) => setSubmitted(values)}>
           <View style={{ gap: 12 }}>
-            <fields.identityCard
+            <AppField form={form} name="identityCard"
               pickFiles={async () => MOCK_ID_CARD}
             />
-            <Form.Submit disabled={!state.isValid}>Submit</Form.Submit>
+            <button type="submit" disabled={!state.isValid}>Submit</button>
           </View>
         </Form>
 

@@ -85,10 +85,10 @@ export function WizardPlayground() {
           else await wizard.next()
         }}
       >
-        {'email' in fields && <fields.email />}
-        {'password' in fields && <fields.password />}
-        {'firstName' in fields && <fields.firstName />}
-        {'country' in fields && <fields.country />}
+        {'email' in fields && <AppField form={form} name="email" />}
+        {'password' in fields && <AppField form={form} name="password" />}
+        {'firstName' in fields && <AppField form={form} name="firstName" />}
+        {'country' in fields && <AppField form={form} name="country" />}
         {wizard.step.id === 'review' ? (
           <pre
             style={{
@@ -115,7 +115,7 @@ export function WizardPlayground() {
               Skip optional step
             </button>
           ) : null}
-          <Form.Submit>{wizard.isLastStep ? 'Finish' : 'Next'}</Form.Submit>
+          <button type="submit">{wizard.isLastStep ? 'Finish' : 'Next'}</button>
         </div>
       </Form>
 
@@ -195,10 +195,10 @@ export function SignupWizardRoute() {
       if (wizard.isLastStep) await wizard.submit()
       else await wizard.next()
     }}>
-      {'email' in fields && <fields.email />}
-      {'password' in fields && <fields.password />}
-      {'companyName' in fields && <fields.companyName />}
-      <Form.Submit>{wizard.isLastStep ? 'Finish' : 'Next'}</Form.Submit>
+      {'email' in fields && <AppField form={form} name="email" />}
+      {'password' in fields && <AppField form={form} name="password" />}
+      {'companyName' in fields && <AppField form={form} name="companyName" />}
+      <button type="submit">{wizard.isLastStep ? 'Finish' : 'Next'}</button>
     </Form>
   )
 }`,

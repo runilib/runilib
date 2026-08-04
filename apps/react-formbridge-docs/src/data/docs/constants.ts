@@ -1,126 +1,3 @@
-export const DOC_PREVIEWS = {
-  bridge: {
-    src: '/docs/formbridge/formbridge-bridge.svg',
-    alt: 'Preview representing schema adapter and external validation integration.',
-    caption:
-      'External schema bridges let you keep Zod or Yup as the source of truth while still using formbridge renderers.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  stylingWeb: {
-    src: '/docs/formbridge/formbridge-overview-web.svg',
-    alt: 'Desktop preview of a form themed through globalDefaults and local field overrides.',
-    caption:
-      'Web styling can combine schema defaults, a shared globalDefaults theme, and one-off field overrides without changing the form runtime.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  stylingNative: {
-    src: '/docs/formbridge/formbridge-overview-native.svg',
-    alt: 'Mobile preview of the same form themed for React Native.',
-    caption:
-      'React Native styling follows the same layered model: schema defaults, shared globalDefaults theme, and local overrides when one screen needs a different look.',
-    maxWidth: 340,
-    maxHeight: 620,
-  },
-  stylingStyledWeb: {
-    src: '/docs/formbridge/formbridge-overview-web.svg',
-    alt: 'Desktop preview of a form themed with styled-components around generated fields.',
-    caption:
-      'styled-components recipe: keep a stable styled host around generated fields and submit buttons, then style the built-in slots with normal CSS selectors.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  stylingUtilityWeb: {
-    src: '/docs/formbridge/formbridge-overview-web.svg',
-    alt: 'Desktop preview of a form themed with utility classes and slot class maps.',
-    caption:
-      'Utility-first recipe: className and classNames slot maps make Tailwind-style theming work without changing the generated field runtime.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  stylingSlotWeb: {
-    src: '/docs/formbridge/formbridge-overview-web.svg',
-    alt: 'Desktop preview of a form themed entirely through inline slot overrides.',
-    caption:
-      'Slot override recipe: use plain objects, DOM props, and render hooks when you want to stay dependency-free on web.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  stylingStyledNative: {
-    src: '/docs/formbridge/formbridge-overview-native.svg',
-    alt: 'Mobile preview of a form themed with styled-components/native.',
-    caption:
-      'styled-components/native recipe: wrap generated fields in a stable host and feed native slot styles through attrs or local overrides.',
-    maxWidth: 340,
-    maxHeight: 620,
-  },
-  stylingSlotNative: {
-    src: '/docs/formbridge/formbridge-overview-native.svg',
-    alt: 'Mobile preview of a form themed through native style objects and slot overrides.',
-    caption:
-      'React Native slot override recipe: one globalDefaults theme plus targeted local overrides is often enough for polished production screens.',
-    maxWidth: 340,
-    maxHeight: 620,
-  },
-  asyncWeb: {
-    src: '/docs/formbridge/formbridge-async-web.svg',
-    alt: 'Desktop preview of an async select or autocomplete flow.',
-    caption:
-      'Async options support debounce, caching, dependencies, and loading states for remote datasets on web.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  asyncNative: {
-    src: '/docs/formbridge/formbridge-async-native.svg',
-    alt: 'Mobile preview of an async picker flow.',
-    caption:
-      'The same async options contract can feed native lists, search inputs, or custom pickers.',
-    maxWidth: 340,
-    maxHeight: 620,
-  },
-  analyticsWeb: {
-    src: '/docs/formbridge/formbridge-lifecycle.svg',
-    alt: 'Preview of analytics instrumentation layered on a web form.',
-    caption:
-      'Analytics stays additive: you keep the same form API and add callbacks for focus, completion, abandonment, and errors.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  analyticsNative: {
-    src: '/docs/formbridge/formbridge-overview-native.svg',
-    alt: 'Preview of analytics instrumentation on a mobile form.',
-    caption:
-      'On native, the same callbacks can track focus, completion, and abandonment without changing field code.',
-    maxWidth: 340,
-    maxHeight: 620,
-  },
-  dynamic: {
-    src: '/docs/formbridge/formbridge-dynamic.svg',
-    alt: 'Preview of a dynamic form definition rendered at runtime.',
-    caption:
-      'Dynamic forms let you turn JSON definitions into real formbridge forms while preserving order and visibility rules.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  wizard: {
-    src: '/docs/formbridge/formbridge-wizard.svg',
-    alt: 'Preview of a multi-step wizard flow.',
-    caption:
-      'Wizard flows accumulate values across steps, apply per-step validation, and keep the same schema-driven building blocks.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-  readonly: {
-    src: '/docs/formbridge/formbridge-readonly.svg',
-    alt: 'Preview of a readonly and diff review screen.',
-    caption:
-      'Readonly and diff rendering are useful for review screens, approval steps, or comparing pending edits to saved data.',
-    maxWidth: 720,
-    maxHeight: 420,
-  },
-} as const;
-
 export const FENCE = '```';
 
 export type DocsMethodTableRow = readonly [string, string, string];
@@ -411,10 +288,13 @@ export const USE_FORM_BRIDGE_OPTIONS_SURFACE = [
       '`AnalyticsOptions`',
       'Wires analytics without changing the field components',
     ],
+    ['`schemaKey?`', '`string | number`', 'Rebuilds the compiled schema runtime'],
+    ['`onSubmit?`', '`(values) => void | Promise<void>`', 'Headless submit callback'],
+    ['`onError?`', '`(errors) => void`', 'Called when validation blocks submission'],
     [
-      '`globalDefaults?`',
-      '`(state) => FormBridgeUiOptions`',
-      'Shared theming layer for generated fields, form wrapper, and submit button; reactive to submit/dirty/error state',
+      '`onSubmitError?`',
+      '`(error) => string`',
+      'Maps a thrown submit error to `state.submitError`',
     ],
   ]),
 ].join('\n');
@@ -430,13 +310,8 @@ export const USE_FORM_BRIDGE_RETURN_SURFACE = [
     ],
     [
       '[Form](/docs/form-component)',
-      '`ComponentType & { Submit }`',
-      'Generated wrapper component with submit lifecycle (includes `Form.Submit`)',
-    ],
-    [
-      '[fields](/docs/generated-fields)',
-      '`Record<name, Component>`',
-      'Typed generated field components keyed by schema name',
+      '`ComponentType`',
+      'Minimal wrapper connected to the submit lifecycle',
     ],
     [
       '[FieldError](/docs/fielderror-component)',
@@ -464,20 +339,9 @@ export const USE_FORM_BRIDGE_RETURN_SURFACE = [
       'Per-field visibility / required / disabled state computed from conditional rules',
     ],
     [
-      '[isLoadingDraft](/docs/draft-persistence)',
-      '`boolean`',
-      '`true` while a persisted draft is being restored',
-    ],
-    [
-      '[hasDraft](/docs/draft-persistence)',
-      '`boolean`',
-      '`true` once a draft was found and restored',
-    ],
-    ['[clearDraft](/docs/draft-persistence)', '`() => void`', 'Delete the saved draft'],
-    [
-      '[saveDraftNow](/docs/draft-persistence)',
-      '`() => void`',
-      'Persist immediately without waiting for debounce',
+      '[persistanceHelpers](/docs/draft-persistence)',
+      '`object`',
+      '`isLoadingDraft`, `hasDraft`, `clearDraft()`, and `saveDraftNow()`',
     ],
     [
       '[setValue](/docs/actions-and-helpers)',
@@ -527,7 +391,12 @@ export const USE_FORM_BRIDGE_RETURN_SURFACE = [
     [
       '[submit](/docs/actions-and-helpers)',
       '`() => Promise<void>`',
-      'Imperative submit using the same submit pipeline as `Form.Submit`',
+      'Imperative submit using the validation and submit pipeline',
+    ],
+    [
+      '[handleSubmit](/docs/actions-and-helpers)',
+      '`(event?) => Promise<void>`',
+      'Event-friendly submit handler for an application-owned web form',
     ],
   ]),
 ].join('\n');
@@ -553,12 +422,12 @@ export const FIELD_CONTROLLER_SURFACE = [
     ['`options?`', '`SelectOption[]`', 'Options (select/radio/async) when applicable'],
     ['`otpLength?`', '`number`', 'OTP length (OTP fields only)'],
     ['`allValues`', '`Record<string, unknown>`', 'Snapshot of every current form value'],
-    ['`descriptor`', '`FieldDescriptor`', 'Raw descriptor produced by the builder'],
     [
-      '`renderProps`',
-      '`RenderContext`',
-      'Context object passed to custom `render(fn)` hooks',
+      '`displayValue` / `rawValue` / `maskComplete`',
+      '`string / string / boolean`',
+      'Masked-field metadata when applicable',
     ],
+    ['`digits` / `otpComplete`', '`string[] / boolean`', 'OTP metadata when applicable'],
     [
       '`setValue`',
       '`(value) => void`',
@@ -609,95 +478,6 @@ export const FORM_COMPONENT_PROPS_SURFACE = [
     ],
     ['`style?`', '`StyleProp`', 'Cross-platform wrapper style prop'],
     ['`className?`', '`string`', 'Web only'],
-  ]),
-].join('\n');
-
-export const FORM_SUBMIT_PROPS_SURFACE = [
-  'Complete `Form.Submit` props surface:',
-  '',
-  'Alongside the props below, `Form.Submit` also extends the native props of the underlying platform button / pressable, except for the keys FormBridge already models itself (`children`, `style`, and the managed loading / disabled behavior).',
-  '',
-  '- **Web**: native `<button>` attributes like `type`, `name`, `value`, `form`, `formAction`, `aria-*`, `data-*`, …',
-  '- **Native**: passthrough `TouchableOpacity`-style props such as `testID`, `accessibilityLabel`, `hitSlop`, `activeOpacity`, …',
-  '',
-  buildMethodsTable([
-    ['`children?`', '`ReactNode`', 'Button label / content'],
-    ['`style?`', '`StyleProp`', 'Cross-platform button/wrapper style'],
-    ['`loadingText?`', '`ReactNode`', 'Replaces the label while submitting'],
-    [
-      '`disabled?`',
-      '`boolean`',
-      'Adds an extra disabled condition on top of submit state',
-    ],
-    ['`className?`', '`string`', 'Web only'],
-    ['`containerStyle?`', '`StyleProp`', 'Native only wrapper/button style'],
-    ['`textStyle?`', '`StyleProp`', 'Native only label style'],
-    ['`indicatorColor?`', '`string`', 'Native only loading indicator color'],
-  ]),
-].join('\n');
-
-export const GENERATED_FIELD_COMMON_PROPS_SURFACE = [
-  'Common generated field props available on every field component:',
-  '',
-  buildMethodsTable([
-    ['`label?`', '`string`', 'Override the schema label for this render only'],
-    ['`placeholder?`', '`string`', 'Override placeholder copy for this render only'],
-    ['`hint?`', '`string`', 'Override helper copy for this render only'],
-    ['`style?`', '`StyleProp`', 'Wrapper style override'],
-    [
-      '`classNames?`',
-      '`SlotClassMap`',
-      'Web slot class map (also available as top-level prop)',
-    ],
-    ['`className?`', '`string`', 'Web only wrapper class override'],
-  ]),
-].join('\n');
-
-export const GENERATED_FIELD_UI_SURFACE = [
-  'Shared field override capabilities:',
-  '',
-  buildMethodsTable([
-    ['`id?` / `testID?`', '`string`', 'Platform id hooks'],
-    ['`hideLabel?`', '`boolean`', 'Visually suppress the default label'],
-    [
-      '`highlightOnError?`',
-      '`boolean`',
-      'Keep the error message but suppress the default error chrome when `false`',
-    ],
-    ['`styles?`', '`SlotStyleMap`', 'Slot style map'],
-    ['`classNames?`', '`SlotClassMap`', 'Web slot class map'],
-    [
-      '`wrapperProps?` / `labelProps?` / `hintProps?` / `errorProps?`',
-      '`object`',
-      'Forward low-level props to the built-in renderer',
-    ],
-    [
-      '`renderLabel?` / `renderHint?` / `renderError?`',
-      '`(ctx) => ReactNode`',
-      'Render-hook escape hatches',
-    ],
-    ['`renderRequiredMark?`', '`() => ReactNode`', 'Custom required mark renderer'],
-    [
-      '`inputProps?`',
-      '`object`',
-      'Text-like fields - forward props to the underlying input',
-    ],
-    ['`textareaProps?`', '`object`', '`textarea` on web'],
-    ['`selectProps?`', '`object`', '`select` on web'],
-    ['`renderPicker?`', '`(ctx) => ReactNode`', 'Select-like fields - custom picker UI'],
-    [
-      '`renderOption?`',
-      '`(option, state) => ReactNode`',
-      'Async select/autocomplete - custom option row',
-    ],
-    [
-      '`renderEmpty?` / `renderLoading?`',
-      '`() => ReactNode`',
-      'Async select/autocomplete - empty/loading states',
-    ],
-    ['`searchInputProps?`', '`object`', 'Phone fields on web'],
-    ['`renderFileIcon?`', '`(file) => ReactNode`', 'File fields on web'],
-    ['`pickFiles?`', '`(ctx) => void`', 'File fields on native'],
   ]),
 ].join('\n');
 
@@ -825,7 +605,7 @@ export const ACTIONS_HELPERS_SURFACE = [
     [
       '`submit`',
       '`() => Promise<void>`',
-      'Imperatively trigger submission through the same pipeline as `<Form.Submit>` (validation, `onSubmit` / `onError` / `onSubmitError`, analytics)',
+      'Imperatively trigger submission through the validation, submit-callback, and analytics pipeline',
     ],
     [
       '`fieldController`',
@@ -1101,89 +881,6 @@ export const PERSIST_OPTIONS_SURFACE = [
       "Bump to invalidate previously saved drafts. Default `'1'`",
     ],
   ]),
-].join('\n');
-
-export const GLOBAL_UI_SURFACE = [
-  'Complete `globalDefaults` surface:',
-  '',
-  buildMethodsTable([
-    [
-      '`globalDefaults`',
-      '`(state) => FormBridgeUiOptions`',
-      'Function invoked on each render - can react to submit/dirty/error state',
-    ],
-    [
-      '`field?`',
-      '`{ classNames?, styles?, hideLabel?, highlightOnError?, readOnly?, wrapperProps?, ... }`',
-      'Shared defaults for all generated fields',
-    ],
-    [
-      '`form?` (web)',
-      '`{ className?, style?, props? }`',
-      'Form wrapper overrides on web',
-    ],
-    ['`form?` (native)', '`{ style?, props? }`', 'Form wrapper overrides on native'],
-    [
-      '`submit?` (web)',
-      '`{ className?, style?, loadingText?, props? }`',
-      'Submit button overrides on web',
-    ],
-    [
-      '`submit?` (native)',
-      '`{ style?, containerStyle?, textStyle?, indicatorColor?, loadingText?, props?, contentProps? }`',
-      'Submit button overrides on native',
-    ],
-  ]),
-].join('\n');
-
-export const WEB_SLOT_SURFACE = [
-  'Web field slot names currently exposed through `classNames` / `styles`.',
-  'Slot names are prefixed with the field type so it is clear where each override will land.',
-  '',
-  '| Field | Slot names |',
-  '| --- | --- |',
-  '| Shared (every field) | `wrapper`, `label`, `hint`, `error`, `requiredMark` |',
-  '| Text / email / number / tel / url / date | `textInput` |',
-  '| Textarea | `textarea` |',
-  '| Select | `select`, `selectValue`, `selectArrow` |',
-  '| Checkbox | `checkboxRow`, `checkboxInput`, `checkboxLabel` |',
-  '| Radio | `radioGroup`, `radioOption`, `radioInput`, `radioLabel` |',
-  '| Switch | `switchRoot`, `switchButton`, `switchTrack`, `switchThumb`, `switchLabel` |',
-  '| OTP | `otpContainer`, `otpInput`, `otpSeparator` |',
-  '| Password | `passwordInput`, `passwordToggle`, `passwordStrengthRow`, `passwordStrengthBar`, `passwordStrengthMeta`, `passwordStrengthFill`, `passwordStrengthLabel`, `passwordStrengthEntropy`, `passwordRulesList`, `passwordRuleItem`, `passwordRuleBullet`, `passwordRuleText` |',
-  '| Phone | `phoneInput`, `phoneRow`, `phoneCountryButton`, `phoneCountryFlag`, `phoneCountryDivider`, `phoneChevron`, `phoneSearchInput`, `phoneSearchWrapper`, `phoneCountryList`, `phoneCountryScroll`, `phoneCountryItem`, `phoneSeparator`, `phoneCountryName`, `phoneCountryDial`, `phoneE164`, `phoneEmptyText` |',
-  '| File | `fileDropZone`, `fileDropZoneIcon`, `fileDropZoneText`, `fileDropZoneAccept`, `fileDropZoneMaxSize`, `fileBrowseButton`, `fileList`, `fileListItem`, `filePreviewImage`, `fileIcon`, `fileInfo`, `fileName`, `fileMeta`, `fileRemoveButton`, `fileAddMoreButton` |',
-  '| Async autocomplete | `autocompleteInput`, `autocompleteSelect`, `autocompleteSelectValue`, `autocompleteSelectArrow`, `autocompleteListbox`, `autocompleteOption`, `autocompleteOptionActive`, `autocompleteOptionSelected`, `autocompleteEmpty`, `autocompleteLoading` |',
-].join('\n');
-
-export const NATIVE_SLOT_SURFACE = [
-  'Native field slot names currently exposed through `styles`.',
-  'Slot names are prefixed with the field type so it is clear where each override will land.',
-  '',
-  '| Field | Slot names |',
-  '| --- | --- |',
-  '| Shared (every field) | `wrapper`, `label`, `error`, `hint`, `requiredMark` |',
-  '| Text / email / number / tel / url / date | `textInput` |',
-  '| Checkbox | `checkboxRow`, `checkboxBox`, `checkboxLabel` |',
-  '| Switch | `switchRow`, `switchLabel` |',
-  '| Select / radio | `selectTrigger`, `selectTriggerLabel`, `selectOptionRow`, `selectOptionLabel`, `selectModalBackdrop`, `selectModalCard` |',
-  '| OTP | `otpContainer`, `otpInput`, `otpSeparator` |',
-  '| Password | `passwordInput`, `passwordToggle`, `passwordToggleText`, `passwordStrengthRow`, `passwordStrengthBar`, `passwordStrengthMeta`, `passwordStrengthFill`, `passwordStrengthLabel`, `passwordStrengthEntropy`, `passwordRulesList`, `passwordRuleItem`, `passwordRuleBullet`, `passwordRuleText` |',
-  '| Phone | `phoneInput`, `phoneRow`, `phoneCountryButton`, `phoneCountryFlag`, `phoneCountryDial`, `phoneCountryDivider`, `phoneChevron`, `phoneE164`, `phoneModalBackdrop`, `phoneModalCard`, `phoneSearchInput`, `phoneSeparator`, `phoneCountryRow`, `phoneCountryName`, `phoneEmptyText` |',
-  '| File | `filePickButton`, `filePickButtonText`, `fileList`, `fileItem`, `fileIcon`, `fileIconText`, `fileName`, `fileMeta`, `fileRemoveButton`, `fileRemoveText` |',
-  '| Async autocomplete | `autocompleteTrigger`, `autocompleteTriggerValue`, `autocompleteTriggerPlaceholder`, `autocompleteModalBackdrop`, `autocompleteModalCard`, `autocompleteSearchInput`, `autocompleteLoadingRow`, `autocompleteLoadingText`, `autocompleteOptionRow`, `autocompleteOptionLabel`, `autocompleteEmptyText` |',
-].join('\n');
-
-export const HOST_HELPERS_SURFACE = [
-  'Complete host helper exports:',
-  '',
-  'Each host keeps the full props surface of the runtime component it wraps, including platform-native attributes.',
-  '',
-  '| Host | Props |',
-  '| --- | --- |',
-  '| `FieldHost` | generated field props + `field` |',
-  '| `SubmitHost` | full submit props (including native button / pressable attrs) + `submit` |',
-  '| `FormHost` | full form props (including native form / wrapper attrs) + `form` |',
 ].join('\n');
 
 export const INFER_AUTODETECTION_SURFACE = [
@@ -1766,7 +1463,7 @@ export const WIZARD_STEP_SURFACE = [
     [
       '`formOptions?`',
       '`Partial<UseFormBridgeOptions<S, TPlatform>>`',
-      'Per-step overrides forwarded to the underlying `useFormBridge()` - `validateOn`, `revalidateOn`, `validatorBridge`, `analytics`, `globalDefaults`, `persist`, `initialValues` (merged with accumulated wizard values)',
+      'Per-step overrides forwarded to the underlying `useFormBridge()` - validation triggers, bridge, analytics, persistence, callbacks, and initial values',
     ],
   ]),
   '',
@@ -2072,17 +1769,17 @@ export const WIZARD_RETURN_SURFACE = [
   `${FENCE}tsx WizardBody.tsx`,
   'if (wizard.isHydrating || !wizard.step) return <Spinner />',
   '',
-  'const { Form, fields } = wizard.currentStep',
+  'const form = wizard.currentStep',
   '',
   'return (',
   '  <>',
   '    <progress value={wizard.progress} max={100} />',
   '    <p>Step {wizard.currentStepIndex + 1} / {wizard.totalSteps}</p>',
   '',
-  '    <Form onSubmit={wizard.isLastStep ? wizard.submit : wizard.next}>',
-  "      {'email' in fields && <fields.email />}",
-  "      {'password' in fields && <fields.password />}",
-  "      {'firstName' in fields && <fields.firstName />}",
+  '    <form.Form onSubmit={wizard.isLastStep ? wizard.submit : wizard.next}>',
+  '      {\'email\' in form.state.values && <AppField form={form} name="email" />}',
+  '      {\'password\' in form.state.values && <AppField form={form} name="password" />}',
+  '      {\'firstName\' in form.state.values && <AppField form={form} name="firstName" />}',
   '',
   '      <div>',
   '        {!wizard.isFirstStep && (',
@@ -2091,11 +1788,11 @@ export const WIZARD_RETURN_SURFACE = [
   '        {wizard.step.optional && !wizard.isLastStep && (',
   "          <button type='button' onClick={wizard.skip}>Skip</button>",
   '        )}',
-  '        <Form.Submit>',
+  '        <button type="submit" disabled={wizard.isSubmitting}>',
   "          {wizard.isSubmitting ? 'Saving…' : wizard.isLastStep ? 'Finish' : 'Next'}",
-  '        </Form.Submit>',
+  '        </button>',
   '      </div>',
-  '    </Form>',
+  '    </form.Form>',
   '',
   '    {wizard.submitError && <p role="alert">{wizard.submitError}</p>}',
   '  </>',
@@ -2164,34 +1861,6 @@ export const READONLY_FIELD_STATE_SURFACE = [
   ]),
 ].join('\n');
 
-export const READONLY_FIELD_PROPS_SURFACE = [
-  'Each generated `ReadonlyFields.name(props?)` component accepts:',
-  '',
-  buildMethodsTable([
-    ['`label?`', '`string`', 'Per-render label override. Falls back to the schema label'],
-    [
-      '`format?`',
-      '`(value) => string`',
-      'One-off formatter for this render only. Takes precedence over `options.formatters[name]` and the built-in formatting',
-    ],
-    [
-      '`style?`',
-      '`object`',
-      "Cross-platform inline style forwarded to the readonly renderer's root element",
-    ],
-    [
-      '`className?`',
-      '`string`',
-      'Forwarded className for the web readonly renderer (ignored on native)',
-    ],
-    [
-      '`showDiff?`',
-      '`boolean`',
-      "Force the before/after UI on or off for this render. Defaults to `options.mode === 'diff'`",
-    ],
-  ]),
-].join('\n');
-
 export const READONLY_RETURN_SURFACE = [
   'Complete `useFormBridgeReadonly()` return surface:',
   '',
@@ -2215,11 +1884,6 @@ export const READONLY_RETURN_SURFACE = [
       '`hasChanges`',
       '`boolean`',
       'Shorthand for `changedFields.length > 0`. Handy for "Nothing changed" empty states',
-    ],
-    [
-      '`ReadonlyFields`',
-      '`{ [K in keyof S]: (props?) => ReactElement \\| null }`',
-      'One ready-to-render component per schema key, reading from `fields[name]`',
     ],
   ]),
 ].join('\n');

@@ -54,9 +54,9 @@ export function SignUpForm() {
   const form = useFormBridge(schema, {
     persist: { key: 'signup-form' },
   });
-  const email = form.field('email');
-  const password = form.field('password');
-  const terms = form.field('terms');
+  const email = form.fieldController('email');
+  const password = form.fieldController('password');
+  const terms = form.fieldController('terms');
 
   return (
     <form.Form onSubmit={async (values) => console.log(values)}>
@@ -105,10 +105,10 @@ export function SignUpForm() {
 
 ## Headless Fields
 
-`form.field(name)` returns everything needed to connect your own UI:
+`form.fieldController(name)` returns everything needed to connect your own UI:
 
 ```tsx
-const phone = form.field('phone');
+const phone = form.fieldController('phone');
 
 <input
   value={phone.displayValue}

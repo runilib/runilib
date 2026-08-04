@@ -15,7 +15,7 @@ export const customSection: LibraryDoc['sections'][number] = {
   content: `Escape hatch for UI that deserves a custom renderer while keeping the rest of the form runtime.
 
 - Use it when the built-in field types are not enough
-- You still keep schema typing, validation, state, submit lifecycle, and the same generated field map
+- You still keep schema typing, validation, state, and the submit lifecycle
 - If the value model is already one of the built-in field types and you only want to replace the UI, prefer \`form.fieldController(name)\` before reaching for \`field.custom()\``,
   codeTabs: [
     {
@@ -42,8 +42,8 @@ export const customSection: LibraryDoc['sections'][number] = {
 const { Form, fields } = useFormBridge(schema)
 
 <Form onSubmit={save}>
-  <fields.rating />
-  <Form.Submit>Send</Form.Submit>
+  <AppField form={form} name="rating" />
+  <button type="submit">Send</button>
 </Form>`,
     },
   ],
@@ -55,7 +55,7 @@ const { Form, fields } = useFormBridge(schema)
 
 | Key | Description |
 | --- | --- |
-| \`defaultValue\` | Required - stays typed through the generated field |
+| \`defaultValue\` | Required - stays typed through the field controller |
 | \`label\` | Optional at construction, usually added with \`label('...')\` |
 | \`render(fn)\` | Main escape hatch - keeps the form runtime while replacing the UI |
 | \`fieldController\` | If you need custom UI for a built-in field type (\`select\`, \`masked\`, \`phone\`), prefer \`form.fieldController(name)\` instead |

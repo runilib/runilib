@@ -4,14 +4,14 @@ import { FIELD_CONTROLLER_SURFACE } from '../constants';
 export const fieldControllerSection: LibraryDoc['sections'][number] = {
   id: 'fb-field-controller',
   title: 'fieldController()',
-  content: `\`form.fieldController(name)\` is FormBridge's headless escape hatch for a single field. It returns a fully reactive, type-safe runtime object that carries **everything a renderer needs** - current value, error, touched/dirty/validating flags, label, placeholder, hint, options, visibility, change/blur/focus handlers, imperative actions, and a focus bridge - while the schema keeps owning the contract (type, validation, conditional rules, persistence, analytics).
+  content: `\`form.fieldController(name)\` is the primary headless rendering API for a single field. It returns a type-safe runtime object that carries **everything your component needs** - current value, error, touched/dirty/validating flags, label, placeholder, hint, options, visibility, change/blur/focus handlers, imperative actions, and a focus bridge - while the schema keeps owning the contract (type, validation, conditional rules, persistence, analytics).
 
-Reach for \`fieldController\` when the generated \`fields.*\` component is not flexible enough, but you still want the field to behave like a first-class schema field. You get total control over the markup without re-implementing form state, validation timing, or error display.
+Use \`fieldController\` for every field you render. You get total control over the markup without re-implementing form state or validation timing.
 
 - Great for: custom masked inputs, bespoke select triggers with bottom sheets or popovers, design-system wrappers, composite widgets (slider + numeric input + presets), inline editors, and any flow that needs imperative focus control.
 - Unlike \`field.custom()\`, the field keeps its original builder semantics - masked fields still run mask validation, selects still expose their \`options\`, phones still normalize to E.164, OTP fields still expose \`otpLength\`, and so on.
-- Unlike builder-level \`.render(fn)\`, the controller can be consumed anywhere in your component tree and plays nicely with surrounding layout, modals, previews, extra buttons, or custom error UI.
-- It is **fully reactive**: reading \`controller.value\`, \`controller.error\`, \`controller.visible\`, etc. subscribes the calling component to that field - no manual \`watch()\` needed.`,
+- It can be consumed anywhere in your component tree and works with surrounding layout, modals, previews, extra buttons, or custom error UI.
+- Calling \`fieldController()\` during render gives the component the current field state; no separate \`watch()\` call is needed.`,
   codeTabs: [
     {
       filename: 'BasicBinding.web.tsx',
@@ -211,10 +211,10 @@ return (
       content: `Use \`fieldController(name)\` when **all** of the following are true:
 
 - The field should stay typed as one of the built-in builder types (\`text\`, \`email\`, \`select\`, \`radio\`, \`masked\`, \`phone\`, \`otp\`, \`date\`, \`file\`, \`number\`, …) so you inherit its validation, normalization, and conditional semantics.
-- The default generated component doesn't fit - you need custom chrome, imperative focus, a modal/sheet trigger, extra buttons, a composite widget, or a shared design-system wrapper.
+- You need to bind the field runtime to an input, modal/sheet trigger, composite widget, or shared design-system wrapper.
 - You still want the renderer to be driven by reactive state (value, error, touched, validating, visible) so conditional rules, persistence, and analytics keep working.
 
-If you only need to restyle the default renderer, prefer [globalDefaults](/docs/globalDefaults) or per-field props first. If you need a **brand new field type** that no builder covers, jump to [field.custom()](/docs/field-custom) instead.`,
+If you need a **brand new value type** that no builder covers, use [field.custom()](/docs/field-custom) and render its controller the same way.`,
     },
     {
       id: 'fb-field-controller-surface',
@@ -242,15 +242,14 @@ Once registered, FormBridge can drive focus from anywhere - auto-focus on mount,
 - **Respect disabled** - the runtime sets it from the schema and from conditional rules; forwarding it keeps the form consistent with other fields.
 - **Prefer onChange over setValue** for user-driven edits: \`onChange\` fires the full update pipeline (change handlers, validation, analytics), while \`setValue\` is meant for imperative updates (presets, paste handlers, resets).
 - **Don't read state.values[name] directly** for rendering - read \`controller.value\`. The controller subscribes the component to that field only, avoiding re-renders on unrelated updates.
-- **Use controller.descriptor** (advanced) when you need to inspect the resolved builder descriptor - for example to read the mask pattern, the min/max of a \`field.number()\`, or the accepted MIME types of a \`field.file()\` - without re-declaring them in the renderer.`,
+- Use the type-specific controller metadata documented by each builder instead of relying on private descriptor fields.`,
     },
     {
       id: 'fb-field-controller-notes',
       title: 'How it compares to other escape hatches',
-      content: `- Prefer \`fieldController(name)\` over [field.custom()](/docs/field-custom) when you still want a built-in field type such as \`select\`, \`masked\`, \`phone\`, or \`otp\`.
-- Prefer \`fieldController(name)\` over builder-level \`.render(fn)\` when the custom UI needs surrounding layout, external buttons, modal state, or imperative focus control from outside the field.
-- Prefer \`renderPicker\` (on \`field.select\` / \`field.radio\` / \`field.date\`) over \`fieldController(name)\` when only the picker surface changes and the built-in field trigger is already good enough.
-- Prefer [globalDefaults](/docs/globalDefaults) or per-field props over \`fieldController\` when the change is purely visual - styling, spacing, label alignment - and the underlying markup is fine.`,
+      content: `- Use \`fieldController(name)\` for built-in field types such as \`select\`, \`masked\`, \`phone\`, or \`otp\`.
+- Use [field.custom()](/docs/field-custom) when the schema needs a value model not covered by a built-in builder.
+- Keep purely visual decisions in the component or design-system adapter that consumes the controller.`,
     },
   ],
 };

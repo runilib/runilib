@@ -76,8 +76,8 @@ const BASE_FIELD_METHOD_ROWS = [
   [
     '`render(fn)`',
     '`fn: (props) => ReactNode`',
-    'Uses the generated renderer',
-    "Provides a custom render function to completely override the default field rendering. Use this when the built-in field components don't meet your UI needs.",
+    'No render callback',
+    'Legacy descriptor callback. Prefer rendering from `fieldController(name)` so UI stays outside the schema.',
   ],
   [
     '`visibleWhen(fieldOrFn, value?)`',

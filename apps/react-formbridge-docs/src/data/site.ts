@@ -6,11 +6,11 @@ export const libraryInfo = {
   name: 'react-formbridge',
   packageName: '@runilib/react-formbridge',
   version: formbridgePackageVersion,
-  tagline: 'Schema-driven form builder for React and React Native',
+  tagline: 'Headless, schema-driven forms for React and React Native',
   description:
-    'Schema-first forms for React and React Native. One TypeScript schema, typed fields, built-in validation, conditional logic, draft persistence, and multi-step flows.',
+    'Schema-first, headless forms for React and React Native. One TypeScript schema, typed controllers, built-in validation, conditional logic, draft persistence, and multi-step flows.',
   shortDescription:
-    'Schema-driven React and React Native forms with typed fields, validation, conditional logic, persistence, async options, and multi-step flows.',
+    'Headless React and React Native forms with typed controllers, validation, conditional logic, persistence, async options, and multi-step flows.',
   installCommand: 'npm install @runilib/react-formbridge',
   npmUrl: 'https://www.npmjs.com/package/@runilib/react-formbridge',
   githubUrl: 'https://github.com/runilib/react-formbridge',
@@ -34,7 +34,7 @@ export const primaryKeywords = [
 ];
 
 export const homeStats: SiteStat[] = [
-  { value: '47', label: 'docs pages' },
+  { value: '45', label: 'docs pages' },
   { value: '17', label: 'field builders' },
   { value: '12', label: 'advanced hooks and patterns' },
   { value: '2', label: 'platforms covered' },
@@ -47,9 +47,9 @@ export const homeFeatures: FeatureCard[] = [
       'Keep the form definition as the source of truth and reuse the same runtime shape across React and React Native.',
   },
   {
-    title: 'Typed generated fields',
+    title: 'Typed headless controllers',
     description:
-      'useFormBridge() returns a ready-to-render Form wrapper and field components with UI props scoped to each platform.',
+      'fieldController() connects schema-owned state and validation to your own web, native, or design-system components.',
   },
   {
     title: 'Validation included',
@@ -90,7 +90,7 @@ export const faqItems: FaqItem[] = [
   {
     question: 'Does react-formbridge support both React web and React Native?',
     answer:
-      'Yes. The library is designed around one schema-first API that renders on React web and React Native with platform-specific UI surfaces where needed.',
+      'Yes. The schema and runtime API are shared; each platform renders its own controls.',
   },
   {
     question: 'Do I need to install Zod, Yup, or any validation library?',
@@ -105,17 +105,17 @@ export const faqItems: FaqItem[] = [
   {
     question: 'Do I need a provider or a custom registry before I can use it?',
     answer:
-      'No. The standard flow is provider-free. You define a schema, call useFormBridge(), and render the generated Form and field components directly.',
+      'No. Define a schema, call useFormBridge(), and bind fieldController() to your own components. FormProvider is optional for deep composition.',
   },
 ];
 
 export const groupDescriptions: Record<string, string> = {
   'Getting started':
     'Install the package, understand the schema mental model, and get a first form on screen quickly.',
-  Tutorials:
-    'Follow end-to-end guides for signup, checkout, validation, custom UI, and advanced production flows on web and React Native.',
-  'Core API':
-    'Learn the main hook surface, generated fields, state model, validation timing, and the shared builder foundation.',
+  Rendering:
+    'Connect typed field controllers to native inputs or reusable design-system adapters.',
+  'Core concepts':
+    'Learn the hook surface, state model, validation timing, persistence, and builder foundation.',
   'Available Field builders':
     'Browse every built-in field builder with defaults, mini recipes, and platform-specific notes.',
   Advanced:
@@ -138,26 +138,35 @@ const schema = {
 } satisfies FormSchema
 
 export function SignupForm() {
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onTouched',
     persist: { key: 'signup-form-web' },
+    onSubmit: async (values) => {
+      console.log('Submitted values', values)
+      window.alert(JSON.stringify(values, null, 2))
+    },
   })
+  const email = form.fieldController('email')
+  const terms = form.fieldController('terms')
 
   return (
-    <Form
-      onSubmit={async (values) => {
-        console.log('Submitted values', values)
-        if (typeof window !== 'undefined') {
-          window.alert(JSON.stringify(values, null, 2))
-        }
-      }}
-    >
-      <fields.email />
-      <fields.password />
-      <fields.role />
-      <fields.terms />
-      <Form.Submit disabled={!state.isValid}>Create account</Form.Submit>
-    </Form>
+    <form onSubmit={form.handleSubmit}>
+      <input
+        type="email"
+        value={email.value}
+        onChange={(event) => email.onChange(event.target.value)}
+        onBlur={email.onBlur}
+      />
+      <label>
+        <input
+          type="checkbox"
+          checked={terms.value}
+          onChange={(event) => terms.onChange(event.target.checked)}
+        />
+        Accept terms
+      </label>
+      <button disabled={form.state.isSubmitting}>Create account</button>
+    </form>
   )
 }`,
   },
@@ -165,7 +174,7 @@ export function SignupForm() {
     label: 'Native',
     filename: 'SignupScreen.native.tsx',
     lang: 'tsx',
-    code: `import { Alert, ScrollView, View } from 'react-native'
+    code: `import { Alert, Button, ScrollView, TextInput, View } from 'react-native'
 import type { FormSchema } from '@runilib/react-formbridge'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
@@ -177,27 +186,31 @@ const schema = {
 } satisfies FormSchema
 
 export function SignupScreen() {
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onTouched',
     persist: { key: 'signup-form-native' },
+    onSubmit: async (values) => {
+      Alert.alert('Submitted', JSON.stringify(values, null, 2))
+    },
   })
+  const email = form.fieldController('email')
+  const password = form.fieldController('password')
 
   return (
     <ScrollView contentInsetAdjustmentBehavior="automatic">
-      <Form
-        onSubmit={async (values) => {
-          console.log('Submitted values', values)
-          Alert.alert('Submitted', JSON.stringify(values, null, 2))
-        }}
-      >
-        <View style={{ gap: 12, paddingTop: 40, padding: 16 }}>
-          <fields.email />
-          <fields.password />
-          <fields.role />
-          <fields.terms />
-          <Form.Submit disabled={!state.isValid}>Create account</Form.Submit>
-        </View>
-      </Form>
+      <View style={{ gap: 12, paddingTop: 40, padding: 16 }}>
+        <TextInput value={email.value} onChangeText={email.onChange} />
+        <TextInput
+          value={password.value}
+          onChangeText={password.onChange}
+          secureTextEntry
+        />
+        <Button
+          title="Create account"
+          onPress={form.submit}
+          disabled={form.state.isSubmitting}
+        />
+      </View>
     </ScrollView>
   )
 }`,

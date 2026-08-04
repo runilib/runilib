@@ -7,7 +7,7 @@ export const schemaApiSection: LibraryDoc['sections'][number] = {
 
 - **The plain schema** describes what fields exist and how they render, default, and self-validate.
 - **createSchema(shape)** takes that same object and returns a wrapped value that **additionally** exposes a validation API (\`safeParse\`, \`refine\`, \`atLeastOne\`, etc.). The wrapped value is still accepted by \`useFormBridge\`, so you do not split rendering and validation across two objects.
-- **Autocomplete stays clean:** The wrapped value deliberately hides the field keys from direct autocomplete on the schema object typing \`mySchema.\` suggests only the API methods. Field-level inference still flows through \`SchemaValues<typeof mySchema>\` and the generated \`fields.*\` components.
+- **Autocomplete stays clean:** The wrapped value deliberately hides field keys from direct autocomplete on the schema object; typing \`mySchema.\` suggests only schema API methods. Field-level inference still flows through \`SchemaValues<typeof mySchema>\` and \`fieldController(name)\`.
 - **Type inference is preserved:** \`const\` inference on the shape keeps every field's builder type, so refinements receive a fully typed \`values\` argument and errors are routed back to the right field.
 - **Import surface stays flexible:** use the main \`@runilib/react-formbridge\` entry in client-only files; if the schema module is shared with strict server runtimes, author it from \`@runilib/react-formbridge/schema\` and import React APIs separately from the main package.`,
   subsections: [
@@ -80,12 +80,12 @@ export function TripBookingForm() {
 
   return (
     <Form onSubmit={(values) => console.log(values)}>
-      <fields.email />
-      <fields.phone />
-      <fields.password />
-      <fields.confirmPassword />
+      <AppField form={form} name="email" />
+      <AppField form={form} name="phone" />
+      <AppField form={form} name="password" />
+      <AppField form={form} name="confirmPassword" />
       {formLevelError ? <p className="error">{formLevelError}</p> : null}
-      <Form.Submit>Book the trip</Form.Submit>
+      <button type="submit">Book the trip</button>
     </Form>
   )
 }`,
@@ -122,9 +122,9 @@ export function BookingForm() {
 
   return (
     <Form onSubmit={(values) => console.log(values)}>
-      <fields.email />
-      <fields.phone />
-      <Form.Submit>Continue</Form.Submit>
+      <AppField form={form} name="email" />
+      <AppField form={form} name="phone" />
+      <button type="submit">Continue</button>
     </Form>
   )
 }
@@ -465,7 +465,7 @@ You can mix \`ref()\` and plain string keys freely inside \`atLeastOne\`, \`exac
 
 Practical consequences:
 
-- Field-level UI (\`<fields.email />\`) automatically displays path-keyed issues you do nothing.
+- Field-level UI (\`<AppField form={form} name="email" />\`) automatically displays path-keyed issues you do nothing.
 - To show form-level errors, read \`state.formLevelError\` and render it wherever makes sense (below the form, in a toast, etc.).
 - Duplicate issues on the same field are preserved in \`issues\` but \`errorsByField\` only keeps the **first** one, mirroring the usual "one message per field" convention.`,
     },

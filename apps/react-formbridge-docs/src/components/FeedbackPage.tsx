@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import {
   type FeedbackSubmissionValues,
@@ -11,131 +11,14 @@ import {
 import { FEEDBACK_SCHEMA, type FeedbackFormValues } from '@/lib/feedbackSchema';
 
 import Link from 'next/link';
-import styled, { css, type DefaultTheme, useTheme } from 'styled-components';
-import { type GlobaleDefaultsProps, useFormBridge } from '../demoFormBridge';
-
-function getFeedbackFieldStyles(theme: DefaultTheme): GlobaleDefaultsProps {
-  const errorColor = theme.mode === 'dark' ? '#ff9fb0' : '#d1435b';
-  const wrapper: CSSProperties = {
-    display: 'grid',
-    gap: '8px',
-    margin: 0,
-  };
-  const label: CSSProperties = {
-    color: theme.text,
-    fontSize: '14px',
-    fontWeight: 700,
-  };
-  const requiredMark: CSSProperties = {
-    color: theme.accent,
-    fontWeight: 800,
-  };
-  const textInput: CSSProperties = {
-    background: theme.surfaceSoft,
-    border: `1px solid ${theme.border}`,
-    borderRadius: '5px',
-    boxSizing: 'border-box',
-    color: theme.text,
-    fontSize: '14px',
-    lineHeight: 1.5,
-    minHeight: '46px',
-    padding: '0 14px',
-    width: '100%',
-  };
-  const textarea: CSSProperties = {
-    background: theme.surfaceSoft,
-    border: `1px solid ${theme.border}`,
-    borderRadius: '5px',
-    boxSizing: 'border-box',
-    color: theme.text,
-    fontSize: '14px',
-    lineHeight: 1.6,
-    minHeight: '132px',
-    padding: '12px 14px',
-    resize: 'vertical',
-    width: '100%',
-  };
-  const select: CSSProperties = {
-    background: theme.surfaceSoft,
-    border: `1px solid ${theme.border}`,
-    borderRadius: '5px',
-    boxSizing: 'border-box',
-    color: theme.text,
-    fontSize: '14px',
-    lineHeight: 1.5,
-    minHeight: '46px',
-    padding: '0 14px',
-    width: '100%',
-  };
-  const hint: CSSProperties = {
-    color: theme.textMuted,
-    fontSize: '12px',
-    lineHeight: 1.6,
-  };
-  const error: CSSProperties = {
-    color: errorColor,
-    fontSize: '12px',
-    fontWeight: 700,
-    lineHeight: 1.5,
-  };
-  const checkboxRow: CSSProperties = {
-    alignItems: 'flex-start',
-    display: 'flex',
-    gap: '10px',
-  };
-  const checkboxInput: CSSProperties = {
-    accentColor: theme.accent,
-    flex: '0 0 18px',
-    height: '18px',
-    marginTop: '2px',
-    width: '18px',
-  };
-  const checkboxLabel: CSSProperties = {
-    color: theme.text,
-    fontSize: '14px',
-    fontWeight: 700,
-    lineHeight: 1.55,
-  };
-
-  return {
-    field: {
-      styles: {
-        checkboxInput,
-        checkboxLabel,
-        checkboxRow,
-        error,
-        hint,
-        textInput,
-        label,
-        requiredMark,
-        wrapper,
-        select,
-        textarea,
-      },
-    },
-  };
-}
-
-function getSubmitStyle(theme: DefaultTheme) {
-  return {
-    background: theme.accent,
-    border: `1px solid ${theme.accent}`,
-    borderRadius: '10px',
-    color: '#ffffff',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: 700,
-    minHeight: '46px',
-    padding: '0 18px',
-  };
-}
+import styled, { css } from 'styled-components';
+import { AppField, useFormBridge } from '../demoFormBridge';
 
 export const FeedbackPage = ({
   initialRelevantPage = '',
 }: {
   initialRelevantPage?: string;
 }) => {
-  const theme = useTheme();
   const normalizedInitialRelevantPage = normalizeRelevantPage(initialRelevantPage);
   const [didSendFeedback, setDidSendFeedback] = useState(false);
   const initialValues = useMemo(
@@ -144,22 +27,6 @@ export const FeedbackPage = ({
   );
 
   const feedbackForm = useFormBridge(FEEDBACK_SCHEMA, {
-    globalDefaults: (state: { state: { isSubmitting: boolean } }) => ({
-      field: {
-        ...getFeedbackFieldStyles(theme).field,
-      },
-      form: {
-        style: {
-          display: 'grid',
-          gap: '18px',
-          marginTop: '22px',
-        },
-      },
-      submit: {
-        loadingText: state.state.isSubmitting ? 'Sending feedback...' : 'Send feedback',
-        style: getSubmitStyle(theme),
-      },
-    }),
     initialValues,
     revalidateOn: 'onChange',
     validateOn: 'onTouched',
@@ -262,44 +129,75 @@ export const FeedbackPage = ({
             </FormNote>
 
             <feedbackForm.Form
+              className="feedback-form"
               onSubmit={handleSubmit}
+              onError={() => undefined}
               onSubmitError={handleSubmitError}
+              style={undefined}
             >
-              <feedbackForm.fields.feedbackType />
+              <AppField
+                form={feedbackForm}
+                name="feedbackType"
+              />
 
               <TwoColumnGrid>
-                <feedbackForm.fields.subject />
-                <feedbackForm.fields.area />
+                <AppField
+                  form={feedbackForm}
+                  name="subject"
+                />
+                <AppField
+                  form={feedbackForm}
+                  name="area"
+                />
               </TwoColumnGrid>
 
               <TwoColumnGrid>
-                <feedbackForm.fields.relevantPage />
-                <feedbackForm.fields.email />
+                <AppField
+                  form={feedbackForm}
+                  name="relevantPage"
+                />
+                <AppField
+                  form={feedbackForm}
+                  name="email"
+                  inputProps={{ type: 'email' }}
+                />
               </TwoColumnGrid>
 
-              <feedbackForm.fields.name />
+              <AppField
+                form={feedbackForm}
+                name="name"
+              />
 
-              <feedbackForm.fields.message
-                styles={{
-                  textarea: {
-                    minHeight: '180px',
-                  },
-                }}
+              <AppField
+                form={feedbackForm}
+                name="message"
+                kind="textarea"
+                textareaStyle={{ minHeight: '180px' }}
               />
 
               <BugGrid>
-                <feedbackForm.fields.expectedBehavior />
-                <feedbackForm.fields.actualBehavior />
-                <feedbackForm.fields.reproductionSteps
-                  styles={{
-                    textarea: {
-                      minHeight: '152px',
-                    },
-                  }}
+                <AppField
+                  form={feedbackForm}
+                  name="expectedBehavior"
+                  kind="textarea"
+                />
+                <AppField
+                  form={feedbackForm}
+                  name="actualBehavior"
+                  kind="textarea"
+                />
+                <AppField
+                  form={feedbackForm}
+                  name="reproductionSteps"
+                  kind="textarea"
+                  textareaStyle={{ minHeight: '152px' }}
                 />
               </BugGrid>
 
-              <feedbackForm.fields.contactConsent />
+              <AppField
+                form={feedbackForm}
+                name="contactConsent"
+              />
 
               {isBugReport ? (
                 <BugNote>
@@ -313,7 +211,14 @@ export const FeedbackPage = ({
               ) : null}
 
               <Actions>
-                <feedbackForm.Form.Submit />
+                <PrimaryButton
+                  type="submit"
+                  disabled={feedbackForm.state.isSubmitting}
+                >
+                  {feedbackForm.state.isSubmitting
+                    ? 'Sending feedback…'
+                    : 'Send feedback'}
+                </PrimaryButton>
                 <SecondaryButton
                   type="button"
                   onClick={handleReset}
@@ -347,8 +252,9 @@ export const FeedbackPage = ({
               <AsideTitle>Why this page uses FormBridge</AsideTitle>
               <AsideCopy>
                 The docs should dogfood the same schema-first flow they describe. This
-                page uses generated fields, conditional visibility, runtime validation,
-                and the built-in submit pipeline instead of a one-off state machine.
+                page uses application-owned fields, conditional visibility, runtime
+                validation, and the built-in submit pipeline instead of a one-off state
+                machine.
               </AsideCopy>
             </AsideCard>
 
@@ -491,6 +397,78 @@ const FormCard = styled.section`
   background: ${({ theme }) => theme.surface};
   box-shadow: ${({ theme }) => theme.shadow};
 
+  .feedback-form {
+    display: grid;
+    gap: 18px;
+    margin-top: 22px;
+  }
+
+  [data-fb-field] {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+  }
+
+  [data-fb-slot='label'],
+  [data-fb-slot='checkbox-label'] {
+    color: ${({ theme }) => theme.text};
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  [data-fb-slot='checkbox-label'] {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.55;
+  }
+
+  [data-fb-slot='required-mark'] {
+    color: ${({ theme }) => theme.accent};
+  }
+
+  [data-fb-slot='input'],
+  [data-fb-slot='select'],
+  [data-fb-slot='textarea'] {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid ${({ theme }) => theme.border};
+    border-radius: 5px;
+    background: ${({ theme }) => theme.surfaceSoft};
+    color: ${({ theme }) => theme.text};
+    font: inherit;
+  }
+
+  [data-fb-slot='input'],
+  [data-fb-slot='select'] {
+    min-height: 46px;
+    padding: 0 14px;
+  }
+
+  [data-fb-slot='textarea'] {
+    min-height: 132px;
+    padding: 12px 14px;
+    resize: vertical;
+  }
+
+  [data-fb-slot='checkbox-input'] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: ${({ theme }) => theme.accent};
+  }
+
+  [data-fb-slot='hint'] {
+    color: ${({ theme }) => theme.textMuted};
+    font-size: 12px;
+  }
+
+  [data-fb-slot='error'] {
+    color: var(--feedback-error);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
   [data-fb-field][data-fb-error] > [data-fb-slot='label'],
   [data-fb-field][data-fb-error] [data-fb-slot='checkbox-label'],
   [data-fb-field][data-fb-error] [data-fb-slot='switch-label'],
@@ -597,6 +575,14 @@ const SecondaryButton = styled.button`
   border: 1px solid ${({ theme }) => theme.border};
   background: ${({ theme }) => theme.surface};
   color: ${({ theme }) => theme.textSoft};
+  cursor: pointer;
+`;
+
+const PrimaryButton = styled.button`
+  ${buttonStyles}
+  border: 1px solid ${({ theme }) => theme.accent};
+  background: ${({ theme }) => theme.accent};
+  color: #ffffff;
   cursor: pointer;
 `;
 

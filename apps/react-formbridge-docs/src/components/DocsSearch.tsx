@@ -8,7 +8,7 @@ import type { DocEntry, DocSection } from '@/types';
 
 import { usePathname, useRouter } from 'next/navigation';
 import styled from 'styled-components';
-import { FieldHost, FormHost, field, useFormBridge } from '../demoFormBridge';
+import { field, useFormBridge } from '../demoFormBridge';
 
 interface SearchIndexItem {
   entry: DocEntry;
@@ -162,6 +162,7 @@ export function DocsSearch() {
   const searchFormRef = useRef(searchForm);
   searchFormRef.current = searchForm;
   const queryValue = String(searchForm.watch('query') ?? '');
+  const queryController = searchForm.fieldController('query');
   const allEntries = useMemo(() => getAllDocEntries(), []);
   const featuredEntries = useMemo(() => getFeaturedEntries(), []);
   const searchIndex = useMemo(() => buildSearchIndex(allEntries), [allEntries]);
@@ -358,14 +359,20 @@ export function DocsSearch() {
               aria-label="Search documentation"
             >
               <SearchForm
-                form={searchForm.Form}
-                onSubmit={handleSearchSubmit}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  handleSearchSubmit();
+                }}
               >
                 <SearchField ref={searchFieldRef}>
                   <SearchGlyph aria-hidden="true" />
                   <SearchInput
-                    field={searchForm.fields.query}
-                    hideLabel
+                    ref={queryController.registerFocusable}
+                    value={String(queryController.value ?? '')}
+                    placeholder={queryController.placeholder}
+                    onChange={(event) => queryController.onChange(event.target.value)}
+                    onBlur={queryController.onBlur}
+                    onFocus={queryController.onFocus}
                     autoComplete="off"
                     inputMode="search"
                     enterKeyHint="search"
@@ -546,7 +553,7 @@ const SearchDialog = styled.div`
   }
 `;
 
-const SearchForm = styled(FormHost)`
+const SearchForm = styled.form`
   padding: 16px 16px 12px;
   border-bottom: 1px solid ${({ theme }) => theme.border};
 `;
@@ -563,31 +570,22 @@ const SearchField = styled.div`
   color: ${({ theme }) => theme.textMuted};
 `;
 
-const SearchInput = styled(FieldHost)`
+const SearchInput = styled.input`
   flex: 1;
   min-width: 0;
   align-self: stretch;
+  width: 100%;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: ${({ theme }) => theme.text};
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: none;
 
-  &[data-fb-field] {
-    flex: 1;
-    min-width: 0;
-  }
-
-  &[data-fb-field] [data-fb-slot='input'] {
-    width: 100%;
-    min-width: 0;
-    min-height: 52px;
-    padding: 0;
-    border: 0;
-    outline: none;
-    background: transparent;
-    color: ${({ theme }) => theme.text};
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: none;
-  }
-
-  &[data-fb-field] [data-fb-slot='input']::placeholder {
+  &::placeholder {
     color: ${({ theme }) => theme.textMuted};
   }
 `;

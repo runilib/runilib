@@ -13,11 +13,8 @@ import { emailSection } from './sections/email';
 import { fieldControllerSection } from './sections/fieldController';
 import { fieldErrorSection } from './sections/fieldError';
 import { fieldLabelSection } from './sections/fieldLabel';
-import { fieldsSection } from './sections/fields';
 import { fileSection } from './sections/file';
 import { formSection } from './sections/form';
-import { globalDefaultsSection } from './sections/globalDefaults';
-import { hostHelpersSection } from './sections/hostHelpers';
 import { inferSection } from './sections/infer';
 import { inferTypeSection } from './sections/inferType';
 import { installSection } from './sections/install';
@@ -39,20 +36,13 @@ import { switchSection } from './sections/switch';
 import { telSection } from './sections/tel';
 import { textSection } from './sections/text';
 import { textareaSection } from './sections/textarea';
-import { tutorialSection } from './sections/tutorial';
-import { tutorialCheckoutSection } from './sections/tutorialCheckout';
 import { tutorialCustomUiSection } from './sections/tutorialCustomUi';
-import { tutorialProductionSection } from './sections/tutorialProduction';
-import { tutorialSchemaValidationSection } from './sections/tutorialSchemaValidation';
-import { tutorialSignupSection } from './sections/tutorialSignup';
-import { tutorialValidationSection } from './sections/tutorialValidation';
 import { urlSection } from './sections/url';
 import { useAsyncOptionsSection } from './sections/useAsyncOptions';
 import { useFormBridgeSection } from './sections/useFormBridge';
 import { useFormBridgeContextSection } from './sections/useFormBridgeContext';
 import { validationSection } from './sections/validation';
 import { adaptersSection } from './sections/validatorBridge';
-import { webUiSection } from './sections/webUi';
 import { wizardSection } from './sections/wizard';
 import { docSidebar } from './sidebar';
 
@@ -65,25 +55,16 @@ export const formbridgeDocs: LibraryDoc = {
     installSection,
     quickstartSection,
     schemaMentalModelSection,
-    tutorialSection,
-    tutorialSignupSection,
-    tutorialCheckoutSection,
-    tutorialValidationSection,
-    tutorialSchemaValidationSection,
     tutorialCustomUiSection,
-    tutorialProductionSection,
     useFormBridgeSection,
     schemaApiSection,
     formSection,
     fieldErrorSection,
     fieldLabelSection,
-    fieldsSection,
     fieldControllerSection,
-    hostHelpersSection,
     stateSection,
     actionsSection,
     validationSection,
-    globalDefaultsSection,
     builderBasicsSection,
     baseFieldBuilderSection,
     textSection,
@@ -108,7 +89,6 @@ export const formbridgeDocs: LibraryDoc = {
     adaptersSection,
     conditionalSection,
     persistenceSection,
-    webUiSection,
     useFormBridgeContextSection,
     analyticsSection,
     useAsyncOptionsSection,

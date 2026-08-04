@@ -19,10 +19,10 @@ function WebTypingHarness() {
     phone: field.masked('99 99 99 99 99').label('Phone').storeRaw(),
   };
   const form = useWebFormBridge(signupSchema);
-  const nameController = form.field('name');
-  const countryController = form.field('country');
-  const codeController = form.field('code');
-  const phoneController = form.field('phone');
+  const nameController = form.fieldController('name');
+  const countryController = form.fieldController('country');
+  const codeController = form.fieldController('code');
+  const phoneController = form.fieldController('phone');
 
   schemaWithApi.safeParse({
     password: 'secret',
@@ -55,8 +55,8 @@ function NativeTypingHarness() {
     otp: field.otp('Code').length(4),
   };
   const form = useNativeFormBridge(nativeSchema);
-  const countryController = form.field('country');
-  const otpController = form.field('otp');
+  const countryController = form.fieldController('country');
+  const otpController = form.fieldController('otp');
 
   countryController.options?.[0]?.label;
   otpController.otpLength;

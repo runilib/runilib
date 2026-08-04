@@ -20,6 +20,95 @@ const API_SHIM = `const api = new Proxy({}, {
     return { methodName, values }
   },
 })`;
+const APP_FIELD_SHIM = `function AppField({ form, name }) {
+  const controller = form.fieldController(name)
+
+  if (!controller.visible) return null
+
+  if (controller.options?.length) {
+    return (
+      <label>
+        {controller.label}
+        <select
+          value={String(controller.value ?? '')}
+          disabled={controller.disabled}
+          onChange={(event) => controller.onChange(event.target.value)}
+          onBlur={controller.onBlur}
+        >
+          {controller.options.map((option) => (
+            <option key={String(option.value)} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {controller.error ? <span role="alert">{controller.error}</span> : null}
+      </label>
+    )
+  }
+
+  if (typeof controller.value === 'boolean') {
+    return (
+      <label>
+        <input
+          type="checkbox"
+          checked={controller.value}
+          disabled={controller.disabled}
+          onChange={(event) => controller.onChange(event.target.checked)}
+          onBlur={controller.onBlur}
+        />
+        {controller.label}
+      </label>
+    )
+  }
+
+  return (
+    <label>
+      {controller.label}
+      <input
+        value={controller.displayValue ?? String(controller.value ?? '')}
+        placeholder={controller.placeholder}
+        disabled={controller.disabled}
+        onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+      />
+      {controller.error ? <span role="alert">{controller.error}</span> : null}
+    </label>
+  )
+}`;
+const APP_FIELD_NATIVE_SHIM = `import {
+  Switch as AppSwitch,
+  Text as AppText,
+  TextInput as AppTextInput,
+  View as AppView,
+} from 'react-native'
+
+function AppField({ form, name }) {
+  const controller = form.fieldController(name)
+
+  if (!controller.visible) return null
+
+  return (
+    <AppView>
+      <AppText>{controller.label}</AppText>
+      {typeof controller.value === 'boolean' ? (
+        <AppSwitch
+          value={controller.value}
+          disabled={controller.disabled}
+          onValueChange={controller.onChange}
+        />
+      ) : (
+        <AppTextInput
+          value={controller.displayValue ?? String(controller.value ?? '')}
+          placeholder={controller.placeholder}
+          editable={!controller.disabled}
+          onChangeText={controller.onChange}
+          onBlur={controller.onBlur}
+        />
+      )}
+      {controller.error ? <AppText>{controller.error}</AppText> : null}
+    </AppView>
+  )
+}`;
 
 type DocSnippetRendererProps = {
   interactive?: boolean;
@@ -121,6 +210,12 @@ const buildSnippetPlaygroundCode = (snippet: CodeSnippet): string | null => {
   }
 
   const codeParts = [snippet.code.trimEnd()];
+
+  if (snippet.code.includes('<AppField')) {
+    codeParts.push(
+      inferSnippetPlatform(snippet) === 'native' ? APP_FIELD_NATIVE_SHIM : APP_FIELD_SHIM,
+    );
+  }
 
   if (
     snippet.code.includes('api.') &&
