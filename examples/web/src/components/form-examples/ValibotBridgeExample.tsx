@@ -101,15 +101,29 @@ export function ValibotBridgeExample() {
         <div className={styles.formRow}>
           <NativeSelectField
             controller={fieldController('plan') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             selectClassName={styles.formInput}
           />
           <NativeField
             controller={fieldController('cardholder') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
@@ -118,16 +132,30 @@ export function ValibotBridgeExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('receiptEmail') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             type="email"
             className={styles.formField}
             inputClassName={styles.formInput}
           />
           <NativeField
             controller={fieldController('cardLast4') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
@@ -139,7 +167,10 @@ export function ValibotBridgeExample() {
             validation pipes.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Validate with Valibot
           </button>
         </div>

@@ -30,7 +30,10 @@ function ManualField({
 
   return (
     <div>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       {type === 'checkbox' ? (
         <input
           id={id}
@@ -134,19 +137,40 @@ export function CustomStorageAdapterExample() {
         >
           <ManualField
             controller={fieldController('fullName') as ManualController}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor: string;
+              }) => React.JSX.Element | null
+            }
           />
           <ManualField
             controller={fieldController('email') as ManualController}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor: string;
+              }) => React.JSX.Element | null
+            }
             type="email"
           />
           <ManualField
             controller={fieldController('newsletter') as ManualController}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor: string;
+              }) => React.JSX.Element | null
+            }
             type="checkbox"
           />
           <button type="submit">Save profile</button>
@@ -159,7 +183,10 @@ export function CustomStorageAdapterExample() {
           ) : (
             <ul style={logListStyle}>
               {logs.map((entry) => (
-                <li key={entry.id} style={logItemStyle}>
+                <li
+                  key={entry.id}
+                  style={logItemStyle}
+                >
                   <span style={logOpStyle(entry.op)}>{entry.op.toUpperCase()}</span>
                   <span style={logKeyStyle}>{entry.key}</span>
                   <span style={logTimeStyle}>{entry.at}</span>

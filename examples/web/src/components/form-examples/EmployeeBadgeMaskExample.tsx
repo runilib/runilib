@@ -28,7 +28,10 @@ function NativeField({
 
   return (
     <div>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       <input
         id={id}
         value={String(value)}
@@ -108,13 +111,27 @@ export function EmployeeBadgeMaskExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('teammateName') as ManualController}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor: string;
+              }) => React.JSX.Element | null
+            }
           />
           <NativeField
             controller={fieldController('badgeCode') as ManualController}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor: string;
+              }) => React.JSX.Element | null
+            }
           />
         </div>
 
@@ -123,7 +140,10 @@ export function EmployeeBadgeMaskExample() {
             Example format: fixed EMP- prefix, four digits, then two uppercase letters.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Issue badge
           </button>
         </div>

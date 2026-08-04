@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { createSchema, field, useFormBridge } from '@/src/demoFormBridge';
+import { createSchema, field, useFormBridge } from '@runilib/react-formbridge';
 
 import * as Haptics from 'expo-haptics';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { createNativeFormUi, formatDemoJson, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { formatDemoJson, simulateSubmitDelay } from './shared';
 
 const ENVIRONMENT_OPTIONS = [
   { label: 'Staging', value: 'staging' },
@@ -174,17 +175,18 @@ export function CreateSchemaAdvancedExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createNativeFormUi(),
+
     persist: {
       key: 'mobile-create-schema-advanced',
       storage: 'local',
     },
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
 
   const liveValues = watchAll();
-  const releaseName = liveValues.releaseName?.trim() || 'Q2 checkout hardening';
+  const releaseName =
+    String(liveValues.releaseName ?? '').trim() || 'Q2 checkout hardening';
   const environmentLabel =
     ENVIRONMENT_OPTIONS.find((item) => item.value === liveValues.environment)?.label ??
     'Pick an environment';
@@ -201,7 +203,7 @@ export function CreateSchemaAdvancedExample() {
       ? 'On-call set'
       : 'Missing on-call';
   const gateSignals = [
-    Boolean(liveValues.releaseName?.trim()),
+    Boolean(String(liveValues.releaseName ?? '').trim()),
     Boolean(liveValues.environment),
     Boolean(liveValues.riskLevel),
     Boolean(liveValues.contactEmail || liveValues.contactPhone),
@@ -291,20 +293,20 @@ export function CreateSchemaAdvancedExample() {
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Release setup</Text>
 
-          <fields.releaseName />
+          <NativeField controller={fieldController('releaseName')} />
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.environment />
+              <NativeField controller={fieldController('environment')} />
             </View>
             <View style={s.halfField}>
-              <fields.riskLevel />
+              <NativeField controller={fieldController('riskLevel')} />
             </View>
           </View>
 
-          <fields.changeTicket />
-          <fields.legalReview />
-          <fields.legalApprover />
+          <NativeField controller={fieldController('changeTicket')} />
+          <NativeField controller={fieldController('legalReview')} />
+          <NativeField controller={fieldController('legalApprover')} />
         </View>
 
         <View style={s.sectionBlock}>
@@ -312,32 +314,32 @@ export function CreateSchemaAdvancedExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.contactEmail />
+              <NativeField controller={fieldController('contactEmail')} />
             </View>
             <View style={s.halfField}>
-              <fields.contactPhone />
+              <NativeField controller={fieldController('contactPhone')} />
             </View>
           </View>
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.slackChannel />
+              <NativeField controller={fieldController('slackChannel')} />
             </View>
             <View style={s.halfField}>
-              <fields.pagerDutyService />
+              <NativeField controller={fieldController('pagerDutyService')} />
             </View>
           </View>
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.maintenanceStart />
+              <NativeField controller={fieldController('maintenanceStart')} />
             </View>
             <View style={s.halfField}>
-              <fields.maintenanceEnd />
+              <NativeField controller={fieldController('maintenanceEnd')} />
             </View>
           </View>
 
-          <fields.rollbackPlan />
+          <NativeField controller={fieldController('rollbackPlan')} />
 
           <View style={s.tips}>
             <Text style={s.tip}>Draft saved locally</Text>
@@ -359,12 +361,9 @@ export function CreateSchemaAdvancedExample() {
           </View>
         ) : null}
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Running createSchema checks..."
-        >
+        <NativeSubmit onPress={() => void form.submit()}>
           Validate release gate
-        </Form.Submit>
+        </NativeSubmit>
       </Form>
 
       <Text style={s.footerText}>

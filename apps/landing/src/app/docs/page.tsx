@@ -72,7 +72,7 @@ export default function Docs() {
                 Every schema is fully typed. Types are inferred - no manual annotations
                 needed.
               </QuickDesc>
-              <QuickCode>{`const form = useFormBridge({\n  email: field.email('Email').required(),\n})\n// form.fields.email is typed ✓`}</QuickCode>
+              <QuickCode>{`const form = useFormBridge({\n  email: field.email('Email').required(),\n})\nconst email = form.fieldController('email') // typed ✓`}</QuickCode>
             </QuickCard>
             <QuickCard>
               <QuickName>Zero config</QuickName>

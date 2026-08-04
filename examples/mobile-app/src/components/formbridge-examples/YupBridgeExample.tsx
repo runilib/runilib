@@ -1,17 +1,15 @@
 // import { useMemo, useState } from 'react';
 // import { Text, View } from 'react-native';
 
-// import { field, useFormBridge, yupBridge } from '@/src/demoFormBridge';
+// import { field, useFormBridge, yupBridge } from '@runilib/react-formbridge';
 
 // import * as yup from 'yup';
 // import { formExampleStyles as s } from './FormExamples.styles';
 // import { BridgeExampleCard } from './BridgeExampleCard';
-// import { createNativeFieldProps, simulateSubmitDelay } from './shared';
+// import { simulateSubmitDelay } from './shared';
 
 // export function YupBridgeExample() {
 //   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-//   const fieldProps = useMemo(() => createNativeFieldProps(), []);
-
 //   const formSchema = useMemo(
 //     () => ({
 //       companyName: field.text().label('Company name').placeholder('Runilib Studio'),
@@ -55,7 +53,7 @@
 //     validatorBridge:resolver,
 //   });
 
-//   const { Form, fields, state, watchAll } = form;
+//   const { Form, fieldController, state, watchAll } = form;
 
 //   const liveValues = watchAll();
 
@@ -95,25 +93,13 @@
 
 //           <View style={s.formRow}>
 //             <View style={s.halfField}>
-//               <fields.companyName {...fieldProps} />
+//               <NativeField controller={fieldController('companyName')} />
 //             </View>
 //             <View style={s.halfField}>
-//               <fields.website {...fieldProps} />
+//               <NativeField controller={fieldController('website')} />
 //             </View>
 //           </View>
 
-//           <fields.monthlyBudget {...fieldProps} />
-//           <fields.acceptsPilot {...fieldProps} />
+//           <NativeField controller={fieldController('monthlyBudget')} />
+//           <NativeField controller={fieldController('acceptsPilot')} />
 //         </View>
-
-//         <Form.Submit
-//           style={s.submitButton}
-//           loadingText="Checking with Yup..."
-//         >
-//           Validate with Yup
-//         </Form.Submit>
-//       </Form>
-//     </BridgeExampleCard>
-//   );
-// }
-export {};

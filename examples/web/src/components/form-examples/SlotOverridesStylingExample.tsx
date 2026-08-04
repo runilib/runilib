@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
+import { NativeField } from './nativeFormHelpers';
 import { StylingExampleFrame } from './StylingExampleFrame';
 import { simulateSubmitDelay } from './shared';
 
@@ -30,67 +31,9 @@ export function SlotOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalDefaults: () => ({
-      form: {
-        style: {
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-        },
-      },
-      submit: {
-        loadingText: 'Saving inline theme...',
-        style: {
-          minWidth: 196,
-          padding: '14px 22px',
-          borderRadius: 16,
-          border: '1px solid rgba(245, 158, 11, 0.22)',
-          background: 'rgba(245, 158, 11, 0.14)',
-          color: '#fde68a',
-          fontWeight: 800,
-        },
-      },
-      field: {
-        styles: {
-          wrapper: {
-            marginBottom: 0,
-            gap: 8,
-          },
-          label: {
-            color: '#30415d',
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-          },
-          textInput: {
-            background: '#ffffff',
-            border: '1px solid rgba(251, 191, 36, 0.18)',
-            borderRadius: 16,
-            color: '#10203a',
-            padding: '14px 16px',
-          },
-          textarea: {
-            minHeight: 108,
-            background: '#ffffff',
-            border: '1px solid rgba(251, 191, 36, 0.18)',
-            borderRadius: 16,
-            color: '#10203a',
-            padding: '14px 16px',
-          },
-          hint: {
-            color: '#fde68a',
-          },
-          error: {
-            color: '#fca5a5',
-          },
-        },
-        renderRequiredMark: () => <span style={{ color: '#f59e0b' }}>•</span>,
-      },
-    }),
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
 
   return (
@@ -98,15 +41,16 @@ export function SlotOverridesStylingExample() {
       recipeName="Slot overrides"
       accent="#f59e0b"
       title="Style everything with plain objects and slot hooks"
-      description="No CSS framework required here. The whole look comes from globalDefaults.field and a couple of local field overrides."
+      description="No CSS framework required here. The application owns the markup and styles while FormBridge owns form state, validation, and submission."
       highlights={['inline objects', 'custom required mark', 'field-level tweaks']}
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.cardholder || 'Ava Stone'}
+            {String(liveValues.cardholder || 'Ava Stone')}
           </p>
           <p className={styles.resolverPreviewMuted}>
-            Receipt destination: {liveValues.receiptEmail || 'billing@runilib.dev'}.
+            Receipt destination:{' '}
+            {String(liveValues.receiptEmail || 'billing@runilib.dev')}.
           </p>
         </>
       }
@@ -126,36 +70,49 @@ export function SlotOverridesStylingExample() {
         }}
       >
         <div className={styles.formRow}>
-          <fields.receiptEmail
-            {...{
-              highlightOnError: false,
-              renderHint: () => (
-                <span style={{ color: '#5f6f88', fontSize: 12 }}>
-                  We only use it for invoices and receipts.
-                </span>
-              ),
-            }}
+          <NativeField
+            controller={fieldController('receiptEmail')}
+            FieldError={FieldError}
+            FieldLabel={FieldLabel}
+            type="email"
+            className={styles.formField}
+            inputClassName={styles.formInput}
           />
-          <fields.postalCode
-            {...{
-              styles: {
-                textInput: {
-                  textAlign: 'center',
-                  letterSpacing: '0.14em',
-                },
-              },
-            }}
+          <NativeField
+            controller={fieldController('postalCode')}
+            FieldError={FieldError}
+            FieldLabel={FieldLabel}
+            className={styles.formField}
+            inputClassName={styles.formInput}
           />
         </div>
 
-        <fields.cardholder />
-        <fields.specialInstructions />
+        <NativeField
+          controller={fieldController('cardholder')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          className={styles.formField}
+          inputClassName={styles.formInput}
+        />
+        <NativeField
+          controller={fieldController('specialInstructions')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          textarea
+          className={styles.formField}
+          inputClassName={styles.formInput}
+        />
 
         <div className={styles.footerRow}>
           <p className={styles.helperText}>
             A few slot maps are enough to theme the form end to end.
           </p>
-          <Form.Submit>Save slot recipe</Form.Submit>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
+            Save slot recipe
+          </button>
         </div>
       </Form>
     </StylingExampleFrame>

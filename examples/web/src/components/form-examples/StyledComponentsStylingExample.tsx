@@ -313,7 +313,8 @@ export function StyledComponentsStylingExample() {
         <PreviewStack>
           <PreviewValue>{String(liveValues.studioName || 'Northwind Labs')}</PreviewValue>
           <PreviewCopy>
-            The host stays static, and each input is wired manually through fieldController.
+            The host stays static, and each input is wired manually through
+            fieldController.
           </PreviewCopy>
           <PreviewPill>{`${String(liveValues.city || 'Lyon')} billing region`}</PreviewPill>
         </PreviewStack>
@@ -436,7 +437,10 @@ export function StyledComponentsStylingExample() {
             owns validation, value sync, and hint/error rendering.
           </FooterCopy>
 
-          <SubmitShell type="submit" disabled={state.status === 'submitting'}>
+          <SubmitShell
+            type="submit"
+            disabled={state.status === 'submitting'}
+          >
             {state.status === 'submitting' ? 'Saving...' : 'Save styled recipe'}
           </SubmitShell>
         </FooterRow>

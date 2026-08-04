@@ -112,184 +112,35 @@ export function PhoneVariantsExample() {
           setLastSubmission(submittedValues as PhoneVariantValues);
         }}
       >
-        <fields.supportLine
-          {...{
-            styles: {
-              phoneRow: {
-                display: 'grid',
-                gridTemplateColumns: '132px minmax(0, 1fr)',
-                gap: 12,
-                alignItems: 'stretch',
-              },
-              phoneCountryButton: {
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 10,
-                minHeight: 54,
-                padding: '0 14px',
-                borderRadius: 16,
-                border: '1px solid rgba(96, 165, 250, 0.22)',
-                background: '#ffffff',
-                color: '#10203a',
-                fontWeight: 700,
-              },
-            },
-            countryButtonAriaLabel: 'Select support market',
-            searchPlaceholderText: 'Search support market',
-            renderCountryButtonContent: ({ currentCountry, defaultContent }) => (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 10,
-                  width: '100%',
-                }}
-              >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  <span aria-hidden="true">{currentCountry.flag}</span>
-                  <span>{currentCountry.code}</span>
-                </span>
-                <span>{defaultContent}</span>
-              </span>
-            ),
-            renderCountryItemContent: ({ country, selected }) => (
-              <>
-                <span aria-hidden="true">{country.flag}</span>
-                <span
-                  style={{
-                    display: 'grid',
-                    gap: 2,
-                  }}
-                >
-                  <span style={{ color: '#10203a', fontSize: 13, fontWeight: 700 }}>
-                    {country.name}
-                  </span>
-                  <span style={{ color: '#64748b', fontSize: 11 }}>
-                    {selected
-                      ? 'Currently routing support here'
-                      : 'Available support market'}
-                  </span>
-                </span>
-                <span style={{ color: '#86efac', fontSize: 12, fontWeight: 700 }}>
-                  +{country.dial}
-                </span>
-              </>
-            ),
-            renderE164: ({ e164 }) => (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  color: '#86efac',
-                  fontSize: 12,
-                }}
-              >
-                <span aria-hidden="true">↳</span>
-                Stored route {e164}
-              </span>
-            ),
-          }}
+        <NativeField
+          controller={fieldController('supportLine')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          type="tel"
+          className={styles.formField}
+          inputClassName={styles.formInput}
+        />
+        <NativeField
+          controller={fieldController('salesHotline')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          type="tel"
+          className={styles.formField}
+          inputClassName={styles.formInput}
+        />
+        <NativeField
+          controller={fieldController('executiveDesk')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          type="tel"
+          className={styles.formField}
+          inputClassName={styles.formInput}
         />
 
-        <fields.salesHotline
-          {...{
-            styles: {
-              phoneRow: {
-                borderColor: 'rgba(96, 165, 250, 0.22)',
-                background: '#ffffff',
-              },
-              phoneCountryButton: {
-                minWidth: 122,
-                color: '#10203a',
-                fontWeight: 700,
-              },
-              phoneInput: {
-                color: '#10203a',
-              },
-            },
-            countryButtonAriaLabel: 'Choose the sales market',
-            searchPlaceholderText: 'Search revenue market',
-            emptySearchText: ({ search }) => `No sales market found for "${search}"`,
-            renderCountryButtonContent: ({ currentCountry }) => (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 10,
-                  width: '100%',
-                }}
-              >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  <span aria-hidden="true">{currentCountry.flag}</span>
-                  <span>Sales</span>
-                </span>
-                <span style={{ color: '#93c5fd' }}>+{currentCountry.dial}</span>
-              </span>
-            ),
-            renderCountryItemContent: ({ country, selected }) => (
-              <>
-                <span aria-hidden="true">{country.flag}</span>
-                <span style={{ color: '#10203a', fontSize: 13, fontWeight: 700 }}>
-                  {country.name}
-                </span>
-                <span
-                  style={{
-                    color: selected ? '#fbbf24' : '#93c5fd',
-                    fontSize: 12,
-                    fontWeight: 700,
-                  }}
-                >
-                  {selected ? 'ACTIVE' : `+${country.dial}`}
-                </span>
-              </>
-            ),
-            e164Text: ({ e164 }) => `CRM storage: ${e164}`,
-          }}
-        />
-
-        <fields.executiveDesk
-          {...{
-            styles: {
-              phoneRow: {
-                borderColor: 'rgba(148, 163, 184, 0.2)',
-                background: '#ffffff',
-              },
-              phoneCountryButton: {
-                minWidth: 94,
-                color: '#10203a',
-                fontWeight: 700,
-              },
-              phoneInput: {
-                color: '#10203a',
-              },
-            },
-            renderCountryButtonContent: ({ currentCountry }) => (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 10,
-                  width: '100%',
-                }}
-              >
-                <span>{currentCountry.name}</span>
-                <span style={{ color: '#93c5fd' }}>▾</span>
-              </span>
-            ),
-            renderE164: ({ e164 }) => (
-              <span style={{ color: '#5f6f88', fontSize: 12 }}>
-                Directory format: {e164}
-              </span>
-            ),
-          }}
-        />
-
-        <button type="submit" className={styles.submitButton}>
+        <button
+          type="submit"
+          className={styles.submitButton}
+        >
           Save phone playbook
         </button>
       </Form>

@@ -110,15 +110,29 @@ export function JoiBridgeExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('city') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
           <NativeSelectField
             controller={fieldController('department') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             selectClassName={styles.formInput}
           />
@@ -127,16 +141,30 @@ export function JoiBridgeExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('phone') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             type="tel"
             className={styles.formField}
             inputClassName={styles.formInput}
           />
           <NativeField
             controller={fieldController('postalCode') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
@@ -148,7 +176,10 @@ export function JoiBridgeExample() {
             business rules.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Validate with Joi
           </button>
         </div>

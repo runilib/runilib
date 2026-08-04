@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { createSchema, field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
-import { NativeField, NativeSelectField } from './nativeFormHelpers';
+import { NativeField } from './nativeFormHelpers';
 import { simulateSubmitDelay } from './shared';
 
 const tripSchema = createSchema({
@@ -121,8 +121,15 @@ export function SchemaRefinementExample() {
           >
             <NativeField
               controller={fieldController('fullName') as never}
-              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-              FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+              FieldError={
+                FieldError as (props: { name: string }) => React.JSX.Element | null
+              }
+              FieldLabel={
+                FieldLabel as (props: {
+                  name: string;
+                  htmlFor?: string;
+                }) => React.JSX.Element | null
+              }
               className={styles.formField}
               inputClassName={styles.formInput}
             />
@@ -130,16 +137,30 @@ export function SchemaRefinementExample() {
             <div style={{ display: 'flex', gap: 14 }}>
               <NativeField
                 controller={fieldController('email') as never}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor?: string;
+                  }) => React.JSX.Element | null
+                }
                 type="email"
                 className={styles.formField}
                 inputClassName={styles.formInput}
               />
               <NativeField
                 controller={fieldController('phone') as never}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor?: string;
+                  }) => React.JSX.Element | null
+                }
                 type="tel"
                 className={styles.formField}
                 inputClassName={styles.formInput}
@@ -149,16 +170,30 @@ export function SchemaRefinementExample() {
             <div style={{ display: 'flex', gap: 14 }}>
               <NativeField
                 controller={fieldController('departureDate') as never}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor?: string;
+                  }) => React.JSX.Element | null
+                }
                 type="date"
                 className={styles.formField}
                 inputClassName={styles.formInput}
               />
               <NativeField
                 controller={fieldController('returnDate') as never}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor?: string;
+                  }) => React.JSX.Element | null
+                }
                 type="date"
                 className={styles.formField}
                 inputClassName={styles.formInput}
@@ -167,16 +202,30 @@ export function SchemaRefinementExample() {
 
             <NativeField
               controller={fieldController('password') as never}
-              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-              FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+              FieldError={
+                FieldError as (props: { name: string }) => React.JSX.Element | null
+              }
+              FieldLabel={
+                FieldLabel as (props: {
+                  name: string;
+                  htmlFor?: string;
+                }) => React.JSX.Element | null
+              }
               type="password"
               className={styles.formField}
               inputClassName={styles.formInput}
             />
             <NativeField
               controller={fieldController('confirmPassword') as never}
-              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-              FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+              FieldError={
+                FieldError as (props: { name: string }) => React.JSX.Element | null
+              }
+              FieldLabel={
+                FieldLabel as (props: {
+                  name: string;
+                  htmlFor?: string;
+                }) => React.JSX.Element | null
+              }
               type="password"
               className={styles.formField}
               inputClassName={styles.formInput}
@@ -184,7 +233,10 @@ export function SchemaRefinementExample() {
 
             {formLevelError ? <p className={styles.errorBox}>{formLevelError}</p> : null}
 
-            <button type="submit" className={styles.submitButton}>
+            <button
+              type="submit"
+              className={styles.submitButton}
+            >
               Book the trip
             </button>
           </Form>

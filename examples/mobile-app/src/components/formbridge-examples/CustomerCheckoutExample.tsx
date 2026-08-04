@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge } from '@/src/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import * as Haptics from 'expo-haptics';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { CUSTOMER_DEPARTMENTS, createNativeFormUi, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { CUSTOMER_DEPARTMENTS, simulateSubmitDelay } from './shared';
 
 export function CustomerCheckoutExample() {
   const [submittedCustomer, setSubmittedCustomer] = useState<Record<
@@ -82,14 +83,14 @@ export function CustomerCheckoutExample() {
   const customerForm = useFormBridge(customerSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createNativeFormUi(),
+
     persist: {
       key: 'mobile-customer-checkout',
       storage: 'local',
     },
   });
 
-  const { Form, fields, state, watchAll } = customerForm;
+  const { Form, fieldController, state, watchAll } = customerForm;
 
   const customerFieldCount = Object.keys(customerSchema).length;
   const liveCustomer = watchAll();
@@ -127,9 +128,12 @@ export function CustomerCheckoutExample() {
         </View>
         <View style={s.customerPreviewMeta}>
           <Text style={s.customerPreviewMetaText}>
-            {liveCustomer.firstName || 'First'} {liveCustomer.lastName || 'Last'}
+            {String(liveCustomer.firstName || 'First')}{' '}
+            {String(liveCustomer.lastName || 'Last')}
           </Text>
-          <Text style={s.customerPreviewMetaText}>{liveCustomer.expiry || 'MM/YY'}</Text>
+          <Text style={s.customerPreviewMetaText}>
+            {String(liveCustomer.expiry || 'MM/YY')}
+          </Text>
         </View>
         <Text style={s.customerPreviewDepartment}>{departmentLabel}</Text>
       </View>
@@ -154,46 +158,38 @@ export function CustomerCheckoutExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.firstName />
+              <NativeField controller={fieldController('firstName')} />
             </View>
             <View style={s.halfField}>
-              <fields.lastName />
+              <NativeField controller={fieldController('lastName')} />
             </View>
           </View>
 
-          <fields.email />
-          <fields.phone />
+          <NativeField controller={fieldController('email')} />
+          <NativeField controller={fieldController('phone')} />
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.department />
+              <NativeField controller={fieldController('department')} />
             </View>
             <View style={s.halfField}>
-              <fields.city />
+              <NativeField controller={fieldController('city')} />
             </View>
           </View>
 
-          <fields.customerCode />
+          <NativeField controller={fieldController('customerCode')} />
         </View>
 
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Payment</Text>
-          <fields.cardNumber
-            {...{
-              styles: {
-                textInput: {
-                  letterSpacing: 1.8,
-                },
-              },
-            }}
-          />
+          <NativeField controller={fieldController('cardNumber')} />
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.expiry />
+              <NativeField controller={fieldController('expiry')} />
             </View>
             <View style={s.halfField}>
-              <fields.cvv />
+              <NativeField controller={fieldController('cvv')} />
             </View>
           </View>
 
@@ -211,13 +207,9 @@ export function CustomerCheckoutExample() {
           </View>
         ) : null}
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Saving customer..."
-          disabled
-        >
+        <NativeSubmit onPress={() => void customerForm.submit()}>
           Save customer
-        </Form.Submit>
+        </NativeSubmit>
       </Form>
     </View>
   );

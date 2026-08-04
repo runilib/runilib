@@ -33,7 +33,10 @@ function NativeField({
 
   return (
     <div className={styles.fieldBlock}>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       {textarea ? (
         <textarea
           id={id}
@@ -71,7 +74,10 @@ function NativeSelectField({
 
   return (
     <div className={styles.fieldBlock}>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       <select
         id={id}
         value={String(value)}
@@ -80,7 +86,10 @@ function NativeSelectField({
         onFocus={controller.onFocus}
       >
         {controller.options?.map((option) => (
-          <option key={String(option.value)} value={String(option.value)}>
+          <option
+            key={String(option.value)}
+            value={String(option.value)}
+          >
             {option.label}
           </option>
         ))}
@@ -173,13 +182,27 @@ export function CssModulesStylingExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('projectName') as ManualController}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor: string;
+              }) => React.JSX.Element | null
+            }
           />
           <NativeField
             controller={fieldController('ownerEmail') as ManualController}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor: string;
+              }) => React.JSX.Element | null
+            }
             type="email"
           />
         </div>
@@ -187,13 +210,23 @@ export function CssModulesStylingExample() {
         <NativeSelectField
           controller={fieldController('department') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
         />
 
         <NativeField
           controller={fieldController('launchNotes') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
           textarea
         />
 
@@ -203,7 +236,10 @@ export function CssModulesStylingExample() {
             variation.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Save CSS recipe
           </button>
         </div>

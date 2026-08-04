@@ -80,23 +80,41 @@ export function SwitchVariantsExample() {
         <NativeCheckboxField
           controller={fieldController('publicProfile') as never}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
           className={styles.formField}
         />
         <NativeCheckboxField
           controller={fieldController('pushAlerts') as never}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
           className={styles.formField}
         />
         <NativeCheckboxField
           controller={fieldController('quietHours') as never}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
           className={styles.formField}
         />
 
-        <button type="submit" className={styles.submitButton}>
+        <button
+          type="submit"
+          className={styles.submitButton}
+        >
           Save switch settings
         </button>
       </Form>

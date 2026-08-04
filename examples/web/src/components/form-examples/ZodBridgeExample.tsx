@@ -59,7 +59,7 @@ export function ZodBridgeExample() {
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.workspaceName || 'New workspace'}
+            {String(liveValues.workspaceName || 'New workspace')}
           </p>
           <p className={styles.resolverPreviewMuted}>
             Team size stays a text input in the UI, then Zod coerces it into a number for
@@ -86,15 +86,29 @@ export function ZodBridgeExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('workspaceName') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
           <NativeField
             controller={fieldController('contactEmail') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             type="email"
             className={styles.formField}
             inputClassName={styles.formInput}
@@ -104,15 +118,29 @@ export function ZodBridgeExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('teamSize') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
           <NativeField
             controller={fieldController('launchDate') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             type="date"
             className={styles.formField}
             inputClassName={styles.formInput}
@@ -124,7 +152,10 @@ export function ZodBridgeExample() {
             Submit and inspect how `teamSize` comes back as a real number.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Validate with Zod
           </button>
         </div>

@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge } from '@/src/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { formExampleStyles as s } from './FormExamples.styles';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
 import { StylingExampleCard } from './StylingExampleCard';
 import { simulateSubmitDelay } from './shared';
 
@@ -31,57 +32,9 @@ export function FieldOverridesStylingExample() {
 
   const form = useFormBridge(schema, {
     validateOn: 'onTouched',
-    globalDefaults: () => ({
-      submit: {
-        loadingText: 'Saving inline theme...',
-        containerStyle: {
-          marginTop: 6,
-          minHeight: 52,
-          borderRadius: 18,
-          backgroundColor: '#f59e0b',
-        },
-        textStyle: {
-          color: '#2a1602',
-          fontWeight: '800',
-        },
-      },
-      field: {
-        styles: {
-          wrapper: {
-            marginBottom: 0,
-            gap: 8,
-          },
-          label: {
-            fontSize: 12,
-            fontWeight: '800',
-            letterSpacing: 0.7,
-            textTransform: 'uppercase',
-            color: '#30415d',
-          },
-          textInput: {
-            minHeight: 52,
-            borderWidth: 1.5,
-            borderColor: 'rgba(251, 191, 36, 0.18)',
-            borderRadius: 16,
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-            fontSize: 15,
-            color: '#10203a',
-            backgroundColor: '#ffffff',
-          },
-          hint: {
-            color: '#fde68a',
-          },
-          error: {
-            color: '#fca5a5',
-          },
-        },
-        renderRequiredMark: () => <Text style={{ color: '#f59e0b' }}>•</Text>,
-      },
-    }),
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
 
   return (
@@ -97,9 +50,12 @@ export function FieldOverridesStylingExample() {
       ]}
       preview={
         <>
-          <Text style={s.previewValue}>{liveValues.cardholder || 'Ava Stone'}</Text>
+          <Text style={s.previewValue}>
+            {String(liveValues.cardholder || 'Ava Stone')}
+          </Text>
           <Text style={s.previewText}>
-            Receipt destination: {liveValues.receiptEmail || 'billing@runilib.dev'}.
+            Receipt destination:{' '}
+            {String(liveValues.receiptEmail || 'billing@runilib.dev')}.
           </Text>
         </>
       }
@@ -121,40 +77,23 @@ export function FieldOverridesStylingExample() {
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Billing context</Text>
 
-          <fields.receiptEmail
-            {...{
-              keyboardType: 'email-address',
-              highlightOnError: false,
-              renderHint: () => (
-                <Text style={{ color: '#5f6f88', fontSize: 12 }}>
-                  We only use it for invoices and receipts.
-                </Text>
-              ),
-            }}
-          />
+          <NativeField controller={fieldController('receiptEmail')} />
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.postalCode
-                {...{
-                  styles: {
-                    textInput: {
-                      textAlign: 'center',
-                      letterSpacing: 2,
-                    },
-                  },
-                }}
-              />
+              <NativeField controller={fieldController('postalCode')} />
             </View>
             <View style={s.halfField}>
-              <fields.cardholder />
+              <NativeField controller={fieldController('cardholder')} />
             </View>
           </View>
 
-          <fields.specialInstructions />
+          <NativeField controller={fieldController('specialInstructions')} />
         </View>
 
-        <Form.Submit>Save field override recipe</Form.Submit>
+        <NativeSubmit onPress={() => void form.submit()}>
+          Save field override recipe
+        </NativeSubmit>
       </Form>
     </StylingExampleCard>
   );

@@ -69,7 +69,7 @@ export function YupBridgeExample() {
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.companyName || 'Pilot company'}
+            {String(liveValues.companyName || 'Pilot company')}
           </p>
           <p className={styles.resolverPreviewMuted}>
             Yup casts the budget into a number and blocks submission until the opt-in flag
@@ -96,15 +96,29 @@ export function YupBridgeExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('companyName') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
           <NativeField
             controller={fieldController('website') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             type="url"
             className={styles.formField}
             inputClassName={styles.formInput}
@@ -114,14 +128,24 @@ export function YupBridgeExample() {
         <NativeField
           controller={fieldController('monthlyBudget') as never}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
           className={styles.formField}
           inputClassName={styles.formInput}
         />
         <NativeCheckboxField
           controller={fieldController('acceptsPilot') as never}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
           className={styles.formField}
         />
 
@@ -130,7 +154,10 @@ export function YupBridgeExample() {
             Budget stays simple in the input, then Yup casts it before submit.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Validate with Yup
           </button>
         </div>

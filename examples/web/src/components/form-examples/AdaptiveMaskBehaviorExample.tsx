@@ -28,7 +28,10 @@ function NativeField({
 
   return (
     <div>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       <input
         id={id}
         value={String(value)}
@@ -104,7 +107,8 @@ export function AdaptiveMaskBehaviorExample() {
             {String(liveValues.cardNumber ?? '4242 4242 4242 4242')}
           </p>
           <p className={styles.resolverPreviewMuted}>
-            Expiry {String(liveValues.expiry ?? '09/28')} · CVV {String(liveValues.cvv ?? '482')} · Member{' '}
+            Expiry {String(liveValues.expiry ?? '09/28')} · CVV{' '}
+            {String(liveValues.cvv ?? '482')} · Member{' '}
             {String(liveValues.memberCode ?? 'AB-4821')}
           </p>
           <div className={styles.points}>
@@ -134,8 +138,15 @@ export function AdaptiveMaskBehaviorExample() {
           <div className={styles.maskAdaptiveWideField}>
             <NativeField
               controller={fieldController('cardNumber') as ManualController}
-              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-              FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              FieldError={
+                FieldError as (props: { name: string }) => React.JSX.Element | null
+              }
+              FieldLabel={
+                FieldLabel as (props: {
+                  name: string;
+                  htmlFor: string;
+                }) => React.JSX.Element | null
+              }
             />
           </div>
 
@@ -143,22 +154,43 @@ export function AdaptiveMaskBehaviorExample() {
             <div className={styles.maskAdaptiveField}>
               <NativeField
                 controller={fieldController('expiry') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
               />
             </div>
             <div className={styles.maskAdaptiveField}>
               <NativeField
                 controller={fieldController('cvv') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
               />
             </div>
             <div className={styles.maskAdaptiveField}>
               <NativeField
                 controller={fieldController('memberCode') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
               />
             </div>
           </div>
@@ -170,7 +202,10 @@ export function AdaptiveMaskBehaviorExample() {
             member code size themselves from the pattern.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Save mask setup
           </button>
         </div>

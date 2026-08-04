@@ -5,12 +5,10 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';
 import { NativeField } from './nativeFormHelpers';
-import { createDemoFieldUi, simulateSubmitDelay } from './shared';
+import { simulateSubmitDelay } from './shared';
 
 export function LicensePlateMaskExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const { compactFieldUi } = createDemoFieldUi(styles);
-
   const formSchema = useMemo(
     () => ({
       vehicleName: field
@@ -79,15 +77,29 @@ export function LicensePlateMaskExample() {
         <div className={styles.formRow}>
           <NativeField
             controller={fieldController('vehicleName') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
           <NativeField
             controller={fieldController('licensePlate') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             inputClassName={styles.formInput}
           />
@@ -98,7 +110,10 @@ export function LicensePlateMaskExample() {
             Example format: two letters, three digits, then two letters.
           </p>
 
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Save plate
           </button>
         </div>

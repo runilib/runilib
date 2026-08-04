@@ -458,7 +458,7 @@ export function useFormBridge<const S extends FormSchema>(
           'data-fb-slot': 'error',
           'data-fb-name': name,
           className: (rest as { className?: string }).className,
-          style: { color: 'red', ...((rest as { style?: React.CSSProperties }).style) },
+          style: { color: 'red', ...(rest as { style?: React.CSSProperties }).style },
         },
         error,
       );

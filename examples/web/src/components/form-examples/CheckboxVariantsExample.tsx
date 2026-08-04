@@ -123,19 +123,19 @@ export function CheckboxVariantsExample() {
         <CheckboxField
           controller={fieldController('acceptTerms') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
         />
         <CheckboxField
           controller={fieldController('weeklyDigest') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
         />
         <CheckboxField
           controller={fieldController('betaInvites') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
         />
-        <button type="submit" className={styles.submitButton}>
+        <button
+          type="submit"
+          className={styles.submitButton}
+        >
           Save checkbox preferences
         </button>
       </Form>

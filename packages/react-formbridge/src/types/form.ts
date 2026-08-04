@@ -251,11 +251,11 @@ export interface UseFormBridgeReturn<
    */
   FieldLabel: (props: FieldLabelProps<Schema, TPlatform>) => React.ReactElement | null;
 
-/**
+  /**
    * Field-scoped controller exposing render props plus imperative actions
    * like change, blur, focus, validate, and manual error control.
    * See {@link FieldController}.
-   */  fieldController: <K extends keyof SchemaShape<Schema> & string>(
+   */ fieldController: <K extends keyof SchemaShape<Schema> & string>(
     name: K,
   ) => FieldController<Schema, K>;
 

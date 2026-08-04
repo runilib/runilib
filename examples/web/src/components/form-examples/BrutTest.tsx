@@ -30,7 +30,10 @@ function NativeField({
 
   return (
     <div className={styles.formField}>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       <input
         id={id}
         type={type}
@@ -172,15 +175,29 @@ export function BrutTestExample() {
             <div className={styles.formRow}>
               <NativeField
                 controller={fieldController('firstName') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
               />
             </div>
 
             <NativeField
               controller={fieldController('email') as ManualController}
-              FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-              FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+              FieldError={
+                FieldError as (props: { name: string }) => React.JSX.Element | null
+              }
+              FieldLabel={
+                FieldLabel as (props: {
+                  name: string;
+                  htmlFor: string;
+                }) => React.JSX.Element | null
+              }
               type="email"
             />
 
@@ -198,39 +215,88 @@ export function BrutTestExample() {
               <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                 <NativeField
                   controller={fieldController('cardNumber') as ManualController}
-                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                  FieldError={
+                    FieldError as (props: { name: string }) => React.JSX.Element | null
+                  }
+                  FieldLabel={
+                    FieldLabel as (props: {
+                      name: string;
+                      htmlFor: string;
+                    }) => React.JSX.Element | null
+                  }
                 />
                 <NativeField
                   controller={fieldController('expiry') as ManualController}
-                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                  FieldError={
+                    FieldError as (props: { name: string }) => React.JSX.Element | null
+                  }
+                  FieldLabel={
+                    FieldLabel as (props: {
+                      name: string;
+                      htmlFor: string;
+                    }) => React.JSX.Element | null
+                  }
                 />
                 <NativeField
                   controller={fieldController('cvv') as ManualController}
-                  FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                  FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                  FieldError={
+                    FieldError as (props: { name: string }) => React.JSX.Element | null
+                  }
+                  FieldLabel={
+                    FieldLabel as (props: {
+                      name: string;
+                      htmlFor: string;
+                    }) => React.JSX.Element | null
+                  }
                 />
               </div>
               <NativeField
                 controller={fieldController('code') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
               />
               <NativeField
                 controller={fieldController('alphanumeric') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
               />
               <NativeField
                 controller={fieldController('lettersOnly') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
               />
               <NativeField
                 controller={fieldController('dateDeNaissance') as ManualController}
-                FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-                FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+                FieldError={
+                  FieldError as (props: { name: string }) => React.JSX.Element | null
+                }
+                FieldLabel={
+                  FieldLabel as (props: {
+                    name: string;
+                    htmlFor: string;
+                  }) => React.JSX.Element | null
+                }
                 type="date"
               />
             </div>
@@ -245,7 +311,10 @@ export function BrutTestExample() {
                 recovery included.
               </p>
 
-              <button type="submit" className={styles.submitButton}>
+              <button
+                type="submit"
+                className={styles.submitButton}
+              >
                 Valider Votre element
               </button>
             </div>

@@ -1,10 +1,13 @@
 import type { CSSProperties } from 'react';
 import { useEffect } from 'react';
 
-import type { FormSchema } from '@/demoFormBridge';
-import { field, useFormBridgeWizard } from '@/demoFormBridge';
+import { type FormSchema, field, useFormBridgeWizard } from '@runilib/react-formbridge';
 
 import { useNavigate, useParams } from 'react-router-dom';
+import {
+  NativeField,
+  NativeSelectField,
+} from '../components/form-examples/nativeFormHelpers';
 
 const WIZARD_STEPS = [
   {
@@ -114,7 +117,7 @@ export function Wizard({ onBack }: { onBack: () => void }) {
     );
   }
 
-  const { Form, fields } = wizard.currentStep;
+  const { Form, FieldError, FieldLabel, fieldController } = wizard.currentStep;
 
   return (
     <div style={pageStyle}>
@@ -185,12 +188,45 @@ export function Wizard({ onBack }: { onBack: () => void }) {
               }}
               style={formStyle}
             >
-              {'firstName' in fields && <fields.firstName />}
-              {'lastName' in fields && <fields.lastName />}
-              {'email' in fields && <fields.email />}
-              {'companyName' in fields && <fields.companyName />}
-              {'role' in fields && <fields.role />}
-              {'teamSize' in fields && <fields.teamSize />}
+              {wizard.currentStepId === 'personal' ? (
+                <>
+                  <NativeField
+                    controller={fieldController('firstName')}
+                    FieldError={FieldError}
+                    FieldLabel={FieldLabel}
+                  />
+                  <NativeField
+                    controller={fieldController('lastName')}
+                    FieldError={FieldError}
+                    FieldLabel={FieldLabel}
+                  />
+                  <NativeField
+                    controller={fieldController('email')}
+                    FieldError={FieldError}
+                    FieldLabel={FieldLabel}
+                    type="email"
+                  />
+                </>
+              ) : null}
+              {wizard.currentStepId === 'company' ? (
+                <>
+                  <NativeField
+                    controller={fieldController('companyName')}
+                    FieldError={FieldError}
+                    FieldLabel={FieldLabel}
+                  />
+                  <NativeField
+                    controller={fieldController('role')}
+                    FieldError={FieldError}
+                    FieldLabel={FieldLabel}
+                  />
+                  <NativeSelectField
+                    controller={fieldController('teamSize')}
+                    FieldError={FieldError}
+                    FieldLabel={FieldLabel}
+                  />
+                </>
+              ) : null}
 
               {wizard.currentStepId === 'review' ? (
                 <div style={reviewCardStyle}>
@@ -213,9 +249,12 @@ export function Wizard({ onBack }: { onBack: () => void }) {
                   Back
                 </button>
 
-                <Form.Submit>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                >
                   {wizard.isLastStep ? 'Submit wizard' : 'Save and continue'}
-                </Form.Submit>
+                </button>
               </div>
             </Form>
           </section>

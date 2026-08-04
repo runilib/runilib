@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { field, type SelectPickerRenderContext, useFormBridge } from '@runilib/react-formbridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';
@@ -13,69 +13,6 @@ import {
   simulateSubmitDelay,
   WORKSPACE_OPTIONS,
 } from './shared';
-
-function renderCityPicker({
-  open,
-  search,
-  setSearch,
-  options,
-  loading,
-  triggerLabel,
-  closePicker,
-  selectOption,
-}: SelectPickerRenderContext) {
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className={styles.variantPickerOverlay}>
-      <div className={styles.variantPickerDialog}>
-        <div className={styles.variantPickerHeader}>
-          <div>
-            <p className={styles.previewLabel}>Custom city lookup</p>
-            <p className={styles.variantPickerTitle}>{triggerLabel}</p>
-          </div>
-
-          <button
-            type="button"
-            className={styles.variantPickerClose}
-            onClick={closePicker}
-          >
-            Close
-          </button>
-        </div>
-
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Type a city name..."
-          className={styles.variantPickerSearch}
-        />
-
-        <div className={styles.variantPickerList}>
-          {loading ? (
-            <div className={styles.variantPickerEmpty}>Loading cities…</div>
-          ) : options.length === 0 ? (
-            <div className={styles.variantPickerEmpty}>No matching city.</div>
-          ) : (
-            options.map((option) => (
-              <button
-                key={String(option.value)}
-                type="button"
-                className={styles.variantPickerOption}
-                onClick={() => selectOption(option)}
-              >
-                <span>{option.label}</span>
-                <span className={styles.variantPickerOptionMeta}>remote option</span>
-              </button>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function SelectVariantsExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
@@ -185,15 +122,29 @@ export function SelectVariantsExample() {
         <div className={styles.formRow}>
           <NativeSelectField
             controller={fieldController('defaultWorkspace') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             selectClassName={styles.formInput}
           />
           <NativeSelectField
             controller={fieldController('seatPack') as never}
-            FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-            FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
             className={styles.formField}
             selectClassName={styles.formInput}
           />
@@ -201,19 +152,32 @@ export function SelectVariantsExample() {
         <NativeField
           controller={fieldController('accessRole') as never}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
           className={styles.formField}
           inputClassName={styles.formInput}
         />
         <NativeField
           controller={fieldController('cityLookup') as never}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor?: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
           className={styles.formField}
           inputClassName={styles.formInput}
         />
 
-        <button type="submit" className={styles.submitButton}>
+        <button
+          type="submit"
+          className={styles.submitButton}
+        >
           Save picker setup
         </button>
       </Form>

@@ -1,20 +1,16 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, joiBridge, useFormBridge } from '@/src/demoFormBridge';
+import { field, joiBridge, useFormBridge } from '@runilib/react-formbridge';
 
 import Joi from 'joi';
 import { BridgeExampleCard } from './BridgeExampleCard';
 import { formExampleStyles as s } from './FormExamples.styles';
-import {
-  CUSTOMER_DEPARTMENTS,
-  createNativeFieldProps,
-  simulateSubmitDelay,
-} from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { CUSTOMER_DEPARTMENTS, simulateSubmitDelay } from './shared';
 
 export function JoiBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
   const formSchema = useMemo(
     () => ({
@@ -77,7 +73,7 @@ export function JoiBridgeExample() {
     validatorBridge: bridge,
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
 
   const liveValues = watchAll();
   const departmentLabel =
@@ -120,29 +116,24 @@ export function JoiBridgeExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.city {...fieldProps} />
+              <NativeField controller={fieldController('city')} />
             </View>
             <View style={s.halfField}>
-              <fields.department {...fieldProps} />
+              <NativeField controller={fieldController('department')} />
             </View>
           </View>
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.phone {...fieldProps} />
+              <NativeField controller={fieldController('phone')} />
             </View>
             <View style={s.halfField}>
-              <fields.postalCode {...fieldProps} />
+              <NativeField controller={fieldController('postalCode')} />
             </View>
           </View>
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Routing with Joi..."
-        >
-          Validate with Joi
-        </Form.Submit>
+        <NativeSubmit onPress={() => void form.submit()}>Validate with Joi</NativeSubmit>
       </Form>
     </BridgeExampleCard>
   );

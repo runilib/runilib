@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge } from '@/src/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { formExampleStyles as s } from './FormExamples.styles';
 import { MaskExampleCard } from './MaskExampleCard';
-import { createNativeFieldProps, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function LicensePlateMaskExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
   const formSchema = useMemo(
     () => ({
@@ -38,7 +38,7 @@ export function LicensePlateMaskExample() {
     revalidateOn: 'onChange',
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
 
   return (
@@ -54,7 +54,9 @@ export function LicensePlateMaskExample() {
       ]}
       preview={
         <>
-          <Text style={s.previewValue}>{liveValues.licensePlate || 'AB-123-CD'}</Text>
+          <Text style={s.previewValue}>
+            {String(liveValues.licensePlate || 'AB-123-CD')}
+          </Text>
           <Text style={s.previewText}>
             The mask teaches the expected structure while keeping the value easy to scan
             in dispatch or support tools, and the formatted value is stored by default.
@@ -81,20 +83,15 @@ export function LicensePlateMaskExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.vehicleName {...fieldProps} />
+              <NativeField controller={fieldController('vehicleName')} />
             </View>
             <View style={s.halfField}>
-              <fields.licensePlate {...fieldProps} />
+              <NativeField controller={fieldController('licensePlate')} />
             </View>
           </View>
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Saving vehicle..."
-        >
-          Save plate
-        </Form.Submit>
+        <NativeSubmit onPress={() => void form.submit()}>Save plate</NativeSubmit>
       </Form>
     </MaskExampleCard>
   );

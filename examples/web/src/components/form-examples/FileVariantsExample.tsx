@@ -63,14 +63,17 @@ function FileField({
 
   return (
     <div>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       <input
         id={id}
         type="file"
         multiple={multiple}
         onChange={(event) => {
           const files = Array.from(event.target.files ?? []);
-          controller.onChange(multiple ? files : files[0] ?? null);
+          controller.onChange(multiple ? files : (files[0] ?? null));
         }}
         onBlur={controller.onBlur}
         onFocus={controller.onFocus}
@@ -149,9 +152,19 @@ export function FileVariantsExample() {
         <>
           <p className={styles.resolverPreviewValue}>{totalFiles} files in play</p>
           <p className={styles.resolverPreviewMuted}>
-            Avatar: {describeFiles(values.profileAsset as FileValue | FileValue[] | null | undefined)}. Assets:{' '}
-            {describeFiles(values.launchAssets as FileValue | FileValue[] | null | undefined)}. Import:{' '}
-            {describeFiles(values.importSheet as FileValue | FileValue[] | null | undefined)}.
+            Avatar:{' '}
+            {describeFiles(
+              values.profileAsset as FileValue | FileValue[] | null | undefined,
+            )}
+            . Assets:{' '}
+            {describeFiles(
+              values.launchAssets as FileValue | FileValue[] | null | undefined,
+            )}
+            . Import:{' '}
+            {describeFiles(
+              values.importSheet as FileValue | FileValue[] | null | undefined,
+            )}
+            .
           </p>
         </>
       }
@@ -173,20 +186,35 @@ export function FileVariantsExample() {
         <FileField
           controller={fieldController('profileAsset') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
         />
 
         <FileField
           controller={fieldController('launchAssets') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
           multiple
         />
 
         <FileField
           controller={fieldController('importSheet') as ManualController}
           FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
-          FieldLabel={FieldLabel as (props: { name: string; htmlFor: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
         />
 
         <div className={styles.footerRow}>
@@ -194,7 +222,10 @@ export function FileVariantsExample() {
             Try one field with the stock UI, one with copy callbacks, and one with full
             content overrides.
           </p>
-          <button type="submit" className={styles.submitButton}>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
             Save file recipe
           </button>
         </div>

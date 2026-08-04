@@ -36,7 +36,7 @@ export function VersionSelector({
     initialValues: { version: defaultVersion },
   });
 
-  const versionField = form.field('version');
+  const versionField = form.fieldController('version');
   const liveValues = form.watchAll();
   const selectedVersion =
     typeof liveValues.version === 'string'

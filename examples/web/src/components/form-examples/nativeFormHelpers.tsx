@@ -1,5 +1,5 @@
+import type { ElementType } from 'react';
 import { useId } from 'react';
-import type { JSX } from 'react';
 
 type ManualController = {
   name: string;
@@ -16,8 +16,8 @@ type ManualController = {
   options?: Array<{ label: string; value: string | number }>;
 };
 
-type FieldErrorComponent = (props: { name: string }) => JSX.Element | null;
-type FieldLabelComponent = (props: { name: string; htmlFor?: string }) => JSX.Element | null;
+type FieldErrorComponent = ElementType;
+type FieldLabelComponent = ElementType;
 
 type NativeFieldProps = {
   controller: ManualController;
@@ -52,7 +52,10 @@ export function NativeField({
 
   return (
     <div className={className}>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       {textarea ? (
         <textarea
           id={id}
@@ -94,7 +97,10 @@ export function NativeSelectField({
 
   return (
     <div className={className}>
-      <FieldLabel name={controller.name} htmlFor={id} />
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
       <select
         id={id}
         value={toInputValue(controller.value)}
@@ -106,7 +112,10 @@ export function NativeSelectField({
         className={selectClassName}
       >
         {controller.options?.map((option) => (
-          <option key={String(option.value)} value={String(option.value)}>
+          <option
+            key={String(option.value)}
+            value={String(option.value)}
+          >
             {option.label}
           </option>
         ))}
@@ -119,7 +128,6 @@ export function NativeSelectField({
 export function NativeCheckboxField({
   controller,
   FieldError,
-  FieldLabel,
   className,
 }: NativeFieldProps) {
   const id = useId();

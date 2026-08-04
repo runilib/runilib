@@ -1,15 +1,10 @@
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
-import {
-  FieldHost,
-  FormHost,
-  field,
-  SubmitHost,
-  useFormBridge,
-} from '@/src/demoFormBridge';
+import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styled from 'styled-components/native';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
 import { StylingExampleCard } from './StylingExampleCard';
 import { simulateSubmitDelay } from './shared';
 
@@ -71,183 +66,6 @@ const FooterText = styled.Text`
   line-height: 18px;
 `;
 
-const StudioFormComp = styled(FormHost)`
-  gap: 16px;
-`;
-
-const StudioNameFieldShell = styled(FieldHost).attrs({
-  styles: {
-    wrapper: {
-      marginBottom: 0,
-      gap: 8,
-    },
-    label: {
-      color: '#30415d',
-      fontSize: 12,
-      fontWeight: '800',
-      letterSpacing: 0.7,
-      textTransform: 'uppercase',
-    },
-    textInput: {
-      minHeight: 52,
-      borderWidth: 1.5,
-      borderColor: 'rgba(125, 211, 252, 0.18)',
-      borderRadius: 16,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      fontSize: 15,
-      color: '#10203a',
-      backgroundColor: '#ffffff',
-    },
-    hint: {
-      color: '#5f6f88',
-      fontSize: 12,
-      lineHeight: 18,
-    },
-    error: {
-      color: '#fda4af',
-      fontSize: 12,
-      fontWeight: '700',
-    },
-  },
-  inputProps: {
-    autoComplete: 'organization',
-  },
-})`
-  margin-bottom: 0px;
-`;
-
-const ContactEmailFieldShell = styled(FieldHost).attrs({
-  styles: {
-    wrapper: {
-      marginBottom: 0,
-      gap: 8,
-    },
-    label: {
-      color: '#dbeafe',
-      fontSize: 12,
-      fontWeight: '800',
-      letterSpacing: 0.7,
-      textTransform: 'uppercase',
-    },
-    textInput: {
-      minHeight: 52,
-      borderWidth: 1.5,
-      borderColor: 'rgba(56, 189, 248, 0.28)',
-      borderRadius: 16,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      fontSize: 15,
-      color: '#10203a',
-      backgroundColor: '#ffffff',
-    },
-    hint: {
-      color: '#64748b',
-      fontSize: 12,
-    },
-    error: {
-      color: '#fda4af',
-      fontSize: 12,
-      fontWeight: '700',
-    },
-  },
-  inputProps: {
-    autoComplete: 'email',
-    keyboardType: 'email-address',
-  },
-})`
-  margin-bottom: 0px;
-`;
-
-const CityFieldShell = styled(FieldHost).attrs({
-  styles: {
-    wrapper: {
-      marginBottom: 0,
-      gap: 8,
-    },
-    label: {
-      color: '#dcfce7',
-      fontSize: 12,
-      fontWeight: '800',
-      letterSpacing: 0.7,
-      textTransform: 'uppercase',
-    },
-    textInput: {
-      minHeight: 52,
-      borderWidth: 1.5,
-      borderColor: 'rgba(74, 222, 128, 0.24)',
-      borderRadius: 16,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      fontSize: 15,
-      color: '#ecfdf5',
-      backgroundColor: 'rgba(2, 44, 34, 0.44)',
-    },
-    hint: {
-      color: '#bbf7d0',
-      fontSize: 12,
-    },
-    error: {
-      color: '#fda4af',
-      fontSize: 12,
-      fontWeight: '700',
-    },
-  },
-})`
-  margin-bottom: 0px;
-`;
-
-const LaunchNotesFieldShell = styled(FieldHost).attrs({
-  styles: {
-    wrapper: {
-      marginBottom: 0,
-      gap: 8,
-    },
-    label: {
-      color: '#30415d',
-      fontSize: 12,
-      fontWeight: '800',
-      letterSpacing: 0.7,
-      textTransform: 'uppercase',
-    },
-    textInput: {
-      minHeight: 112,
-      borderWidth: 1.5,
-      borderColor: 'rgba(125, 211, 252, 0.18)',
-      borderRadius: 16,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      fontSize: 15,
-      color: '#10203a',
-      backgroundColor: '#ffffff',
-    },
-    hint: {
-      color: '#64748b',
-      fontSize: 12,
-    },
-    error: {
-      color: '#fda4af',
-      fontSize: 12,
-      fontWeight: '700',
-    },
-  },
-})`
-  margin-bottom: 0px;
-`;
-
-const SubmitShell = styled(SubmitHost).attrs({
-  loadingText: 'Applying styled system...',
-  textStyle: {
-    color: '#042033',
-    fontWeight: '800',
-  },
-})`
-  margin-top: 6px;
-  min-height: 52px;
-  border-radius: 18px;
-  background-color: #38bdf8;
-`;
-
 export function StyledComponentsStylingExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
 
@@ -281,25 +99,27 @@ export function StyledComponentsStylingExample() {
     validateOn: 'onTouched',
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
 
   return (
     <StylingExampleCard
       recipeName="Styled Components"
       accent="#38bdf8"
-      title="Style generated fields from a stable styled host"
-      description="On native, the styled host stays static and injects the generated field plus its slot styles. That keeps styled-components/native ergonomic without runtime wrapper instability."
-      highlights={['styled field host', 'attrs for native slots', 'styled(Form.Submit)']}
+      title="Compose headless fields inside styled containers"
+      description="On native, styled-components owns the layout while fieldController provides value, validation, and event handlers."
+      highlights={['application-owned UI', 'styled containers', 'fieldController']}
       preview={
         <PreviewStack>
-          <PreviewValue>{liveValues.studioName || 'Northwind Labs'}</PreviewValue>
+          <PreviewValue>{String(liveValues.studioName || 'Northwind Labs')}</PreviewValue>
           <PreviewCopy>
             The host stays stable, and attrs feed the generated field its native slot
             styles.
           </PreviewCopy>
           <PreviewPill>
-            <PreviewPillText>{liveValues.city || 'Lyon'} billing region</PreviewPillText>
+            <PreviewPillText>
+              {String(liveValues.city || 'Lyon')} billing region
+            </PreviewPillText>
           </PreviewPill>
         </PreviewStack>
       }
@@ -310,26 +130,27 @@ export function StyledComponentsStylingExample() {
           : null
       }
       submitError={state.submitError}
-      footer="This is the safest styled-components/native pattern with generated fields: the host handles the styling contract, and the formbridge field still owns value, validation, and renderer logic."
+      footer="The application controls every rendered component; FormBridge stays focused on state, validation, and submission."
     >
-      <StudioFormComp
-        form={Form}
-        // biome-ignore lint/suspicious/noExplicitAny: To be fixed
-        onSubmit={async (values: any) => {
+      <Form
+        onSubmit={async (values) => {
           await simulateSubmitDelay();
           setLastSubmission(values);
         }}
       >
         <SectionCard>
           <SectionTitle>Studio profile</SectionTitle>
-          <StudioNameFieldShell field={fields.studioName} />
-          <ContactEmailFieldShell field={fields.contactEmail} />
-          <CityFieldShell field={fields.city} />
+          <NativeField controller={fieldController('studioName')} />
+          <NativeField controller={fieldController('contactEmail')} />
+          <NativeField controller={fieldController('city')} />
         </SectionCard>
 
         <SectionCard>
           <SectionTitle>Handoff note</SectionTitle>
-          <LaunchNotesFieldShell field={fields.launchNotes} />
+          <NativeField
+            controller={fieldController('launchNotes')}
+            multiline
+          />
         </SectionCard>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
@@ -337,9 +158,11 @@ export function StyledComponentsStylingExample() {
             The styled host controls presentation, and the generated field keeps all the
             form behavior.
           </FooterText>
-          <SubmitShell submit={Form.Submit}>Save styled recipe</SubmitShell>
+          <NativeSubmit onPress={() => void form.submit()}>
+            Save styled recipe
+          </NativeSubmit>
         </View>
-      </StudioFormComp>
+      </Form>
     </StylingExampleCard>
   );
 }

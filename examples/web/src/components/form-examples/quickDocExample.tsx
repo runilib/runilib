@@ -20,7 +20,13 @@ type ManualController = {
   onFocus: () => void;
 };
 
-function ManualField({ controller, type = 'text' }: { controller: ManualController; type?: string }) {
+function ManualField({
+  controller,
+  type = 'text',
+}: {
+  controller: ManualController;
+  type?: string;
+}) {
   const id = useId();
   const value = controller.value ?? '';
 
@@ -45,7 +51,10 @@ function ManualField({ controller, type = 'text' }: { controller: ManualControll
           onFocus={controller.onFocus}
         >
           {controller.options?.map((option) => (
-            <option key={String(option.value)} value={String(option.value)}>
+            <option
+              key={String(option.value)}
+              value={String(option.value)}
+            >
               {option.label}
             </option>
           ))}
@@ -72,11 +81,26 @@ export function SignupForm() {
 
   return (
     <Form onSubmit={async (values) => console.log(values)}>
-      <ManualField controller={fieldController('email')} type="email" />
-      <ManualField controller={fieldController('password')} type="password" />
-      <ManualField controller={fieldController('role')} type="select" />
-      <ManualField controller={fieldController('terms')} type="checkbox" />
-      <button type="submit" disabled={!state.isValid}>
+      <ManualField
+        controller={fieldController('email')}
+        type="email"
+      />
+      <ManualField
+        controller={fieldController('password')}
+        type="password"
+      />
+      <ManualField
+        controller={fieldController('role')}
+        type="select"
+      />
+      <ManualField
+        controller={fieldController('terms')}
+        type="checkbox"
+      />
+      <button
+        type="submit"
+        disabled={!state.isValid}
+      >
         Create account
       </button>
     </Form>

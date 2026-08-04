@@ -1,16 +1,16 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { field, useFormBridge, zodBridge } from '@/src/demoFormBridge';
+import { field, useFormBridge, zodBridge } from '@runilib/react-formbridge';
 
 import { z } from 'zod';
 import { BridgeExampleCard } from './BridgeExampleCard';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { createNativeFieldProps, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function ZodBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
   const formSchema = useMemo(
     () => ({
@@ -44,7 +44,7 @@ export function ZodBridgeExample() {
     validatorBridge: bridge,
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
 
   const liveValues = watchAll();
 
@@ -58,7 +58,7 @@ export function ZodBridgeExample() {
       preview={
         <>
           <Text style={s.previewValue}>
-            {liveValues.workspaceName || 'New workspace'}
+            {String(liveValues.workspaceName || 'New workspace')}
           </Text>
           <Text style={s.previewText}>
             Team size stays textual in the UI, then Zod coerces it into a number for the
@@ -86,29 +86,24 @@ export function ZodBridgeExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.workspaceName {...fieldProps} />
+              <NativeField controller={fieldController('workspaceName')} />
             </View>
             <View style={s.halfField}>
-              <fields.contactEmail {...fieldProps} />
+              <NativeField controller={fieldController('contactEmail')} />
             </View>
           </View>
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.teamSize {...fieldProps} />
+              <NativeField controller={fieldController('teamSize')} />
             </View>
             <View style={s.halfField}>
-              <fields.launchDate {...fieldProps} />
+              <NativeField controller={fieldController('launchDate')} />
             </View>
           </View>
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Normalizing with Zod..."
-        >
-          Validate with Zod
-        </Form.Submit>
+        <NativeSubmit onPress={() => void form.submit()}>Validate with Zod</NativeSubmit>
       </Form>
     </BridgeExampleCard>
   );

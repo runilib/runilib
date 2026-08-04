@@ -23,7 +23,13 @@ type ManualController = {
   onFocus: () => void;
 };
 
-function ManualField({ controller, type = 'text' }: { controller: ManualController; type?: string }) {
+function ManualField({
+  controller,
+  type = 'text',
+}: {
+  controller: ManualController;
+  type?: string;
+}) {
   const inputId = useId();
   const value = controller.value ?? '';
 
@@ -61,12 +67,21 @@ export function QuickTestExample() {
     <section>
       <Form onSubmit={(values) => console.log('save', values)}>
         <ManualField controller={fieldController('email')} />
-        <ManualField controller={fieldController('switch')} type="checkbox" />
+        <ManualField
+          controller={fieldController('switch')}
+          type="checkbox"
+        />
         <ManualField controller={fieldController('radio')} />
         <ManualField controller={fieldController('text')} />
         <ManualField controller={fieldController('otp')} />
-        <ManualField controller={fieldController('password')} type="password" />
-        <ManualField controller={fieldController('checkbox')} type="checkbox" />
+        <ManualField
+          controller={fieldController('password')}
+          type="password"
+        />
+        <ManualField
+          controller={fieldController('checkbox')}
+          type="checkbox"
+        />
         <ManualField controller={fieldController('file')} />
         <button type="submit">Save</button>
       </Form>
