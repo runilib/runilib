@@ -14,7 +14,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  createNativeFormUi,
+  NativeField,
+  NativeSubmit,
+} from '../../components/formbridge-examples/nativeFormHelpers';
+import {
   formatDemoJson,
   simulateSubmitDelay,
 } from '../../components/formbridge-examples/shared';
@@ -33,8 +36,6 @@ const wizardStorage = (() => {
   };
 })();
 
-const wizardUi = () => createNativeFormUi();
-
 const WIZARD_STEPS = [
   {
     id: 'personal',
@@ -44,9 +45,6 @@ const WIZARD_STEPS = [
       lastName: field.text().required('Last name is required'),
       email: field.email().required('Email is required'),
     } satisfies FormSchema,
-    formOptions: {
-      globalDefaults: wizardUi,
-    },
   },
   {
     id: 'company',
@@ -60,17 +58,11 @@ const WIZARD_STEPS = [
         { label: 'Product squad', value: 'product' },
       ]),
     } satisfies FormSchema,
-    formOptions: {
-      globalDefaults: wizardUi,
-    },
   },
   {
     id: 'review',
     label: 'Review',
     schema: {} satisfies FormSchema,
-    formOptions: {
-      globalDefaults: wizardUi,
-    },
   },
 ] as const;
 
@@ -162,7 +154,7 @@ export function FormbridgeWizardScreen() {
     );
   }
 
-  const { Form, fields } = wizard.currentStep;
+  const { Form, fieldController } = wizard.currentStep;
 
   return (
     <SafeAreaView
@@ -240,12 +232,20 @@ export function FormbridgeWizardScreen() {
             }}
             style={s.form}
           >
-            {'firstName' in fields && <fields.firstName />}
-            {'lastName' in fields && <fields.lastName />}
-            {'email' in fields && <fields.email />}
-            {'companyName' in fields && <fields.companyName />}
-            {'role' in fields && <fields.role />}
-            {'workspace' in fields && <fields.workspace />}
+            {wizard.currentStepId === 'personal' ? (
+              <>
+                <NativeField controller={fieldController('firstName')} />
+                <NativeField controller={fieldController('lastName')} />
+                <NativeField controller={fieldController('email')} />
+              </>
+            ) : null}
+            {wizard.currentStepId === 'company' ? (
+              <>
+                <NativeField controller={fieldController('companyName')} />
+                <NativeField controller={fieldController('role')} />
+                <NativeField controller={fieldController('workspace')} />
+              </>
+            ) : null}
 
             {wizard.currentStepId === 'review' ? (
               <View style={s.reviewCard}>
@@ -274,9 +274,9 @@ export function FormbridgeWizardScreen() {
                 </Text>
               </TouchableOpacity>
 
-              <Form.Submit>
+              <NativeSubmit onPress={() => void wizard.currentStep.submit()}>
                 {wizard.isLastStep ? 'Submit wizard' : 'Save and continue'}
-              </Form.Submit>
+              </NativeSubmit>
             </View>
           </Form>
         </View>

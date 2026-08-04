@@ -248,8 +248,8 @@ export function PhonePlaygroundWeb() {
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <fields.phone />
-          <Form.Submit>Save phone</Form.Submit>
+          <AppField form={form} name="phone" />
+          <button type="submit">Save phone</button>
         </div>
       </Form>
 
@@ -328,8 +328,8 @@ export function PhonePlaygroundApp() {
           }}
         >
           <View style={{ gap: 12 }}>
-            <fields.phone />
-            <Form.Submit>Save phone</Form.Submit>
+            <AppField form={form} name="phone" />
+            <button type="submit">Save phone</button>
           </View>
         </Form>
 
@@ -383,10 +383,10 @@ ${PHONE_METHODS_TABLE}`,
     {
       id: 'fb-phone-overrides',
       title: 'Per-render props (text, render, passthroughs)',
-      content: `Beyond the builder methods above, every \`<fields.phone />\` renderer accepts props to customize copy, swap rendering, or forward attributes to the underlying inputs. Pass them directly on the rendered field:
+      content: `Beyond the builder methods above, every \`<AppField form={form} name="phone" />\` renderer accepts props to customize copy, swap rendering, or forward attributes to the underlying inputs. Pass them directly on the rendered field:
 
 ${FENCE}tsx
-<fields.phone
+<AppField form={form} name="phone"
   searchPlaceholderText="Search a country…"
   emptySearchText={({ search }) => \`No match for "\${search}"\`}
   renderCountryItemContent={({ country, defaultContent, selected }) => (
@@ -417,7 +417,7 @@ ${PHONE_PASSTHROUGH_TABLE}`,
       content: `The \`styles\` prop accepts an object keyed by renderer slot. Each entry is merged **over** the built-in default for that slot, so you can tweak one property or replace it.
 
 ${FENCE}tsx
-<fields.phone
+<AppField form={form} name="phone"
   styles={{
     phoneModalCard: { borderRadius: 20, padding: 16 },
     phoneCountryRow: { paddingVertical: 16 },

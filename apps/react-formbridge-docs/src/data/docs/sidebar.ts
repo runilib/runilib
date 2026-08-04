@@ -8,22 +8,7 @@ export const docSidebar: LibraryDoc['sidebar'] = [
       { id: 'fb-install', label: 'Installation' },
       { id: 'fb-quickstart', label: 'Quick start' },
       { id: 'fb-schema-mental-model', label: 'Schema mental model' },
-    ],
-  },
-  {
-    group: 'Interactives Tutorials',
-    color: 'blue',
-    items: [
-      { id: 'fb-tutorial', label: 'Tutorial' },
-      { id: 'fb-tutorial-signup', label: 'Signup form' },
-      { id: 'fb-tutorial-checkout', label: 'Checkout flow' },
-      { id: 'fb-tutorial-validation', label: 'Validation & bridges' },
-      {
-        id: 'fb-tutorial-schema-validation',
-        label: 'createSchema() & strong validation',
-      },
-      { id: 'fb-tutorial-custom-ui', label: 'Custom UI & styling' },
-      { id: 'fb-tutorial-production', label: 'Advanced flows' },
+      { id: 'fb-tutorial-custom-ui', label: 'Render your UI' },
     ],
   },
   {
@@ -51,15 +36,13 @@ export const docSidebar: LibraryDoc['sidebar'] = [
     ],
   },
   {
-    group: 'Components',
+    group: 'Rendering',
     color: 'blue',
     items: [
-      { id: 'fb-form', label: '<Form/>' },
-      { id: 'fb-field-error', label: '<FieldError/>' },
-      { id: 'fb-field-label', label: '<FieldLabel/>' },
-      { id: 'fb-fields', label: '<GeneratedFields />' },
       { id: 'fb-field-controller', label: 'form.fieldController()' },
-      { id: 'fb-host-helpers', label: '<HostComponents />' },
+      { id: 'fb-form', label: '<Form />' },
+      { id: 'fb-field-label', label: '<FieldLabel />' },
+      { id: 'fb-field-error', label: '<FieldError />' },
     ],
   },
   {
@@ -95,14 +78,6 @@ export const docSidebar: LibraryDoc['sidebar'] = [
       { id: 'fb-validation', label: 'Built-in validation' },
       { id: 'fb-adapters', label: 'Validator bridge' },
       { id: 'fb-conditional', label: 'Conditional logic' },
-    ],
-  },
-  {
-    group: 'Styling',
-    color: 'blue',
-    items: [
-      { id: 'fb-global-props', label: 'globalDefaults' },
-      { id: 'fb-web-ui', label: 'Styling recipes' },
     ],
   },
 ];

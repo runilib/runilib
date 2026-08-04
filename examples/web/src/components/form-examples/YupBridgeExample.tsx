@@ -5,7 +5,8 @@ import { field, useFormBridge, yupBridge } from '@runilib/react-formbridge';
 import * as yup from 'yup';
 import { BridgeExampleFrame } from './BridgeExampleFrame';
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { NativeCheckboxField, NativeField } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function YupBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
@@ -51,11 +52,10 @@ export function YupBridgeExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
     validatorBridge: bridge,
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
 
   const liveValues = watchAll();
 
@@ -69,7 +69,7 @@ export function YupBridgeExample() {
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.companyName || 'Pilot company'}
+            {String(liveValues.companyName || 'Pilot company')}
           </p>
           <p className={styles.resolverPreviewMuted}>
             Yup casts the budget into a number and blocks submission until the opt-in flag
@@ -94,24 +94,72 @@ export function YupBridgeExample() {
         }}
       >
         <div className={styles.formRow}>
-          <fields.companyName />
-          <fields.website />
+          <NativeField
+            controller={fieldController('companyName') as never}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
+          <NativeField
+            controller={fieldController('website') as never}
+            FieldError={
+              FieldError as (props: { name: string }) => React.JSX.Element | null
+            }
+            FieldLabel={
+              FieldLabel as (props: {
+                name: string;
+                htmlFor?: string;
+              }) => React.JSX.Element | null
+            }
+            type="url"
+            className={styles.formField}
+            inputClassName={styles.formInput}
+          />
         </div>
 
-        <fields.monthlyBudget />
-        <fields.acceptsPilot />
+        <NativeField
+          controller={fieldController('monthlyBudget') as never}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
+          className={styles.formField}
+          inputClassName={styles.formInput}
+        />
+        <NativeCheckboxField
+          controller={fieldController('acceptsPilot') as never}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor?: string;
+            }) => React.JSX.Element | null
+          }
+          className={styles.formField}
+        />
 
         <div className={styles.footerRow}>
           <p className={styles.helperText}>
             Budget stays simple in the input, then Yup casts it before submit.
           </p>
 
-          <Form.Submit
+          <button
+            type="submit"
             className={styles.submitButton}
-            loadingText="Checking with Yup…"
           >
             Validate with Yup
-          </Form.Submit>
+          </button>
         </div>
       </Form>
     </BridgeExampleFrame>

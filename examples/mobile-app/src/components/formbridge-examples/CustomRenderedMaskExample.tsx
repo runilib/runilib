@@ -6,7 +6,8 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { formExampleStyles as s } from './FormExamples.styles';
 import { MaskExampleCard } from './MaskExampleCard';
-import { createNativeFieldProps, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 const ACCESS_CODE_PREFIX = 'OPS';
 
@@ -136,7 +137,6 @@ function CustomRenderedAccessCodeField({
 
 export function CustomRenderedMaskExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
   const formSchema = useMemo(
     (): CustomMaskSchema => ({
@@ -162,7 +162,7 @@ export function CustomRenderedMaskExample() {
     revalidateOn: 'onChange',
   });
 
-  const { Form, fieldController, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
   const launchAccessCode = fieldController('launchAccessCode');
   const codeState = buildAccessCodeState(String(liveValues.launchAccessCode ?? ''));
@@ -181,7 +181,7 @@ export function CustomRenderedMaskExample() {
       preview={
         <>
           <Text style={s.previewValue}>
-            {liveValues.launchAccessCode || 'OPS-2048-QA'}
+            {String(liveValues.launchAccessCode || 'OPS-2048-QA')}
           </Text>
           <Text style={s.previewText}>
             Raw suffix {codeState.rawValue || '2048QA'} ·{' '}
@@ -207,7 +207,7 @@ export function CustomRenderedMaskExample() {
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Mission control</Text>
 
-          <fields.workspaceName {...fieldProps} />
+          <NativeField controller={fieldController('workspaceName')} />
           <CustomRenderedAccessCodeField controller={launchAccessCode} />
         </View>
 
@@ -219,12 +219,7 @@ export function CustomRenderedMaskExample() {
             <Text style={s.secondaryButtonText}>Focus code field</Text>
           </TouchableOpacity>
 
-          <Form.Submit
-            style={s.submitButton}
-            loadingText="Saving access..."
-          >
-            Save launch code
-          </Form.Submit>
+          <NativeSubmit onPress={() => void form.submit()}>Save launch code</NativeSubmit>
         </View>
       </Form>
     </MaskExampleCard>

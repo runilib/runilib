@@ -45,10 +45,10 @@ export function NewsletterSettings() {
 
   return (
     <form.Form onSubmit={async (values) => api.save(values)}>
-      <form.fields.email />
-      <form.fields.marketingOptIn />
+      <AppField form={form} name="email" />
+      <AppField form={form} name="marketingOptIn" />
       <LiveSummary />
-      <form.Form.Submit>Save preferences</form.Form.Submit>
+      <button type="submit">Save preferences</button>
     </form.Form>
   )
 }`,
@@ -82,10 +82,10 @@ export function ContactDetailsScreen() {
   return (
     <form.Form onSubmit={async (values) => api.save(values)}>
       <View style={{ gap: 12, padding: 16 }}>
-        <form.fields.fullName />
-        <form.fields.phone />
+        <AppField form={form} name="fullName" />
+        <AppField form={form} name="phone" />
         <SubmitHint />
-        <form.Form.Submit>Continue</form.Form.Submit>
+        <button type="submit">Continue</button>
       </View>
     </form.Form>
   )
@@ -138,8 +138,8 @@ export function CheckoutLayout() {
       <div className="checkout-layout">
         <main>
           <form.Form onSubmit={async (values) => api.checkout(values)}>
-            <form.fields.email />
-            <form.fields.coupon />
+            <AppField form={form} name="email" />
+            <AppField form={form} name="coupon" />
           </form.Form>
         </main>
 

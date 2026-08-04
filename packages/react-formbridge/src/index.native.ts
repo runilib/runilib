@@ -1,24 +1,3 @@
-import {
-  FieldHost as SharedFieldHost,
-  type FieldHostProps as SharedFieldHostProps,
-  FormHost as SharedFormHost,
-  type FormHostProps as SharedFormHostProps,
-  SubmitHost as SharedSubmitHost,
-  type SubmitHostProps as SharedSubmitHostProps,
-} from './renderers/hosts/Host';
-import type {
-  FormSchema,
-  ExtraFieldProps as NativeExtraFieldProps,
-} from './types.native';
-
-// ─── Core ─────────────────────────────────────────────────────────────────────
-
-// ─── Core ─────────────────────────────────────────────────────────────────────
-
-// ─── Core ─────────────────────────────────────────────────────────────────────
-
-// ─── Core ─────────────────────────────────────────────────────────────────────
-
 export {
   type JoiBridgeIssue,
   type JoiBridgeOptions,
@@ -99,20 +78,5 @@ export {
   type WizardStepChangeEvent,
   type WizardStepChangeReason,
 } from './hooks/useFormBridgeWizard.native';
-// ─── FormHost ────────────────────────────────────────────────────────────────────
-export type FieldHostProps<TProps extends NativeExtraFieldProps = NativeExtraFieldProps> =
-  SharedFieldHostProps<TProps>;
-export const FieldHost = SharedFieldHost as <TProps extends NativeExtraFieldProps>(
-  props: FieldHostProps<TProps>,
-) => JSX.Element;
-
-export type SubmitHostProps = SharedSubmitHostProps<'native'>;
-export const SubmitHost = SharedSubmitHost as (props: SubmitHostProps) => JSX.Element;
-
-export type FormHostProps<F extends FormSchema> = SharedFormHostProps<F, 'native'>;
-export const FormHost = SharedFormHost as <F extends FormSchema>(
-  props: FormHostProps<F>,
-) => JSX.Element;
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type * from './types.native';

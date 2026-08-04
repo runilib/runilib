@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 import type { FieldDescriptor, FormSchema, SchemaValues } from '../../types';
 
@@ -60,42 +60,6 @@ export interface UseReadonlyFormReturn<S extends FormSchema> {
    * Whether at least one field changed.
    */
   hasChanges: boolean;
-
-  /**
-   * Readonly render components, one per field.
-   */
-  ReadonlyFields: ReadonlyFieldsComponent<S>;
-}
-
-export type ReadonlyFieldsComponent<S extends FormSchema> = {
-  [K in keyof S]: (props?: ReadonlyFieldProps) => React.ReactElement | null;
-};
-
-export interface ReadonlyFieldProps {
-  /**
-   * Optional label override.
-   */
-  label?: string;
-
-  /**
-   * Optional display formatter override for this render only.
-   */
-  format?: (value: unknown) => string;
-
-  /**
-   * Optional cross-platform style prop forwarded to the renderer.
-   */
-  style?: object;
-
-  /**
-   * Optional className for web renderers.
-   */
-  className?: string;
-
-  /**
-   * Forces diff UI even when mode is `readonly`.
-   */
-  showDiff?: boolean;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -234,43 +198,10 @@ export function useFormBridgeReadonly<S extends FormSchema>(
     };
   }, [descriptors, values, originalValues, mode, formatters]);
 
-  const ReadonlyFields = useMemo((): ReadonlyFieldsComponent<S> => {
-    const result: Record<
-      string,
-      (props?: ReadonlyFieldProps) => React.ReactElement | null
-    > = {};
-
-    for (const name of fieldNames as string[]) {
-      result[name] = (props?: ReadonlyFieldProps) => {
-        const state = fields[name as keyof S];
-        const label = props?.label ?? state.label;
-        const display = props?.format ? props.format(state.value) : state.display;
-        const showDiff = props?.showDiff ?? mode === 'diff';
-
-        const nextState: FieldReadonlyState = {
-          ...state,
-          label,
-          display,
-        };
-
-        const { ReadonlyField } = require('../../renderers/web/ReadonlyField');
-
-        return React.createElement(ReadonlyField, {
-          state: nextState,
-          showDiff,
-          props,
-        });
-      };
-    }
-
-    return result as ReadonlyFieldsComponent<S>;
-  }, [fieldNames, fields, mode]);
-
   return {
     fields,
     fieldNames,
     changedFields,
     hasChanges: changedFields.length > 0,
-    ReadonlyFields,
   };
 }

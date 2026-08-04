@@ -304,7 +304,6 @@ export function createUseFormBridgeWizard<TPlatform extends Platform>(
       validatorBridge: stepFormOptions?.validatorBridge,
       persist: stepPersist,
       analytics: stepFormOptions?.analytics,
-      globalDefaults: stepFormOptions?.globalDefaults,
     });
 
     const liveAllValues = step

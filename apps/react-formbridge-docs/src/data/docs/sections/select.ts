@@ -99,12 +99,8 @@ export const selectSection: LibraryDoc['sections'][number] = {
     },
     {
       id: 'fb-select-custom-picker',
-      title: 'Custom picker modal',
-      content: `Need a custom modal, bottom sheet, command palette, or searchable dialog instead of the built-in picker? Pass \`renderPicker\`.
-
-- Works for local options and \`optionsFrom(...)\`
-- Works per rendered field through \`<fields.city renderPicker={renderPicker} />\`
-- If the built-in trigger itself should disappear too, keep the same select schema field and move to \`form.fieldController(name)\`
+      title: 'Render a picker',
+      content: `Select fields expose their resolved \`options\` through \`fieldController(name)\`. Use them in a native \`<select>\`, a design-system combobox, a modal, or a bottom sheet.
 
 \`\`\`tsx
 const schema = {
@@ -119,37 +115,23 @@ const schema = {
 }
 
 const form = useFormBridge(schema)
+const city = form.fieldController('city')
 
-<form.Form onSubmit={save}>
-  <form.fields.city
-    renderPicker={({
-        open,
-        search,
-        setSearch,
-        options,
-        loading,
-        error,
-        triggerLabel,
-        closePicker,
-        selectOption,
-      }) =>
-        open ? (
-          <CityLookupModal
-            title={triggerLabel}
-            query={search}
-            loading={loading}
-            error={error}
-            items={options}
-            onQueryChange={setSearch}
-            onClose={closePicker}
-            onSelect={(option) => selectOption(option)}
-          />
-        ) : null}
-  />
-</form.Form>
+<select
+  value={String(city.value ?? '')}
+  disabled={city.disabled}
+  onChange={(event) => city.onChange(event.target.value)}
+  onBlur={city.onBlur}
+>
+  {city.options?.map((option) => (
+    <option key={String(option.value)} value={option.value}>
+      {option.label}
+    </option>
+  ))}
+</select>
 \`\`\`
 
-The \`renderPicker\` context gives you: \`open\`, \`search\`, \`setSearch\`, \`clearSearch\`, \`options\`, \`loading\`, \`error\`, \`selectedOption\`, \`triggerLabel\`, \`openPicker\`, \`closePicker\`, and \`selectOption\`. That makes it easy to plug the same field into a design-system modal on web, a native sheet on mobile, or a fully custom async search experience without replacing the rest of the field API.`,
+For remote search, use \`useAsyncOptions()\` to own query/loading/error state and pass its options to your picker UI.`,
     },
     {
       id: 'fb-select-props',
@@ -159,7 +141,7 @@ The \`renderPicker\` context gives you: \`open\`, \`search\`, \`setSearch\`, \`c
 - Selected values are stored as the option \`value\`, so both \`string\` and \`number\` are supported
 ${BASE_FIELD_BUILDER_REFERENCE}
 - String-specific helpers are not available on select fields
-- Custom picker UIs are wired through per-field \`renderPicker\` or fully custom \`form.fieldController(name)\` flows
+- Picker UIs consume \`form.fieldController(name)\` and remain entirely application-owned
 
 Select-specific methods:
 ${SELECT_METHODS_TABLE}`,

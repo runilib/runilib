@@ -31,7 +31,7 @@ export const emailSection: LibraryDoc['sections'][number] = {
   email: field.email('Work email').required().lowercase().trim(),
 }
 const { Form, fields } = useFormBridge(schema)
-<Form onSubmit={save}><fields.email inputProps={{ autoComplete:'email' }} /><Form.Submit>Send</Form.Submit></Form>`,
+<Form onSubmit={save}><AppField form={form} name="email" inputProps={{ autoComplete:'email' }} /><button type="submit">Send</button></Form>`,
     },
     {
       filename: 'Email.native.tsx',
@@ -43,8 +43,8 @@ const { Form, fields } = useFormBridge(schema)
 const { Form, fields } = useFormBridge(schema)
 
 <Form onSubmit={save}>
-  <fields.email />
-  <Form.Submit>Send</Form.Submit>
+  <AppField form={form} name="email" />
+  <button type="submit">Send</button>
 </Form>`,
     },
   ],

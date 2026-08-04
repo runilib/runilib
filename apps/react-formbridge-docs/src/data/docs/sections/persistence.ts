@@ -89,11 +89,11 @@ function LocalDraftForm({
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <fields.fullName />
-          <fields.email />
-          <fields.notes />
-          <fields.newsletter />
-          <fields.otp />
+          <AppField form={form} name="fullName" />
+          <AppField form={form} name="email" />
+          <AppField form={form} name="notes" />
+          <AppField form={form} name="newsletter" />
+          <AppField form={form} name="otp" />
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
@@ -137,7 +137,7 @@ function LocalDraftForm({
             </button>
           </div>
 
-          <Form.Submit>Submit values</Form.Submit>
+          <button type="submit">Submit values</button>
         </div>
       </Form>
 
@@ -344,9 +344,9 @@ function CustomAdapterForm({
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <fields.company />
-          <fields.role />
-          <fields.handoff />
+          <AppField form={form} name="company" />
+          <AppField form={form} name="role" />
+          <AppField form={form} name="handoff" />
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
@@ -387,7 +387,7 @@ function CustomAdapterForm({
             </button>
           </div>
 
-          <Form.Submit>Submit values</Form.Submit>
+          <button type="submit">Submit values</button>
         </div>
       </Form>
 

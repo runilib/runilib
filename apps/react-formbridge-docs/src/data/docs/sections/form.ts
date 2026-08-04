@@ -1,15 +1,16 @@
 import type { LibraryDoc } from './../../../types/index';
-import { FORM_COMPONENT_PROPS_SURFACE, FORM_SUBMIT_PROPS_SURFACE } from '../constants';
+import { FORM_COMPONENT_PROPS_SURFACE } from '../constants';
 
 export const formSection: LibraryDoc['sections'][number] = {
   id: 'fb-form',
   title: 'Form component',
-  content: `Wrapper component returned by the hook. It connects submit, validation, async loading state, and submit error handling to the generated field runtime.
+  content: `Minimal wrapper component returned by the hook. It provides context and connects its submit event to FormBridge's validation and submission pipeline. It does not render fields or a submit button.
 
 - On web, it behaves like a smart \`<form>\`
 - On native, it behaves like a smart wrapper you can place inside your layout
-- \`Form\` also accepts the native props of that underlying platform element, so things like \`id\`, \`method\`, \`autoComplete\`, \`aria-*\`, \`testID\`, or \`accessibilityLabel\` can be passed directly at the call site
-- \`Form.Submit\` is coupled to the same runtime, so loading and disabled states stay aligned with the form, and it likewise extends the native button / pressable props of the platform`,
+- \`Form\` accepts the native props of that underlying platform element.
+- Render your own controls and submit button. Read \`form.state.isSubmitting\` to expose loading/disabled UI.
+- For a completely application-owned wrapper, use \`handleSubmit\` on web or call \`submit()\` on native.`,
   codeTabs: [
     {
       filename: 'Form.tsx',
@@ -23,15 +24,15 @@ export const formSection: LibraryDoc['sections'][number] = {
   onError={(errors) => console.log(errors)}
   onSubmitError={(error) => console.log(error)}
 >
-  {/* fields... */}
-  <Form.Submit
+  <AppField form={form} name="displayName" />
+  <button
     type="submit"
     name="intent"
     value="save-profile"
-    loadingText="Saving..."
+    disabled={form.state.isSubmitting}
   >
-    Save
-  </Form.Submit>
+    {form.state.isSubmitting ? 'Saving…' : 'Save'}
+  </button>
 </Form>`,
     },
   ],
@@ -40,11 +41,6 @@ export const formSection: LibraryDoc['sections'][number] = {
       id: 'fb-form-props',
       title: 'Props',
       content: `${FORM_COMPONENT_PROPS_SURFACE}`,
-    },
-    {
-      id: 'fb-submit-props',
-      title: 'Form.Submit',
-      content: `${FORM_SUBMIT_PROPS_SURFACE}`,
     },
   ],
 };

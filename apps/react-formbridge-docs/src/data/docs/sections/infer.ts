@@ -94,9 +94,9 @@ function EditUserForm({ user }: { user: User }) {
 
   return (
     <Form onSubmit={(values) => updateUser(user.id, values)}>
-      <fields.email />
-      <fields.role />
-      <Form.Submit>Save user</Form.Submit>
+      <AppField form={form} name="email" />
+      <AppField form={form} name="role" />
+      <button type="submit">Save user</button>
     </Form>
   )
 }`,

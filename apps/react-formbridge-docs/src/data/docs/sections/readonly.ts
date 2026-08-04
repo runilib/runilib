@@ -1,6 +1,5 @@
 import type { LibraryDoc } from './../../../types/index';
 import {
-  READONLY_FIELD_PROPS_SURFACE,
   READONLY_FIELD_STATE_SURFACE,
   READONLY_OPTIONS_SURFACE,
   READONLY_RETURN_SURFACE,
@@ -130,11 +129,11 @@ export function ReadonlyPlayground() {
         >
           <div style={{ display: 'grid', gap: 12 }}>
             <h4 style={{ margin: 0 }}>Editable form</h4>
-            <fields.fullName />
-            <fields.email />
-            <fields.country />
-            <fields.newsletter />
-            <Form.Submit>Save profile</Form.Submit>
+            <AppField form={form} name="fullName" />
+            <AppField form={form} name="email" />
+            <AppField form={form} name="country" />
+            <AppField form={form} name="newsletter" />
+            <button type="submit">Save profile</button>
           </div>
         </Form>
 
@@ -225,14 +224,12 @@ ${READONLY_OPTIONS_SURFACE}`,
       title: 'Return',
       content: `${READONLY_FIELD_STATE_SURFACE}
 
-${READONLY_FIELD_PROPS_SURFACE}
-
 ${READONLY_RETURN_SURFACE}`,
     },
     {
       id: 'fb-readonly-notes',
-      title: 'Platform note',
-      content: `Readonly review flows are currently most battle-tested on web. If you plan to rely on this API in native screens too, validate the exact renderer behavior you need before rolling it out broadly.`,
+      title: 'Rendering note',
+      content: `The hook returns formatted state, not components. Iterate over \`fieldNames\` and render \`fields[name]\` with your own web or native review-row component.`,
     },
   ],
 };

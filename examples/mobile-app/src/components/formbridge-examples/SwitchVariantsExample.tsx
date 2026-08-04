@@ -6,7 +6,8 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 import * as Haptics from 'expo-haptics';
 import { FieldVariantCard } from './FieldVariantCard';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { createNativeFormUi, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function SwitchVariantsExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
@@ -34,10 +35,9 @@ export function SwitchVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onChange',
     revalidateOn: 'onChange',
-    globalDefaults: () => createNativeFormUi(),
   });
 
-  const { Form, fields, watchAll } = form;
+  const { Form, fieldController, watchAll } = form;
   const values = watchAll();
   const activeCount = Object.values(values).filter(Boolean).length;
 
@@ -91,17 +91,14 @@ export function SwitchVariantsExample() {
       >
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Switch family</Text>
-          <fields.publicProfile />
-          <fields.pushAlerts />
-          <fields.quietHours />
+          <NativeField controller={fieldController('publicProfile')} />
+          <NativeField controller={fieldController('pushAlerts')} />
+          <NativeField controller={fieldController('quietHours')} />
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Saving switches..."
-        >
+        <NativeSubmit onPress={() => void form.submit()}>
           Save switch settings
-        </Form.Submit>
+        </NativeSubmit>
       </Form>
     </FieldVariantCard>
   );

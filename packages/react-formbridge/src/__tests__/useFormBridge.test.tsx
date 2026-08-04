@@ -375,8 +375,8 @@ describe('useForm - submit lifecycle', () => {
   });
 });
 
-describe('useForm - Form.Submit', () => {
-  it('renders a ReactNode loadingText while submitting', async () => {
+describe('useForm - headless submit', () => {
+  it('lets user-owned submit controls drive the Form pipeline', async () => {
     let resolveSubmit: (() => void) | undefined;
 
     function Harness() {
@@ -392,9 +392,12 @@ describe('useForm - Form.Submit', () => {
             })
           }
         >
-          <form.Form.Submit loadingText={<span data-testid="saving-node">Saving…</span>}>
-            Save
-          </form.Form.Submit>
+          <button
+            type="submit"
+            disabled={form.state.isSubmitting}
+          >
+            {form.state.isSubmitting ? 'Saving...' : 'Save'}
+          </button>
         </form.Form>
       );
     }
@@ -405,7 +408,7 @@ describe('useForm - Form.Submit', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     });
 
-    expect(screen.getByTestId('saving-node')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Saving...' })).toBeTruthy();
     expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true);
 
     await act(async () => {
@@ -422,7 +425,7 @@ describe('useFormBridgeContext', () => {
 
     function Mirror() {
       const form = useFormBridgeContext<typeof schema, 'web'>();
-      return <span data-testid="mirror">{form.watch('firstName')}</span>;
+      return <span data-testid="mirror">{String(form.watch('firstName'))}</span>;
     }
 
     function Harness() {
@@ -455,7 +458,7 @@ describe('useFormBridgeContext', () => {
 
     function HeaderValue() {
       const form = useFormBridgeContext<typeof schema, 'web'>();
-      return <span data-testid="header-value">{form.watch('firstName')}</span>;
+      return <span data-testid="header-value">{String(form.watch('firstName'))}</span>;
     }
 
     function Harness() {

@@ -5,11 +5,11 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { formExampleStyles as s } from './FormExamples.styles';
 import { MaskExampleCard } from './MaskExampleCard';
-import { createNativeFieldProps, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function EmployeeBadgeMaskExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
   const formSchema = useMemo(
     () => ({
@@ -38,7 +38,7 @@ export function EmployeeBadgeMaskExample() {
     revalidateOn: 'onChange',
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
 
   return (
@@ -50,7 +50,9 @@ export function EmployeeBadgeMaskExample() {
       highlights={['Fixed prefix', 'Structured suffix', 'Human-friendly IDs']}
       preview={
         <>
-          <Text style={s.previewValue}>{liveValues.badgeCode || 'EMP-2048-AX'}</Text>
+          <Text style={s.previewValue}>
+            {String(liveValues.badgeCode || 'EMP-2048-AX')}
+          </Text>
           <Text style={s.previewText}>
             The static prefix is rendered automatically, while the mask keeps the rest of
             the badge code in the expected format and stores that formatted value.
@@ -77,20 +79,15 @@ export function EmployeeBadgeMaskExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.teammateName {...fieldProps} />
+              <NativeField controller={fieldController('teammateName')} />
             </View>
             <View style={s.halfField}>
-              <fields.badgeCode {...fieldProps} />
+              <NativeField controller={fieldController('badgeCode')} />
             </View>
           </View>
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Issuing badge..."
-        >
-          Issue badge
-        </Form.Submit>
+        <NativeSubmit onPress={() => void form.submit()}>Issue badge</NativeSubmit>
       </Form>
     </MaskExampleCard>
   );

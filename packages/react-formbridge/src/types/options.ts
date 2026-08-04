@@ -1,8 +1,7 @@
 import type { PersistOptions } from '../core/persist/draft';
 import type { AnalyticsOptions } from '../hooks/shared/useFormBridgeAnalytics';
 import type { Platform, SelectOption } from './field';
-import type { FormSchema, FormState, SchemaValues } from './schema';
-import type { FormBridgeOptions } from './ui';
+import type { FormSchema, FormState, SchemaShape, SchemaValues } from './schema';
 
 // ─── Validation trigger ─────────────────────────────────────────────────────────
 
@@ -28,7 +27,7 @@ export type ValidationTrigger = 'onChange' | 'onBlur' | 'onSubmit' | 'onTouched'
  */
 export interface UseFormBridgeOptions<
   S extends FormSchema,
-  TPlatform extends Platform = Platform,
+  _TPlatform extends Platform = Platform,
 > {
   /**
    * When validation runs for a field:
@@ -107,16 +106,21 @@ export interface UseFormBridgeOptions<
   analytics?: AnalyticsOptions;
 
   /**
-   * Global UI layer applied to every rendered field, form wrapper, and
-   * submit button. Receives a read-only {@link globalDefaultsContext} so you
-   * can theme reactively based on the live form state, branch on field
-   * metadata via the compiled `schema`, or switch on the target `platform`.
-   *
-   * Local field props still win over these defaults.
+   * Called when the form submits and validation passes. This is the headless
+   * submit entrypoint; `<form.Form onSubmit>` can still override it locally.
    */
-  globalDefaults?(
-    context: globalDefaultsContext<S, TPlatform>,
-  ): FormBridgeOptions<TPlatform>;
+  onSubmit?: (values: SchemaValues<S>) => void | Promise<void>;
+
+  /**
+   * Called when submission fails validation.
+   */
+  onError?: (errors: Partial<Record<keyof SchemaShape<S>, string>>) => void;
+
+  /**
+   * Called when `onSubmit` throws. Return a string to store it as
+   * `state.submitError`.
+   */
+  onSubmitError?: (error: unknown) => string;
 }
 
 // ─── globalDefaults context ──────────────────────────────────────────────────────

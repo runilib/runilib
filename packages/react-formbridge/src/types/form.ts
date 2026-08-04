@@ -1,11 +1,12 @@
-import type { ButtonHTMLAttributes, FormHTMLAttributes, ReactNode } from 'react';
+import type { FormHTMLAttributes, ReactNode } from 'react';
 
 import type { VisibilityMap } from '../core/conditions/conditions';
+import type { OtpFieldBuilder } from '../core/field-descriptors/otp/OtpFieldBuilder';
+import type { SelectFieldBuilder } from '../core/field-descriptors/select/SelectFieldBuilder';
 import type {
   EmptyProps,
   FieldRenderHandlers,
   FieldRenderState,
-  NativeStyleValue,
   Platform,
   PlatformStyleValue,
   SelectOption,
@@ -14,10 +15,10 @@ import type {
   FormSchema,
   FormState,
   ResolvedFieldDescriptor,
+  SchemaFieldType,
   SchemaShape,
   SchemaValues,
 } from './schema';
-import type { FieldComponents } from './ui';
 
 // ─── Standalone FieldError component ─────────────────────────────────────────
 
@@ -109,11 +110,20 @@ export interface FocusableFieldHandle {
  * `otpLength`; everything else gets nothing.
  */
 type FieldControllerTypeMetadata<TEntry> =
-  ResolvedFieldDescriptor<TEntry> extends { _type: 'select' | 'radio' }
+  TEntry extends SelectFieldBuilder<'select' | 'radio'>
     ? { options?: SelectOption[] }
-    : ResolvedFieldDescriptor<TEntry> extends { _type: 'otp' }
-      ? { otpLength?: number }
-      : Record<never, never>;
+    : SchemaFieldType<TEntry> extends 'select' | 'radio'
+      ? { options?: SelectOption[] }
+      : TEntry extends OtpFieldBuilder
+        ? OtpFieldController
+        : SchemaFieldType<TEntry> extends 'otp'
+          ? OtpFieldController
+          : Record<never, never>;
+
+type FieldControllerHeadlessMetadata<TEntry> =
+  ResolvedFieldDescriptor<TEntry> extends { _maskPattern: string }
+    ? MaskedFieldController
+    : Record<never, never>;
 
 /**
  * Internal: {@link FieldRenderState} narrowed to a specific schema key. Strips
@@ -126,6 +136,29 @@ type FieldControllerState<
 > = Omit<FieldRenderState<SchemaValues<Schema>[K]>, 'name' | 'options' | 'otpLength'> & {
   name: K;
 };
+
+export interface MaskedFieldController {
+  mask: {
+    pattern: string;
+    placeholder: string;
+    placeholderText?: string;
+    showPlaceholder: boolean;
+    storeRaw: boolean;
+  };
+  rawValue: string;
+  displayValue: string;
+  maskComplete: boolean;
+  format: (value: string) => string;
+  unmask: (value: string) => string;
+}
+
+export interface OtpFieldController {
+  otpLength: number;
+  otpComplete: boolean;
+  digits: string[];
+  setDigit: (index: number, value: string) => void;
+  clear: () => void;
+}
 
 /**
  * Headless controller for a single field. Returned by
@@ -148,6 +181,7 @@ export type FieldController<
   K extends keyof SchemaShape<Schema> & string = keyof SchemaShape<Schema> & string,
 > = FieldControllerState<Schema, K> &
   FieldControllerTypeMetadata<SchemaShape<Schema>[K]> &
+  FieldControllerHeadlessMetadata<SchemaShape<Schema>[K]> &
   FieldRenderHandlers<SchemaValues<Schema>[K]> & {
     /**
      * Whether the field is visible per the schema's `conditions` rules.
@@ -197,24 +231,8 @@ export interface UseFormBridgeReturn<
    */
   FormProvider: (props: { children: ReactNode }) => JSX.Element;
 
-  /**
-   * The smart Form component - renders a form wrapper bound to the hook's
-   * state. Exposes `.Submit` as a nested component for a drop-in submit button.
-   *
-   * @example <form.Form onSubmit={handleSignUp}> ... </form.Form>
-   */
+  /** Minimal form wrapper bound to the hook's submit pipeline. */
   Form: FormComponent<Schema, TPlatform>;
-
-  /**
-   * Auto-rendered field components - one entry per schema key, picked by the
-   * field's type.
-   *
-   * - On web: renders `<input>`, `<textarea>`, `<select>`, etc.
-   * - On native: renders `<TextInput>`, `<Switch>`, `<Picker>`, etc.
-   *
-   * @example <form.fields.email />
-   */
-  fields: FieldComponents<Schema, TPlatform>;
 
   /**
    * Standalone error-message component.
@@ -237,8 +255,7 @@ export interface UseFormBridgeReturn<
    * Field-scoped controller exposing render props plus imperative actions
    * like change, blur, focus, validate, and manual error control.
    * See {@link FieldController}.
-   */
-  fieldController: <K extends keyof SchemaShape<Schema> & string>(
+   */ fieldController: <K extends keyof SchemaShape<Schema> & string>(
     name: K,
   ) => FieldController<Schema, K>;
 
@@ -309,6 +326,9 @@ export interface UseFormBridgeReturn<
    */
   submit: () => Promise<void>;
 
+  /** Event-friendly submit handler for custom `<form>` elements. */
+  handleSubmit: (event?: { preventDefault?: () => void }) => Promise<void>;
+
   /**
    * Current visibility / required / disabled state per field, derived from
    * the schema's `conditions` rules. Updated reactively as values change.
@@ -349,7 +369,7 @@ export interface UseFormBridgeReturn<
  * @typeParam Schema - The form schema (typed `onSubmit`/`onError`).
  */
 export interface BaseFormProps<Schema extends FormSchema> {
-  /** The form body - typically a tree of `<form.fields.*>` and a `<form.Form.Submit>`. */
+  /** The form body. Render your own fields and submit controls inside. */
   children: ReactNode;
   /**
    * Called when the user submits and validation passes. Receives the fully
@@ -415,8 +435,7 @@ export type FormProps<
   };
 
 /**
- * The smart Form component type. Callable like a regular React component and
- * carries a `Submit` static for the bundled submit button.
+ * The minimal Form component type. Callable like a regular React component.
  *
  * @typeParam Schema - The form schema.
  * @typeParam TPlatform - `'web'` or `'native'`.
@@ -424,69 +443,4 @@ export type FormProps<
 export type FormComponent<
   Schema extends FormSchema,
   TPlatform extends Platform = Platform,
-> = {
-  (props: FormProps<Schema, TPlatform>): JSX.Element;
-  /**
-   * A submit button automatically disabled while `status` is
-   * `'submitting'` / `'validating'`, with optional loading text swap.
-   */
-  Submit: SubmitButtonComponent<TPlatform>;
-};
-
-/**
- * Native `<button>` attributes passed through on web. Keys owned by FormBridge
- * (`children`, `style`) are stripped so the library keeps control over them.
- *
- * Lets you set native button attributes like `type`, `form`, `name`, `value`,
- * `formAction`, `aria-*`, …
- */
-export type WebSubmitNativeProps = Omit<
-  ButtonHTMLAttributes<HTMLButtonElement>,
-  'children' | 'style'
->;
-
-/**
- * Passthrough for `TouchableOpacity` props on native. Kept as a loose index
- * signature so this shared types file stays decoupled from `react-native`.
- *
- * Consumers may pass any `TouchableOpacityProps` (testID, accessibilityLabel,
- * hitSlop, activeOpacity, …). `disabled` is typed explicitly because
- * FormBridge also reads it.
- */
-export interface NativeSubmitNativeProps {
-  /** Manual disable flag - combined with the automatic in-flight disable. */
-  disabled?: boolean;
-  [key: string]: unknown;
-}
-
-/**
- * Props accepted by the `Form.Submit` button.
- *
- * On top of the base slot props (`children`, `loadingText`, `style`), this
- * type layers on platform-specific passthroughs so the component behaves like
- * a native `<button>` (web) or `<TouchableOpacity>` (native).
- *
- * @typeParam TPlatform - `'web'` or `'native'`.
- */
-export type SubmitButtonProps<TPlatform extends Platform = Platform> = {
-  /** Button label. Defaults to `'Submit'` when omitted. */
-  children?: ReactNode;
-  /** Inline style for the wrapper button. */
-  style?: PlatformStyleValue<TPlatform>;
-  /** Label shown while the form is submitting/validating (defaults to `'Please wait…'`). */
-  loadingText?: ReactNode;
-  /** Container style - native only (wraps the button visual). */
-  containerStyle?: TPlatform extends 'native' ? NativeStyleValue : never;
-  /** Text style applied to the label - native only. */
-  textStyle?: TPlatform extends 'native' ? NativeStyleValue : never;
-  /** Loading indicator color - native only. */
-  indicatorColor?: TPlatform extends 'native' ? string : never;
-} & (TPlatform extends 'web' ? WebSubmitNativeProps : NativeSubmitNativeProps);
-
-/**
- * The component type returned as `Form.Submit`. Always resolves to a valid
- * element - there is no null branch.
- */
-export type SubmitButtonComponent<TPlatform extends Platform = Platform> = (
-  props: SubmitButtonProps<TPlatform>,
-) => JSX.Element;
+> = (props: FormProps<Schema, TPlatform>) => JSX.Element;

@@ -17,7 +17,7 @@
 
 > Part of the [**runilib**](https://runilib.dev) ecosystem - React & React Native libraries that share the same API on web and native.
 
-`@runilib/react-formbridge` is the forms package of runilib. It lets you define a form once and reuse the same API across web and native. It generates fields from a schema and handles validation, conditional logic, persistence, async options, and multi-step flows.
+`@runilib/react-formbridge` is the forms package of runilib. It lets you define a form once and reuse the same headless API across web and native. It handles validation, conditional logic, persistence, async options, masked values, OTP helpers, and multi-step flows while you render your own inputs.
 
 Full documentation: https://react-formbridge.runilib.dev
 
@@ -28,7 +28,7 @@ Full documentation: https://react-formbridge.runilib.dev
 ## What It Solves
 
 - One form schema for React web and React Native
-- Generated fields instead of manual wiring
+- Headless field controllers instead of generated UI
 - Built-in validation and conditional visibility
 - Persistence, dynamic forms, readonly views, and wizard flows
 
@@ -51,37 +51,78 @@ const schema = {
 } satisfies FormSchema;
 
 export function SignUpForm() {
-  const { Form, fields } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     persist: { key: 'signup-form' },
   });
+  const email = form.fieldController('email');
+  const password = form.fieldController('password');
+  const terms = form.fieldController('terms');
 
   return (
-    <Form onSubmit={async (values) => console.log(values)}>
-      <fields.email />
-      <fields.password />
-      <fields.terms />
-      <Form.Submit>Create account</Form.Submit>
-    </Form>
+    <form.Form onSubmit={async (values) => console.log(values)}>
+      <form.FieldLabel name="email" />
+      <input
+        id="email"
+        type="email"
+        value={email.value}
+        placeholder={email.placeholder}
+        disabled={email.disabled}
+        onChange={(event) => email.onChange(event.target.value)}
+        onBlur={email.onBlur}
+      />
+      <form.FieldError name="email" />
+
+      <form.FieldLabel name="password" />
+      <input
+        id="password"
+        type="password"
+        value={password.value}
+        disabled={password.disabled}
+        onChange={(event) => password.onChange(event.target.value)}
+        onBlur={password.onBlur}
+      />
+      <form.FieldError name="password" />
+
+      <label>
+        <input
+          type="checkbox"
+          checked={terms.value}
+          disabled={terms.disabled}
+          onChange={(event) => terms.onChange(event.target.checked)}
+          onBlur={terms.onBlur}
+        />
+        I accept the terms
+      </label>
+      <form.FieldError name="terms" />
+
+      <button type="submit" disabled={form.state.isSubmitting}>
+        Create account
+      </button>
+    </form.Form>
   );
 }
 ```
 
-## Type-safe field overrides
+## Headless Fields
 
-Generated fields expose only the override props that make sense for their platform and field type.
+`form.fieldController(name)` returns everything needed to connect your own UI:
 
 ```tsx
-<fields.email inputProps={{ autoComplete: 'email', inputMode: 'email' }} />
-<fields.bio textareaProps={{ rows: 4 }} />
-<fields.country selectProps={{ size: 5  }} />
+const phone = form.fieldController('phone');
+
+<input
+  value={phone.displayValue}
+  onChange={(event) => phone.onChange(event.target.value)}
+/>;
 ```
 
-- Text-like fields expose `inputProps`
-- `textarea` fields expose `textareaProps` on web
-- `select` fields expose `selectProps` on web
-- Native fields do not expose web-only props such as `className`, `textareaProps`, or `selectProps`
+- `value`, `error`, `touched`, `dirty`, `required`, `disabled`, `visible`
+- `onChange`, `onBlur`, `onFocus`, `setValue`, `validate`, `setError`, `clearError`
+- `options` for select/radio fields
+- `displayValue`, `rawValue`, `format`, `unmask` for masked fields
+- `digits`, `setDigit`, `otpComplete` for OTP fields
 
-When you need to annotate a schema, prefer `satisfies FormSchema` over `: FormSchema` so TypeScript keeps the exact field types and the right autocomplete for each generated field.
+When you need to annotate a schema, prefer `satisfies FormSchema` over `: FormSchema` so TypeScript keeps the exact field types and controller autocomplete.
 
 ## React Native TypeScript
 

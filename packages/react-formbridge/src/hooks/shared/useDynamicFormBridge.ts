@@ -20,12 +20,15 @@ export interface UseDynamicFormOptions<
   defaultValues?: Record<string, unknown>;
 }
 
-export interface UseDynamicFormReturn<TPlatform extends Platform = Platform> {
+export interface UseDynamicFormReturn<
+  S extends FormSchema = FormSchema,
+  TPlatform extends Platform = Platform,
+> {
   /**
    * Fully initialized form bridge instance.
    * Returns `null` while the dynamic definition is still unavailable.
    */
-  form: UseFormBridgeReturn<FormSchema, TPlatform> | null;
+  form: UseFormBridgeReturn<S, TPlatform> | null;
 
   /**
    * Ordered list of field names as declared by the dynamic form parser.
@@ -76,7 +79,7 @@ export function createUseDynamicFormBridge<TPlatform extends Platform>(
   return function useDynamicFormBridge<S extends FormSchema>(
     source: JsonFormDefinition | (() => Promise<JsonFormDefinition>),
     options: UseDynamicFormOptions<S, TPlatform> = {},
-  ): UseDynamicFormReturn<TPlatform> {
+  ): UseDynamicFormReturn<S, TPlatform> {
     const [definition, setDefinition] = useState<JsonFormDefinition | null>(
       typeof source === 'function' ? null : source,
     );
@@ -165,7 +168,7 @@ export function createUseDynamicFormBridge<TPlatform extends Platform>(
     }, [parsed, defaultValues]);
 
     // Always call the hook once to respect the Rules of Hooks.
-    const bridge = useFormBridge(resolvedSchema, formOptions);
+    const bridge = useFormBridge(resolvedSchema as S, formOptions);
 
     // ── Visibility evaluation ────────────────────────────────────────────────
     const isVisible = useCallback(

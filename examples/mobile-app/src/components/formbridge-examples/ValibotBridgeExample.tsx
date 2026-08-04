@@ -6,11 +6,11 @@ import { field, useFormBridge, valibotBridge } from '@runilib/react-formbridge';
 import * as v from 'valibot';
 import { BridgeExampleCard } from './BridgeExampleCard';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { createNativeFieldProps, DEMO_PLANS, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { DEMO_PLANS, simulateSubmitDelay } from './shared';
 
 export function ValibotBridgeExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
-  const fieldProps = useMemo(() => createNativeFieldProps(), []);
 
   const formSchema = useMemo(
     () => ({
@@ -62,7 +62,7 @@ export function ValibotBridgeExample() {
     validatorBridge: bridge,
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
 
   const liveValues = watchAll();
   const planLabel =
@@ -103,29 +103,26 @@ export function ValibotBridgeExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.plan {...fieldProps} />
+              <NativeField controller={fieldController('plan')} />
             </View>
             <View style={s.halfField}>
-              <fields.cardholder {...fieldProps} />
+              <NativeField controller={fieldController('cardholder')} />
             </View>
           </View>
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.receiptEmail {...fieldProps} />
+              <NativeField controller={fieldController('receiptEmail')} />
             </View>
             <View style={s.halfField}>
-              <fields.cardLast4 {...fieldProps} />
+              <NativeField controller={fieldController('cardLast4')} />
             </View>
           </View>
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Parsing with Valibot..."
-        >
+        <NativeSubmit onPress={() => void form.submit()}>
           Validate with Valibot
-        </Form.Submit>
+        </NativeSubmit>
       </Form>
     </BridgeExampleCard>
   );

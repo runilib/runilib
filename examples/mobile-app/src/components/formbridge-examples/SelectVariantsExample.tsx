@@ -19,10 +19,10 @@ import {
 import * as Haptics from 'expo-haptics';
 import { FieldVariantCard } from './FieldVariantCard';
 import { formExampleStyles as s } from './FormExamples.styles';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
 import {
   ACCESS_ROLE_OPTIONS,
   CITY_DIRECTORY_OPTIONS,
-  createNativeFormUi,
   ROUTING_MODE_OPTIONS,
   searchCityDirectory,
   simulateSubmitDelay,
@@ -198,7 +198,7 @@ function CustomRoutingModeField({
   );
 }
 
-function renderCityPicker({
+function _renderCityPicker({
   open,
   search,
   setSearch,
@@ -370,10 +370,9 @@ export function SelectVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createNativeFormUi(),
   });
 
-  const { Form, fieldController, fields, watchAll } = form;
+  const { Form, fieldController, watchAll } = form;
   const values = watchAll();
   const routingMode = fieldController('routingMode');
   const workspaceLabel =
@@ -436,18 +435,13 @@ export function SelectVariantsExample() {
       >
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Select family</Text>
-          <fields.workspace highlightOnError />
-          <fields.accessRole />
-          <fields.cityLookup renderPicker={renderCityPicker} />
+          <NativeField controller={fieldController('workspace')} />
+          <NativeField controller={fieldController('accessRole')} />
+          <NativeField controller={fieldController('cityLookup')} />
           <CustomRoutingModeField controller={routingMode} />
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Saving picker setup..."
-        >
-          Save picker setup
-        </Form.Submit>
+        <NativeSubmit onPress={() => void form.submit()}>Save picker setup</NativeSubmit>
       </Form>
     </FieldVariantCard>
   );

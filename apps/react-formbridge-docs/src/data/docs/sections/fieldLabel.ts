@@ -25,7 +25,7 @@ const FIELD_LABEL_PROPS_TABLE = buildMethodsTable([
   [
     '`htmlFor`',
     '`string` *(web only)*',
-    'Explicit `for` attribute. Defaults to the field `name`, which already matches the input id emitted by the generated fields.',
+    'Explicit `for` attribute. Defaults to the field `name`; give your application-owned input the same id.',
   ],
   [
     '`className`',
@@ -51,9 +51,9 @@ export const fieldLabelSection: LibraryDoc['sections'][number] = {
 
 - Label text comes from \`field.x('Label text')\` in the schema - the component stays in sync automatically, so you don't duplicate strings in JSX
 - Required mark is driven by \`.required()\` on the builder. Flip the schema and the asterisk appears/disappears everywhere
-- \`htmlFor\` defaults to the field \`name\`, which matches the id emitted by the generated fields - click the label, the input focuses, accessibility wired for free
+- \`htmlFor\` defaults to the field \`name\`; use the same id on your input
 - Use it when you render inputs through \`form.fieldController(name)\` or when your design-system row layout keeps label / input / error as separate slots
-- Unlike \`Form\` and \`Form.Submit\`, \`FieldLabel\` keeps a deliberately focused API today instead of mirroring every native label attribute; if you need total control over the wrapper element, use \`render\``,
+- \`FieldLabel\` keeps a deliberately focused API; if you need total control over the wrapper element, use \`render\``,
   codeTabs: [
     {
       filename: 'FieldLabel.web.tsx',
@@ -70,13 +70,13 @@ const form = useFormBridge(schema)
     <input
       id="email"
       name="email"
-      value={form.state.values.email}
-      onChange={(e) => form.setFieldValue('email', e.target.value)}
-      onBlur={() => form.setFieldTouched('email', true)}
+      value={form.fieldController('email').value}
+      onChange={(e) => form.fieldController('email').onChange(e.target.value)}
+      onBlur={form.fieldController('email').onBlur}
     />
     <form.FieldError name="email" />
   </div>
-  <form.Form.Submit>Save</form.Form.Submit>
+  <button type="submit">Save</button>
 </form.Form>`,
     },
     {
@@ -113,9 +113,9 @@ const form = useFormBridge(schema)
     {
       id: 'fb-field-label-why',
       title: 'Why it exists',
-      content: `The generated \`<form.fields.email />\` component already renders its own label inline. \`<FieldLabel />\` exists for the cases where that isn't enough:
+      content: `\`<FieldLabel />\` is an optional convenience for application-owned fields:
 
-- **Custom layouts** - you render the input yourself via \`form.fieldController('email')\` and want a drop-in label slot without re-implementing the required-mark logic
+- **Custom layouts** - render the input via \`form.fieldController('email')\` and use a drop-in label slot without re-implementing the required-mark logic
 - **Design-system rows** - your form grid keeps label / input / error in separate columns, and each slot is its own component
 - **Single source of truth** - the label text lives once in the schema; flipping a field between optional and required automatically updates every place \`<FieldLabel />\` is mounted
 - **Tooltips, icons, help popovers** - use \`render\` to wrap the label in richer UI without giving up the typed \`name\` binding or the required-mark automation`,

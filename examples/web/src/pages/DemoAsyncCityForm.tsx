@@ -2,6 +2,8 @@ import React from 'react';
 
 import { field, useFormBridge } from '@runilib/react-formbridge';
 
+import { NativeSelectField } from '../components/form-examples/nativeFormHelpers';
+
 type CityDeps = { country?: string };
 
 export function DemoAsyncCityForm() {
@@ -58,13 +60,21 @@ export function DemoAsyncCityForm() {
     [],
   );
 
-  const { Form, fields } = useFormBridge(schema);
+  const { Form, FieldError, FieldLabel, fieldController } = useFormBridge(schema);
 
   return (
     <Form onSubmit={(values) => console.log('values', values)}>
-      <fields.country />
-      <fields.city />
-      <Form.Submit>Submit</Form.Submit>
+      <NativeSelectField
+        controller={fieldController('country')}
+        FieldError={FieldError}
+        FieldLabel={FieldLabel}
+      />
+      <NativeSelectField
+        controller={fieldController('city')}
+        FieldError={FieldError}
+        FieldLabel={FieldLabel}
+      />
+      <button type="submit">Submit</button>
     </Form>
   );
 }

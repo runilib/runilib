@@ -6,7 +6,8 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 import * as Haptics from 'expo-haptics';
 import { FieldVariantCard } from './FieldVariantCard';
 import { formExampleStyles as s } from './FormExamples.styles';
-import { createNativeFormUi, simulateSubmitDelay } from './shared';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 export function CheckboxVariantsExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
@@ -36,10 +37,9 @@ export function CheckboxVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createNativeFormUi(),
   });
 
-  const { Form, fields, watchAll } = form;
+  const { Form, fieldController, watchAll } = form;
   const values = watchAll();
   const enabledCount = Object.values(values).filter(Boolean).length;
 
@@ -95,17 +95,14 @@ export function CheckboxVariantsExample() {
       >
         <View style={s.sectionBlock}>
           <Text style={s.sectionBlockTitle}>Checkbox family</Text>
-          <fields.acceptTerms />
-          <fields.weeklyDigest />
-          <fields.betaInvites />
+          <NativeField controller={fieldController('acceptTerms')} />
+          <NativeField controller={fieldController('weeklyDigest')} />
+          <NativeField controller={fieldController('betaInvites')} />
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Saving checkboxes..."
-        >
+        <NativeSubmit onPress={() => void form.submit()}>
           Save checkbox preferences
-        </Form.Submit>
+        </NativeSubmit>
       </Form>
     </FieldVariantCard>
   );

@@ -4,8 +4,9 @@ import { Text, View } from 'react-native';
 import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { formExampleStyles as s } from './FormExamples.styles';
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
 import { StylingExampleCard } from './StylingExampleCard';
-import { CUSTOMER_DEPARTMENTS, createNativeFormUi, simulateSubmitDelay } from './shared';
+import { CUSTOMER_DEPARTMENTS, simulateSubmitDelay } from './shared';
 
 export function StyleSheetStylingExample() {
   const [lastSubmission, setLastSubmission] = useState<unknown>(null);
@@ -39,10 +40,9 @@ export function StyleSheetStylingExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createNativeFormUi(),
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
   const departmentLabel =
     CUSTOMER_DEPARTMENTS.find((item) => item.value === liveValues.department)?.label ??
@@ -58,10 +58,10 @@ export function StyleSheetStylingExample() {
       preview={
         <>
           <Text style={s.previewValue}>
-            {liveValues.projectName || 'Billing redesign'}
+            {String(liveValues.projectName || 'Billing redesign')}
           </Text>
           <Text style={s.previewText}>
-            Current owner: {liveValues.ownerEmail || 'owner@runilib.dev'}.
+            Current owner: {String(liveValues.ownerEmail || 'owner@runilib.dev')}.
           </Text>
           <Text style={s.customerPreviewDepartment}>{departmentLabel}</Text>
         </>
@@ -86,32 +86,21 @@ export function StyleSheetStylingExample() {
 
           <View style={s.formRow}>
             <View style={s.halfField}>
-              <fields.projectName />
+              <NativeField controller={fieldController('projectName')} />
             </View>
             <View style={s.halfField}>
-              <fields.ownerEmail />
+              <NativeField controller={fieldController('ownerEmail')} />
             </View>
           </View>
 
-          <fields.department
-            {...{
-              styles: {
-                selectTrigger: {
-                  borderColor: '#f5bf67',
-                },
-              },
-            }}
-          />
+          <NativeField controller={fieldController('department')} />
 
-          <fields.launchNotes />
+          <NativeField controller={fieldController('launchNotes')} />
         </View>
 
-        <Form.Submit
-          style={s.submitButton}
-          loadingText="Applying StyleSheet theme..."
-        >
+        <NativeSubmit onPress={() => void form.submit()}>
           Save StyleSheet recipe
-        </Form.Submit>
+        </NativeSubmit>
       </Form>
     </StylingExampleCard>
   );

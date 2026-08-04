@@ -1,15 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
 import { type FileValue, field, useFormBridge } from '@runilib/react-formbridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { simulateSubmitDelay } from './shared';
 
 type FileVariantValues = {
   profileAsset: FileValue | null;
   launchAssets: FileValue[];
   importSheet: FileValue | null;
+};
+
+type ManualController = {
+  name: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
 };
 
 function countFiles(value: FileValue | FileValue[] | null | undefined): number {
@@ -38,6 +46,41 @@ function describeFiles(value: FileValue | FileValue[] | null | undefined): strin
   }
 
   return value.name;
+}
+
+function FileField({
+  controller,
+  FieldError,
+  FieldLabel,
+  multiple = false,
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+  FieldLabel: (props: { name: string; htmlFor: string }) => React.JSX.Element | null;
+  multiple?: boolean;
+}) {
+  const id = useId();
+
+  return (
+    <div>
+      <FieldLabel
+        name={controller.name}
+        htmlFor={id}
+      />
+      <input
+        id={id}
+        type="file"
+        multiple={multiple}
+        onChange={(event) => {
+          const files = Array.from(event.target.files ?? []);
+          controller.onChange(multiple ? files : (files[0] ?? null));
+        }}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
+      />
+      <FieldError name={controller.name} />
+    </div>
+  );
 }
 
 export function FileVariantsExample() {
@@ -84,132 +127,14 @@ export function FileVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => {
-      const baseUi = createDemoFormUi(styles);
-
-      return {
-        ...baseUi,
-        submit: {
-          ...baseUi.submit,
-          loadingText: 'Saving file recipe...',
-        },
-        field: {
-          ...baseUi.field,
-          styles: {
-            ...baseUi.field?.styles,
-            wrapper: {
-              ...baseUi.field?.styles?.wrapper,
-              gap: 8,
-            },
-            fileDropZone: {
-              minHeight: 148,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'stretch',
-              justifyContent: 'center',
-              gap: 12,
-              padding: '18px 18px 16px',
-              borderRadius: 20,
-              border: '1px dashed rgba(125, 211, 252, 0.22)',
-              background:
-                'linear-gradient(180deg, rgba(14, 165, 233, 0.10), rgba(8, 47, 73, 0.18))',
-              color: '#10203a',
-              textAlign: 'left',
-              cursor: 'pointer',
-            },
-            fileBrowseButton: {
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              minHeight: 52,
-              padding: '14px 18px',
-              borderRadius: 16,
-              border: '1px solid rgba(96, 165, 250, 0.22)',
-              background: 'rgba(37, 99, 235, 0.10)',
-              color: '#dbeafe',
-              fontWeight: 700,
-            },
-            fileAddMoreButton: {
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 46,
-              padding: '12px 16px',
-              borderRadius: 14,
-              border: '1px solid rgba(148, 163, 184, 0.18)',
-              background: '#ffffff',
-              color: '#10203a',
-              fontWeight: 700,
-            },
-            fileList: {
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            },
-            fileListItem: {
-              display: 'grid',
-              gridTemplateColumns: '72px minmax(0, 1fr) auto',
-              gap: 14,
-              alignItems: 'center',
-              padding: '12px 14px',
-              borderRadius: 18,
-              border: '1px solid rgba(148, 163, 184, 0.14)',
-              background: '#ffffff',
-            },
-            filePreviewImage: {
-              width: 72,
-              height: 72,
-              objectFit: 'cover',
-              borderRadius: 16,
-              border: '1px solid rgba(148, 163, 184, 0.16)',
-            },
-            fileIcon: {
-              width: 72,
-              height: 72,
-              display: 'grid',
-              placeItems: 'center',
-              borderRadius: 16,
-              border: '1px solid rgba(148, 163, 184, 0.14)',
-              background: 'rgba(37, 99, 235, 0.06)',
-              fontSize: 28,
-            },
-            fileName: {
-              margin: 0,
-              color: '#10203a',
-              fontSize: 14,
-              fontWeight: 700,
-            },
-            fileMeta: {
-              margin: 0,
-              color: '#64748b',
-              fontSize: 12,
-              lineHeight: 1.5,
-            },
-            fileRemoveButton: {
-              border: '1px solid rgba(248, 113, 113, 0.18)',
-              borderRadius: 12,
-              background: 'rgba(127, 29, 29, 0.22)',
-              color: '#fecaca',
-              minHeight: 40,
-              padding: '10px 12px',
-              fontWeight: 700,
-            },
-          },
-        },
-      };
-    },
   });
 
-  const { Form, fields, watchAll } = form;
-  const values = watchAll();
+  const { Form, FieldError, FieldLabel, fieldController, watchAll } = form;
+  const values = watchAll() as Record<string, unknown>;
   const totalFiles =
-    countFiles(values.profileAsset) +
-    countFiles(values.launchAssets) +
-    countFiles(values.importSheet);
+    countFiles(values.profileAsset as FileValue | FileValue[] | null | undefined) +
+    countFiles(values.launchAssets as FileValue | FileValue[] | null | undefined) +
+    countFiles(values.importSheet as FileValue | FileValue[] | null | undefined);
 
   return (
     <FieldVariantFrame
@@ -227,9 +152,19 @@ export function FileVariantsExample() {
         <>
           <p className={styles.resolverPreviewValue}>{totalFiles} files in play</p>
           <p className={styles.resolverPreviewMuted}>
-            Avatar: {describeFiles(values.profileAsset)}. Assets:{' '}
-            {describeFiles(values.launchAssets)}. Import:{' '}
-            {describeFiles(values.importSheet)}.
+            Avatar:{' '}
+            {describeFiles(
+              values.profileAsset as FileValue | FileValue[] | null | undefined,
+            )}
+            . Assets:{' '}
+            {describeFiles(
+              values.launchAssets as FileValue | FileValue[] | null | undefined,
+            )}
+            . Import:{' '}
+            {describeFiles(
+              values.importSheet as FileValue | FileValue[] | null | undefined,
+            )}
+            .
           </p>
         </>
       }
@@ -248,116 +183,38 @@ export function FileVariantsExample() {
           setLastSubmission(submittedValues as FileVariantValues);
         }}
       >
-        <fields.profileAsset
-          {...{
-            renderDropZoneIcon: () => '🧑',
-            renderDropZoneContent: ({ accept, defaultIcon, dragging, maxSize }) => (
-              <div style={{ display: 'grid', gap: 10 }}>
-                <div
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 48,
-                    height: 48,
-                    borderRadius: 14,
-                    background: 'rgba(255,255,255,0.08)',
-                    fontSize: 24,
-                  }}
-                >
-                  {defaultIcon}
-                </div>
-                <div style={{ display: 'grid', gap: 4 }}>
-                  <strong style={{ color: '#10203a', fontSize: 14 }}>
-                    {dragging ? 'Release to update the avatar' : 'Upload a profile asset'}
-                  </strong>
-                  <span style={{ color: '#5f6f88', fontSize: 12.5, lineHeight: 1.5 }}>
-                    {dragging
-                      ? 'We keep the preview and file metadata in the same generated field.'
-                      : 'Perfect for account settings, speaker headshots, or team directories.'}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 8,
-                    fontSize: 11.5,
-                    color: '#bae6fd',
-                  }}
-                >
-                  <span>Accepted: {accept.join(', ')}</span>
-                  <span>
-                    Max size:{' '}
-                    {maxSize ? `${Math.round(maxSize / (1024 * 1024))} MB` : '-'}
-                  </span>
-                </div>
-              </div>
-            ),
-          }}
+        <FileField
+          controller={fieldController('profileAsset') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
         />
 
-        <fields.launchAssets
-          {...{
-            dragActiveText: 'Release to attach the launch bundle',
-            acceptedText: ({ formattedAccept }) => `Accepted assets: ${formattedAccept}`,
-            maxSizeText: ({ formattedMaxSize }) => `Per-file limit: ${formattedMaxSize}`,
-            browseButtonText: ({ fileCount }) =>
-              fileCount > 0
-                ? `📂 Add more launch assets (${fileCount})`
-                : '📂 Browse launch assets',
-            addMoreButtonText: ({ fileCount, maxFiles }) =>
-              `Add another asset (${fileCount}/${maxFiles})`,
-            removeButtonText: ({ index }) => `Remove #${index + 1}`,
-            renderFileIcon: (file, ctx) => {
-              if (file.type.includes('pdf')) {
-                return '📘';
-              }
-
-              if (file.type.includes('image')) {
-                return '🖼️';
-              }
-
-              return ctx.defaultIcon;
-            },
-            renderFileMeta: ({ file, formattedSize, defaultContent }) =>
-              file.type.includes('pdf') ? (
-                <p style={{ margin: 0, color: '#93c5fd', fontSize: 12, lineHeight: 1.5 }}>
-                  PDF brief · {formattedSize}
-                </p>
-              ) : (
-                defaultContent
-              ),
-          }}
+        <FileField
+          controller={fieldController('launchAssets') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
+          multiple
         />
 
-        <fields.importSheet
-          {...{
-            browseButtonText: 'Upload CSV or XLSX',
-            renderBrowseButtonContent: ({ defaultContent }) => (
-              <span
-                style={{
-                  display: 'grid',
-                  justifyItems: 'start',
-                  gap: 4,
-                  textAlign: 'left',
-                }}
-              >
-                <strong style={{ fontSize: 13.5 }}>{defaultContent}</strong>
-                <small style={{ color: '#64748b', fontSize: 11.5 }}>
-                  Keep the CTA compact while the parser remains fully typed.
-                </small>
-              </span>
-            ),
-            renderFileMeta: ({ formattedSize, file }) => (
-              <p style={{ margin: 0, color: '#fcd34d', fontSize: 12, lineHeight: 1.5 }}>
-                {file.type.includes('sheet') || file.type.includes('csv')
-                  ? 'Spreadsheet payload'
-                  : 'Imported file'}{' '}
-                · {formattedSize}
-              </p>
-            ),
-          }}
+        <FileField
+          controller={fieldController('importSheet') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+          FieldLabel={
+            FieldLabel as (props: {
+              name: string;
+              htmlFor: string;
+            }) => React.JSX.Element | null
+          }
         />
 
         <div className={styles.footerRow}>
@@ -365,7 +222,12 @@ export function FileVariantsExample() {
             Try one field with the stock UI, one with copy callbacks, and one with full
             content overrides.
           </p>
-          <Form.Submit className={styles.submitButton}>Save file recipe</Form.Submit>
+          <button
+            type="submit"
+            className={styles.submitButton}
+          >
+            Save file recipe
+          </button>
         </div>
       </Form>
     </FieldVariantFrame>

@@ -50,9 +50,9 @@ export function SignupWithAnalytics() {
 
   return (
     <Form onSubmit={(values) => api.signup(values)}>
-      <fields.email />
-      <fields.password />
-      <Form.Submit>Sign up</Form.Submit>
+      <AppField form={form} name="email" />
+      <AppField form={form} name="password" />
+      <button type="submit">Sign up</button>
     </Form>
   )
 }`,
@@ -87,8 +87,8 @@ export function PhoneCapture() {
     <ScrollView>
       <Form onSubmit={(values) => console.log(values)}>
         <View style={{ gap: 12, padding: 16 }}>
-          <fields.phone />
-          <Form.Submit>Continue</Form.Submit>
+          <AppField form={form} name="phone" />
+          <button type="submit">Continue</button>
         </View>
       </Form>
     </ScrollView>

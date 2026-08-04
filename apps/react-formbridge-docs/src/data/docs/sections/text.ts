@@ -92,8 +92,8 @@ const { Form, fields } = useFormBridge(schema)
 
 return (
 <Form onSubmit={save}>
-  <fields.fullName />
-  <Form.Submit>Save</Form.Submit>
+  <AppField form={form} name="fullName" />
+  <button type="submit">Save</button>
 </Form>
 )`,
     },
@@ -112,8 +112,8 @@ const { Form, fields } = useFormBridge(schema)
 
 return (
 <Form onSubmit={save}>
-  <fields.fullName />
-  <Form.Submit>Save</Form.Submit>
+  <AppField form={form} name="fullName" />
+  <button type="submit">Save</button>
 </Form>
 )`,
     },

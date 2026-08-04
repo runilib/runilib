@@ -5,7 +5,7 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import styles from './FormExamples.module.css';
 import { MaskExampleFrame } from './MaskExampleFrame';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { simulateSubmitDelay } from './shared';
 
 const ACCESS_CODE_PREFIX = 'OPS';
 
@@ -170,10 +170,9 @@ export function CustomRenderedMaskExample() {
   const form = useFormBridge(formSchema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
   });
 
-  const { Form, fieldController, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
   const liveValues = watchAll();
   const launchAccessCode = fieldController('launchAccessCode');
   const codeState = buildAccessCodeState(String(liveValues.launchAccessCode ?? ''));
@@ -192,7 +191,7 @@ export function CustomRenderedMaskExample() {
       preview={
         <>
           <p className={styles.resolverPreviewValue}>
-            {liveValues.launchAccessCode || 'OPS-2048-QA'}
+            {String(liveValues.launchAccessCode ?? 'OPS-2048-QA')}
           </p>
           <p className={styles.resolverPreviewMuted}>
             Raw suffix {codeState.rawValue || '2048QA'} ·{' '}
@@ -222,7 +221,18 @@ export function CustomRenderedMaskExample() {
         }}
       >
         <div className={styles.formRow}>
-          <fields.workspaceName />
+          <div className={styles.customMaskField}>
+            <FieldLabel name="workspaceName" />
+            <input
+              value={String(watchAll().workspaceName ?? '')}
+              onChange={(event) => {
+                fieldController('workspaceName').onChange(event.target.value);
+              }}
+              onBlur={fieldController('workspaceName').onBlur}
+              onFocus={fieldController('workspaceName').onFocus}
+            />
+            <FieldError name="workspaceName" />
+          </div>
           <CustomRenderedAccessCodeField controller={launchAccessCode} />
         </div>
 
@@ -241,12 +251,13 @@ export function CustomRenderedMaskExample() {
               Focus code field
             </button>
 
-            <Form.Submit
+            <button
+              type="submit"
               className={styles.submitButton}
-              loadingText="Issuing access…"
+              disabled={state.status === 'submitting'}
             >
-              Save launch code
-            </Form.Submit>
+              {state.status === 'submitting' ? 'Issuing access…' : 'Save launch code'}
+            </button>
           </div>
         </div>
       </Form>

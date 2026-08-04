@@ -102,9 +102,9 @@ export function MaskedPlaygroundWeb() {
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <fields.cardNumber />
-          <fields.licensePlate />
-          <Form.Submit>Save values</Form.Submit>
+          <AppField form={form} name="cardNumber" />
+          <AppField form={form} name="licensePlate" />
+          <button type="submit">Save values</button>
         </div>
       </Form>
 
@@ -189,9 +189,9 @@ export function MaskedPlaygroundApp() {
           }}
         >
           <View style={{ gap: 12 }}>
-            <fields.cardNumber />
-            <fields.licensePlate />
-            <Form.Submit>Save values</Form.Submit>
+            <AppField form={form} name="cardNumber" />
+            <AppField form={form} name="licensePlate" />
+            <button type="submit">Save values</button>
           </View>
         </Form>
 

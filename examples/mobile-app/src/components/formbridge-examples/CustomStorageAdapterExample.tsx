@@ -4,6 +4,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { FormSchema, StorageAdapter } from '@runilib/react-formbridge';
 import { field, useFormBridge } from '@runilib/react-formbridge';
 
+import { NativeField, NativeSubmit } from './nativeFormHelpers';
+
 type LogEntry = { op: 'get' | 'set' | 'remove'; key: string; at: string };
 
 function createInMemoryAdapter(pushLog: (entry: LogEntry) => void): StorageAdapter {
@@ -42,13 +44,14 @@ export function CustomStorageAdapterExample() {
     [],
   );
 
-  const { Form, fields } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     persist: {
       key: 'custom-adapter-native',
       storage: adapter,
       debounce: 400,
     },
   });
+  const { Form, fieldController } = form;
 
   return (
     <View style={s.card}>
@@ -65,11 +68,11 @@ export function CustomStorageAdapterExample() {
           console.log('[@examples/mobile] custom storage submit', values);
         }}
       >
-        <fields.fullName />
-        <fields.email />
-        <fields.code />
-        <fields.newsletter />
-        <Form.Submit>Save profile</Form.Submit>
+        <NativeField controller={fieldController('fullName')} />
+        <NativeField controller={fieldController('email')} />
+        <NativeField controller={fieldController('code')} />
+        <NativeField controller={fieldController('newsletter')} />
+        <NativeSubmit onPress={() => void form.submit()}>Save profile</NativeSubmit>
       </Form>
 
       <View style={s.logCard}>

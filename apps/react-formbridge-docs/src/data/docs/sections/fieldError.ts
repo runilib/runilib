@@ -32,13 +32,13 @@ const FIELD_ERROR_PROPS_TABLE = buildMethodsTable([
 export const fieldErrorSection: LibraryDoc['sections'][number] = {
   id: 'fb-field-error',
   title: 'FieldError component',
-  content: `Standalone error component returned by \`useFormBridge\`. Renders the validation error for a single field anywhere in the tree, with the same visibility rules the auto-rendered fields already follow.
+  content: `Standalone error component returned by \`useFormBridge\`. Renders the validation error for a single field anywhere in the tree.
 
 - Returns \`null\` when there is nothing to show, so it's safe to mount unconditionally - no \`{error && ...}\` boilerplate at the call site
 - Visibility follows the standard FormBridge rule: \`touched || submitCount > 0\`. The message stays hidden until the user has interacted with the field or tried to submit
 - Fully typed: the \`name\` prop autocompletes from your schema keys, so renaming a field breaks the usage site at compile time instead of at runtime
 - Use it when you render fields through \`form.fieldController(name)\` or a fully custom UI and want FormBridge to keep driving the error rendering
-- Unlike \`Form\` and \`Form.Submit\`, \`FieldError\` keeps a focused API instead of exposing every native wrapper attribute; if you need full control over the alert element, use \`render\``,
+- \`FieldError\` keeps a focused API instead of exposing every native wrapper attribute; if you need full control over the alert element, use \`render\``,
   codeTabs: [
     {
       filename: 'FieldError.web.tsx',
@@ -52,12 +52,12 @@ const form = useFormBridge(schema)
 <form.Form onSubmit={save}>
   <input
     name="email"
-    value={form.state.values.email}
-    onChange={(e) => form.setFieldValue('email', e.target.value)}
-    onBlur={() => form.setFieldTouched('email', true)}
+    value={form.fieldController('email').value}
+    onChange={(e) => form.fieldController('email').onChange(e.target.value)}
+    onBlur={form.fieldController('email').onBlur}
   />
   <form.FieldError name="email" />
-  <form.Form.Submit>Save</form.Form.Submit>
+  <button type="submit">Save</button>
 </form.Form>`,
     },
     {
@@ -86,9 +86,9 @@ const form = useFormBridge(schema)
     {
       id: 'fb-field-error-why',
       title: 'Why it exists',
-      content: `The auto-rendered \`<form.fields.email />\` component already shows its own error inline. \`<FieldError />\` exists for the cases where that isn't enough:
+      content: `\`<FieldError />\` is an optional convenience for application-owned fields:
 
-- **Custom layouts** - you're rendering the input yourself via \`form.fieldController('email')\` and need a drop-in error slot without re-implementing the \`touched || submitCount > 0\` rule
+- **Custom layouts** - render the input via \`form.fieldController('email')\` and use a drop-in error slot without re-implementing the \`touched || submitCount > 0\` rule
 - **Design-system integration** - your form rows have a fixed label/input/error grid and each slot is its own React component
 - **Multi-placement errors** - you want to show the error both inline *and* in a summary bar at the top of the form (mount \`<FieldError />\` twice, it stays in sync)
 - **Render-prop wrappers** - you need to wrap the error in a tooltip, toast, animation, or icon that the default \`<span>\` can't express`,

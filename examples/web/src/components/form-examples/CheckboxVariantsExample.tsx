@@ -1,10 +1,46 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 
 import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { simulateSubmitDelay } from './shared';
+
+type ManualController = {
+  name: string;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  onBlur: () => void;
+  onFocus: () => void;
+};
+
+function CheckboxField({
+  controller,
+  FieldError,
+}: {
+  controller: ManualController;
+  FieldError: (props: { name: string }) => React.JSX.Element | null;
+}) {
+  const id = useId();
+  const checked = Boolean(controller.value);
+
+  return (
+    <div className={styles.formField}>
+      <label htmlFor={id}>
+        <input
+          id={id}
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => controller.onChange(event.target.checked)}
+          onBlur={controller.onBlur}
+          onFocus={controller.onFocus}
+        />
+        <span>{controller.name}</span>
+      </label>
+      <FieldError name={controller.name} />
+    </div>
+  );
+}
 
 export function CheckboxVariantsExample() {
   const [lastSubmission, setLastSubmission] = useState<Record<string, unknown> | null>(
@@ -34,11 +70,10 @@ export function CheckboxVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => createDemoFormUi(styles),
   });
 
-  const { Form, fields, watchAll } = form;
-  const values = watchAll();
+  const { Form, FieldError, fieldController, watchAll } = form;
+  const values = watchAll() as Record<string, unknown>;
   const enabledCount = Object.values(values).filter(Boolean).length;
 
   return (
@@ -85,16 +120,24 @@ export function CheckboxVariantsExample() {
           setLastSubmission(submittedValues as Record<string, unknown>);
         }}
       >
-        <fields.acceptTerms />
-        <fields.weeklyDigest />
-        <fields.betaInvites />
-        <Form.Submit
+        <CheckboxField
+          controller={fieldController('acceptTerms') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+        />
+        <CheckboxField
+          controller={fieldController('weeklyDigest') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+        />
+        <CheckboxField
+          controller={fieldController('betaInvites') as ManualController}
+          FieldError={FieldError as (props: { name: string }) => React.JSX.Element | null}
+        />
+        <button
+          type="submit"
           className={styles.submitButton}
-          loadingText="Saving preferences…"
-          disabled
         >
           Save checkbox preferences
-        </Form.Submit>
+        </button>
       </Form>
     </FieldVariantFrame>
   );

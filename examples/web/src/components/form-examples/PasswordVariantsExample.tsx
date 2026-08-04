@@ -4,7 +4,8 @@ import { field, useFormBridge } from '@runilib/react-formbridge';
 
 import { FieldVariantFrame } from './FieldVariantFrame';
 import styles from './FormExamples.module.css';
-import { createDemoFormUi, simulateSubmitDelay } from './shared';
+import { NativeField } from './nativeFormHelpers';
+import { simulateSubmitDelay } from './shared';
 
 type PasswordVariantValues = {
   accountPassword: string;
@@ -95,119 +96,9 @@ export function PasswordVariantsExample() {
   const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
-    globalDefaults: () => {
-      const baseUi = createDemoFormUi(styles);
-
-      return {
-        ...baseUi,
-        submit: {
-          ...baseUi.submit,
-          loadingText: 'Saving password playbook...',
-        },
-        field: {
-          ...baseUi.field,
-          styles: {
-            ...baseUi.field?.styles,
-            passwordInput: {
-              ...baseUi.field?.styles?.textInput,
-              width: '100%',
-              paddingRight: '132px',
-            },
-            wrapper: {
-              ...baseUi.field?.styles?.wrapper,
-              gap: 8,
-            },
-            passwordToggle: {
-              position: 'absolute',
-              top: '50%',
-              right: 12,
-              transform: 'translateY(-50%)',
-              minHeight: 34,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid rgba(148, 163, 184, 0.18)',
-              background: '#ffffff',
-              color: '#10203a',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 700,
-              gap: 8,
-              whiteSpace: 'nowrap',
-            },
-            passwordStrengthRow: {
-              display: 'grid',
-              gap: 10,
-              marginTop: 2,
-            },
-            passwordStrengthBar: {
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-              gap: 6,
-              alignItems: 'stretch',
-            },
-            passwordStrengthMeta: {
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-              flexWrap: 'wrap',
-            },
-            passwordStrengthFill: {
-              minHeight: 6,
-              borderRadius: 999,
-              background: 'rgba(148, 163, 184, 0.18)',
-              transition: 'background-color 120ms ease, transform 120ms ease',
-            },
-            passwordStrengthLabel: {
-              fontSize: 12,
-              fontWeight: 700,
-            },
-            passwordStrengthEntropy: {
-              fontSize: 11,
-              color: '#64748b',
-            },
-            passwordRulesList: {
-              listStyle: 'none',
-              margin: 0,
-              padding: 0,
-              display: 'grid',
-              gap: 8,
-            },
-            passwordRuleItem: {
-              display: 'grid',
-              gridTemplateColumns: '20px minmax(0, 1fr)',
-              gap: 10,
-              alignItems: 'center',
-              padding: '10px 12px',
-              borderRadius: 14,
-              border: '1px solid rgba(148, 163, 184, 0.14)',
-              background: '#ffffff',
-            },
-            passwordRuleBullet: {
-              width: 20,
-              height: 20,
-              borderRadius: 999,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(148, 163, 184, 0.16)',
-              color: '#10203a',
-              fontSize: 11,
-              fontWeight: 800,
-            },
-            passwordRuleText: {
-              fontSize: 12,
-              lineHeight: 1.45,
-              color: '#5f6f88',
-            },
-          },
-        },
-      };
-    },
   });
 
-  const { Form, fields, state, watchAll } = form;
+  const { Form, FieldError, FieldLabel, fieldController, state, watchAll } = form;
   const values = watchAll();
   const healthyCount = (
     [
@@ -215,7 +106,7 @@ export function PasswordVariantsExample() {
       ['adminSecret', values.adminSecret],
       ['recoveryPassphrase', values.recoveryPassphrase],
     ] as const
-  ).filter(([name, value]) => Boolean(value) && !state.errors[name]).length;
+  ).filter(([, value]) => Boolean(value) && !state.errors[0]).length;
 
   return (
     <FieldVariantFrame
@@ -234,11 +125,18 @@ export function PasswordVariantsExample() {
           <p className={styles.resolverPreviewValue}>{healthyCount} flows look healthy</p>
           <p className={styles.resolverPreviewMuted}>
             Signup:{' '}
-            {describePasswordState(values.accountPassword, state.errors.accountPassword)}.
-            Admin: {describePasswordState(values.adminSecret, state.errors.adminSecret)}.
-            Recovery:{' '}
             {describePasswordState(
-              values.recoveryPassphrase,
+              String(values.accountPassword ?? ''),
+              state.errors.accountPassword,
+            )}
+            . Admin:{' '}
+            {describePasswordState(
+              String(values.adminSecret ?? ''),
+              state.errors.adminSecret,
+            )}
+            . Recovery:{' '}
+            {describePasswordState(
+              String(values.recoveryPassphrase ?? ''),
               state.errors.recoveryPassphrase,
             )}
             .
@@ -258,128 +156,37 @@ export function PasswordVariantsExample() {
           setLastSubmission(submittedValues as PasswordVariantValues);
         }}
       >
-        <fields.accountPassword />
-
-        <fields.adminSecret
-          {...{
-            showPasswordText: 'Reveal',
-            hidePasswordText: 'Mask',
-            renderToggleContent: ({ defaultContent, revealed }) => (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                <span aria-hidden="true">{revealed ? '🙈' : '👁️'}</span>
-                <span>{defaultContent}</span>
-              </span>
-            ),
-            renderStrengthRowContent: ({ defaultBarContent, result }) => (
-              <div
-                style={{
-                  display: 'grid',
-                  gap: 10,
-                  padding: '12px 14px',
-                  borderRadius: 18,
-                  border: '1px solid rgba(96, 165, 250, 0.20)',
-                  background:
-                    'linear-gradient(180deg, rgba(37, 99, 235, 0.08), rgba(255, 255, 255, 0.98))',
-                }}
-              >
-                {defaultBarContent}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 12,
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <span
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      borderRadius: 999,
-                      padding: '6px 10px',
-                      background: `${result.color}20`,
-                      border: `1px solid ${result.color}44`,
-                      color: result.color,
-                      fontSize: 12,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {result.label}
-                  </span>
-                  <span style={{ color: '#5f6f88', fontSize: 12 }}>
-                    {result.percent}% of the target security posture
-                  </span>
-                </div>
-              </div>
-            ),
-          }}
+        <NativeField
+          controller={fieldController('accountPassword')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          type="password"
+          className={styles.formField}
+          inputClassName={styles.formInput}
+        />
+        <NativeField
+          controller={fieldController('adminSecret')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          type="password"
+          className={styles.formField}
+          inputClassName={styles.formInput}
+        />
+        <NativeField
+          controller={fieldController('recoveryPassphrase')}
+          FieldError={FieldError}
+          FieldLabel={FieldLabel}
+          type="password"
+          className={styles.formField}
+          inputClassName={styles.formInput}
         />
 
-        <fields.recoveryPassphrase
-          {...{
-            showPasswordText: ({ hasValue }) => (hasValue ? 'Peek' : 'Show'),
-            hidePasswordText: 'Hide again',
-            renderStrengthLabel: ({ result }) => (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  color: result.color,
-                  fontWeight: 700,
-                  fontSize: 12,
-                }}
-              >
-                <span aria-hidden="true">✦</span>
-                {result.label}
-              </span>
-            ),
-            renderStrengthEntropy: ({ result }) => (
-              <span style={{ color: '#64748b', fontSize: 11 }}>
-                {result.entropy} bits of entropy
-              </span>
-            ),
-            renderStrengthRule: ({ rule }) => (
-              <li
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '22px minmax(0, 1fr)',
-                  gap: 10,
-                  alignItems: 'center',
-                  padding: '10px 12px',
-                  borderRadius: 14,
-                  border: `1px solid ${rule.passed ? 'rgba(34, 197, 94, 0.24)' : 'rgba(148, 163, 184, 0.14)'}`,
-                  background: rule.passed ? 'rgba(34, 197, 94, 0.08)' : '#ffffff',
-                }}
-              >
-                <span
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 999,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: rule.passed
-                      ? 'rgba(34, 197, 94, 0.18)'
-                      : 'rgba(148, 163, 184, 0.16)',
-                    color: rule.passed ? '#15803d' : '#64748b',
-                    fontSize: 11,
-                    fontWeight: 800,
-                  }}
-                >
-                  {rule.passed ? '✓' : '·'}
-                </span>
-                <span style={{ color: '#20304b', fontSize: 12, lineHeight: 1.45 }}>
-                  {rule.label}
-                </span>
-              </li>
-            ),
-          }}
-        />
-
-        <Form.Submit>Save password playbook</Form.Submit>
+        <button
+          type="submit"
+          className={styles.submitButton}
+        >
+          Save password playbook
+        </button>
       </Form>
     </FieldVariantFrame>
   );

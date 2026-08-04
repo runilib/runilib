@@ -1,13 +1,3 @@
-import {
-  FieldHost as SharedFieldHost,
-  type FieldHostProps as SharedFieldHostProps,
-  FormHost as SharedFormHost,
-  type FormHostProps as SharedFormHostProps,
-  SubmitHost as SharedSubmitHost,
-  type SubmitHostProps as SharedSubmitHostProps,
-} from './renderers/hosts/Host';
-import type { FormSchema, ExtraFieldProps as WebExtraFieldProps } from './types.web';
-
 export {
   type JoiBridgeIssue,
   type JoiBridgeOptions,
@@ -88,20 +78,5 @@ export {
   type WizardStepChangeEvent,
   type WizardStepChangeReason,
 } from './hooks/useFormBridgeWizard.web';
-// ─── FormHost ────────────────────────────────────────────────────────────────────
-export type FieldHostProps<TProps extends WebExtraFieldProps = WebExtraFieldProps> =
-  SharedFieldHostProps<TProps>;
-export const FieldHost = SharedFieldHost as <TProps extends WebExtraFieldProps>(
-  props: FieldHostProps<TProps>,
-) => JSX.Element;
-
-export type SubmitHostProps = SharedSubmitHostProps<'web'>;
-export const SubmitHost = SharedSubmitHost as (props: SubmitHostProps) => JSX.Element;
-
-export type FormHostProps<F extends FormSchema> = SharedFormHostProps<F, 'web'>;
-export const FormHost = SharedFormHost as <F extends FormSchema>(
-  props: FormHostProps<F>,
-) => JSX.Element;
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type * from './types.web';

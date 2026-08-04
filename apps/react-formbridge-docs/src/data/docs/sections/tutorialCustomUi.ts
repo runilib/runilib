@@ -2,245 +2,144 @@ import type { LibraryDoc } from './../../../types/index';
 
 export const tutorialCustomUiSection: LibraryDoc['sections'][number] = {
   id: 'fb-tutorial-custom-ui',
-  title: 'Tutorial: custom UI & styling',
-  content: `Generated fields are the default path, but the runtime still leaves room for design-system wrappers and fully bespoke inputs.
+  title: 'Render your UI',
+  content: `React FormBridge is headless: it does not generate inputs or impose a component library. Use \`fieldController(name)\` to connect schema-owned behavior to UI owned by your application.
 
-- Use \`fieldController(name)\` when the value model is still one of the built-in field types and you only want custom UI
-- Use \`field.custom(defaultValue)\` when the field needs a new value model
-- Keep styling in \`globalDefaults\`, local field overrides, or host components so the schema stays focused on behavior`,
+- The controller exposes value, events, validation state, semantic metadata, visibility, and focus registration.
+- Web and native share the schema, but each platform renders its own accessible controls.
+- Put layout, styling, input variants, and design-system adapters in your UI layer.`,
   codeTabs: [
     {
-      filename: 'web.tsx',
+      filename: 'TextField.web.tsx',
       lang: 'tsx',
-      code: `import { field, useFormBridge } from '@runilib/react-formbridge'
-
-const schema = {
-  workspaceName: field.text('Workspace').required(),
-  launchAccessCode: field
-    .masked('OPS-9999-LL')
-    .label('Launch access code')
-    .placeholder('2048-QA')
-    .hint('Rendered manually through form.fieldController(...).')
-    .required()
-    .validateComplete('Complete the launch access code.'),
-}
-
-export function MissionControlForm() {
-  const form = useFormBridge(schema, {
-    validateOn: 'onBlur',
-    revalidateOn: 'onChange',
-  })
-
-  const accessCodeController = form.fieldController('launchAccessCode')
+      code: `export function TextField({ controller }) {
+  if (!controller.visible) return null
 
   return (
-    <form.Form onSubmit={async (values) => api.save(values)}>
-      <form.fields.workspaceName />
-      <label htmlFor={accessCodeController.id}>{accessCodeController.label}</label>
+    <div className="field">
+      <label htmlFor={controller.name}>
+        {controller.label}{controller.required ? ' *' : ''}
+      </label>
       <input
-        id={accessCodeController.id}
-        ref={(node) => accessCodeController.registerFocusable(node)}
-        value={String(accessCodeController.value ?? '').replace(/^OPS-/, '')}
-        placeholder="2048-QA"
-        disabled={accessCodeController.disabled}
-        onChange={(event) => accessCodeController.onChange('OPS-' + event.target.value.toUpperCase())}
-        onBlur={accessCodeController.onBlur}
-        onFocus={accessCodeController.onFocus}
+        id={controller.name}
+        name={controller.name}
+        ref={controller.registerFocusable}
+        value={String(controller.value ?? '')}
+        placeholder={controller.placeholder}
+        disabled={controller.disabled}
+        required={controller.required}
+        aria-invalid={Boolean(controller.error)}
+        onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
       />
-      {accessCodeController.error ? <p>{accessCodeController.error}</p> : null}
-      <button type="button" onClick={() => accessCodeController.focus()}>Focus code field</button>
-      <form.Form.Submit>Save</form.Form.Submit>
-    </form.Form>
+      {controller.error ? <p role="alert">{controller.error}</p> : null}
+    </div>
   )
 }`,
     },
     {
-      filename: 'native.tsx',
+      filename: 'TextField.native.tsx',
       lang: 'tsx',
-      code: `import { Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { field, useFormBridge } from '@runilib/react-formbridge'
+      code: `import { Text, TextInput, View } from 'react-native'
 
-const schema = {
-  workspaceName: field.text('Workspace').required(),
-  launchAccessCode: field
-    .masked('OPS-9999-LL')
-    .label('Launch access code')
-    .placeholder('2048-QA')
-    .hint('Rendered manually through form.fieldController(...).')
-    .required()
-    .validateComplete('Complete the launch access code.'),
-}
-
-export function MissionControlScreen() {
-  const form = useFormBridge(schema, {
-    validateOn: 'onBlur',
-    revalidateOn: 'onChange',
-  })
-
-  const accessCode = form.fieldController('launchAccessCode')
+export function TextField({ controller }) {
+  if (!controller.visible) return null
 
   return (
-    <form.Form onSubmit={async (values) => api.save(values)}>
-      <View style={{ gap: 12, padding: 16 }}>
-        <form.fields.workspaceName />
-        <Text>{accessCode.label}</Text>
-        <TextInput
-          ref={(node) => accessCode.registerFocusable(node)}
-          value={String(accessCode.value ?? '').replace(/^OPS-/, '')}
-          placeholder="2048-QA"
-          editable={!accessCode.disabled}
-          onChangeText={(text) => accessCode.onChange('OPS-' + text.toUpperCase())}
-          onBlur={accessCode.onBlur}
-          onFocus={accessCode.onFocus}
-        />
-        {accessCode.error ? <Text>{accessCode.error}</Text> : null}
-        <TouchableOpacity onPress={() => accessCode.focus()}>
-          <Text>Focus code field</Text>
-        </TouchableOpacity>
-        <form.Form.Submit>Save</form.Form.Submit>
-      </View>
-    </form.Form>
+    <View>
+      <Text>{controller.label}{controller.required ? ' *' : ''}</Text>
+      <TextInput
+        ref={controller.registerFocusable}
+        value={String(controller.value ?? '')}
+        placeholder={controller.placeholder}
+        editable={!controller.disabled}
+        onChangeText={controller.onChange}
+        onBlur={controller.onBlur}
+        onFocus={controller.onFocus}
+      />
+      {controller.error ? <Text accessibilityRole="alert">{controller.error}</Text> : null}
+    </View>
   )
 }`,
     },
   ],
   subsections: [
     {
-      id: 'fb-tutorial-custom-field',
-      title: 'Use field.custom() for new value models',
-      content: `If the built-in field families are close but not quite right, keep the new value model typed in the schema and replace the renderer completely.`,
+      id: 'fb-tutorial-custom-ui-form',
+      title: 'Compose a form',
+      content: `Create controllers during render, pass them to your UI components, and submit with \`handleSubmit\` on web or \`submit\` on native. \`onSubmit\` belongs to the hook options; the submit helpers run the same validation pipeline.`,
       code: {
-        filename: 'CustomRating.tsx',
+        filename: 'ProfileForm.web.tsx',
+        lang: 'tsx',
+        code: `import { field, useFormBridge } from '@runilib/react-formbridge'
+import { TextField } from './TextField'
+
+const schema = {
+  name: field.text('Name').required().trim(),
+  email: field.email('Email').required(),
+}
+
+export function ProfileForm() {
+  const form = useFormBridge(schema, {
+    validateOn: 'onBlur',
+    onSubmit: (values) => api.saveProfile(values),
+  })
+
+  return (
+    <form onSubmit={form.handleSubmit} noValidate>
+      <TextField controller={form.fieldController('name')} />
+      <TextField controller={form.fieldController('email')} />
+      <button type="submit" disabled={form.state.isSubmitting}>
+        {form.state.isSubmitting ? 'Saving…' : 'Save'}
+      </button>
+    </form>
+  )
+}`,
+      },
+    },
+    {
+      id: 'fb-tutorial-custom-ui-adapters',
+      title: 'Build design-system adapters',
+      content: `Wrap \`fieldController()\` once per control family. A text adapter, checkbox adapter, select adapter, masked-input adapter, and file adapter are usually enough. This keeps form screens concise without coupling FormBridge itself to your UI kit.
+
+Type-specific controllers add useful metadata:
+
+- select/radio: \`options\`
+- masked fields: \`displayValue\`, \`rawValue\`, \`maskComplete\`, \`format()\`, and \`unmask()\`
+- OTP: \`otpLength\`, \`digits\`, \`setDigit()\`, \`clear()\`, and \`otpComplete\``,
+    },
+    {
+      id: 'fb-tutorial-custom-field',
+      title: 'Use field.custom() for a new value model',
+      content: `\`field.custom(defaultValue)\` adds a typed value model to the schema. Rendering still happens through its controller, exactly like built-in fields.`,
+      code: {
+        filename: 'RatingField.tsx',
         lang: 'tsx',
         code: `const schema = {
   rating: field
     .custom(0)
     .label('Rating')
-    .render(({ label, value, onChange, error }) => (
-      <div>
-        <p>{label}</p>
-        {[1, 2, 3, 4, 5].map((step) => (
-          <button key={step} type="button" onClick={() => onChange(step)}>
-            {value >= step ? '★' : '☆'}
-          </button>
-        ))}
-        {error ? <p>{error}</p> : null}
-      </div>
-    ))
     .validate((value) => (value > 0 ? null : 'Pick a rating')),
-}`,
-      },
-    },
-    {
-      id: 'fb-tutorial-custom-styling',
-      title: 'Style the same runtime in different ways',
-      content: `The product shell can evolve without rewriting the field semantics. Keep styling in the UI layer and keep behavior in the schema.`,
-      codeTabs: [
-        {
-          filename: 'web.tsx',
-          lang: 'tsx',
-          code: `import styled from 'styled-components'
-import {
-  FieldHost,
-  FormHost,
-  SubmitHost,
-  field,
-  useFormBridge,
-} from '@runilib/react-formbridge'
-
-const Shell = styled(FormHost)\`
-  display: grid;
-  gap: 14px;
-\`
-
-const EmailField = styled(FieldHost).attrs({
-  inputProps: { autoComplete: 'email', inputMode: 'email' },
-})\`
-  & input {
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-  }
-\`
-
-const SubmitButton = styled(SubmitHost)\`
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-\`
-
-const schema = {
-  email: field.email('Email').required(),
-  password: field.password('Password').required(),
 }
 
-export function StyledRecipe() {
+function RatingField() {
   const form = useFormBridge(schema)
+  const rating = form.fieldController('rating')
 
   return (
-    <Shell form={form.Form} onSubmit={async (values) => api.save(values)}>
-      <EmailField field={form.fields.email} />
-      <FieldHost field={form.fields.password} />
-      <SubmitButton submit={form.Form.Submit}>Sign in</SubmitButton>
-    </Shell>
+    <div>
+      <p>{rating.label}</p>
+      {[1, 2, 3, 4, 5].map((step) => (
+        <button key={step} type="button" onClick={() => rating.onChange(step)}>
+          {rating.value >= step ? '★' : '☆'}
+        </button>
+      ))}
+      {rating.error ? <p role="alert">{rating.error}</p> : null}
+    </div>
   )
 }`,
-        },
-        {
-          filename: 'native.tsx',
-          lang: 'tsx',
-          code: `import styled from 'styled-components/native'
-import {
-  FieldHost,
-  FormHost,
-  SubmitHost,
-  field,
-  useFormBridge,
-} from '@runilib/react-formbridge'
-
-const StyledForm = styled(FormHost)\`
-  gap: 16px;
-\`
-
-const EmailField = styled(FieldHost).attrs({
-    inputProps: {
-      autoComplete: 'email',
-      keyboardType: 'email-address',
-    },
-    styles: {
-      wrapper: { gap: 6 },
-      input: {
-        borderWidth: 1,
-        borderColor: '#cbd5e1',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
       },
-    },
-})\`\`
-
-const SubmitButton = styled(SubmitHost)\`
-  border-radius: 8px;
-  background: #2563eb;
-\`
-
-const schema = {
-  email: field.email('Email').required(),
-  password: field.password('Password').required(),
-}
-
-export function StyledRecipeScreen() {
-  const form = useFormBridge(schema)
-
-  return (
-    <StyledForm form={form.Form} onSubmit={async (values) => api.save(values)}>
-      <EmailField field={form.fields.email} />
-      <FieldHost field={form.fields.password} />
-      <SubmitButton submit={form.Form.Submit}>Sign in</SubmitButton>
-    </StyledForm>
-  )
-}`,
-        },
-      ],
     },
   ],
 };

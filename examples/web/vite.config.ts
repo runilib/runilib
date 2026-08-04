@@ -51,6 +51,7 @@ export default defineConfig({
   resolve: {
     alias: {
       'react-native$': 'react-native-web',
+      '@': path.resolve(__dirname, './src'),
       '@runilib/react-walkit': path.resolve(
         __dirname,
         '../../packages/react-walkit/src/index.ts',

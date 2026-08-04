@@ -116,7 +116,7 @@ export function DynamicFormPlayground() {
           return <Field key={name} />
         })}
 
-        <Form.Submit>{meta.submitLabel ?? 'Submit'}</Form.Submit>
+        <button type="submit">{meta.submitLabel ?? 'Submit'}</button>
       </Form>
 
       <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
@@ -178,7 +178,7 @@ export function RemoteDynamic({ url }: { url: string }) {
             const Field = fields[name]
             return <Field key={name} />
           })}
-          <Form.Submit>Submit</Form.Submit>
+          <button type="submit">Submit</button>
         </View>
       </Form>
     </ScrollView>
@@ -245,9 +245,9 @@ export function DynamicSignupStepRoute() {
         return <Field key={name} />
       })}
 
-      <Form.Submit>
+      <button type="submit">
         {meta.submitLabel ?? (nextStepId ? 'Continue' : 'Finish')}
-      </Form.Submit>
+      </button>
     </Form>
   )
 }`,
@@ -319,9 +319,9 @@ export function DynamicSignupStepScreen() {
             return <Field key={name} />
           })}
 
-          <Form.Submit>
+          <button type="submit">
             {meta.submitLabel ?? (nextStepId ? 'Continue' : 'Finish')}
-          </Form.Submit>
+          </button>
         </View>
       </Form>
     </ScrollView>

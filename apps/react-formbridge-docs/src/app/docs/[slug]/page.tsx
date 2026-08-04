@@ -61,17 +61,29 @@ const schema = {
 }
 
 export function ProfileForm() {
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
+    onSubmit: (values) => api.save(values),
   })
+  const fullName = form.fieldController('fullName')
+  const email = form.fieldController('email')
 
   return (
-    <Form onSubmit={async (values) => api.save(values)}>
-      <fields.fullName />
-      <fields.email />
-      <Form.Submit disabled={!state.isValid}>Save changes</Form.Submit>
-    </Form>
+    <form onSubmit={form.handleSubmit}>
+      <input
+        value={fullName.value}
+        onChange={(event) => fullName.onChange(event.target.value)}
+        onBlur={fullName.onBlur}
+      />
+      <input
+        type="email"
+        value={email.value}
+        onChange={(event) => email.onChange(event.target.value)}
+        onBlur={email.onBlur}
+      />
+      <button disabled={form.state.isSubmitting}>Save changes</button>
+    </form>
   )
 }`,
     filename: 'QuickStartPlayground.web.tsx',
@@ -80,7 +92,7 @@ export function ProfileForm() {
   },
   {
     interactive: true,
-    code: `import { ScrollView, View } from 'react-native'
+    code: `import { Button, ScrollView, TextInput, View } from 'react-native'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -89,20 +101,25 @@ const schema = {
 }
 
 export function ProfileForm() {
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
+    onSubmit: (values) => api.save(values),
   })
+  const fullName = form.fieldController('fullName')
+  const email = form.fieldController('email')
 
   return (
     <ScrollView>
-      <Form onSubmit={async (values) => api.save(values)}>
-        <View style={{ gap: 12, padding: 16 }}>
-          <fields.fullName />
-          <fields.email />
-          <Form.Submit disabled={!state.isValid}>Save changes</Form.Submit>
-        </View>
-      </Form>
+      <View style={{ gap: 12, padding: 16 }}>
+        <TextInput value={fullName.value} onChangeText={fullName.onChange} />
+        <TextInput value={email.value} onChangeText={email.onChange} />
+        <Button
+          title="Save changes"
+          onPress={form.submit}
+          disabled={form.state.isSubmitting}
+        />
+      </View>
     </ScrollView>
   )
 }`,
@@ -155,9 +172,24 @@ const USE_FORM_BRIDGE_OPTIONS: FeatureOptionRow[] = [
     type: 'Partial<SchemaValues<typeof schema>>',
   },
   {
-    description: 'Seed the runtime from existing values before the user edits the form.',
-    property: 'globalDefaults',
-    type: 'Partial<SchemaValues<typeof schema>>',
+    description: 'Rebuild the compiled schema runtime when its definition changes.',
+    property: 'schemaKey',
+    type: 'string | number',
+  },
+  {
+    description: 'Submit callback called after successful validation.',
+    property: 'onSubmit',
+    type: '(values) => void | Promise<void>',
+  },
+  {
+    description: 'Callback called when validation blocks submission.',
+    property: 'onError',
+    type: '(errors) => void',
+  },
+  {
+    description: 'Maps a thrown submission error to state.submitError.',
+    property: 'onSubmitError',
+    type: '(error) => string',
   },
 ];
 
@@ -229,7 +261,6 @@ const UseFormBridgeFeaturePage = ({
   version: string;
 }) => {
   const formEntry = getDocEntryById('fb-form');
-  const fieldsEntry = getDocEntryById('fb-fields');
   const stateEntry = getDocEntryById('fb-state');
   const fieldControllerEntry = getDocEntryById('fb-field-controller');
   const fieldErrorEntry = getDocEntryById('fb-field-error');
@@ -248,17 +279,10 @@ const UseFormBridgeFeaturePage = ({
       title: 'FormProvider',
     },
     {
-      description:
-        'Generated wrapper component with submit lifecycle and `Form.Submit` helpers.',
+      description: 'Minimal wrapper connected to the submit lifecycle.',
       href: formEntry?.href,
-      label: 'generated wrapper',
+      label: 'form wrapper',
       title: 'Form',
-    },
-    {
-      description: 'Typed generated field components keyed by the schema field names.',
-      href: fieldsEntry?.href,
-      label: 'typed generated fields',
-      title: 'fields',
     },
     {
       description:
@@ -378,7 +402,7 @@ const UseFormBridgeFeaturePage = ({
     },
     {
       description:
-        'Imperatively trigger submission through the same pipeline as `Form.Submit`.',
+        'Imperatively trigger submission through the validation and submit pipeline.',
       href: actionsEntry?.href,
       label: 'imperative action',
       title: 'submit()',
