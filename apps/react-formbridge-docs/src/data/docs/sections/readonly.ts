@@ -69,7 +69,7 @@ export function ReadonlyPlayground() {
     initialValues: originalValues,
   })
 
-  const { Form, fields, state } = form
+  const { Form, fieldController, state } = form
 
   const readonly = useFormBridgeReadonly(schema, {
     mode,

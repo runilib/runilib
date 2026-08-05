@@ -89,7 +89,7 @@ export function DynamicFormPlayground() {
     )
   }
 
-  const { Form, fields, state } = form
+  const { Form, fieldController, state } = form
 
   return (
     <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#f5f7fb' }}>
@@ -111,10 +111,11 @@ export function DynamicFormPlayground() {
           setSubmitted(values)
         }}
       >
-        {fieldOrder.filter((name) => isVisible(name)).map((name) => {
-          const Field = fields[name]
-          return <Field key={name} />
-        })}
+        {fieldOrder
+          .filter((name) => isVisible(name))
+          .map((name) => (
+            <AppField key={name} form={form} name={name} />
+          ))}
 
         <button type="submit">{meta.submitLabel ?? 'Submit'}</button>
       </Form>
@@ -169,7 +170,7 @@ export function RemoteDynamic({ url }: { url: string }) {
 
   if (!form) return <View><Text>{loadError ?? 'Loading…'}</Text></View>
 
-  const { Form, fields } = form
+  const { Form, fieldController } = form
   return (
     <ScrollView>
       <Form onSubmit={(values) => console.log(values)}>
@@ -227,7 +228,7 @@ export function DynamicSignupStepRoute() {
   }
 
   const nextStepId = NEXT_STEP_BY_ID[stepId as keyof typeof NEXT_STEP_BY_ID]
-  const { Form, fields } = form
+  const { Form, fieldController } = form
 
   return (
     <Form
@@ -299,7 +300,7 @@ export function DynamicSignupStepScreen() {
   }
 
   const nextStepId = NEXT_STEP_BY_ID[stepId as keyof typeof NEXT_STEP_BY_ID]
-  const { Form, fields } = form
+  const { Form, fieldController } = form
 
   return (
     <ScrollView>

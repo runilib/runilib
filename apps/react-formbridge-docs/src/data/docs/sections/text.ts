@@ -88,7 +88,8 @@ export const textSection: LibraryDoc['sections'][number] = {
     .max(80)
     .pattern(/^[a-z\\s'-]+$/i, 'Only letters and spaces.'),
 }
-const { Form, fields } = useFormBridge(schema)
+const form = useFormBridge(schema)
+  const { Form, fieldController } = form
 
 return (
 <Form onSubmit={save}>
@@ -108,7 +109,8 @@ return (
     .max(80)
     .pattern(/^[a-z\\s'-]+$/i, 'Only letters and spaces.'),
 }
-const { Form, fields } = useFormBridge(schema)
+const form = useFormBridge(schema)
+  const { Form, fieldController } = form
 
 return (
 <Form onSubmit={save}>

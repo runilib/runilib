@@ -39,7 +39,8 @@ export const customSection: LibraryDoc['sections'][number] = {
     .validate((value) => (value > 0 ? null : 'Pick a rating')),
 }
 
-const { Form, fields } = useFormBridge(schema)
+const form = useFormBridge(schema)
+  const { Form, fieldController } = form
 
 <Form onSubmit={save}>
   <AppField form={form} name="rating" />

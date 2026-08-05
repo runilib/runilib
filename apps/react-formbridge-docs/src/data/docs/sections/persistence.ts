@@ -69,7 +69,7 @@ function LocalDraftForm({
     },
   })
 
-  const { Form, fields, persistanceHelpers, state } = form
+  const { Form, fieldController, persistanceHelpers, state } = form
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -334,7 +334,7 @@ function CustomAdapterForm({
     },
   })
 
-  const { Form, fields, persistanceHelpers, state } = form
+  const { Form, fieldController, persistanceHelpers, state } = form
 
   return (
     <>

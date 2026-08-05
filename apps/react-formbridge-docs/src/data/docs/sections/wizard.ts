@@ -63,7 +63,8 @@ export function WizardPlayground() {
 
   if (!wizard.step) return null
 
-  const { Form, fields } = wizard.currentStep
+  const form = wizard.currentStep
+  const { Form, fieldController } = form
 
   return (
     <div style={{ fontFamily: 'sans-serif', padding: 20, background: '#f5f7fb' }}>
@@ -85,10 +86,10 @@ export function WizardPlayground() {
           else await wizard.next()
         }}
       >
-        {'email' in fields && <AppField form={form} name="email" />}
-        {'password' in fields && <AppField form={form} name="password" />}
-        {'firstName' in fields && <AppField form={form} name="firstName" />}
-        {'country' in fields && <AppField form={form} name="country" />}
+        {'email' in form.state.values && <AppField form={form} name="email" />}
+        {'password' in form.state.values && <AppField form={form} name="password" />}
+        {'firstName' in form.state.values && <AppField form={form} name="firstName" />}
+        {'country' in form.state.values && <AppField form={form} name="country" />}
         {wizard.step.id === 'review' ? (
           <pre
             style={{
@@ -170,6 +171,7 @@ const steps = [
 
 export function SignupWizardRoute() {
   const navigate = useNavigate()
+  const form = wizard.currentStep
   const { stepId } = useParams()
 
   const wizard = useFormBridgeWizard(steps, {
@@ -188,16 +190,16 @@ export function SignupWizardRoute() {
 
   if (wizard.isHydrating || !wizard.step) return null
 
-  const { Form, fields } = wizard.currentStep
+  const { Form, fieldController } = form
 
   return (
     <Form onSubmit={async () => {
       if (wizard.isLastStep) await wizard.submit()
       else await wizard.next()
     }}>
-      {'email' in fields && <AppField form={form} name="email" />}
-      {'password' in fields && <AppField form={form} name="password" />}
-      {'companyName' in fields && <AppField form={form} name="companyName" />}
+      {'email' in form.state.values && <AppField form={form} name="email" />}
+      {'password' in form.state.values && <AppField form={form} name="password" />}
+      {'companyName' in form.state.values && <AppField form={form} name="companyName" />}
       <button type="submit">{wizard.isLastStep ? 'Finish' : 'Next'}</button>
     </Form>
   )

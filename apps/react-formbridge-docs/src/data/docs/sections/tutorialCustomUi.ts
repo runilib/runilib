@@ -12,11 +12,17 @@ export const tutorialCustomUiSection: LibraryDoc['sections'][number] = {
     {
       filename: 'TextField.web.tsx',
       lang: 'tsx',
-      code: `export function TextField({ controller }) {
+      code: `import { field, useFormBridge } from '@runilib/react-formbridge'
+
+const schema = {
+  displayName: field.text('Display name').required().trim(),
+}
+
+function TextField({ controller }) {
   if (!controller.visible) return null
 
   return (
-    <div className="field">
+    <div style={{ display: 'grid', gap: 6 }}>
       <label htmlFor={controller.name}>
         {controller.label}{controller.required ? ' *' : ''}
       </label>
@@ -32,22 +38,48 @@ export const tutorialCustomUiSection: LibraryDoc['sections'][number] = {
         onChange={(event) => controller.onChange(event.target.value)}
         onBlur={controller.onBlur}
         onFocus={controller.onFocus}
+        style={{ padding: 10, borderRadius: 8, border: '1px solid #9ca3af' }}
       />
-      {controller.error ? <p role="alert">{controller.error}</p> : null}
+      {controller.error ? (
+        <span role="alert" style={{ color: '#dc2626' }}>{controller.error}</span>
+      ) : null}
     </div>
+  )
+}
+
+export function TextFieldExample() {
+  const form = useFormBridge(schema, {
+    validateOn: 'onBlur',
+    onSubmit: (values) => console.log(values),
+  })
+
+  return (
+    <form
+      noValidate
+      onSubmit={form.handleSubmit}
+      style={{ display: 'grid', gap: 12, padding: 20, fontFamily: 'sans-serif' }}
+    >
+      <TextField controller={form.fieldController('displayName')} />
+      <button type="submit">Save</button>
+    </form>
   )
 }`,
     },
     {
       filename: 'TextField.native.tsx',
       lang: 'tsx',
-      code: `import { Text, TextInput, View } from 'react-native'
+      code: `import { Button, Text, TextInput, View } from 'react-native'
+import { field, useFormBridge } from '@runilib/react-formbridge'
 
-export function TextField({ controller }) {
+const schema = {
+  displayName: field.text('Display name').required().trim(),
+}
+
+function TextField({ controller }) {
   if (!controller.visible) return null
 
   return (
-    <View>
+    <View style={{ gap: 6 }}>
       <Text>{controller.label}{controller.required ? ' *' : ''}</Text>
       <TextInput
         ref={controller.registerFocusable}
@@ -57,8 +89,27 @@ export function TextField({ controller }) {
         onChangeText={controller.onChange}
         onBlur={controller.onBlur}
         onFocus={controller.onFocus}
+        style={{ padding: 10, borderRadius: 8, borderWidth: 1, borderColor: '#9ca3af' }}
       />
-      {controller.error ? <Text accessibilityRole="alert">{controller.error}</Text> : null}
+      {controller.error ? (
+        <Text accessibilityRole="alert" style={{ color: '#dc2626' }}>
+          {controller.error}
+        </Text>
+      ) : null}
+    </View>
+  )
+}
+
+export function TextFieldExample() {
+  const form = useFormBridge(schema, {
+    validateOn: 'onBlur',
+    onSubmit: (values) => console.log(values),
+  })
+
+  return (
+    <View style={{ gap: 12, padding: 20 }}>
+      <TextField controller={form.fieldController('displayName')} />
+      <Button title="Save" onPress={() => void form.submit()} />
     </View>
   )
 }`,
@@ -73,11 +124,28 @@ export function TextField({ controller }) {
         filename: 'ProfileForm.web.tsx',
         lang: 'tsx',
         code: `import { field, useFormBridge } from '@runilib/react-formbridge'
-import { TextField } from './TextField'
 
 const schema = {
   name: field.text('Name').required().trim(),
   email: field.email('Email').required(),
+}
+
+function TextField({ controller }) {
+  if (!controller.visible) return null
+
+  return (
+    <label style={{ display: 'grid', gap: 6 }}>
+      {controller.label}{controller.required ? ' *' : ''}
+      <input
+        value={String(controller.value ?? '')}
+        disabled={controller.disabled}
+        onChange={(event) => controller.onChange(event.target.value)}
+        onBlur={controller.onBlur}
+        style={{ padding: 10, borderRadius: 8, border: '1px solid #9ca3af' }}
+      />
+      {controller.error ? <span role="alert">{controller.error}</span> : null}
+    </label>
+  )
 }
 
 export function ProfileForm() {
@@ -116,7 +184,9 @@ Type-specific controllers add useful metadata:
       code: {
         filename: 'RatingField.tsx',
         lang: 'tsx',
-        code: `const schema = {
+        code: `import { field, useFormBridge } from '@runilib/react-formbridge'
+
+const schema = {
   rating: field
     .custom(0)
     .label('Rating')

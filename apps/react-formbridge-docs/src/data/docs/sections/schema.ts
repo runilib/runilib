@@ -43,7 +43,7 @@ If your form has only independent field rules, the plain object form with \`sati
     {
       id: 'fb-schema-quickstart',
       title: 'Quick start',
-      content: `The wrapped schema is used exactly like a plain shape. Hand it to \`useFormBridge\`, render via \`fields.*\`, and chain cross-field rules on the result of \`createSchema()\`. Declare the schema at module scope (outside the component) so its identity stays stable across renders. If that schema module is reused outside React, move the schema authoring imports to \`@runilib/react-formbridge/schema\`.`,
+      content: `The wrapped schema is used exactly like a plain shape. Hand it to \`useFormBridge\`, render from \`fieldController(name)\`, and chain cross-field rules on the result of \`createSchema()\`. Declare the schema at module scope (outside the component) so its identity stays stable across renders. If that schema module is reused outside React, move the schema authoring imports to \`@runilib/react-formbridge/schema\`.`,
       code: {
         filename: 'TripBookingForm.tsx',
         lang: 'tsx',
@@ -70,10 +70,11 @@ const tripSchema = createSchema({
   })
 
 export function TripBookingForm() {
-  const { Form, fields, state } = useFormBridge(tripSchema, {
+  const form = useFormBridge(tripSchema, {
     validateOn: 'onTouched',
     revalidateOn: 'onChange',
   })
+  const { Form, fieldController, state } = form
 
   // Form-level errors (no specific field) land under state.formLevelError
   const formLevelError = state.formLevelError
@@ -118,7 +119,8 @@ import { useFormBridge } from '@runilib/react-formbridge'
 import { bookingSchema } from './bookingSchema'
 
 export function BookingForm() {
-  const { Form, fields } = useFormBridge(bookingSchema)
+  const form = useFormBridge(bookingSchema)
+  const { Form, fieldController } = form
 
   return (
     <Form onSubmit={(values) => console.log(values)}>

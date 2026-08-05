@@ -31,7 +31,8 @@ const schema = {
 }
 
 export function SignupWithAnalytics() {
-  const { Form, fields, state } = useFormBridge(schema)
+  const form = useFormBridge(schema)
+  const { Form, fieldController, state } = form
 
   useFormBridgeAnalytics(
     {
@@ -70,7 +71,8 @@ import {
 const schema = { phone: field.phone('Phone').required() }
 
 export function PhoneCapture() {
-  const { Form, fields, state } = useFormBridge(schema)
+  const form = useFormBridge(schema)
+  const { Form, fieldController, state } = form
 
   useFormBridgeAnalytics(
     {

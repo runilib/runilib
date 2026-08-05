@@ -30,7 +30,8 @@ export const emailSection: LibraryDoc['sections'][number] = {
       code: `const schema = {
   email: field.email('Work email').required().lowercase().trim(),
 }
-const { Form, fields } = useFormBridge(schema)
+const form = useFormBridge(schema)
+  const { Form, fieldController } = form
 <Form onSubmit={save}><AppField form={form} name="email" inputProps={{ autoComplete:'email' }} /><button type="submit">Send</button></Form>`,
     },
     {
@@ -40,7 +41,8 @@ const { Form, fields } = useFormBridge(schema)
   email: field.email('Work email').required().trim(),
 }
 
-const { Form, fields } = useFormBridge(schema)
+const form = useFormBridge(schema)
+  const { Form, fieldController } = form
 
 <Form onSubmit={save}>
   <AppField form={form} name="email" />

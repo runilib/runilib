@@ -25,24 +25,25 @@ const OTP_METHODS_TABLE = buildMethodsTable([
   [
     '`mask(char?)`',
     "`char?: string` (default `'•'`)",
-    'Renders each filled cell with a masking character while the real value stays in form state.',
+    'Configures the masking character your application-owned OTP component should display while the real value stays in form state.',
   ],
   [
     '`groups(sizes, separator?)`',
     "`sizes: number[]`, `separator?: string` (default `'-'`)",
-    'Splits the code into groups with a non-editable separator between them (e.g. `[3, 2]` renders `___-__`). The total length becomes the sum of the sizes.',
+    'Configures logical groups (e.g. `[3, 2]` for `___-__`). The total length becomes the sum of the sizes; your UI renders the separator.',
   ],
 ]);
 
 export const otpSection: LibraryDoc['sections'][number] = {
   id: 'fb-otp',
   title: 'field.otp()',
-  content: `One-time-password builder for short verification codes. Renders individual character cells instead of a single input.
+  content: `One-time-password builder for short verification codes. Use its headless controller to render individual character cells.
 
-- \`length()\` fixes the exact code length and the renderer shows that many cells
-- \`digitsOnly()\`, \`lettersOnly()\` and \`alphanumeric()\` restrict the accepted character set; renderers also pick the matching keyboard hint and drop disallowed keystrokes before they reach form state
+- \`length()\` fixes the exact code length; \`controller.otpLength\` tells your UI how many cells to show
+- \`digitsOnly()\`, \`lettersOnly()\` and \`alphanumeric()\` restrict the accepted character set; your UI chooses the matching keyboard hint
 - \`mask()\` hides the typed value behind a display character (e.g. \`•\`) while keeping the real value in form state
-- \`groups()\` splits the code into groups with a non-editable separator between them, like \`___-__\`
+- \`groups()\` defines the value length; pass the same visual grouping to your application-owned component
+- Manage cell refs in your UI to move focus forward after input, backward on Backspace, and distribute pasted codes
 - Combine with \`validateOn: 'onChange'\` at hook level for instant validation as the user types`,
   codeTabs: [
     {
@@ -50,7 +51,7 @@ export const otpSection: LibraryDoc['sections'][number] = {
       label: 'Web',
       interactive: true,
       lang: 'tsx',
-      code: `import { useState } from 'react'
+      code: `import { useRef, useState } from 'react'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -64,11 +65,98 @@ const schema = {
     .required(),
 }
 
+function OtpField({ form, name, groups = [6], separator = '-' }) {
+  const otp = form.fieldController(name)
+  const inputRefs = useRef([])
+
+  if (!otp.visible) return null
+
+  let offset = 0
+
+  const setCharacters = (startIndex, input) => {
+    const characters = input.replace(/\\D/g, '').slice(0, otp.otpLength - startIndex)
+
+    characters.split('').forEach((character, localIndex) => {
+      otp.setDigit(startIndex + localIndex, character)
+    })
+
+    if (characters.length > 0) {
+      const nextIndex = Math.min(startIndex + characters.length, otp.otpLength - 1)
+      queueMicrotask(() => inputRefs.current[nextIndex]?.focus())
+    }
+  }
+
+  return (
+    <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+      <legend style={{ marginBottom: 8 }}>
+        {otp.label}{otp.required ? ' *' : ''}
+      </legend>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {groups.map((size, groupIndex) => {
+          const start = offset
+          offset += size
+
+          return (
+            <div key={groupIndex} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {groupIndex > 0 ? <span aria-hidden>{separator}</span> : null}
+              {Array.from({ length: size }, (_, localIndex) => {
+                const index = start + localIndex
+
+                return (
+                  <input
+                    key={index}
+                    ref={(node) => {
+                      inputRefs.current[index] = node
+                      if (index === 0) otp.registerFocusable(node)
+                    }}
+                    aria-label={\`Character \${index + 1} of \${otp.otpLength}\`}
+                    value={otp.digits[index] ?? ''}
+                    inputMode="numeric"
+                    autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                    maxLength={1}
+                    disabled={otp.disabled}
+                    onChange={(event) => setCharacters(index, event.target.value)}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === 'Backspace' &&
+                        !otp.digits[index] &&
+                        index > 0
+                      ) {
+                        inputRefs.current[index - 1]?.focus()
+                      }
+                    }}
+                    onPaste={(event) => {
+                      event.preventDefault()
+                      setCharacters(index, event.clipboardData.getData('text'))
+                    }}
+                    onBlur={otp.onBlur}
+                    style={{
+                      width: 42,
+                      height: 48,
+                      boxSizing: 'border-box',
+                      textAlign: 'center',
+                      fontSize: 20,
+                      border: \`1px solid \${otp.error ? '#dc2626' : '#9ca3af'}\`,
+                      borderRadius: 8,
+                    }}
+                  />
+                )
+              })}
+            </div>
+          )
+        })}
+      </div>
+      {otp.error ? <p role="alert" style={{ color: '#dc2626' }}>{otp.error}</p> : null}
+    </fieldset>
+  )
+}
+
 export function OtpPlaygroundWeb() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onChange',
   })
+  const { Form, fieldController, state } = form
   const code = String(state.values.code ?? '')
   const plainCode = String(state.values.plainCode ?? '')
 
@@ -95,11 +183,11 @@ export function OtpPlaygroundWeb() {
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <AppField form={form} name="code" />
+          <OtpField form={form} name="code" groups={[3, 3]} />
           <p style={{ margin: 0, color: '#4b5563' }}>
             Grouped progress: <strong>{code.length}</strong> / 6
           </p>
-          <AppField form={form} name="plainCode" />
+          <OtpField form={form} name="plainCode" />
           <p style={{ margin: 0, color: '#4b5563' }}>
             Plain progress: <strong>{plainCode.length}</strong> / 6
           </p>
@@ -145,8 +233,8 @@ export function OtpPlaygroundWeb() {
       label: 'App',
       interactive: true,
       lang: 'tsx',
-      code: `import { useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+      code: `import { useRef, useState } from 'react'
+import { Button, ScrollView, Text, TextInput, View } from 'react-native'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -160,11 +248,96 @@ const schema = {
     .required(),
 }
 
+function OtpField({ form, name, groups = [6], separator = '-' }) {
+  const otp = form.fieldController(name)
+  const inputRefs = useRef([])
+
+  if (!otp.visible) return null
+
+  let offset = 0
+
+  const setCharacters = (startIndex, input) => {
+    const characters = input.replace(/\\D/g, '').slice(0, otp.otpLength - startIndex)
+
+    characters.split('').forEach((character, localIndex) => {
+      otp.setDigit(startIndex + localIndex, character)
+    })
+
+    if (characters.length > 0) {
+      const nextIndex = Math.min(startIndex + characters.length, otp.otpLength - 1)
+      requestAnimationFrame(() => inputRefs.current[nextIndex]?.focus())
+    }
+  }
+
+  return (
+    <View style={{ gap: 8 }}>
+      <Text>
+        {otp.label}{otp.required ? ' *' : ''}
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        {groups.map((size, groupIndex) => {
+          const start = offset
+          offset += size
+
+          return (
+            <View
+              key={groupIndex}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+            >
+              {groupIndex > 0 ? <Text>{separator}</Text> : null}
+              {Array.from({ length: size }, (_, localIndex) => {
+                const index = start + localIndex
+
+                return (
+                  <TextInput
+                    key={index}
+                    ref={(node) => {
+                      inputRefs.current[index] = node
+                      if (index === 0) otp.registerFocusable(node)
+                    }}
+                    accessibilityLabel={\`Character \${index + 1} of \${otp.otpLength}\`}
+                    value={otp.digits[index] ?? ''}
+                    keyboardType="number-pad"
+                    textContentType={index === 0 ? 'oneTimeCode' : 'none'}
+                    editable={!otp.disabled}
+                    onChangeText={(value) => setCharacters(index, value)}
+                    onKeyPress={({ nativeEvent }) => {
+                      if (
+                        nativeEvent.key === 'Backspace' &&
+                        !otp.digits[index] &&
+                        index > 0
+                      ) {
+                        inputRefs.current[index - 1]?.focus()
+                      }
+                    }}
+                    onBlur={otp.onBlur}
+                    style={{
+                      width: 42,
+                      height: 48,
+                      textAlign: 'center',
+                      fontSize: 20,
+                      borderWidth: 1,
+                      borderColor: otp.error ? '#dc2626' : '#9ca3af',
+                      borderRadius: 8,
+                    }}
+                  />
+                )
+              })}
+            </View>
+          )
+        })}
+      </View>
+      {otp.error ? <Text style={{ color: '#dc2626' }}>{otp.error}</Text> : null}
+    </View>
+  )
+}
+
 export function OtpPlaygroundApp() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onChange',
   })
+  const { Form, fieldController, state } = form
   const code = String(state.values.code ?? '')
   const plainCode = String(state.values.plainCode ?? '')
 
@@ -184,15 +357,15 @@ export function OtpPlaygroundApp() {
           }}
         >
           <View style={{ gap: 12 }}>
-            <AppField form={form} name="code" />
+            <OtpField form={form} name="code" groups={[3, 3]} />
             <Text style={{ color: '#4b5563' }}>
               Grouped progress: <Text style={{ fontWeight: '600' }}>{code.length}</Text> / 6
             </Text>
-            <AppField form={form} name="plainCode" />
+            <OtpField form={form} name="plainCode" />
             <Text style={{ color: '#4b5563' }}>
               Plain progress: <Text style={{ fontWeight: '600' }}>{plainCode.length}</Text> / 6
             </Text>
-            <button type="submit">Verify code</button>
+            <Button title="Verify code" onPress={() => void form.submit()} />
           </View>
         </Form>
 
@@ -319,9 +492,10 @@ const schema = {
   code: field.otp('Verification code').length(6).digitsOnly().required(),
 }
 
-const { Form, fields, state, submit } = useFormBridge(schema, {
+const form = useFormBridge(schema, {
   validateOn: 'onChange',
 })
+  const { Form, fieldController, state, submit } = form
 
 useEffect(() => {
   if (state.values.code?.length === 6 && state.isValid) {
@@ -330,7 +504,7 @@ useEffect(() => {
 }, [state.values.code, state.isValid, submit])
 
 <Form onSubmit={verifyCode}>
-  <AppField form={form} name="code" />
+  <OtpField form={form} name="code" />
 </Form>
 ${FENCE}`,
     },

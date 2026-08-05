@@ -5,7 +5,7 @@ const FILE_METHODS_TABLE = buildMethodsTable([
   [
     '`label(text)`',
     '`text: string`',
-    'Sets the field label rendered above the uploader.',
+    'Sets the label exposed to your application-owned uploader.',
   ],
   [
     '`required(message?)`',
@@ -42,7 +42,7 @@ const FILE_METHODS_TABLE = buildMethodsTable([
   [
     '`source(type)`',
     "`'gallery' | 'camera' | 'documents' | 'all'`",
-    'Native-only: which picker to open. `all` (default) shows an action sheet so the user can choose. Web ignores this since the browser file dialog handles all sources.',
+    'Native picker intent. Use the same value when wiring your application-owned picker; web file dialogs ignore it.',
   ],
   [
     '`withBase64()`',
@@ -121,7 +121,7 @@ export const fileSection: LibraryDoc['sections'][number] = {
 
 - Has its own upload-focused fluent API: \`accept()\`, \`maxSize()\`, \`multiple()\`, \`preview()\`, \`source()\`, \`resize()\`
 - \`render()\`, \`transform()\`, and the conditional helpers from \`BaseFieldBuilder\` are not available on this builder
-- Platform differences are handled by the renderer - the schema keeps the business contract`,
+- Your application renders the browser input, drop zone, or native picker; the schema keeps the business contract`,
   codeTabs: [
     {
       filename: 'File.web.tsx',
@@ -159,12 +159,82 @@ function summarize(value: FileValue | FileValue[] | null): string {
     .join('\\n')
 }
 
+function toFileValue(file: File): FileValue {
+  return {
+    uri: URL.createObjectURL(file),
+    name: file.name,
+    type: file.type || 'application/octet-stream',
+    size: file.size,
+  }
+}
+
+function FileField({
+  form,
+  name,
+  accept,
+  multiple = false,
+  preview = false,
+}) {
+  const file = form.fieldController(name)
+  const selected = Array.isArray(file.value)
+    ? file.value
+    : file.value
+      ? [file.value]
+      : []
+
+  if (!file.visible) return null
+
+  return (
+    <label
+      style={{
+        display: 'grid',
+        gap: 8,
+        padding: 16,
+        border: \`1px dashed \${file.error ? '#dc2626' : '#9ca3af'}\`,
+        borderRadius: 12,
+        background: '#fff',
+      }}
+    >
+      <strong>{file.label}{file.required ? ' *' : ''}</strong>
+      <span>Drop files here or choose them from your device.</span>
+      <input
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        disabled={file.disabled}
+        onChange={(event) => {
+          const values = Array.from(event.target.files ?? []).map(toFileValue)
+          file.onChange(multiple ? values : (values[0] ?? null))
+        }}
+        onBlur={file.onBlur}
+      />
+      {preview
+        ? selected.map((value) =>
+            value.type.startsWith('image/') ? (
+              <img
+                key={value.uri}
+                src={value.uri}
+                alt={value.name}
+                style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }}
+              />
+            ) : null,
+          )
+        : null}
+      {selected.map((value) => (
+        <span key={value.uri}>{value.name} · {formatSize(value.size)}</span>
+      ))}
+      {file.error ? <span role="alert" style={{ color: '#dc2626' }}>{file.error}</span> : null}
+    </label>
+  )
+}
+
 export function FilePlaygroundWeb() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
     revalidateOn: 'onChange',
   })
+  const { Form, fieldController, state } = form
 
   return (
     <div
@@ -186,8 +256,18 @@ export function FilePlaygroundWeb() {
 
       <Form onSubmit={async (values) => setSubmitted(values)}>
         <div style={{ display: 'grid', gap: 16 }}>
-          <AppField form={form} name="avatar" />
-          <AppField form={form} name="attachments" />
+          <FileField
+            form={form}
+            name="avatar"
+            accept="image/jpeg,image/png,image/webp"
+            preview
+          />
+          <FileField
+            form={form}
+            name="attachments"
+            accept="image/png,image/jpeg,application/pdf"
+            multiple
+          />
           <button type="submit" disabled={!state.isValid}>Upload</button>
         </div>
       </Form>
@@ -242,7 +322,7 @@ attachments:
       interactive: true,
       lang: 'tsx',
       code: `import { useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { Button, Pressable, ScrollView, Text, View } from 'react-native'
 import {
   field,
   useFormBridge,
@@ -269,11 +349,48 @@ const MOCK_ID_CARD: FileValue = {
   base64: 'JVBERi0xLjQKJeLjz9MKNCAw…(truncated)',
 }
 
+function FileField({ form, name, pickFiles }) {
+  const file = form.fieldController(name)
+
+  if (!file.visible) return null
+
+  const selected = file.value
+
+  return (
+    <View style={{ gap: 8 }}>
+      <Text>{file.label}{file.required ? ' *' : ''}</Text>
+      <Pressable
+        accessibilityRole="button"
+        disabled={file.disabled}
+        onPress={async () => {
+          const result = await pickFiles()
+          if (result) file.onChange(result)
+        }}
+        style={{
+          padding: 18,
+          alignItems: 'center',
+          borderWidth: 1,
+          borderStyle: 'dashed',
+          borderColor: file.error ? '#dc2626' : '#9ca3af',
+          borderRadius: 12,
+          backgroundColor: '#fff',
+        }}
+      >
+        <Text>{selected ? 'Replace document' : 'Choose a document'}</Text>
+      </Pressable>
+      {file.hint ? <Text style={{ color: '#4b5563' }}>{file.hint}</Text> : null}
+      {selected ? <Text>{selected.name} · {selected.type}</Text> : null}
+      {file.error ? <Text style={{ color: '#dc2626' }}>{file.error}</Text> : null}
+    </View>
+  )
+}
+
 export function FilePlaygroundApp() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
   })
+  const { Form, fieldController, state } = form
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
@@ -290,10 +407,14 @@ export function FilePlaygroundApp() {
 
         <Form onSubmit={async (values) => setSubmitted(values)}>
           <View style={{ gap: 12 }}>
-            <AppField form={form} name="identityCard"
+            <FileField form={form} name="identityCard"
               pickFiles={async () => MOCK_ID_CARD}
             />
-            <button type="submit" disabled={!state.isValid}>Submit</button>
+            <Button
+              title="Submit"
+              disabled={!state.isValid}
+              onPress={() => void form.submit()}
+            />
           </View>
         </Form>
 
@@ -356,6 +477,18 @@ Base-builder relationship:
 - See [Base field builder](/docs/base-field-builder) for the shared surface most other builders inherit
 - \`field.file()\` ships its own conditional helpers (\`visibleWhen\`, \`requiredWhen\`, \`disabledWhen\`, \`resetOnHide\`, …) that mirror the BaseFieldBuilder shape, so it integrates with the same conditional logic as every other field
 - It does **not** expose \`render()\`, \`transform()\`, or the value-coercion helpers because it does not extend the full \`BaseFieldBuilder\` surface`,
+    },
+    {
+      id: 'fb-file-headless-ui',
+      title: 'Render a picker or drop zone',
+      content: `FormBridge does not open a picker or render an upload surface. Build that UI in your application and bind it with \`form.fieldController(name)\`.
+
+- Web: map the browser \`FileList\` to \`FileValue\` objects, then call \`controller.onChange()\`
+- Native: map the result from Expo Document Picker, Expo Image Picker, or your preferred picker to \`FileValue\`
+- Send one \`FileValue | null\` in single mode, or a \`FileValue[]\` after \`multiple()\`
+- The application owns previews and temporary object-URL cleanup; FormBridge owns form state and schema validation
+
+The interactive examples above deliberately pass \`accept\`, \`multiple\`, and picker behavior to the application-owned component so the UI visibly matches the schema configuration.`,
     },
     {
       id: 'fb-file-recipes',

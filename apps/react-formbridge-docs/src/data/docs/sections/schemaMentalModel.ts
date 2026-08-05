@@ -34,7 +34,7 @@ const schema = {
 } satisfies FormSchema
 \`\`\`
 
-This keeps \`fields.bio\` aligned with textarea-only overrides and \`fields.country\` aligned with select-only overrides.`,
+This keeps \`fieldController('bio')\` aligned with textarea metadata and \`fieldController('country')\` aligned with select metadata.`,
     },
   ],
 };

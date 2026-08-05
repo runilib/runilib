@@ -17,6 +17,7 @@ import {
 import Svg, { Defs, Mask, Rect } from 'react-native-svg';
 import type { OverlayProps, SpotlightRect } from '../../../types/Walkit.types';
 import { easeOut, lerp } from '../../../utils/helpers';
+import { getNativeMaskBounds } from '../../../utils/nativeMask';
 import { getSpotlightRect } from '../../../utils/positioning.shared';
 import { computeWalkitStepPosition } from '../../../utils/Walkit.positioning';
 import { NativeWalkitContent } from './Walkit.native';
@@ -199,7 +200,10 @@ export const NativeOverlay = ({
           style={StyleSheet.absoluteFill}
         >
           <Defs>
-            <Mask id="uc-native-mask">
+            <Mask
+              id="uc-native-mask"
+              {...getNativeMaskBounds(screenWidth, screenHeight)}
+            >
               <Rect
                 x={0}
                 y={0}
