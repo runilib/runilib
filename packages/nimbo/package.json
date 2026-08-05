@@ -1,6 +1,6 @@
 {
   "name": "@runilib/nimbo",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Part of the runilib ecosystem (https://runilib.dev). Tiny typed state modules for React and React Native with global, local, scoped, and async-ready state primitives.",
   "keywords": [
     "runilib",
