@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1
+
+### Patch Changes
+
+- [#200](https://github.com/runilib/runilib/pull/200) [`3eea880`](https://github.com/runilib/runilib/commit/3eea880b6e60e291bcfa6331e552b04a79b10487) Thanks [@akladekouassi](https://github.com/akladekouassi)! - Fix the React Native spotlight overlay on Android by giving the SVG mask
+  explicit user-space bounds. This restores the transparent cutout and highlight
+  ring around the active tour target on Android renderers that do not handle the
+  default mask bounding box consistently.
+
 ## 1.1.0
 
 ### Minor Changes
