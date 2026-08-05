@@ -16,7 +16,20 @@ export const useFormBridgeSection: LibraryDoc['sections'][number] = {
     {
       filename: 'useFormBridge.tsx',
       lang: 'tsx',
-      code: `const {
+      code: `const form = useFormBridge(schema, {
+  validateOn: 'onBlur',
+  revalidateOn: 'onChange',
+  validatorBridge,
+  persist,
+  formKey: 'checkout-step-1',
+  schemaKey: schemaVersion,
+  initialValues: { quantity: 2 },
+  analytics,
+  onSubmit: saveCheckout,
+  onError: focusFirstInvalidField,
+  onSubmitError: () => 'Unable to save the checkout',
+})
+  const {
   FormProvider,
   Form,
   FieldError,
@@ -36,19 +49,7 @@ export const useFormBridgeSection: LibraryDoc['sections'][number] = {
   watchAll,
   submit,
   handleSubmit,
-} = useFormBridge(schema, {
-  validateOn: 'onBlur',
-  revalidateOn: 'onChange',
-  validatorBridge,
-  persist,
-  formKey: 'checkout-step-1',
-  schemaKey: schemaVersion,
-  initialValues: { quantity: 2 },
-  analytics,
-  onSubmit: saveCheckout,
-  onError: focusFirstInvalidField,
-  onSubmitError: () => 'Unable to save the checkout',
-})`,
+} = form`,
     },
   ],
   subsections: [

@@ -46,7 +46,7 @@ export const maskedSection: LibraryDoc['sections'][number] = {
 
 - First argument is required: a built-in \`MASKS\` preset, a raw pattern string, or a \`{ pattern, tokens }\` object
 - Label the field separately with \`label(...)\` since the constructor takes the mask, not the label
-- The renderer adapts width and input mode to the mask profile (numeric vs alphanumeric)`,
+- Your application-owned input chooses its width and input mode, while the controller formats and unmasks the value`,
   codeTabs: [
     {
       filename: 'Masked.web.tsx',
@@ -73,11 +73,44 @@ const schema = {
     .uppercase(),
 }
 
+function MaskedField({ form, name, inputMode = 'text' }) {
+  const masked = form.fieldController(name)
+
+  if (!masked.visible) return null
+
+  return (
+    <label style={{ display: 'grid', gap: 6 }}>
+      <span>{masked.label}{masked.required ? ' *' : ''}</span>
+      <input
+        value={masked.displayValue}
+        placeholder={masked.mask.placeholderText ?? masked.placeholder}
+        inputMode={inputMode}
+        disabled={masked.disabled}
+        onChange={(event) => masked.onChange(event.target.value)}
+        onFocus={masked.onFocus}
+        onBlur={masked.onBlur}
+        style={{
+          padding: 10,
+          border: \`1px solid \${masked.error ? '#dc2626' : '#9ca3af'}\`,
+          borderRadius: 8,
+          fontFamily: 'monospace',
+          letterSpacing: 1,
+        }}
+      />
+      <small style={{ color: masked.maskComplete ? '#15803d' : '#4b5563' }}>
+        {masked.maskComplete ? 'Complete' : \`Expected format: \${masked.mask.placeholder}\`}
+      </small>
+      {masked.error ? <span role="alert" style={{ color: '#dc2626' }}>{masked.error}</span> : null}
+    </label>
+  )
+}
+
 export function MaskedPlaygroundWeb() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
   })
+  const { Form, fieldController, state } = form
 
   return (
     <div
@@ -102,8 +135,8 @@ export function MaskedPlaygroundWeb() {
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <AppField form={form} name="cardNumber" />
-          <AppField form={form} name="licensePlate" />
+          <MaskedField form={form} name="cardNumber" inputMode="numeric" />
+          <MaskedField form={form} name="licensePlate" />
           <button type="submit">Save values</button>
         </div>
       </Form>
@@ -147,7 +180,7 @@ export function MaskedPlaygroundWeb() {
       interactive: true,
       lang: 'tsx',
       code: `import { useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { Button, ScrollView, Text, TextInput, View } from 'react-native'
 import { MASKS, field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -167,11 +200,45 @@ const schema = {
     .uppercase(),
 }
 
+function MaskedField({ form, name, keyboardType = 'default' }) {
+  const masked = form.fieldController(name)
+
+  if (!masked.visible) return null
+
+  return (
+    <View style={{ gap: 6 }}>
+      <Text>{masked.label}{masked.required ? ' *' : ''}</Text>
+      <TextInput
+        value={masked.displayValue}
+        placeholder={masked.mask.placeholderText ?? masked.placeholder}
+        keyboardType={keyboardType}
+        editable={!masked.disabled}
+        onChangeText={masked.onChange}
+        onFocus={masked.onFocus}
+        onBlur={masked.onBlur}
+        style={{
+          padding: 10,
+          borderWidth: 1,
+          borderColor: masked.error ? '#dc2626' : '#9ca3af',
+          borderRadius: 8,
+          fontFamily: 'monospace',
+          letterSpacing: 1,
+        }}
+      />
+      <Text style={{ color: masked.maskComplete ? '#15803d' : '#4b5563' }}>
+        {masked.maskComplete ? 'Complete' : \`Expected format: \${masked.mask.placeholder}\`}
+      </Text>
+      {masked.error ? <Text style={{ color: '#dc2626' }}>{masked.error}</Text> : null}
+    </View>
+  )
+}
+
 export function MaskedPlaygroundApp() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
   })
+  const { Form, fieldController, state } = form
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
@@ -189,9 +256,9 @@ export function MaskedPlaygroundApp() {
           }}
         >
           <View style={{ gap: 12 }}>
-            <AppField form={form} name="cardNumber" />
-            <AppField form={form} name="licensePlate" />
-            <button type="submit">Save values</button>
+            <MaskedField form={form} name="cardNumber" keyboardType="number-pad" />
+            <MaskedField form={form} name="licensePlate" />
+            <Button title="Save values" onPress={() => void form.submit()} />
           </View>
         </Form>
 
@@ -244,14 +311,14 @@ ${MASKED_METHODS_TABLE}`,
     {
       id: 'fb-masked-runtime',
       title: 'Adaptive mask runtime',
-      content: `The built-in masked renderers now adapt to the mask instead of treating every mask like the same numeric field.
+      content: `FormBridge exposes mask state and operations through \`form.fieldController(name)\`; your application renders the input.
 
-- Numeric-only masks keep numeric-friendly keyboard / input mode hints
-- Alphanumeric masks stop behaving like numeric-only inputs when the token map accepts letters
-- \`maxLength\` follows the visible mask length, including separators
-- Short masks stay compact while longer masks can claim the width they need, which makes side-by-side layouts easier without hand-tuned widths
+- Bind the input to \`displayValue\` and forward changes to \`onChange()\`
+- Use \`mask.placeholder\` / \`mask.placeholderText\` to describe the expected shape
+- \`rawValue\`, \`maskComplete\`, \`format()\`, and \`unmask()\` are available for custom feedback
+- Choose \`inputMode\`, keyboard type, width, and visual treatment in your own component
 
-If you want the mask behavior but your own shell, prefix badge, trigger row, or fully custom layout, keep the field as \`field.masked(...)\` in the schema and drive the UI through \`form.fieldController(name)\`.`,
+The examples above define a reusable application-owned \`MaskedField\`; no UI component is imported from FormBridge.`,
     },
     {
       id: 'fb-masked-recipes',

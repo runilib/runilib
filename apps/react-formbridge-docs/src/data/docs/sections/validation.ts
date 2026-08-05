@@ -154,8 +154,8 @@ This is also how you wire **server-side validation** into the same pipeline: cal
       code: {
         filename: 'imperative-validation.tsx',
         lang: 'tsx',
-        code: `const { Form, fields, state, validate, setError, setErrors, clearErrors } =
-  useFormBridge(signupSchema)
+        code: `const form = useFormBridge(signupSchema)
+  const { Form, fieldController, state, validate, setError, setErrors, clearErrors } = form
 
 async function onSubmit(values) {
   // Re-validate the whole form manually if needed
@@ -197,10 +197,11 @@ Pick \`'onTouched'\` for the smoothest UX: no premature errors while the user is
       code: {
         filename: 'triggers.tsx',
         lang: 'tsx',
-        code: `const { Form, fields, state } = useFormBridge(signupSchema, {
+        code: `const form = useFormBridge(signupSchema, {
   validateOn: 'onTouched',
   revalidateOn: 'onChange',
-})`,
+})
+  const { Form, fieldController, state } = form`,
       },
     },
     {
@@ -236,9 +237,10 @@ const formSchema = {
   password: field.password(),
 }
 
-const { Form, fields, state } = useFormBridge(formSchema, {
+const form = useFormBridge(formSchema, {
   validatorBridge: zodBridge(zSchema),
-})`,
+})
+  const { Form, fieldController, state } = form`,
       },
     },
     {

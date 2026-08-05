@@ -90,7 +90,8 @@ function EditUserForm({ user }: { user: User }) {
     role:     { type: 'select', options: ['admin', 'user', 'viewer'] },
   })
 
-  const { Form, fields } = useFormBridge(schema)
+  const form = useFormBridge(schema)
+  const { Form, fieldController } = form
 
   return (
     <Form onSubmit={(values) => updateUser(user.id, values)}>

@@ -1,172 +1,17 @@
 import type { LibraryDoc } from './../../../types/index';
 import { BASE_FIELD_BUILDER_REFERENCE, buildMethodsTable, FENCE } from '../constants';
 
-const PHONE_TEXT_OVERRIDES_TABLE = buildMethodsTable([
-  [
-    '`countryButtonAriaLabel`',
-    '`string | (ctx) => string`',
-    'Accessibility label for the country-picker trigger button. Receives the current render context (current country, open state, search, …).',
-  ],
-  [
-    '`searchPlaceholderText`',
-    '`string | (ctx) => string`',
-    "Placeholder for the country-search input inside the picker. Defaults to `'Search country…'`.",
-  ],
-  [
-    '`emptySearchText`',
-    '`string | (ctx) => string`',
-    "Text shown when the search query matches no countries. Defaults to `'No countries match \"<query>\".'` / `'No countries available.'`.",
-  ],
-  [
-    '`e164Text`',
-    '`string | (ctx & { e164 }) => string`',
-    'Opt-in label rendered alongside the E.164 preview. Only shown when `e164Text` or `renderE164` is provided.',
-  ],
-]);
-
-const PHONE_RENDER_OVERRIDES_TABLE = buildMethodsTable([
-  [
-    '`renderCountryButtonContent`',
-    '`(ctx & { defaultContent }) => ReactNode`',
-    'Full renderer for the country-picker trigger content (flag, dial code, chevron). `defaultContent` contains the built-in layout so you can wrap it.',
-  ],
-  [
-    '`renderCountryItemContent`',
-    '`(ctx & { country, defaultContent, index, selected }) => ReactNode`',
-    'Full renderer for a single row in the country list. Useful to add a "selected" checkmark or a custom layout.',
-  ],
-  [
-    '`renderEmptySearchContent`',
-    '`(ctx & { defaultContent }) => ReactNode`',
-    'Full renderer for the "no results" state shown inside the picker.',
-  ],
-  [
-    '`renderE164`',
-    '`(ctx & { defaultContent, e164 }) => ReactNode`',
-    'Opt-in full renderer for the E.164 preview below the input. Only shown when `e164Text` or `renderE164` is provided.',
-  ],
-  [
-    '`renderLabel` / `renderHint` / `renderError` / `renderRequiredMark`',
-    '`(ctx) => ReactNode`',
-    'Inherited from every field - replace the label, hint, error, or required-mark rendering entirely.',
-  ],
-]);
-
-const PHONE_PASSTHROUGH_TABLE = buildMethodsTable([
-  [
-    '`inputProps`',
-    'Web: `InputHTMLAttributes` · Native: `TextInputProps`',
-    'Passthrough attributes for the phone-number input itself (`aria-*`, `data-*`, `onKeyDown`, `testID`, …).',
-  ],
-  [
-    '`searchInputProps`',
-    'Web: `InputHTMLAttributes` · Native: `TextInputProps`',
-    'Passthrough attributes for the country-search input inside the picker.',
-  ],
-  [
-    '`wrapperProps` / `labelProps` / `hintProps` / `errorProps`',
-    'Platform-native props',
-    'Passthrough props for the wrapper, label, hint, and error elements. Each merges its `style` with the default.',
-  ],
-  [
-    '`hideLabel`',
-    '`boolean`',
-    'Hides the visible label while keeping the accessible name via `aria-label` / `accessibilityLabel`.',
-  ],
-  [
-    '`countryLayout`',
-    "`'integrated' | 'detached'`",
-    'Same as the builder method but at the render site. Takes precedence over the schema value for this specific render.',
-  ],
-  [
-    '`styles`',
-    'Record of slot → style',
-    'Per-slot style overrides (see the **Style keys** section below). Each slot is merged **over** the built-in default, so you can tweak a single property or replace it entirely.',
-  ],
-]);
-
-const PHONE_STYLE_KEYS_NATIVE = buildMethodsTable([
-  ['`wrapper`', 'ViewStyle', 'Outer field container.'],
-  ['`label`', 'TextStyle', 'Field label.'],
-  ['`requiredMark`', 'TextStyle', 'The asterisk shown next to required labels.'],
-  ['`hint`', 'TextStyle', 'Helper text below the input.'],
-  ['`error`', 'TextStyle', 'Error text shown below the input.'],
-  ['`phoneRow`', 'ViewStyle', 'Row wrapping the country button + phone input.'],
-  ['`phoneCountryButton`', 'ViewStyle', 'The picker trigger button.'],
-  ['`phoneCountryFlag`', 'TextStyle', 'Flag emoji inside the trigger and country rows.'],
-  ['`phoneCountryDial`', 'TextStyle', 'Dial-code text (e.g. `+33`).'],
-  [
-    '`phoneCountryDivider`',
-    'ViewStyle',
-    'Vertical divider between the country button and input in the `integrated` layout.',
-  ],
-  ['`phoneChevron`', 'TextStyle', 'Chevron glyph inside the trigger.'],
-  ['`phoneInput`', 'TextStyle', 'The phone-number `TextInput`.'],
-  ['`phoneE164`', 'TextStyle', 'The opt-in E.164 preview text.'],
-  ['`phoneModalBackdrop`', 'ViewStyle', 'Dimmed overlay behind the country picker.'],
-  ['`phoneModalCard`', 'ViewStyle', 'The modal card that contains the country list.'],
-  ['`phoneSearchInput`', 'TextStyle', 'Country-search input inside the picker.'],
-  ['`phoneCountryRow`', 'ViewStyle', 'One row in the country list.'],
-  ['`phoneCountryName`', 'TextStyle', 'Country name inside a row.'],
-  [
-    '`phoneSeparator`',
-    'ViewStyle',
-    'The separator between preferred countries and the rest of the list.',
-  ],
-  ['`phoneEmptyText`', 'TextStyle', 'Empty-state text when no countries match.'],
-]);
-
-const PHONE_STYLE_KEYS_WEB = buildMethodsTable([
-  ['`wrapper`', 'CSSProperties', 'Outer field container.'],
-  ['`label`', 'CSSProperties', 'Field label.'],
-  ['`requiredMark`', 'CSSProperties', 'The asterisk shown next to required labels.'],
-  ['`hint`', 'CSSProperties', 'Helper text below the input.'],
-  ['`error`', 'CSSProperties', 'Error text shown below the input.'],
-  ['`phoneRow`', 'CSSProperties', 'Row wrapping the country button + phone input.'],
-  ['`phoneCountryButton`', 'CSSProperties', 'The picker trigger button.'],
-  [
-    '`phoneCountryFlag`',
-    'CSSProperties',
-    'Flag glyph inside the trigger and country rows.',
-  ],
-  ['`phoneCountryDial`', 'CSSProperties', 'Dial-code text (e.g. `+33`).'],
-  [
-    '`phoneCountryDivider`',
-    'CSSProperties',
-    'Vertical divider between the country button and input in the `integrated` layout.',
-  ],
-  ['`phoneChevron`', 'CSSProperties', 'Chevron glyph inside the trigger.'],
-  ['`phoneInput`', 'CSSProperties', 'The phone-number `<input>`.'],
-  ['`phoneE164`', 'CSSProperties', 'The opt-in E.164 preview text.'],
-  ['`phoneSearchWrapper`', 'CSSProperties', 'Wrapper around the country-search input.'],
-  ['`phoneSearchInput`', 'CSSProperties', 'Country-search `<input>`.'],
-  ['`phoneCountryList`', 'CSSProperties', 'Outer container of the country list popup.'],
-  [
-    '`phoneCountryScroll`',
-    'CSSProperties',
-    'Scrollable container holding the country rows.',
-  ],
-  ['`phoneCountryItem`', 'CSSProperties', 'One row in the country list.'],
-  ['`phoneCountryName`', 'CSSProperties', 'Country name inside a row.'],
-  [
-    '`phoneSeparator`',
-    'CSSProperties',
-    'The separator between preferred countries and the rest of the list.',
-  ],
-  ['`phoneEmptyText`', 'CSSProperties', 'Empty-state text when no countries match.'],
-]);
-
 const PHONE_METHODS_TABLE = buildMethodsTable([
   ['`defaultCountry(code)`', '`code: string`', 'Sets the initial selected country.'],
   [
     '`preferredCountries(codes)`',
     '`codes: string[]`',
-    'Shortlists countries shown at the top of the picker.',
+    'Stores the preferred-country configuration for a country-aware phone experience.',
   ],
   [
     '`searchable(value = true)`',
     '`value?: boolean`',
-    'Enables country search inside the picker.',
+    'Stores whether the application-owned country picker should offer search.',
   ],
   ['`showFlag(value = true)`', '`value?: boolean`', 'Shows or hides the country flag.'],
   [
@@ -177,7 +22,7 @@ const PHONE_METHODS_TABLE = buildMethodsTable([
   [
     '`countryLayout(layout)`',
     "`'integrated' | 'detached'`",
-    'Chooses whether the country selector sits **inside** the same bordered shell as the input (`integrated`, default) or as a **separate** button before it (`detached`). Drives both the default styling and a `data-fb-layout` attribute you can target in CSS.',
+    'Describes whether your country selector should sit inside the input shell (`integrated`, default) or as a separate control (`detached`).',
   ],
   [
     '`storeE164()`',
@@ -194,10 +39,10 @@ const PHONE_METHODS_TABLE = buildMethodsTable([
 export const phoneSection: LibraryDoc['sections'][number] = {
   id: 'fb-phone',
   title: 'field.phone()',
-  content: `Country-aware phone builder with flag selector, dial codes, format validation, and E.164 storage.
+  content: `Country-aware phone value and validation builder. Your application owns the country picker and input UI.
 
 - For a basic phone text input without country metadata, use \`field.tel()\` instead
-- The renderer shows a country picker with flags, dial codes, and optional search
+- Build a web/native \`PhoneField\` from \`form.fieldController(name)\` and your country data
 - \`storeE164()\` normalizes the output to \`+33612345678\` format for API consumption`,
   codeTabs: [
     {
@@ -219,11 +64,82 @@ const schema = {
     .required(),
 }
 
+const COUNTRIES = [
+  { code: 'FR', flag: '🇫🇷', dial: '+33', name: 'France' },
+  { code: 'US', flag: '🇺🇸', dial: '+1', name: 'United States' },
+  { code: 'GB', flag: '🇬🇧', dial: '+44', name: 'United Kingdom' },
+]
+
+function PhoneField({ form, name }) {
+  const phone = form.fieldController(name)
+  const [countryCode, setCountryCode] = useState('FR')
+  const country = COUNTRIES.find((item) => item.code === countryCode) ?? COUNTRIES[0]
+  const storedValue = String(phone.value ?? '')
+  const national = storedValue.startsWith(country.dial)
+    ? storedValue.slice(country.dial.length)
+    : storedValue.replace(/^\\+\\d{1,3}/, '')
+
+  if (!phone.visible) return null
+
+  const updateValue = (dial, value) => {
+    const digits = value.replace(/\\D/g, '')
+    phone.onChange(digits ? dial + digits : '')
+  }
+
+  return (
+    <label style={{ display: 'grid', gap: 6 }}>
+      <span>{phone.label}{phone.required ? ' *' : ''}</span>
+      <span style={{ display: 'flex' }}>
+        <select
+          aria-label="Country"
+          value={country.code}
+          disabled={phone.disabled}
+          onChange={(event) => {
+            const next = COUNTRIES.find((item) => item.code === event.target.value)
+            if (!next) return
+            setCountryCode(next.code)
+            updateValue(next.dial, national)
+          }}
+          style={{ borderRadius: '8px 0 0 8px', padding: 10 }}
+        >
+          {COUNTRIES.map((item) => (
+            <option key={item.code} value={item.code}>
+              {item.flag} {item.name} ({item.dial})
+            </option>
+          ))}
+        </select>
+        <input
+          aria-label={phone.label}
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel-national"
+          value={national}
+          placeholder="6 12 34 56 78"
+          disabled={phone.disabled}
+          onChange={(event) => updateValue(country.dial, event.target.value)}
+          onFocus={phone.onFocus}
+          onBlur={phone.onBlur}
+          style={{
+            minWidth: 0,
+            flex: 1,
+            padding: 10,
+            border: \`1px solid \${phone.error ? '#dc2626' : '#9ca3af'}\`,
+            borderRadius: '0 8px 8px 0',
+          }}
+        />
+      </span>
+      {storedValue ? <small>Stored as {storedValue}</small> : null}
+      {phone.error ? <span role="alert" style={{ color: '#dc2626' }}>{phone.error}</span> : null}
+    </label>
+  )
+}
+
 export function PhonePlaygroundWeb() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
   })
+  const { Form, fieldController, state } = form
 
   return (
     <div
@@ -248,7 +164,7 @@ export function PhonePlaygroundWeb() {
         }}
       >
         <div style={{ display: 'grid', gap: 12 }}>
-          <AppField form={form} name="phone" />
+          <PhoneField form={form} name="phone" />
           <button type="submit">Save phone</button>
         </div>
       </Form>
@@ -292,7 +208,7 @@ export function PhonePlaygroundWeb() {
       interactive: true,
       lang: 'tsx',
       code: `import { useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { Button, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -306,11 +222,89 @@ const schema = {
     .required(),
 }
 
+const COUNTRIES = [
+  { code: 'FR', flag: '🇫🇷', dial: '+33', name: 'France' },
+  { code: 'US', flag: '🇺🇸', dial: '+1', name: 'United States' },
+  { code: 'GB', flag: '🇬🇧', dial: '+44', name: 'United Kingdom' },
+]
+
+function PhoneField({ form, name }) {
+  const phone = form.fieldController(name)
+  const [countryIndex, setCountryIndex] = useState(0)
+  const country = COUNTRIES[countryIndex]
+  const storedValue = String(phone.value ?? '')
+  const national = storedValue.startsWith(country.dial)
+    ? storedValue.slice(country.dial.length)
+    : storedValue.replace(/^\\+\\d{1,3}/, '')
+
+  if (!phone.visible) return null
+
+  const updateValue = (dial, value) => {
+    const digits = value.replace(/\\D/g, '')
+    phone.onChange(digits ? dial + digits : '')
+  }
+
+  const selectNextCountry = () => {
+    const nextIndex = (countryIndex + 1) % COUNTRIES.length
+    const next = COUNTRIES[nextIndex]
+    setCountryIndex(nextIndex)
+    updateValue(next.dial, national)
+  }
+
+  return (
+    <View style={{ gap: 6 }}>
+      <Text>{phone.label}{phone.required ? ' *' : ''}</Text>
+      <View style={{ flexDirection: 'row' }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Change country"
+          disabled={phone.disabled}
+          onPress={selectNextCountry}
+          style={{
+            justifyContent: 'center',
+            paddingHorizontal: 12,
+            borderWidth: 1,
+            borderColor: '#9ca3af',
+            borderTopLeftRadius: 8,
+            borderBottomLeftRadius: 8,
+          }}
+        >
+          <Text>{country.flag} {country.dial} ▾</Text>
+        </Pressable>
+        <TextInput
+          accessibilityLabel={phone.label}
+          value={national}
+          placeholder="6 12 34 56 78"
+          keyboardType="phone-pad"
+          textContentType="telephoneNumber"
+          editable={!phone.disabled}
+          onChangeText={(value) => updateValue(country.dial, value)}
+          onFocus={phone.onFocus}
+          onBlur={phone.onBlur}
+          style={{
+            minWidth: 0,
+            flex: 1,
+            padding: 10,
+            borderWidth: 1,
+            borderLeftWidth: 0,
+            borderColor: phone.error ? '#dc2626' : '#9ca3af',
+            borderTopRightRadius: 8,
+            borderBottomRightRadius: 8,
+          }}
+        />
+      </View>
+      {storedValue ? <Text>Stored as {storedValue}</Text> : null}
+      {phone.error ? <Text style={{ color: '#dc2626' }}>{phone.error}</Text> : null}
+    </View>
+  )
+}
+
 export function PhonePlaygroundApp() {
   const [submitted, setSubmitted] = useState<Record<string, unknown> | null>(null)
-  const { Form, fields, state } = useFormBridge(schema, {
+  const form = useFormBridge(schema, {
     validateOn: 'onBlur',
   })
+  const { Form, fieldController, state } = form
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#f5f7fb' }}>
@@ -328,8 +322,8 @@ export function PhonePlaygroundApp() {
           }}
         >
           <View style={{ gap: 12 }}>
-            <AppField form={form} name="phone" />
-            <button type="submit">Save phone</button>
+            <PhoneField form={form} name="phone" />
+            <Button title="Save phone" onPress={() => void form.submit()} />
           </View>
         </Form>
 
@@ -381,58 +375,11 @@ Phone-specific methods:
 ${PHONE_METHODS_TABLE}`,
     },
     {
-      id: 'fb-phone-overrides',
-      title: 'Per-render props (text, render, passthroughs)',
-      content: `Beyond the builder methods above, every \`<AppField form={form} name="phone" />\` renderer accepts props to customize copy, swap rendering, or forward attributes to the underlying inputs. Pass them directly on the rendered field:
+      id: 'fb-phone-headless-ui',
+      title: 'Render a country-aware input',
+      content: `FormBridge no longer renders a country picker. Keep the schema responsible for the phone value, required state, E.164 storage, and format validation; keep flags, country search, modal/popover behavior, and styling in an application-owned \`PhoneField\`.
 
-${FENCE}tsx
-<AppField form={form} name="phone"
-  searchPlaceholderText="Search a country…"
-  emptySearchText={({ search }) => \`No match for "\${search}"\`}
-  renderCountryItemContent={({ country, defaultContent, selected }) => (
-    <>
-      {defaultContent}
-      {selected ? <span>✓</span> : null}
-    </>
-  )}
-  inputProps={{ 'aria-describedby': 'phone-help' }}
-/>
-${FENCE}
-
-**Text overrides** — each accepts a plain string or a function that receives the render context (current country, open state, search query, …).
-
-${PHONE_TEXT_OVERRIDES_TABLE}
-
-**Render overrides** - each receives a \`defaultContent\` node so you can wrap the built-in UI or replace it entirely.
-
-${PHONE_RENDER_OVERRIDES_TABLE}
-
-**Passthrough props & layout**
-
-${PHONE_PASSTHROUGH_TABLE}`,
-    },
-    {
-      id: 'fb-phone-style-keys',
-      title: 'Style keys',
-      content: `The \`styles\` prop accepts an object keyed by renderer slot. Each entry is merged **over** the built-in default for that slot, so you can tweak one property or replace it.
-
-${FENCE}tsx
-<AppField form={form} name="phone"
-  styles={{
-    phoneModalCard: { borderRadius: 20, padding: 16 },
-    phoneCountryRow: { paddingVertical: 16 },
-    phoneCountryName: { fontWeight: '600' },
-  }}
-/>
-${FENCE}
-
-**Native slots** (\`ViewStyle\` / \`TextStyle\`)
-
-${PHONE_STYLE_KEYS_NATIVE}
-
-**Web slots** (\`CSSProperties\`)
-
-${PHONE_STYLE_KEYS_WEB}`,
+The interactive examples above use a small local country list. In production, that list can come from your localization layer or phone-input package. Forward the resulting E.164 string to \`controller.onChange()\` when using \`storeE164()\`. Without \`storeE164()\`, forward the \`PhoneValue\` shape expected by the schema.`,
     },
     {
       id: 'fb-phone-recipes',
