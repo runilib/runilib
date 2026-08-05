@@ -43,6 +43,7 @@ export const otpSection: LibraryDoc['sections'][number] = {
 - \`digitsOnly()\`, \`lettersOnly()\` and \`alphanumeric()\` restrict the accepted character set; your UI chooses the matching keyboard hint
 - \`mask()\` hides the typed value behind a display character (e.g. \`•\`) while keeping the real value in form state
 - \`groups()\` defines the value length; pass the same visual grouping to your application-owned component
+- Manage cell refs in your UI to move focus forward after input, backward on Backspace, and distribute pasted codes
 - Combine with \`validateOn: 'onChange'\` at hook level for instant validation as the user types`,
   codeTabs: [
     {
@@ -50,7 +51,7 @@ export const otpSection: LibraryDoc['sections'][number] = {
       label: 'Web',
       interactive: true,
       lang: 'tsx',
-      code: `import { useState } from 'react'
+      code: `import { useRef, useState } from 'react'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
 const schema = {
@@ -66,10 +67,24 @@ const schema = {
 
 function OtpField({ form, name, groups = [6], separator = '-' }) {
   const otp = form.fieldController(name)
+  const inputRefs = useRef([])
 
   if (!otp.visible) return null
 
   let offset = 0
+
+  const setCharacters = (startIndex, input) => {
+    const characters = input.replace(/\\D/g, '').slice(0, otp.otpLength - startIndex)
+
+    characters.split('').forEach((character, localIndex) => {
+      otp.setDigit(startIndex + localIndex, character)
+    })
+
+    if (characters.length > 0) {
+      const nextIndex = Math.min(startIndex + characters.length, otp.otpLength - 1)
+      queueMicrotask(() => inputRefs.current[nextIndex]?.focus())
+    }
+  }
 
   return (
     <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
@@ -90,13 +105,30 @@ function OtpField({ form, name, groups = [6], separator = '-' }) {
                 return (
                   <input
                     key={index}
+                    ref={(node) => {
+                      inputRefs.current[index] = node
+                      if (index === 0) otp.registerFocusable(node)
+                    }}
                     aria-label={\`Character \${index + 1} of \${otp.otpLength}\`}
                     value={otp.digits[index] ?? ''}
                     inputMode="numeric"
                     autoComplete={index === 0 ? 'one-time-code' : 'off'}
                     maxLength={1}
                     disabled={otp.disabled}
-                    onChange={(event) => otp.setDigit(index, event.target.value)}
+                    onChange={(event) => setCharacters(index, event.target.value)}
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === 'Backspace' &&
+                        !otp.digits[index] &&
+                        index > 0
+                      ) {
+                        inputRefs.current[index - 1]?.focus()
+                      }
+                    }}
+                    onPaste={(event) => {
+                      event.preventDefault()
+                      setCharacters(index, event.clipboardData.getData('text'))
+                    }}
                     onBlur={otp.onBlur}
                     style={{
                       width: 42,
@@ -201,7 +233,7 @@ export function OtpPlaygroundWeb() {
       label: 'App',
       interactive: true,
       lang: 'tsx',
-      code: `import { useState } from 'react'
+      code: `import { useRef, useState } from 'react'
 import { Button, ScrollView, Text, TextInput, View } from 'react-native'
 import { field, useFormBridge } from '@runilib/react-formbridge'
 
@@ -218,10 +250,24 @@ const schema = {
 
 function OtpField({ form, name, groups = [6], separator = '-' }) {
   const otp = form.fieldController(name)
+  const inputRefs = useRef([])
 
   if (!otp.visible) return null
 
   let offset = 0
+
+  const setCharacters = (startIndex, input) => {
+    const characters = input.replace(/\\D/g, '').slice(0, otp.otpLength - startIndex)
+
+    characters.split('').forEach((character, localIndex) => {
+      otp.setDigit(startIndex + localIndex, character)
+    })
+
+    if (characters.length > 0) {
+      const nextIndex = Math.min(startIndex + characters.length, otp.otpLength - 1)
+      requestAnimationFrame(() => inputRefs.current[nextIndex]?.focus())
+    }
+  }
 
   return (
     <View style={{ gap: 8 }}>
@@ -245,13 +291,25 @@ function OtpField({ form, name, groups = [6], separator = '-' }) {
                 return (
                   <TextInput
                     key={index}
+                    ref={(node) => {
+                      inputRefs.current[index] = node
+                      if (index === 0) otp.registerFocusable(node)
+                    }}
                     accessibilityLabel={\`Character \${index + 1} of \${otp.otpLength}\`}
                     value={otp.digits[index] ?? ''}
                     keyboardType="number-pad"
                     textContentType={index === 0 ? 'oneTimeCode' : 'none'}
-                    maxLength={1}
                     editable={!otp.disabled}
-                    onChangeText={(value) => otp.setDigit(index, value)}
+                    onChangeText={(value) => setCharacters(index, value)}
+                    onKeyPress={({ nativeEvent }) => {
+                      if (
+                        nativeEvent.key === 'Backspace' &&
+                        !otp.digits[index] &&
+                        index > 0
+                      ) {
+                        inputRefs.current[index - 1]?.focus()
+                      }
+                    }}
                     onBlur={otp.onBlur}
                     style={{
                       width: 42,
